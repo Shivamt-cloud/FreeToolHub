@@ -1157,9 +1157,20 @@ ith<!DOCTYPE html>
 
         function initializeBase64Encoder() {
             if (!window.base64Encoder) {
-                window.base64Encoder = new Base64Encoder();
-                console.log('Base64 Encoder initialized');
+                try {
+                    if (typeof AdvancedBase64Encoder === 'undefined') {
+                        console.error('AdvancedBase64Encoder class not found!');
+                        return false;
+                    }
+                    window.base64Encoder = new AdvancedBase64Encoder();
+                    console.log('Advanced Base64 Encoder initialized successfully');
+                    return true;
+                } catch (error) {
+                    console.error('Error initializing Advanced Base64 Encoder:', error);
+                    return false;
+                }
             }
+            return true;
         }
 
         function initializeAdvancedPasswordGenerator() {
@@ -2166,6 +2177,222 @@ ith<!DOCTYPE html>
             // This function is called when the target color space changes
             // We can add logic here if needed
             updateColorPreview();
+        }
+
+        // Base64 Encoder Functions
+        function encodeBase64() {
+            if (!window.base64Encoder) {
+                initializeBase64Encoder();
+                return;
+            }
+
+            try {
+                const input = document.getElementById('base64-input').value;
+                const inputType = document.getElementById('input-type').value;
+                const urlSafe = document.getElementById('url-safe').checked;
+                const wrapMime = document.getElementById('wrap-mime').checked;
+                const omitPadding = document.getElementById('omit-padding').checked;
+
+                if (!input) {
+                    showBase64Error('Please enter input data');
+                    return;
+                }
+
+                let data;
+                if (inputType === 'text') {
+                    data = input;
+                } else if (inputType === 'hex') {
+                    // Convert hex string to bytes
+                    if (input.length % 2 !== 0) {
+                        showBase64Error('Hex string must have even length');
+                        return;
+                    }
+                    data = new Uint8Array(input.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+                } else {
+                    showBase64Error('Invalid input type');
+                    return;
+                }
+
+                const encoded = window.base64Encoder.encode(data, {
+                    urlSafe,
+                    wrapMime,
+                    omitPadding
+                });
+
+                // Show result
+                document.getElementById('base64-result').textContent = encoded;
+                document.getElementById('base64-result').classList.remove('hidden');
+                document.getElementById('base64-error').classList.add('hidden');
+
+                // Show statistics
+                const stats = window.base64Encoder.getStats(data);
+                showBase64Stats(stats);
+
+                // Show all variants
+                const variants = window.base64Encoder.encodeAllVariants(data);
+                showBase64Variants(variants);
+
+            } catch (error) {
+                showBase64Error('Encoding error: ' + error.message);
+            }
+        }
+
+        function decodeBase64() {
+            if (!window.base64Encoder) {
+                initializeBase64Encoder();
+                return;
+            }
+
+            try {
+                const input = document.getElementById('base64-input').value;
+                const urlSafe = document.getElementById('url-safe').checked;
+                const strict = document.getElementById('strict-mode').checked;
+
+                if (!input) {
+                    showBase64Error('Please enter Base64 data');
+                    return;
+                }
+
+                const decoded = window.base64Encoder.decode(input, {
+                    urlSafe,
+                    strict
+                });
+
+                // Convert to string representation
+                const decodedString = window.base64Encoder.bytesToString(decoded);
+                const hexString = Array.from(decoded).map(b => b.toString(16).padStart(2, '0')).join('');
+
+                // Show results
+                document.getElementById('decoded-text').textContent = decodedString;
+                document.getElementById('decoded-hex').textContent = hexString;
+                document.getElementById('decoded-bytes').textContent = decoded.length + ' bytes';
+                
+                document.getElementById('base64-result').classList.remove('hidden');
+                document.getElementById('base64-error').classList.add('hidden');
+
+            } catch (error) {
+                showBase64Error('Decoding error: ' + error.message);
+            }
+        }
+
+        function validateBase64() {
+            if (!window.base64Encoder) {
+                initializeBase64Encoder();
+                return;
+            }
+
+            try {
+                const input = document.getElementById('base64-input').value;
+                const urlSafe = document.getElementById('url-safe').checked;
+
+                if (!input) {
+                    showBase64Error('Please enter Base64 data');
+                    return;
+                }
+
+                const validation = window.base64Encoder.validate(input, {
+                    urlSafe,
+                    allowPadding: true,
+                    allowWhitespace: true
+                });
+
+                if (validation.isValid) {
+                    document.getElementById('validation-result').textContent = `Valid Base64: ${validation.length} characters, ${validation.padding} padding characters`;
+                    document.getElementById('validation-result').classList.remove('hidden');
+                    document.getElementById('base64-error').classList.add('hidden');
+                } else {
+                    showBase64Error('Invalid Base64: ' + validation.error);
+                }
+
+            } catch (error) {
+                showBase64Error('Validation error: ' + error.message);
+            }
+        }
+
+        function showBase64Stats(stats) {
+            const statsElement = document.getElementById('base64-stats');
+            if (statsElement) {
+                statsElement.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div><strong>Input:</strong> ${stats.inputBytes} bytes (${stats.inputBits} bits)</div>
+                        <div><strong>Standard:</strong> ${stats.standardEncodedLength} chars</div>
+                        <div><strong>URL-Safe:</strong> ${stats.urlSafeEncodedLength} chars</div>
+                        <div><strong>MIME:</strong> ${stats.mimeEncodedLength} chars</div>
+                        <div><strong>Expansion:</strong> ${stats.expansionRatio.toFixed(2)}x</div>
+                        <div><strong>Padding:</strong> ${stats.paddingCharacters} chars</div>
+                    </div>
+                `;
+                statsElement.classList.remove('hidden');
+            }
+        }
+
+        function showBase64Variants(variants) {
+            const variantsElement = document.getElementById('base64-variants');
+            if (variantsElement) {
+                variantsElement.innerHTML = `
+                    <div class="space-y-2 text-sm">
+                        <div><strong>Standard:</strong> <code class="bg-gray-100 px-1 rounded">${variants.standard}</code></div>
+                        <div><strong>URL-Safe:</strong> <code class="bg-gray-100 px-1 rounded">${variants.urlSafe}</code></div>
+                        <div><strong>URL-Safe (No Padding):</strong> <code class="bg-gray-100 px-1 rounded">${variants.urlSafeNoPadding}</code></div>
+                        <div><strong>MIME:</strong> <code class="bg-gray-100 px-1 rounded">${variants.mime}</code></div>
+                        <div><strong>MIME URL-Safe:</strong> <code class="bg-gray-100 px-1 rounded">${variants.mimeUrlSafe}</code></div>
+                    </div>
+                `;
+                variantsElement.classList.remove('hidden');
+            }
+        }
+
+        function showBase64Error(message) {
+            const errorElement = document.getElementById('base64-error');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.remove('hidden');
+            }
+            
+            // Hide result sections
+            document.getElementById('base64-result').classList.add('hidden');
+            document.getElementById('base64-stats').classList.add('hidden');
+            document.getElementById('base64-variants').classList.add('hidden');
+            document.getElementById('validation-result').classList.add('hidden');
+        }
+
+        function clearBase64Results() {
+            document.getElementById('base64-input').value = '';
+            document.getElementById('base64-result').classList.add('hidden');
+            document.getElementById('base64-error').classList.add('hidden');
+            document.getElementById('base64-stats').classList.add('hidden');
+            document.getElementById('base64-variants').classList.add('hidden');
+            document.getElementById('validation-result').classList.add('hidden');
+            document.getElementById('decoded-text').textContent = '';
+            document.getElementById('decoded-hex').textContent = '';
+            document.getElementById('decoded-bytes').textContent = '';
+        }
+
+        function runBase64Tests() {
+            if (!window.base64Encoder) {
+                initializeBase64Encoder();
+                return;
+            }
+
+            try {
+                const results = window.base64Encoder.runSelfTests();
+                
+                let output = `Base64 Encoder Self-Tests\n`;
+                output += `Passed: ${results.passed}, Failed: ${results.failed}\n\n`;
+                
+                for (const test of results.tests) {
+                    if (test.passed) {
+                        output += `✅ ${test.name}\n`;
+                    } else {
+                        output += `❌ ${test.name}: ${test.error || 'Failed'}\n`;
+                    }
+                }
+                
+                alert(output);
+                
+            } catch (error) {
+                showBase64Error('Test error: ' + error.message);
+            }
         }
 
         function populateCurrencyDropdowns() {
@@ -5559,6 +5786,41 @@ ith<!DOCTYPE html>
                     }
                 }, 1200);
             }
+            
+            // Test if AdvancedBase64Encoder is available
+            console.log('DOM loaded, checking AdvancedBase64Encoder availability...');
+            console.log('AdvancedBase64Encoder type:', typeof AdvancedBase64Encoder);
+            console.log('AdvancedBase64Encoder value:', AdvancedBase64Encoder);
+            
+            if (typeof AdvancedBase64Encoder !== 'undefined') {
+                console.log('✅ AdvancedBase64Encoder class is available');
+                // Pre-initialize base64 encoder
+                setTimeout(() => {
+                    try {
+                        window.base64Encoder = new AdvancedBase64Encoder();
+                        console.log('✅ AdvancedBase64Encoder pre-initialized');
+                    } catch (error) {
+                        console.error('❌ Error pre-initializing AdvancedBase64Encoder:', error);
+                    }
+                }, 400);
+            } else {
+                console.error('❌ AdvancedBase64Encoder class is NOT available');
+                // Check if it's available after a delay (script loading issue)
+                setTimeout(() => {
+                    console.log('Delayed check - AdvancedBase64Encoder type:', typeof AdvancedBase64Encoder);
+                    if (typeof AdvancedBase64Encoder !== 'undefined') {
+                        console.log('✅ AdvancedBase64Encoder now available after delay');
+                        try {
+                            window.base64Encoder = new AdvancedBase64Encoder();
+                            console.log('✅ AdvancedBase64Encoder initialized after delay');
+                        } catch (error) {
+                            console.error('❌ Error initializing AdvancedBase64Encoder after delay:', error);
+                        }
+                    } else {
+                        console.error('❌ AdvancedBase64Encoder still not available after delay');
+                    }
+                }, 1400);
+            }
         });
 
         // Advanced Calculator functions - moved to head section
@@ -5789,237 +6051,21 @@ ith<!DOCTYPE html>
             }
         }
 
-        // Advanced Base64 Encoder Functions
-        let base64Encoder = null;
+        // Advanced Base64 Encoder Functions - moved to head section
 
-        function initializeBase64Encoder() {
-            if (!base64Encoder) {
-                try {
-                    base64Encoder = new AdvancedBase64Encoder();
-                    console.log('✅ AdvancedBase64Encoder initialized successfully');
-                } catch (error) {
-                    console.error('❌ Error creating AdvancedBase64Encoder:', error);
-                }
-            }
-        }
+        // Advanced Base64 Encoder Functions - moved to head section
 
-        function updateBase64Inputs() {
-            const inputType = document.getElementById('base64-input-type').value;
-            
-            // Hide all input types
-            document.getElementById('base64-text-input').classList.add('hidden');
-            document.getElementById('base64-hex-input').classList.add('hidden');
-            document.getElementById('base64-file-input').classList.add('hidden');
-            
-            // Show selected input type
-            document.getElementById(`base64-${inputType}-input`).classList.remove('hidden');
-            
-            // Clear previous results
-            clearBase64Results();
-        }
+        // Advanced Base64 Encoder Functions - moved to head section
 
-        function clearBase64Results() {
-            document.getElementById('base64-result').classList.add('hidden');
-            document.getElementById('base64-error').classList.add('hidden');
-            document.getElementById('base64-stats').classList.add('hidden');
-            document.getElementById('base64-variants').classList.add('hidden');
-        }
 
-        function getBase64Input() {
-            const inputType = document.getElementById('base64-input-type').value;
-            
-            switch (inputType) {
-                case 'text':
-                    return document.getElementById('base64-text').value;
-                case 'hex':
-                    const hexInput = document.getElementById('base64-hex').value;
-                    if (hexInput) {
-                        // Convert hex to bytes
-                        const hex = hexInput.replace(/[^0-9A-Fa-f]/g, '');
-                        const bytes = new Uint8Array(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-                        return bytes;
-                    }
-                    return '';
-                case 'file':
-                    const fileInput = document.getElementById('base64-file');
-                    if (fileInput.files.length > 0) {
-                        return fileInput.files[0];
-                    }
-                    return '';
-                default:
-                    return '';
-            }
-        }
 
-        function encodeBase64() {
-            if (!base64Encoder) {
-                initializeBase64Encoder();
-            }
 
-            try {
-                const input = getBase64Input();
-                if (!input) {
-                    showBase64Error('Please provide input data');
-                    return;
-                }
 
-                const options = {
-                    urlSafe: document.getElementById('base64-url-safe').checked,
-                    wrapMime: document.getElementById('base64-mime-wrap').checked,
-                    omitPadding: document.getElementById('base64-omit-padding').checked
-                };
 
-                let result;
-                if (input instanceof File) {
-                    // Handle file input
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const bytes = new Uint8Array(e.target.result);
-                        const encoded = base64Encoder.encode(bytes, options);
-                        showBase64Result(encoded, 'Encoded');
-                        showBase64Stats(bytes);
-                        showBase64Variants(bytes);
-                    };
-                    reader.readAsArrayBuffer(input);
-                } else {
-                    // Handle text/hex input
-                    const encoded = base64Encoder.encode(input, options);
-                    showBase64Result(encoded, 'Encoded');
-                    showBase64Stats(input);
-                    showBase64Variants(input);
-                }
 
-            } catch (error) {
-                showBase64Error(error.message);
-            }
-        }
 
-        function decodeBase64() {
-            if (!base64Encoder) {
-                initializeBase64Encoder();
-            }
 
-            try {
-                const input = document.getElementById('base64-text').value.trim();
-                if (!input) {
-                    showBase64Error('Please provide Base64 string to decode');
-                    return;
-                }
 
-                const options = {
-                    urlSafe: document.getElementById('base64-url-safe').checked,
-                    strict: document.getElementById('base64-strict-mode').checked
-                };
-
-                const decoded = base64Encoder.decode(input, options);
-                const decodedString = base64Encoder.bytesToString(decoded);
-                
-                showBase64Result(decodedString, 'Decoded');
-                showBase64Stats(decoded);
-
-            } catch (error) {
-                showBase64Error(error.message);
-            }
-        }
-
-        function validateBase64() {
-            if (!base64Encoder) {
-                initializeBase64Encoder();
-            }
-
-            try {
-                const input = document.getElementById('base64-text').value.trim();
-                if (!input) {
-                    showBase64Error('Please provide Base64 string to validate');
-                    return;
-                }
-
-                const options = {
-                    urlSafe: document.getElementById('base64-url-safe').checked,
-                    allowPadding: true,
-                    allowWhitespace: true
-                };
-
-                const validation = base64Encoder.validate(input, options);
-                
-                if (validation.isValid) {
-                    showBase64Result(`✅ Valid Base64 string\nLength: ${validation.length}\nPadding: ${validation.padding}\nData length: ${validation.dataLength}`, 'Validation');
-                } else {
-                    showBase64Error(validation.error);
-                }
-
-            } catch (error) {
-                showBase64Error(error.message);
-            }
-        }
-
-        function showBase64Result(result, type) {
-            clearBase64Results();
-            document.getElementById('base64-result').classList.remove('hidden');
-            document.getElementById('base64-result-content').textContent = `${type}: ${result}`;
-        }
-
-        function showBase64Error(message) {
-            clearBase64Results();
-            document.getElementById('base64-error').classList.remove('hidden');
-            document.getElementById('base64-error-message').textContent = message;
-        }
-
-        function showBase64Stats(input) {
-            try {
-                const stats = base64Encoder.getStats(input);
-                document.getElementById('base64-stats').classList.remove('hidden');
-                document.getElementById('base64-stats-content').innerHTML = `
-                    <div><strong>Input bytes:</strong> ${stats.inputBytes}</div>
-                    <div><strong>Input bits:</strong> ${stats.inputBits}</div>
-                    <div><strong>Standard encoded:</strong> ${stats.standardEncodedLength}</div>
-                    <div><strong>URL-safe encoded:</strong> ${stats.urlSafeEncodedLength}</div>
-                    <div><strong>MIME encoded:</strong> ${stats.mimeEncodedLength}</div>
-                    <div><strong>Expansion ratio:</strong> ${stats.expansionRatio.toFixed(2)}x</div>
-                    <div><strong>Padding characters:</strong> ${stats.paddingCharacters}</div>
-                    <div><strong>Line breaks:</strong> ${stats.lineBreaks}</div>
-                `;
-            } catch (error) {
-                console.error('Error showing stats:', error);
-            }
-        }
-
-        function showBase64Variants(input) {
-            try {
-                const variants = base64Encoder.encodeAllVariants(input);
-                document.getElementById('base64-variants').classList.remove('hidden');
-                document.getElementById('base64-variants-content').innerHTML = `
-                    <div class="p-3 bg-white rounded border">
-                        <div class="font-medium text-gray-800 mb-2">Standard</div>
-                        <div class="font-mono text-sm break-all">${variants.standard}</div>
-                    </div>
-                    <div class="p-3 bg-white rounded border">
-                        <div class="font-medium text-gray-800 mb-2">URL-safe</div>
-                        <div class="font-mono text-sm break-all">${variants.urlSafe}</div>
-                    </div>
-                    <div class="p-3 bg-white rounded border">
-                        <div class="font-medium text-gray-800 mb-2">URL-safe (no padding)</div>
-                        <div class="font-mono text-sm break-all">${variants.urlSafeNoPadding}</div>
-                    </div>
-                    <div class="p-3 bg-white rounded border">
-                        <div class="font-medium text-gray-800 mb-2">MIME</div>
-                        <div class="font-mono text-sm break-all">${variants.mime}</div>
-                    </div>
-                    <div class="p-3 bg-white rounded border">
-                        <div class="font-medium text-gray-800 mb-2">MIME URL-safe</div>
-                        <div class="font-mono text-sm break-all">${variants.mimeUrlSafe}</div>
-                    </div>
-                `;
-            } catch (error) {
-                console.error('Error showing variants:', error);
-            }
-        }
-
-        function setBase64Example(example) {
-            document.getElementById('base64-input-type').value = 'text';
-            updateBase64Inputs();
-            document.getElementById('base64-text').value = example;
-        }
 
         // Handle file upload for Base64
         document.addEventListener('DOMContentLoaded', function() {
@@ -6052,299 +6098,7 @@ ith<!DOCTYPE html>
             document.getElementById('bmi-error').classList.add('hidden');
         }
 
-        // BMI Calculator Functions - moved to head section
 
-        // BMI Calculator Functions - moved to head section
-
-        // BMI Calculator Functions - moved to head section
-
-        // BMI Calculator Functions - moved to head section
-
-        // BMI Calculator Functions - moved to head section
-
-        // BMI Calculator Functions - moved to head section
-
-        // Age Calculator Functions - moved to head section
-
-        // Age Calculator Functions - moved to head section
-
-        // Age Calculator Functions - moved to head section
-
-        // Age Calculator Functions - moved to head section
-
-        // Unit Converter Functions - moved to head section
-
-        // Unit Converter Functions - moved to head section
-
-        // Unit Converter Functions - moved to head section
-
-        // Currency Converter Functions - moved to head section
-
-        // Currency Converter Functions - moved to head section
-
-        // Currency Converter Functions - moved to head section
-
-        // Currency Converter Functions - moved to head section
-
-        // Color Converter Functions - moved to head section
-            if (!colorConverter) return;
-
-            const fromSpace = document.getElementById('from-color-space').value;
-            const inputsContainer = document.getElementById('color-inputs');
-            
-            inputsContainer.innerHTML = '';
-            
-            switch (fromSpace) {
-                case 'hex':
-                    inputsContainer.innerHTML = `
-                        <div>
-                            <label class="block text-sm font-medium mb-2">HEX Color</label>
-                            <input type="text" id="hex-input" placeholder="#FF0000" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent font-mono" oninput="updateColorPreview()">
-                        </div>
-                    `;
-                    break;
-                    
-                case 'srgb8':
-                    inputsContainer.innerHTML = `
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Red (0-255)</label>
-                                <input type="number" id="r-input" min="0" max="255" value="255" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Green (0-255)</label>
-                                <input type="number" id="g-input" min="0" max="255" value="255" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Blue (0-255)</label>
-                                <input type="number" id="b-input" min="0" max="255" value="255" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'srgb':
-                    inputsContainer.innerHTML = `
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Red (0-1)</label>
-                                <input type="number" id="r-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Green (0-1)</label>
-                                <input type="number" id="g-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Blue (0-1)</label>
-                                <input type="number" id="b-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'srgb-linear':
-                    inputsContainer.innerHTML = `
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Red Linear (0-1)</label>
-                                <input type="number" id="r-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Green Linear (0-1)</label>
-                                <input type="number" id="g-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Blue Linear (0-1)</label>
-                                <input type="number" id="b-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'hsl':
-                    inputsContainer.innerHTML = `
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Hue (0-360°)</label>
-                                <input type="number" id="h-input" min="0" max="360" step="1" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Saturation (0-1)</label>
-                                <input type="number" id="s-input" min="0" max="1" step="0.01" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Lightness (0-1)</label>
-                                <input type="number" id="l-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'hsv':
-                    inputsContainer.innerHTML = `
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Hue (0-360°)</label>
-                                <input type="number" id="h-input" min="0" max="360" step="1" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Saturation (0-1)</label>
-                                <input type="number" id="s-input" min="0" max="1" step="0.01" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Value (0-1)</label>
-                                <input type="number" id="v-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'cmyk':
-                    inputsContainer.innerHTML = `
-                        <div class="grid grid-cols-4 gap-3">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Cyan (0-1)</label>
-                                <input type="number" id="c-input" min="0" max="1" step="0.01" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Magenta (0-1)</label>
-                                <input type="number" id="m-input" min="0" max="1" step="0.01" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Yellow (0-1)</label>
-                                <input type="number" id="y-input" min="0" max="1" step="0.01" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Key (0-1)</label>
-                                <input type="number" id="k-input" min="0" max="1" step="0.01" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'xyz':
-                    inputsContainer.innerHTML = `
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">X (0-100)</label>
-                                <input type="number" id="x-input" min="0" max="100" step="0.01" value="95.05" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Y (0-100)</label>
-                                <input type="number" id="y-input" min="0" max="100" step="0.01" value="100" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Z (0-100)</label>
-                                <input type="number" id="z-input" min="0" max="100" step="0.01" value="108.88" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'lab':
-                    inputsContainer.innerHTML = `
-                        <div class="grid grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">L* (0-100)</label>
-                                <input type="number" id="l-input" min="0" max="100" step="0.01" value="100" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">a* (-128 to 127)</label>
-                                <input type="number" id="a-input" min="-128" max="127" step="0.01" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">b* (-128 to 127)</label>
-                                <input type="number" id="b-input" min="-128" max="127" step="0.01" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
-                            </div>
-                        </div>
-                    `;
-                    break;
-            }
-            
-            // Set default values and update preview
-            updateColorPreview();
-        }
-
-        // Color Converter Functions - moved to head section
-
-        // Color Converter Functions - moved to head section
-
-        // Color Converter Functions - moved to head section
-                        const yy = parseFloat(document.getElementById('y-input')?.value || 0);
-                        const z = parseFloat(document.getElementById('z-input')?.value || 0);
-                        input = [x, yy, z, alpha];
-                        break;
-                        
-                    case 'lab':
-                        const ll = parseFloat(document.getElementById('l-input')?.value || 0);
-                        const aa = parseFloat(document.getElementById('a-input')?.value || 0);
-                        const bb = parseFloat(document.getElementById('b-input')?.value || 0);
-                        input = [ll, aa, bb, alpha];
-                        break;
-                        
-                    default:
-                        throw new Error('Unsupported color space');
-                }
-
-                const result = colorConverter.convertColor(input, fromSpace, toSpace, alpha);
-                
-                if (result.error) {
-                    showColorError(result.error);
-                } else {
-                    showColorResult(result, toSpace);
-                    showColorInfo(input, fromSpace);
-                }
-
-            } catch (error) {
-                showColorError(error.message);
-            }
-        }
-
-        function showColorResult(result, toSpace) {
-            document.getElementById('color-error').classList.add('hidden');
-            document.getElementById('color-result').classList.remove('hidden');
-            
-            const resultContent = document.getElementById('result-content');
-            let displayText = '';
-            
-            switch (toSpace) {
-                case 'hex':
-                    displayText = `HEX: ${result}`;
-                    break;
-                case 'srgb8':
-                    displayText = `sRGB 8-bit: [${result[0]}, ${result[1]}, ${result[2]}, ${result[3]}]`;
-                    break;
-                case 'srgb':
-                    displayText = `sRGB: [${result[0].toFixed(4)}, ${result[1].toFixed(4)}, ${result[2].toFixed(4)}, ${result[3].toFixed(4)}]`;
-                    break;
-                case 'srgb-linear':
-                    displayText = `sRGB Linear: [${result[0].toFixed(4)}, ${result[1].toFixed(4)}, ${result[2].toFixed(4)}, ${result[3].toFixed(4)}]`;
-                    break;
-                case 'hsl':
-                    displayText = `HSL: [${result[0].toFixed(1)}°, ${result[1].toFixed(4)}, ${result[2].toFixed(4)}, ${result[3].toFixed(4)}]`;
-                    break;
-                case 'hsv':
-                    displayText = `HSV: [${result[0].toFixed(1)}°, ${result[1].toFixed(4)}, ${result[2].toFixed(4)}, ${result[3].toFixed(4)}]`;
-                    break;
-                case 'cmyk':
-                    displayText = `CMYK: [${result[0].toFixed(4)}, ${result[1].toFixed(4)}, ${result[2].toFixed(4)}, ${result[3].toFixed(4)}, ${result[4].toFixed(4)}]`;
-                    break;
-                case 'xyz':
-                    displayText = `XYZ: [${result[0].toFixed(4)}, ${result[1].toFixed(4)}, ${result[2].toFixed(4)}, ${result[3].toFixed(4)}]`;
-                    break;
-                case 'lab':
-                    displayText = `CIELAB: [${result[0].toFixed(4)}, ${result[1].toFixed(4)}, ${result[2].toFixed(4)}, ${result[3].toFixed(4)}]`;
-                    break;
-            }
-            
-            resultContent.textContent = displayText;
-        }
-
-        // Color Converter Functions - moved to head section
-
-        // Color Converter Functions - moved to head section
-
-        // Color Converter Functions - moved to head section
 
         // Color Converter Functions - moved to head section
 
