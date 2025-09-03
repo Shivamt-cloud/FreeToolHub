@@ -1615,8 +1615,9 @@ ith<!DOCTYPE html>
 
 
         // Test QR Module functionality
-        function testQRModule() {
+        window.testQRModule = function() {
             console.log('🧪 Testing QR Module...');
+            alert('Test function called! Check console for details.');
             
             // Check if classes are available
             const classes = ['AdvancedQRGenerator', 'QRConstants', 'BitBuffer', 'InputSegmenter', 'ReedSolomonEncoder', 'QRMatrix'];
@@ -1641,6 +1642,7 @@ ith<!DOCTYPE html>
             } catch (error) {
                 console.error('❌ Error testing QR module:', error);
                 console.error('Error stack:', error.stack);
+                alert(`Error: ${error.message}`);
             }
         }
 
@@ -4862,6 +4864,9 @@ ith<!DOCTYPE html>
                 </div>
                     <button onclick="testQRModule()" class="bg-yellow-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-yellow-700 mb-3">
                         🧪 Test Module
+                    </button>
+                    <button onclick="alert('Button works!')" class="bg-red-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-red-700 mb-3">
+                        🔴 Test Button
                     </button>
                     <button onclick="generateBasicQR()" class="btn-primary w-full text-white py-3 rounded-lg font-semibold">
                         🔒 Generate QR Code
