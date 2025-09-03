@@ -3168,6 +3168,54 @@ ith<!DOCTYPE html>
             box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
     </style>
+    
+    <script>
+        // Make all password generator functions globally accessible
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure all password generator functions are available globally
+            if (typeof generateMultiplePasswords === 'function') {
+                window.generateMultiplePasswords = generateMultiplePasswords;
+            }
+            if (typeof generateDicewarePassphrase === 'function') {
+                window.generateDicewarePassphrase = generateDicewarePassphrase;
+            }
+            if (typeof validatePassword === 'function') {
+                window.validatePassword = validatePassword;
+            }
+            if (typeof getPasswordOptions === 'function') {
+                window.getPasswordOptions = getPasswordOptions;
+            }
+            if (typeof getPassphraseOptions === 'function') {
+                window.getPassphraseOptions = getPassphraseOptions;
+            }
+            if (typeof displayPasswordResult === 'function') {
+                window.displayPasswordResult = displayPasswordResult;
+            }
+            if (typeof displayMultiplePasswords === 'function') {
+                window.displayMultiplePasswords = displayMultiplePasswords;
+            }
+            if (typeof displayPasswordValidation === 'function') {
+                window.displayPasswordValidation = displayPasswordValidation;
+            }
+            if (typeof getStrengthColor === 'function') {
+                window.getStrengthColor = getStrengthColor;
+            }
+            if (typeof copyAdvancedPassword === 'function') {
+                window.copyAdvancedPassword = copyAdvancedPassword;
+            }
+            if (typeof switchPasswordMode === 'function') {
+                window.switchPasswordMode = switchPasswordMode;
+            }
+            if (typeof updateEntropyInfo === 'function') {
+                window.updateEntropyInfo = updateEntropyInfo;
+            }
+            if (typeof updateDicewareInfo === 'function') {
+                window.updateDicewareInfo = updateDicewareInfo;
+            }
+            
+            console.log('✅ All password generator functions made globally accessible');
+        });
+    </script>
 </head>
 <body class="bg-gray-50 text-gray-800">
     <!-- Navigation -->
