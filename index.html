@@ -687,6 +687,212 @@ ith<!DOCTYPE html>
             if (errorDiv) errorDiv.classList.add('hidden');
         }
 
+        // Age Calculator Functions
+        function initializeAgeCalculator() {
+            if (!window.ageCalc) {
+                window.ageCalc = new AgeCalculator();
+                console.log('Age Calculator initialized');
+            }
+        }
+
+        function calculateBasicAge() {
+            if (!window.ageCalc) {
+                initializeAgeCalculator();
+            }
+
+            const birthDate = document.getElementById('birth-date').value;
+            const referenceDate = document.getElementById('reference-date').value || null;
+            const feb29Mode = document.getElementById('feb29-mode').value;
+            const outputUnits = document.getElementById('output-units').value;
+
+            if (!birthDate) {
+                showAgeError('Please enter a birth date');
+                return;
+            }
+
+            try {
+                const result = window.ageCalc.calculateAge(birthDate, referenceDate, 'local', feb29Mode, outputUnits);
+
+                if (result.success) {
+                    showAgeResult(result);
+                } else {
+                    showAgeError(result.error);
+                }
+
+            } catch (error) {
+                showAgeError('Error calculating age: ' + error.message);
+            }
+        }
+
+        function calculateAdvancedAge() {
+            if (!window.ageCalc) {
+                initializeAgeCalculator();
+            }
+
+            const birthDateTime = document.getElementById('birth-datetime').value;
+            const referenceDateTime = document.getElementById('reference-datetime').value || null;
+            const birthTimezone = document.getElementById('birth-timezone').value;
+            const referenceTimezone = document.getElementById('reference-timezone').value;
+
+            if (!birthDateTime) {
+                showAgeError('Please enter a birth date and time');
+                return;
+            }
+
+            try {
+                // For now, we'll use the basic calculation since timezone handling is complex
+                // In a full implementation, you'd convert dates to the same timezone first
+                const result = window.ageCalc.calculateAge(birthDateTime, referenceDateTime, birthTimezone, 'march1', 'calendar');
+
+                if (result.success) {
+                    showAgeResult(result);
+                } else {
+                    showAgeError(result.error);
+                }
+
+            } catch (error) {
+                showAgeError('Error calculating advanced age: ' + error.message);
+            }
+        }
+
+        function calculateAgeMilestones() {
+            if (!window.ageCalc) {
+                initializeAgeCalculator();
+            }
+
+            const birthDate = document.getElementById('milestones-birth-date').value;
+            
+            if (!birthDate) {
+                showAgeError('Please enter a birth date');
+                return;
+            }
+
+            // Get selected milestones
+            const selectedMilestones = [];
+            document.querySelectorAll('#milestones-age-mode input[type="checkbox"]:checked').forEach(checkbox => {
+                selectedMilestones.push(parseInt(checkbox.value));
+            });
+
+            if (selectedMilestones.length === 0) {
+                showAgeError('Please select at least one milestone');
+                return;
+            }
+
+            try {
+                const result = window.ageCalc.calculateAgeMilestones(birthDate, selectedMilestones);
+
+                if (result.success) {
+                    showAgeMilestonesResult(result);
+                } else {
+                    showAgeError(result.error);
+                }
+
+            } catch (error) {
+                showAgeError('Error calculating milestones: ' + error.message);
+            }
+        }
+
+        function calculateDateRange() {
+            if (!window.ageCalc) {
+                initializeAgeCalculator();
+            }
+
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+
+            if (!startDate || !endDate) {
+                showAgeError('Please enter both start and end dates');
+                return;
+            }
+
+            try {
+                const result = window.ageCalc.calculateDaysBetween(startDate, endDate);
+
+                if (result.success) {
+                    showDateRangeResult(result, startDate, endDate);
+                } else {
+                    showAgeError(result.error);
+                }
+
+            } catch (error) {
+                showAgeError('Error calculating date range: ' + error.message);
+            }
+        }
+
+        function showAgeResult(result) {
+            // Hide error, show result
+            document.getElementById('age-error').classList.add('hidden');
+            document.getElementById('age-result').classList.remove('hidden');
+
+            // Display age value
+            const ageValue = `${result.age.years} years, ${result.age.months} months, ${result.age.days} days`;
+            document.getElementById('age-value').textContent = ageValue;
+            document.getElementById('age-breakdown').textContent = 'Age Breakdown';
+
+            // Display additional info
+            document.getElementById('age-birth-date').textContent = result.metadata.birthDate;
+            document.getElementById('age-reference-date').textContent = result.metadata.referenceDate;
+            document.getElementById('age-next-birthday').textContent = result.nextBirthday.formatted;
+            document.getElementById('age-days-until').textContent = result.nextBirthday.daysUntil + ' days';
+
+            // Display totals
+            document.getElementById('age-total-days').textContent = result.totals.days;
+            document.getElementById('age-total-weeks').textContent = result.totals.weeks;
+            document.getElementById('age-total-months').textContent = result.totals.months;
+            document.getElementById('age-leap-years').textContent = result.metadata.leapYear ? 'Yes' : 'No';
+
+            // Show additional info section
+            document.getElementById('age-additional-info').classList.remove('hidden');
+        }
+
+        function showAgeMilestonesResult(result) {
+            // Hide error, show result
+            document.getElementById('age-error').classList.add('hidden');
+            document.getElementById('age-result').classList.remove('hidden');
+
+            // Display milestones
+            let milestonesText = '';
+            result.milestones.forEach(milestone => {
+                milestonesText += `${milestone.age} years: ${milestone.date} (${milestone.daysUntil} days)\n`;
+            });
+
+            document.getElementById('age-value').textContent = 'Age Milestones';
+            document.getElementById('age-breakdown').textContent = milestonesText;
+
+            // Hide additional info for milestones
+            document.getElementById('age-additional-info').classList.add('hidden');
+        }
+
+        function showDateRangeResult(result, startDate, endDate) {
+            // Hide error, show result
+            document.getElementById('age-error').classList.add('hidden');
+            document.getElementById('age-result').classList.remove('hidden');
+
+            // Display date range result
+            document.getElementById('age-value').textContent = 'Date Range';
+            document.getElementById('age-breakdown').textContent = `${result.days} days between ${startDate} and ${endDate}`;
+
+            // Display totals
+            document.getElementById('age-total-days').textContent = result.days;
+            document.getElementById('age-total-weeks').textContent = result.weeks;
+            document.getElementById('age-total-months').textContent = result.months;
+            document.getElementById('age-leap-years').textContent = result.years;
+
+            // Show additional info section
+            document.getElementById('age-additional-info').classList.remove('hidden');
+        }
+
+        function showAgeError(message) {
+            document.getElementById('age-error-message').textContent = message;
+            document.getElementById('age-error').classList.remove('hidden');
+            document.getElementById('age-result').classList.add('hidden');
+        }
+
+        function clearAgeResults() {
+            document.getElementById('age-result').classList.add('hidden');
+            document.getElementById('age-error').classList.add('hidden');
+        }
+
         function initializeBMICalculator() {
             console.log('Initializing BMI Calculator...');
             console.log('BMICalculator class available:', typeof BMICalculator);
@@ -4867,243 +5073,13 @@ ith<!DOCTYPE html>
 
         // BMI Calculator Functions - moved to head section
 
-        // Age Calculator Functions
-        function initializeAgeCalculator() {
-            if (!ageCalc) {
-                try {
-                    ageCalc = new AgeCalculator();
-                } catch (error) {
-                    console.error('Error creating AgeCalculator:', error);
-                }
-            }
-        }
+        // Age Calculator Functions - moved to head section
 
-        function switchAgeMode(mode) {
-            // Hide all modes
-            document.querySelectorAll('.age-mode').forEach(el => el.classList.add('hidden'));
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.age-tab').forEach(tab => tab.classList.remove('active'));
-            
-            // Show selected mode and activate tab
-            if (mode === 'basic') {
-                document.getElementById('basic-age-mode').classList.remove('hidden');
-                document.getElementById('basic-age-tab').classList.add('active');
-            } else if (mode === 'advanced') {
-                document.getElementById('advanced-age-mode').classList.remove('hidden');
-                document.getElementById('advanced-age-tab').classList.add('active');
-            } else if (mode === 'milestones') {
-                document.getElementById('milestones-age-mode').classList.remove('hidden');
-                document.getElementById('milestones-age-tab').classList.add('active');
-            } else if (mode === 'between') {
-                document.getElementById('between-age-mode').classList.remove('hidden');
-                document.getElementById('between-age-tab').classList.add('active');
-            }
-            
-            // Initialize calculator if needed
-            initializeAgeCalculator();
-            
-            // Clear previous results
-            clearAgeResults();
-        }
+        // Age Calculator Functions - moved to head section
 
-        function clearAgeResults() {
-            document.getElementById('age-result').classList.add('hidden');
-            document.getElementById('age-error').classList.add('hidden');
-        }
+        // Age Calculator Functions - moved to head section
 
-        function calculateBasicAge() {
-            if (!ageCalc) {
-                initializeAgeCalculator();
-            }
-
-            const birthDate = document.getElementById('birth-date').value;
-            const referenceDate = document.getElementById('reference-date').value || null;
-            const feb29Mode = document.getElementById('feb29-mode').value;
-            const outputUnits = document.getElementById('output-units').value;
-
-            if (!birthDate) {
-                showAgeError('Please enter a birth date');
-                return;
-            }
-
-            try {
-                const result = ageCalc.calculateAge(birthDate, referenceDate, 'local', feb29Mode, outputUnits);
-
-                if (result.success) {
-                    showAgeResult(result);
-                } else {
-                    showAgeError(result.error);
-                }
-
-            } catch (error) {
-                showAgeError('Error calculating age: ' + error.message);
-            }
-        }
-
-        function calculateAdvancedAge() {
-            if (!ageCalc) {
-                initializeAgeCalculator();
-            }
-
-            const birthDateTime = document.getElementById('birth-datetime').value;
-            const referenceDateTime = document.getElementById('reference-datetime').value || null;
-            const birthTimezone = document.getElementById('birth-timezone').value;
-            const referenceTimezone = document.getElementById('reference-timezone').value;
-
-            if (!birthDateTime) {
-                showAgeError('Please enter a birth date and time');
-                return;
-            }
-
-            try {
-                // For now, we'll use the basic calculation since timezone handling is complex
-                // In a full implementation, you'd convert dates to the same timezone first
-                const result = ageCalc.calculateAge(birthDateTime, referenceDateTime, birthTimezone, 'march1', 'calendar');
-
-                if (result.success) {
-                    showAgeResult(result);
-                } else {
-                    showAgeError(result.error);
-                }
-
-            } catch (error) {
-                showAgeError('Error calculating advanced age: ' + error.message);
-            }
-        }
-
-        function calculateAgeMilestones() {
-            if (!ageCalc) {
-                initializeAgeCalculator();
-            }
-
-            const birthDate = document.getElementById('milestones-birth-date').value;
-            
-            if (!birthDate) {
-                showAgeError('Please enter a birth date');
-                return;
-            }
-
-            // Get selected milestones
-            const selectedMilestones = [];
-            document.querySelectorAll('#milestones-age-mode input[type="checkbox"]:checked').forEach(checkbox => {
-                selectedMilestones.push(parseInt(checkbox.value));
-            });
-
-            if (selectedMilestones.length === 0) {
-                showAgeError('Please select at least one milestone');
-                return;
-            }
-
-            try {
-                const result = ageCalc.calculateAgeMilestones(birthDate, selectedMilestones);
-
-                if (result.success) {
-                    showAgeMilestonesResult(result);
-                } else {
-                    showAgeError(result.error);
-                }
-
-            } catch (error) {
-                showAgeError('Error calculating milestones: ' + error.message);
-            }
-        }
-
-        function calculateDateRange() {
-            if (!ageCalc) {
-                initializeAgeCalculator();
-            }
-
-            const startDate = document.getElementById('start-date').value;
-            const endDate = document.getElementById('end-date').value;
-
-            if (!startDate || !endDate) {
-                showAgeError('Please enter both start and end dates');
-                return;
-            }
-
-            try {
-                const result = ageCalc.calculateDaysBetween(startDate, endDate);
-
-                if (result.success) {
-                    showDateRangeResult(result, startDate, endDate);
-                } else {
-                    showAgeError(result.error);
-                }
-
-            } catch (error) {
-                showAgeError('Error calculating date range: ' + error.message);
-            }
-        }
-
-        function showAgeResult(result) {
-            // Hide error, show result
-            document.getElementById('age-error').classList.add('hidden');
-            document.getElementById('age-result').classList.remove('hidden');
-
-            // Display age value
-            const ageValue = `${result.age.years} years, ${result.age.months} months, ${result.age.days} days`;
-            document.getElementById('age-value').textContent = ageValue;
-            document.getElementById('age-breakdown').textContent = 'Age Breakdown';
-
-            // Display additional info
-            document.getElementById('age-birth-date').textContent = result.metadata.birthDate;
-            document.getElementById('age-reference-date').textContent = result.metadata.referenceDate;
-            document.getElementById('age-next-birthday').textContent = result.nextBirthday.formatted;
-            document.getElementById('age-days-until').textContent = result.nextBirthday.daysUntil + ' days';
-
-            // Display totals
-            document.getElementById('age-total-days').textContent = result.totals.days;
-            document.getElementById('age-total-weeks').textContent = result.totals.weeks;
-            document.getElementById('age-total-months').textContent = result.totals.months;
-            document.getElementById('age-leap-years').textContent = result.metadata.leapYear ? 'Yes' : 'No';
-
-            // Show additional info section
-            document.getElementById('age-additional-info').classList.remove('hidden');
-        }
-
-        function showAgeMilestonesResult(result) {
-            // Hide error, show result
-            document.getElementById('age-error').classList.add('hidden');
-            document.getElementById('age-result').classList.remove('hidden');
-
-            // Display milestones
-            let milestonesText = '';
-            result.milestones.forEach(milestone => {
-                milestonesText += `${milestone.age} years: ${milestone.date} (${milestone.daysUntil} days)\n`;
-            });
-
-            document.getElementById('age-value').textContent = 'Age Milestones';
-            document.getElementById('age-breakdown').textContent = milestonesText;
-
-            // Hide additional info for milestones
-            document.getElementById('age-additional-info').classList.add('hidden');
-        }
-
-        function showDateRangeResult(result, startDate, endDate) {
-            // Hide error, show result
-            document.getElementById('age-error').classList.add('hidden');
-            document.getElementById('age-result').classList.remove('hidden');
-
-            // Display date range result
-            document.getElementById('age-value').textContent = 'Date Range';
-            document.getElementById('age-breakdown').textContent = `${result.days} days between ${startDate} and ${endDate}`;
-
-            // Display totals
-            document.getElementById('age-total-days').textContent = result.days;
-            document.getElementById('age-total-weeks').textContent = result.weeks;
-            document.getElementById('age-total-months').textContent = result.months;
-            document.getElementById('age-leap-years').textContent = result.years;
-
-            // Show additional info section
-            document.getElementById('age-additional-info').classList.remove('hidden');
-        }
-
-        function showAgeError(message) {
-            document.getElementById('age-error-message').textContent = message;
-            document.getElementById('age-error').classList.remove('hidden');
-            document.getElementById('age-result').classList.add('hidden');
-        }
+        // Age Calculator Functions - moved to head section
 
         // Unit Converter Functions - moved to head section
 
