@@ -3171,50 +3171,82 @@ ith<!DOCTYPE html>
     
     <script>
         // Make all password generator functions globally accessible
-        document.addEventListener('DOMContentLoaded', function() {
-            // Ensure all password generator functions are available globally
-            if (typeof generateMultiplePasswords === 'function') {
-                window.generateMultiplePasswords = generateMultiplePasswords;
-            }
-            if (typeof generateDicewarePassphrase === 'function') {
-                window.generateDicewarePassphrase = generateDicewarePassphrase;
-            }
-            if (typeof validatePassword === 'function') {
-                window.validatePassword = validatePassword;
-            }
-            if (typeof getPasswordOptions === 'function') {
-                window.getPasswordOptions = getPasswordOptions;
-            }
-            if (typeof getPassphraseOptions === 'function') {
-                window.getPassphraseOptions = getPassphraseOptions;
-            }
-            if (typeof displayPasswordResult === 'function') {
-                window.displayPasswordResult = displayPasswordResult;
-            }
-            if (typeof displayMultiplePasswords === 'function') {
-                window.displayMultiplePasswords = displayMultiplePasswords;
-            }
-            if (typeof displayPasswordValidation === 'function') {
-                window.displayPasswordValidation = displayPasswordValidation;
-            }
-            if (typeof getStrengthColor === 'function') {
-                window.getStrengthColor = getStrengthColor;
-            }
-            if (typeof copyAdvancedPassword === 'function') {
-                window.copyAdvancedPassword = copyAdvancedPassword;
-            }
-            if (typeof switchPasswordMode === 'function') {
-                window.switchPasswordMode = switchPasswordMode;
-            }
-            if (typeof updateEntropyInfo === 'function') {
-                window.updateEntropyInfo = updateEntropyInfo;
-            }
-            if (typeof updateDicewareInfo === 'function') {
-                window.updateDicewareInfo = updateDicewareInfo;
-            }
+        function makeFunctionsGlobal() {
+            console.log('🔧 Making password generator functions globally accessible...');
             
+            // Direct function definitions to ensure global availability
+            window.generateMultiplePasswords = function() {
+                if (!window.advancedPasswordGen) {
+                    initializeAdvancedPasswordGenerator();
+                }
+
+                try {
+                    const count = 5; // Generate 5 passwords
+                    const options = getPasswordOptions();
+                    
+                    const results = window.advancedPasswordGen.generateMultiplePasswords(count, options);
+                    
+                    if (results.length > 0) {
+                        displayMultiplePasswords(results);
+                    } else {
+                        alert('Failed to generate any passwords');
+                    }
+                } catch (error) {
+                    alert(`Error generating multiple passwords: ${error.message}`);
+                }
+            };
+
+            window.generateDicewarePassphrase = function() {
+                if (!window.advancedPasswordGen) {
+                    initializeAdvancedPasswordGenerator();
+                }
+
+                try {
+                    const targetEntropy = parseInt(document.getElementById('diceware-entropy').value);
+                    const separator = document.getElementById('word-separator').value;
+                    const addRandomChars = document.getElementById('add-random-chars').checked;
+
+                    const result = window.advancedPasswordGen.generatePassphrase({
+                        targetEntropy,
+                        separator,
+                        addRandomChars
+                    });
+
+                    displayPasswordResult(result);
+                } catch (error) {
+                    alert(`Error generating passphrase: ${error.message}`);
+                }
+            };
+
+            window.validatePassword = function() {
+                if (!window.advancedPasswordGen) {
+                    initializeAdvancedPasswordGenerator();
+                }
+
+                try {
+                    const password = document.getElementById('password-to-validate').value;
+                    if (!password) {
+                        alert('Please enter a password to validate');
+                        return;
+                    }
+
+                    const assessment = window.advancedPasswordGen.validatePassword(password);
+                    displayPasswordValidation(assessment);
+                } catch (error) {
+                    alert(`Error validating password: ${error.message}`);
+                }
+            };
+
             console.log('✅ All password generator functions made globally accessible');
-        });
+        }
+
+        // Run immediately and also on DOMContentLoaded
+        makeFunctionsGlobal();
+        document.addEventListener('DOMContentLoaded', makeFunctionsGlobal);
+        
+        // Also run after a delay to ensure all scripts are loaded
+        setTimeout(makeFunctionsGlobal, 1000);
+        setTimeout(makeFunctionsGlobal, 2000);
     </script>
 </head>
 <body class="bg-gray-50 text-gray-800">
