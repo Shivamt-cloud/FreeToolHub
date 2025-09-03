@@ -1139,9 +1139,20 @@ ith<!DOCTYPE html>
 
         function initializeColorConverter() {
             if (!window.colorConverter) {
-                window.colorConverter = new ColorConverter();
-                console.log('Color Converter initialized');
+                try {
+                    if (typeof AdvancedColorConverter === 'undefined') {
+                        console.error('AdvancedColorConverter class not found!');
+                        return false;
+                    }
+                    window.colorConverter = new AdvancedColorConverter();
+                    console.log('Advanced Color Converter initialized successfully');
+                    return true;
+                } catch (error) {
+                    console.error('Error initializing Advanced Color Converter:', error);
+                    return false;
+                }
             }
+            return true;
         }
 
         function initializeBase64Encoder() {
@@ -1422,6 +1433,739 @@ ith<!DOCTYPE html>
             }
             
             debugOutput.textContent = output;
+        }
+
+        // Color Converter Functions
+        function updateColorInputs() {
+            if (!window.colorConverter) {
+                initializeColorConverter();
+                return;
+            }
+
+            const fromSpace = document.getElementById('from-color-space').value;
+            const inputsContainer = document.getElementById('color-inputs');
+            
+            if (!inputsContainer) return;
+            
+            inputsContainer.innerHTML = '';
+            
+            switch (fromSpace) {
+                case 'hex':
+                    inputsContainer.innerHTML = `
+                        <div>
+                            <label class="block text-sm font-medium mb-2">HEX Color</label>
+                            <input type="text" id="hex-input" placeholder="#FF0000" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent font-mono" oninput="updateColorPreview()">
+                        </div>
+                    `;
+                    break;
+                    
+                case 'srgb8':
+                    inputsContainer.innerHTML = `
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Red (0-255)</label>
+                                <input type="number" id="r-input" min="0" max="255" value="255" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Green (0-255)</label>
+                                <input type="number" id="g-input" min="0" max="255" value="255" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Blue (0-255)</label>
+                                <input type="number" id="b-input" min="0" max="255" value="255" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'srgb':
+                    inputsContainer.innerHTML = `
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Red (0-1)</label>
+                                <input type="number" id="r-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Green (0-1)</label>
+                                <input type="number" id="g-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Blue (0-1)</label>
+                                <input type="number" id="b-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'hsl':
+                    inputsContainer.innerHTML = `
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Hue (0-360°)</label>
+                                <input type="number" id="h-input" min="0" max="360" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Saturation (0-1)</label>
+                                <input type="number" id="s-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Lightness (0-1)</label>
+                                <input type="number" id="l-input" min="0" max="1" step="0.01" value="0.5" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'hsv':
+                    inputsContainer.innerHTML = `
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Hue (0-360°)</label>
+                                <input type="number" id="h-input" min="0" max="360" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Saturation (0-1)</label>
+                                <input type="number" id="s-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Value (0-1)</label>
+                                <input type="number" id="v-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'cmyk':
+                    inputsContainer.innerHTML = `
+                        <div class="grid grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Cyan (0-1)</label>
+                                <input type="number" id="c-input" min="0" max="1" step="0.01" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Magenta (0-1)</label>
+                                <input type="number" id="m-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Yellow (0-1)</label>
+                                <input type="number" id="y-input" min="0" max="1" step="0.01" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Key (0-1)</label>
+                                <input type="number" id="k-input" min="0" max="1" step="0.01" value="0" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'xyz':
+                    inputsContainer.innerHTML = `
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">X (0-100)</label>
+                                <input type="number" id="x-input" min="0" max="100" step="0.01" value="41.25" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Y (0-100)</label>
+                                <input type="number" id="y-input" min="0" max="100" step="0.01" value="21.27" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Z (0-100)</label>
+                                <input type="number" id="z-input" min="0" max="100" step="0.01" value="1.93" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'lab':
+                    inputsContainer.innerHTML = `
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">L* (0-100)</label>
+                                <input type="number" id="l-input" min="0" max="100" step="0.01" value="53.24" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">a* (-128 to 127)</label>
+                                <input type="number" id="a-input" min="-128" max="127" step="0.01" value="80.09" class="w-full p-3 border border-gray-300 rounded-lg focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">b* (-128 to 127)</label>
+                                <input type="number" id="b-input" min="-128" max="127" step="0.01" value="67.20" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" oninput="updateColorPreview()">
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            // Add alpha slider
+            inputsContainer.innerHTML += `
+                <div class="mt-4">
+                    <label class="block text-sm font-medium mb-2">Alpha (0-1)</label>
+                    <input type="range" id="alpha-slider" min="0" max="1" step="0.01" value="1" class="w-full" oninput="updateColorPreview()">
+                    <span id="alpha-value" class="text-sm text-gray-600">1.0</span>
+                </div>
+            `;
+            
+            // Update alpha value display
+            const alphaSlider = document.getElementById('alpha-slider');
+            const alphaValue = document.getElementById('alpha-value');
+            if (alphaSlider && alphaValue) {
+                alphaSlider.addEventListener('input', function() {
+                    alphaValue.textContent = this.value;
+                });
+            }
+            
+            // Initialize with default values
+            updateColorPreview();
+        }
+
+        function updateColorPreview() {
+            if (!window.colorConverter) {
+                initializeColorConverter();
+                return;
+            }
+
+            try {
+                const fromSpace = document.getElementById('from-color-space').value;
+                const toSpace = document.getElementById('to-color-space').value;
+                const alphaSlider = document.getElementById('alpha-slider');
+                const alpha = alphaSlider ? parseFloat(alphaSlider.value) : 1.0;
+                
+                let input;
+                
+                // Get input values based on color space
+                switch (fromSpace) {
+                    case 'hex':
+                        const hexInput = document.getElementById('hex-input');
+                        if (hexInput && hexInput.value) {
+                            input = hexInput.value;
+                        } else {
+                            input = '#FF0000';
+                        }
+                        break;
+                        
+                    case 'srgb8':
+                        const r8 = parseInt(document.getElementById('r-input')?.value || 255);
+                        const g8 = parseInt(document.getElementById('g-input')?.value || 255);
+                        const b8 = parseInt(document.getElementById('b-input')?.value || 255);
+                        input = [r8, g8, b8, alpha];
+                        break;
+                        
+                    case 'srgb':
+                        const r = parseFloat(document.getElementById('r-input')?.value || 1);
+                        const g = parseFloat(document.getElementById('g-input')?.value || 1);
+                        const b = parseFloat(document.getElementById('b-input')?.value || 1);
+                        input = [r, g, b, alpha];
+                        break;
+                        
+                    case 'hsl':
+                        const h = parseFloat(document.getElementById('h-input')?.value || 0);
+                        const s = parseFloat(document.getElementById('s-input')?.value || 1);
+                        const l = parseFloat(document.getElementById('l-input')?.value || 0.5);
+                        input = [h, s, l, alpha];
+                        break;
+                        
+                    case 'hsv':
+                        const hsv_h = parseFloat(document.getElementById('h-input')?.value || 0);
+                        const s_hsv = parseFloat(document.getElementById('s-input')?.value || 1);
+                        const v = parseFloat(document.getElementById('v-input')?.value || 1);
+                        input = [hsv_h, s_hsv, v, alpha];
+                        break;
+                        
+                    case 'cmyk':
+                        const c = parseFloat(document.getElementById('c-input')?.value || 0);
+                        const m = parseFloat(document.getElementById('m-input')?.value || 1);
+                        const y_cmyk = parseFloat(document.getElementById('y-input')?.value || 1);
+                        const k = parseFloat(document.getElementById('k-input')?.value || 0);
+                        input = [c, m, y_cmyk, k, alpha];
+                        break;
+                        
+                    case 'xyz':
+                        const x = parseFloat(document.getElementById('x-input')?.value || 41.25);
+                        const y = parseFloat(document.getElementById('y-input')?.value || 21.27);
+                        const z = parseFloat(document.getElementById('z-input')?.value || 1.93);
+                        input = [x, y, z, alpha];
+                        break;
+                        
+                    case 'lab':
+                        const l_lab = parseFloat(document.getElementById('l-input')?.value || 53.24);
+                        const a_lab = parseFloat(document.getElementById('a-input')?.value || 80.09);
+                        const b_lab = parseFloat(document.getElementById('b-input')?.value || 67.20);
+                        input = [l_lab, a_lab, b_lab, alpha];
+                        break;
+                        
+                    default:
+                        input = [1, 0, 0, alpha];
+                }
+                
+                // Convert color
+                const result = window.colorConverter.convertColor(input, fromSpace, toSpace, alpha);
+                
+                if (result && !result.error) {
+                    // Update preview
+                    const preview = document.getElementById('color-preview');
+                    if (preview) {
+                        const srgb = window.colorConverter.convertColor(input, fromSpace, 'srgb', alpha);
+                        if (srgb && !srgb.error) {
+                            const r = Math.round(srgb[0] * 255);
+                            const g = Math.round(srgb[1] * 255);
+                            const b = Math.round(srgb[2] * 255);
+                            const a = srgb[3] || 1;
+                            preview.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${a})`;
+                        }
+                    }
+                    
+                    // Update result display
+                    const resultDisplay = document.getElementById('color-result');
+                    if (resultDisplay) {
+                        if (Array.isArray(result)) {
+                            resultDisplay.textContent = result.map(v => typeof v === 'number' ? v.toFixed(4) : v).join(', ');
+                        } else {
+                            resultDisplay.textContent = result;
+                        }
+                    }
+                    
+                    // Update all color space displays
+                    updateAllColorSpaces(input, fromSpace, alpha);
+                } else {
+                    console.error('Color conversion error:', result?.error);
+                }
+                
+            } catch (error) {
+                console.error('Error updating color preview:', error);
+            }
+        }
+
+        function updateAllColorSpaces(input, fromSpace, alpha) {
+            if (!window.colorConverter) return;
+            
+            try {
+                const colorInfo = window.colorConverter.getColorInfo(input, fromSpace);
+                
+                if (colorInfo && !colorInfo.error) {
+                    // Update HEX display
+                    const hexDisplay = document.getElementById('hex-display');
+                    if (hexDisplay) hexDisplay.textContent = colorInfo.hex;
+                    
+                    // Update RGB display
+                    const rgbDisplay = document.getElementById('rgb-display');
+                    if (rgbDisplay) {
+                        const rgb = colorInfo.rgb;
+                        rgbDisplay.textContent = `rgb(${Math.round(rgb[0] * 255)}, ${Math.round(rgb[1] * 255)}, ${Math.round(rgb[2] * 255)})`;
+                    }
+                    
+                    // Update HSL display
+                    const hslDisplay = document.getElementById('hsl-display');
+                    if (hslDisplay) {
+                        const hsl = colorInfo.hsl;
+                        hslDisplay.textContent = `hsl(${hsl[0].toFixed(1)}°, ${(hsl[1] * 100).toFixed(1)}%, ${(hsl[2] * 100).toFixed(1)}%)`;
+                    }
+                    
+                    // Update HSV display
+                    const hsvDisplay = document.getElementById('hsv-display');
+                    if (hsvDisplay) {
+                        const hsv = colorInfo.hsv;
+                        hsvDisplay.textContent = `hsv(${hsv[0].toFixed(1)}°, ${(hsv[1] * 100).toFixed(1)}%, ${(hsv[2] * 100).toFixed(1)}%)`;
+                    }
+                    
+                    // Update CMYK display
+                    const cmykDisplay = document.getElementById('cmyk-display');
+                    if (cmykDisplay) {
+                        const cmyk = colorInfo.cmyk;
+                        cmykDisplay.textContent = `cmyk(${cmyk[0].toFixed(3)}, ${cmyk[1].toFixed(3)}, ${cmyk[2].toFixed(3)}, ${cmyk[3].toFixed(3)})`;
+                    }
+                    
+                    // Update XYZ display
+                    const xyzDisplay = document.getElementById('xyz-display');
+                    if (xyzDisplay) {
+                        const xyz = colorInfo.xyz;
+                        xyzDisplay.textContent = `xyz(${xyz[0].toFixed(3)}, ${xyz[1].toFixed(3)}, ${xyz[2].toFixed(3)})`;
+                    }
+                    
+                    // Update LAB display
+                    const labDisplay = document.getElementById('lab-display');
+                    if (labDisplay) {
+                        const lab = colorInfo.lab;
+                        labDisplay.textContent = `lab(${lab[0].toFixed(2)}, ${lab[1].toFixed(2)}, ${lab[2].toFixed(2)})`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating all color spaces:', error);
+            }
+        }
+
+        // Initialize color converter when color modal is opened
+        function openColorModal() {
+            openModal('color');
+            setTimeout(() => {
+                if (initializeColorConverter()) {
+                    updateColorInputs();
+                }
+            }, 100);
+        }
+
+        // Utility functions for color converter
+        function setQuickColor(color, space) {
+            document.getElementById('from-color-space').value = space;
+            updateColorInputs();
+            
+            if (space === 'hex') {
+                document.getElementById('hex-input').value = color;
+            }
+            
+            updateColorPreview();
+        }
+
+        function clearColorResults() {
+            const resultElement = document.getElementById('color-result');
+            const errorElement = document.getElementById('color-error');
+            const infoElement = document.getElementById('color-info');
+            
+            if (resultElement) resultElement.classList.add('hidden');
+            if (errorElement) errorElement.classList.add('hidden');
+            if (infoElement) infoElement.classList.add('hidden');
+        }
+
+        function getCurrentColorInput(space, alpha) {
+            try {
+                switch (space) {
+                    case 'hex':
+                        const hexInput = document.getElementById('hex-input');
+                        return hexInput && hexInput.value ? hexInput.value : null;
+                        
+                    case 'srgb8':
+                    case 'srgb':
+                    case 'srgb-linear':
+                        const r = parseFloat(document.getElementById('r-input')?.value || 0);
+                        const g = parseFloat(document.getElementById('g-input')?.value || 0);
+                        const b = parseFloat(document.getElementById('b-input')?.value || 0);
+                        return [r, g, b, alpha];
+                        
+                    case 'hsl':
+                        const h = parseFloat(document.getElementById('h-input')?.value || 0);
+                        const s = parseFloat(document.getElementById('s-input')?.value || 0);
+                        const l = parseFloat(document.getElementById('l-input')?.value || 1);
+                        return [h, s, l, alpha];
+                        
+                    case 'hsv':
+                        const hh = parseFloat(document.getElementById('h-input')?.value || 0);
+                        const ss = parseFloat(document.getElementById('s-input')?.value || 0);
+                        const v = parseFloat(document.getElementById('v-input')?.value || 1);
+                        return [hh, ss, v, alpha];
+                        
+                    case 'cmyk':
+                        const c = parseFloat(document.getElementById('c-input')?.value || 0);
+                        const m = parseFloat(document.getElementById('m-input')?.value || 0);
+                        const y = parseFloat(document.getElementById('y-input')?.value || 0);
+                        const k = parseFloat(document.getElementById('k-input')?.value || 0);
+                        return [c, m, y, k, alpha];
+                        
+                    case 'xyz':
+                        const x = parseFloat(document.getElementById('x-input')?.value || 0);
+                        const yy = parseFloat(document.getElementById('y-input')?.value || 0);
+                        const z = parseFloat(document.getElementById('z-input')?.value || 0);
+                        return [x, yy, z, alpha];
+                        
+                    case 'lab':
+                        const ll = parseFloat(document.getElementById('l-input')?.value || 0);
+                        const aa = parseFloat(document.getElementById('a-input')?.value || 0);
+                        const bb = parseFloat(document.getElementById('b-input')?.value || 0);
+                        return [ll, aa, bb, alpha];
+                        
+                    default:
+                        return null;
+                }
+            } catch (error) {
+                return null;
+            }
+        }
+
+        // Color harmony functions
+        function generateComplementary() {
+            if (!window.colorConverter) return;
+            
+            try {
+                const fromSpace = document.getElementById('from-color-space').value;
+                const alphaSlider = document.getElementById('alpha-slider');
+                const alpha = alphaSlider ? parseFloat(alphaSlider.value) : 1.0;
+                let input = getCurrentColorInput(fromSpace, alpha);
+                
+                if (!input) return;
+                
+                const result = window.colorConverter.generateComplementary(input, fromSpace);
+                if (result.error) {
+                    console.error('Error generating complementary color:', result.error);
+                } else {
+                    // Set the complementary color as input
+                    setColorInput(result.complementary, fromSpace);
+                    updateColorPreview();
+                }
+            } catch (error) {
+                console.error('Error generating complementary color:', error);
+            }
+        }
+
+        function generateAnalogous() {
+            if (!window.colorConverter) return;
+            
+            try {
+                const fromSpace = document.getElementById('from-color-space').value;
+                const alphaSlider = document.getElementById('alpha-slider');
+                const alpha = alphaSlider ? parseFloat(alphaSlider.value) : 1.0;
+                let input = getCurrentColorInput(fromSpace, alpha);
+                
+                if (!input) return;
+                
+                const result = window.colorConverter.generateAnalogous(input, fromSpace, 3);
+                if (result.error) {
+                    console.error('Error generating analogous colors:', result.error);
+                } else {
+                    // Show analogous colors in info section
+                    const infoElement = document.getElementById('color-info');
+                    if (infoElement) {
+                        infoElement.classList.remove('hidden');
+                        const infoContent = document.getElementById('info-content');
+                        if (infoContent) {
+                            infoContent.innerHTML = `
+                                <div><strong>Original:</strong> ${JSON.stringify(result.original)}</div>
+                                <div><strong>Analogous 1:</strong> ${JSON.stringify(result.analogous[0])}</div>
+                                <div><strong>Analogous 2:</strong> ${JSON.stringify(result.analogous[1])}</div>
+                                <div><strong>Analogous 3:</strong> ${JSON.stringify(result.analogous[2])}</div>
+                            `;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error generating analogous colors:', error);
+            }
+        }
+
+        function generateTriadic() {
+            if (!window.colorConverter) return;
+            
+            try {
+                const fromSpace = document.getElementById('from-color-space').value;
+                const alphaSlider = document.getElementById('alpha-slider');
+                const alpha = alphaSlider ? parseFloat(alphaSlider.value) : 1.0;
+                let input = getCurrentColorInput(fromSpace, alpha);
+                
+                if (!input) return;
+                
+                const result = window.colorConverter.generateTriadic(input, fromSpace);
+                if (result.error) {
+                    console.error('Error generating triadic colors:', result.error);
+                } else {
+                    // Show triadic colors in info section
+                    const infoElement = document.getElementById('color-info');
+                    if (infoElement) {
+                        infoElement.classList.remove('hidden');
+                        const infoContent = document.getElementById('info-content');
+                        if (infoContent) {
+                            infoContent.innerHTML = `
+                                <div><strong>Original:</strong> ${JSON.stringify(result.original)}</div>
+                                <div><strong>Triadic 1:</strong> ${JSON.stringify(result.triadic1)}</div>
+                                <div><strong>Triadic 2:</strong> ${JSON.stringify(result.triadic2)}</div>
+                            `;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error generating triadic colors:', error);
+            }
+        }
+
+        function setColorInput(color, space) {
+            try {
+                switch (space) {
+                    case 'hex':
+                        if (document.getElementById('hex-input')) {
+                            document.getElementById('hex-input').value = color;
+                        }
+                        break;
+                        
+                    case 'srgb8':
+                    case 'srgb':
+                    case 'srgb-linear':
+                        if (color.length >= 3) {
+                            if (document.getElementById('r-input')) document.getElementById('r-input').value = color[0];
+                            if (document.getElementById('g-input')) document.getElementById('g-input').value = color[1];
+                            if (document.getElementById('b-input')) document.getElementById('b-input').value = color[2];
+                        }
+                        break;
+                        
+                    case 'hsl':
+                        if (color.length >= 3) {
+                            if (document.getElementById('h-input')) document.getElementById('h-input').value = color[0];
+                            if (document.getElementById('s-input')) document.getElementById('s-input').value = color[1];
+                            if (document.getElementById('l-input')) document.getElementById('l-input').value = color[2];
+                        }
+                        break;
+                        
+                    case 'hsv':
+                        if (color.length >= 3) {
+                            if (document.getElementById('h-input')) document.getElementById('h-input').value = color[0];
+                            if (document.getElementById('s-input')) document.getElementById('s-input').value = color[1];
+                            if (document.getElementById('v-input')) document.getElementById('v-input').value = color[2];
+                        }
+                        break;
+                        
+                    case 'cmyk':
+                        if (color.length >= 4) {
+                            if (document.getElementById('c-input')) document.getElementById('c-input').value = color[0];
+                            if (document.getElementById('m-input')) document.getElementById('m-input').value = color[1];
+                            if (document.getElementById('y-input')) document.getElementById('y-input').value = color[2];
+                            if (document.getElementById('k-input')) document.getElementById('k-input').value = color[3];
+                        }
+                        break;
+                        
+                    case 'xyz':
+                        if (color.length >= 3) {
+                            if (document.getElementById('x-input')) document.getElementById('x-input').value = color[0];
+                            if (document.getElementById('y-input')) document.getElementById('y-input').value = color[1];
+                            if (document.getElementById('z-input')) document.getElementById('z-input').value = color[2];
+                        }
+                        break;
+                        
+                    case 'lab':
+                        if (color.length >= 3) {
+                            if (document.getElementById('l-input')) document.getElementById('l-input').value = color[0];
+                            if (document.getElementById('a-input')) document.getElementById('a-input').value = color[1];
+                            if (document.getElementById('b-input')) document.getElementById('b-input').value = color[2];
+                        }
+                        break;
+                }
+            } catch (error) {
+                console.error('Error setting color input:', error);
+            }
+        }
+
+        function updateAlphaValue() {
+            const slider = document.getElementById('alpha-slider');
+            const value = document.getElementById('alpha-value');
+            if (slider && value) {
+                value.textContent = slider.value;
+                updateColorPreview();
+            }
+        }
+
+        function updateAlphaSlider() {
+            const slider = document.getElementById('alpha-slider');
+            const value = document.getElementById('alpha-value');
+            if (slider && value) {
+                slider.value = value.textContent;
+                updateColorPreview();
+            }
+        }
+
+        function convertColor() {
+            if (!window.colorConverter) {
+                initializeColorConverter();
+                return;
+            }
+
+            try {
+                const fromSpace = document.getElementById('from-color-space').value;
+                const toSpace = document.getElementById('to-color-space').value;
+                const alphaSlider = document.getElementById('alpha-slider');
+                const alpha = alphaSlider ? parseFloat(alphaSlider.value) : 1.0;
+
+                let input = getCurrentColorInput(fromSpace, alpha);
+                if (!input) {
+                    console.error('No valid input color found');
+                    return;
+                }
+
+                const result = window.colorConverter.convertColor(input, fromSpace, toSpace, alpha);
+                
+                if (result && !result.error) {
+                    // Update result display
+                    const resultDisplay = document.getElementById('color-result');
+                    if (resultDisplay) {
+                        if (Array.isArray(result)) {
+                            resultDisplay.textContent = result.map(v => typeof v === 'number' ? v.toFixed(4) : v).join(', ');
+                        } else {
+                            resultDisplay.textContent = result;
+                        }
+                        resultDisplay.classList.remove('hidden');
+                    }
+                    
+                    // Hide error if it was showing
+                    const errorElement = document.getElementById('color-error');
+                    if (errorElement) errorElement.classList.add('hidden');
+                    
+                    // Update all color space displays
+                    updateAllColorSpaces(input, fromSpace, alpha);
+                } else {
+                    console.error('Color conversion error:', result?.error);
+                    // Show error
+                    const errorElement = document.getElementById('color-error');
+                    if (errorElement) errorElement.classList.remove('hidden');
+                    const errorMessage = document.getElementById('error-message');
+                    if (errorMessage) errorMessage.textContent = result?.error || 'Unknown error';
+                }
+                
+            } catch (error) {
+                console.error('Error converting color:', error);
+                // Show error
+                const errorElement = document.getElementById('color-error');
+                if (errorElement) {
+                    errorElement.classList.remove('hidden');
+                    const errorMessage = document.getElementById('error-message');
+                    if (errorMessage) errorMessage.textContent = error.message;
+                }
+            }
+        }
+
+        function showColorError(message) {
+            const resultElement = document.getElementById('color-result');
+            const errorElement = document.getElementById('color-error');
+            const infoElement = document.getElementById('color-info');
+            
+            if (resultElement) resultElement.classList.add('hidden');
+            if (infoElement) infoElement.classList.add('hidden');
+            if (errorElement) {
+                errorElement.classList.remove('hidden');
+                const errorMessage = document.getElementById('error-message');
+                if (errorMessage) errorMessage.textContent = message;
+            }
+        }
+
+        function showColorInfo(input, fromSpace) {
+            try {
+                if (!window.colorConverter) return;
+                
+                const info = window.colorConverter.getColorInfo(input, fromSpace);
+                if (info.error) {
+                    return;
+                }
+
+                const infoElement = document.getElementById('color-info');
+                if (infoElement) {
+                    infoElement.classList.remove('hidden');
+                    const infoContent = document.getElementById('info-content');
+                    
+                    if (infoContent) {
+                        infoContent.innerHTML = `
+                            <div><strong>HEX:</strong> ${info.hex}</div>
+                            <div><strong>sRGB:</strong> [${info.srgb[0].toFixed(4)}, ${info.srgb[1].toFixed(4)}, ${info.srgb[2].toFixed(4)}]</div>
+                            <div><strong>HSL:</strong> [${info.hsl[0].toFixed(1)}°, ${info.hsl[1].toFixed(4)}, ${info.hsl[2].toFixed(4)}]</div>
+                            <div><strong>HSV:</strong> [${info.hsv[0].toFixed(1)}°, ${info.hsv[1].toFixed(4)}, ${info.hsv[2].toFixed(4)}]</div>
+                            <div><strong>CMYK:</strong> [${info.cmyk[0].toFixed(4)}, ${info.cmyk[1].toFixed(4)}, ${info.cmyk[2].toFixed(4)}, ${info.cmyk[3].toFixed(4)}]</div>
+                            <div><strong>XYZ:</strong> [${info.xyz[0].toFixed(4)}, ${info.xyz[1].toFixed(4)}, ${info.xyz[2].toFixed(4)}]</div>
+                            <div><strong>CIELAB:</strong> [${info.lab[0].toFixed(4)}, ${info.lab[1].toFixed(4)}, ${info.lab[2].toFixed(4)}]</div>
+                        `;
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error showing color info:', error);
+            }
+        }
+
+        function updateColorConversion() {
+            // This function is called when the target color space changes
+            // We can add logic here if needed
+            updateColorPreview();
         }
 
         function populateCurrencyDropdowns() {
@@ -2265,7 +3009,7 @@ ith<!DOCTYPE html>
                     <p class="text-gray-600 text-sm">Convert currencies with ECB rates & ISO 4217 standards</p>
                 </div>
 
-                <div class="tool-card p-6 rounded-2xl" onclick="openModal('color')">
+                <div class="tool-card p-6 rounded-2xl" onclick="openColorModal()">
                     <div class="tool-icon bg-gradient-to-r from-pink-500 to-purple-600 mx-auto">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a4 4 0 004-4V5z"></path>
@@ -4780,6 +5524,41 @@ ith<!DOCTYPE html>
                     }
                 }, 1000);
             }
+            
+            // Test if AdvancedColorConverter is available
+            console.log('DOM loaded, checking AdvancedColorConverter availability...');
+            console.log('AdvancedColorConverter type:', typeof AdvancedColorConverter);
+            console.log('AdvancedColorConverter value:', AdvancedColorConverter);
+            
+            if (typeof AdvancedColorConverter !== 'undefined') {
+                console.log('✅ AdvancedColorConverter class is available');
+                // Pre-initialize color converter
+                setTimeout(() => {
+                    try {
+                        window.colorConverter = new AdvancedColorConverter();
+                        console.log('✅ AdvancedColorConverter pre-initialized');
+                    } catch (error) {
+                        console.error('❌ Error pre-initializing AdvancedColorConverter:', error);
+                    }
+                }, 300);
+            } else {
+                console.error('❌ AdvancedColorConverter class is NOT available');
+                // Check if it's available after a delay (script loading issue)
+                setTimeout(() => {
+                    console.log('Delayed check - AdvancedColorConverter type:', typeof AdvancedColorConverter);
+                    if (typeof AdvancedColorConverter !== 'undefined') {
+                        console.log('✅ AdvancedColorConverter now available after delay');
+                        try {
+                            window.colorConverter = new AdvancedColorConverter();
+                            console.log('✅ AdvancedColorConverter initialized after delay');
+                        } catch (error) {
+                            console.error('❌ Error initializing AdvancedColorConverter after delay:', error);
+                        }
+                    } else {
+                        console.error('❌ AdvancedColorConverter still not available after delay');
+                    }
+                }, 1200);
+            }
         });
 
         // Advanced Calculator functions - moved to head section
@@ -5307,28 +6086,7 @@ ith<!DOCTYPE html>
 
         // Currency Converter Functions - moved to head section
 
-        // Color Converter Functions
-        function initializeColorConverter() {
-            console.log('Initializing Advanced Color Converter...');
-            if (!colorConverter) {
-                try {
-                    console.log('Creating new AdvancedColorConverter instance...');
-                    colorConverter = new AdvancedColorConverter();
-                    console.log('AdvancedColorConverter created successfully:', colorConverter);
-                    
-                    // Initialize with default color space
-                    updateColorInputs();
-                    
-                } catch (error) {
-                    console.error('Error creating AdvancedColorConverter:', error);
-                }
-            } else {
-                console.log('AdvancedColorConverter already exists');
-                updateColorInputs();
-            }
-        }
-
-        function updateColorInputs() {
+        // Color Converter Functions - moved to head section
             if (!colorConverter) return;
 
             const fromSpace = document.getElementById('from-color-space').value;
@@ -5507,193 +6265,11 @@ ith<!DOCTYPE html>
             updateColorPreview();
         }
 
-        function updateColorPreview() {
-            if (!colorConverter) return;
+        // Color Converter Functions - moved to head section
 
-            try {
-                const fromSpace = document.getElementById('from-color-space').value;
-                const alpha = parseFloat(document.getElementById('alpha-value').value);
-                let input, r, g, b;
+        // Color Converter Functions - moved to head section
 
-                switch (fromSpace) {
-                    case 'hex':
-                        const hexInput = document.getElementById('hex-input');
-                        if (hexInput && hexInput.value) {
-                            const parsed = colorConverter.parseHex(hexInput.value);
-                            r = parsed.r / 255;
-                            g = parsed.g / 255;
-                            b = parsed.b / 255;
-                        } else {
-                            r = g = b = 1;
-                        }
-                        break;
-                        
-                    case 'srgb8':
-                        r = parseFloat(document.getElementById('r-input')?.value || 255) / 255;
-                        g = parseFloat(document.getElementById('g-input')?.value || 255) / 255;
-                        b = parseFloat(document.getElementById('b-input')?.value || 255) / 255;
-                        break;
-                        
-                    case 'srgb':
-                    case 'srgb-linear':
-                        r = parseFloat(document.getElementById('r-input')?.value || 1);
-                        g = parseFloat(document.getElementById('g-input')?.value || 1);
-                        b = parseFloat(document.getElementById('b-input')?.value || 1);
-                        break;
-                        
-                    case 'hsl':
-                        const h = parseFloat(document.getElementById('h-input')?.value || 0);
-                        const s = parseFloat(document.getElementById('s-input')?.value || 0);
-                        const l = parseFloat(document.getElementById('l-input')?.value || 1);
-                        [r, g, b] = colorConverter.hslToRgb(h, s, l);
-                        break;
-                        
-                    case 'hsv':
-                        const hh = parseFloat(document.getElementById('h-input')?.value || 0);
-                        const ss = parseFloat(document.getElementById('s-input')?.value || 0);
-                        const v = parseFloat(document.getElementById('v-input')?.value || 1);
-                        [r, g, b] = colorConverter.hsvToRgb(hh, ss, v);
-                        break;
-                        
-                    case 'cmyk':
-                        const c = parseFloat(document.getElementById('c-input')?.value || 0);
-                        const m = parseFloat(document.getElementById('m-input')?.value || 0);
-                        const y = parseFloat(document.getElementById('y-input')?.value || 0);
-                        const k = parseFloat(document.getElementById('k-input')?.value || 0);
-                        [r, g, b] = colorConverter.cmykToRgb(c, m, y, k);
-                        break;
-                        
-                    case 'xyz':
-                        const x = parseFloat(document.getElementById('x-input')?.value || 95.05);
-                        const yy = parseFloat(document.getElementById('y-input')?.value || 100);
-                        const z = parseFloat(document.getElementById('z-input')?.value || 108.88);
-                        const srgbLinear = colorConverter.xyzToSrgbLinear(x, yy, z);
-                        r = colorConverter.linearToSrgb(srgbLinear[0]);
-                        g = colorConverter.linearToSrgb(srgbLinear[1]);
-                        b = colorConverter.linearToSrgb(srgbLinear[2]);
-                        break;
-                        
-                    case 'lab':
-                        const ll = parseFloat(document.getElementById('l-input')?.value || 100);
-                        const aa = parseFloat(document.getElementById('a-input')?.value || 0);
-                        const bb = parseFloat(document.getElementById('b-input')?.value || 0);
-                        const xyz = colorConverter.labToXyz(ll, aa, bb);
-                        const srgbLinear2 = colorConverter.xyzToSrgbLinear(xyz[0], xyz[1], xyz[2]);
-                        r = colorConverter.linearToSrgb(srgbLinear2[0]);
-                        g = colorConverter.linearToSrgb(srgbLinear2[1]);
-                        b = colorConverter.linearToSrgb(srgbLinear2[2]);
-                        break;
-                        
-                    default:
-                        r = g = b = 1;
-                }
-
-                // Clamp values
-                r = Math.max(0, Math.min(1, r));
-                g = Math.max(0, Math.min(1, g));
-                b = Math.max(0, Math.min(1, b));
-
-                // Update preview
-                const preview = document.getElementById('color-preview');
-                const previewHex = document.getElementById('preview-hex');
-                const previewRgb = document.getElementById('preview-rgb');
-
-                if (preview) {
-                    preview.style.backgroundColor = `rgb(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)})`;
-                }
-
-                if (previewHex) {
-                    const hex = colorConverter.hexFromRgba(r, g, b, alpha, alpha < 1);
-                    previewHex.textContent = hex;
-                }
-
-                if (previewRgb) {
-                    previewRgb.textContent = `RGB(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)})`;
-                }
-
-            } catch (error) {
-                console.error('Error updating color preview:', error);
-            }
-        }
-
-        function updateAlphaValue() {
-            const slider = document.getElementById('alpha-slider');
-            const value = document.getElementById('alpha-value');
-            if (slider && value) {
-                value.value = slider.value;
-                updateColorPreview();
-            }
-        }
-
-        function updateAlphaSlider() {
-            const slider = document.getElementById('alpha-slider');
-            const value = document.getElementById('alpha-value');
-            if (slider && value) {
-                slider.value = value.value;
-                updateColorPreview();
-            }
-        }
-
-        function convertColor() {
-            if (!colorConverter) {
-                initializeColorConverter();
-                return;
-            }
-
-            try {
-                const fromSpace = document.getElementById('from-color-space').value;
-                const toSpace = document.getElementById('to-color-space').value;
-                const alpha = parseFloat(document.getElementById('alpha-value').value);
-
-                let input;
-                switch (fromSpace) {
-                    case 'hex':
-                        const hexInput = document.getElementById('hex-input');
-                        if (!hexInput || !hexInput.value) {
-                            throw new Error('Please enter a HEX color');
-                        }
-                        input = hexInput.value;
-                        break;
-                        
-                    case 'srgb8':
-                        const r8 = parseFloat(document.getElementById('r-input')?.value || 0);
-                        const g8 = parseFloat(document.getElementById('g-input')?.value || 0);
-                        const b8 = parseFloat(document.getElementById('b-input')?.value || 0);
-                        input = [r8, g8, b8, alpha];
-                        break;
-                        
-                    case 'srgb':
-                    case 'srgb-linear':
-                        const r = parseFloat(document.getElementById('r-input')?.value || 0);
-                        const g = parseFloat(document.getElementById('g-input')?.value || 0);
-                        const b = parseFloat(document.getElementById('b-input')?.value || 0);
-                        input = [r, g, b, alpha];
-                        break;
-                        
-                    case 'hsl':
-                        const h = parseFloat(document.getElementById('h-input')?.value || 0);
-                        const s = parseFloat(document.getElementById('s-input')?.value || 0);
-                        const l = parseFloat(document.getElementById('l-input')?.value || 1);
-                        input = [h, s, l, alpha];
-                        break;
-                        
-                    case 'hsv':
-                        const hh = parseFloat(document.getElementById('h-input')?.value || 0);
-                        const ss = parseFloat(document.getElementById('s-input')?.value || 0);
-                        const v = parseFloat(document.getElementById('v-input')?.value || 1);
-                        input = [hh, ss, v, alpha];
-                        break;
-                        
-                    case 'cmyk':
-                        const c = parseFloat(document.getElementById('c-input')?.value || 0);
-                        const m = parseFloat(document.getElementById('m-input')?.value || 0);
-                        const y = parseFloat(document.getElementById('y-input')?.value || 0);
-                        const k = parseFloat(document.getElementById('k-input')?.value || 0);
-                        input = [c, m, y, k, alpha];
-                        break;
-                        
-                    case 'xyz':
-                        const x = parseFloat(document.getElementById('x-input')?.value || 0);
+        // Color Converter Functions - moved to head section
                         const yy = parseFloat(document.getElementById('y-input')?.value || 0);
                         const z = parseFloat(document.getElementById('z-input')?.value || 0);
                         input = [x, yy, z, alpha];
@@ -5764,262 +6340,13 @@ ith<!DOCTYPE html>
             resultContent.textContent = displayText;
         }
 
-        function showColorError(message) {
-            document.getElementById('color-result').classList.add('hidden');
-            document.getElementById('color-info').classList.add('hidden');
-            document.getElementById('color-error').classList.remove('hidden');
-            document.getElementById('error-message').textContent = message;
-        }
+        // Color Converter Functions - moved to head section
 
-        function showColorInfo(input, fromSpace) {
-            try {
-                const info = colorConverter.getColorInfo(input, fromSpace);
-                if (info.error) {
-                    return;
-                }
+        // Color Converter Functions - moved to head section
 
-                document.getElementById('color-info').classList.remove('hidden');
-                const infoContent = document.getElementById('info-content');
-                
-                infoContent.innerHTML = `
-                    <div><strong>HEX:</strong> ${info.hex}</div>
-                    <div><strong>sRGB:</strong> [${info.srgb[0].toFixed(4)}, ${info.srgb[1].toFixed(4)}, ${info.srgb[2].toFixed(4)}]</div>
-                    <div><strong>HSL:</strong> [${info.hsl[0].toFixed(1)}°, ${info.hsl[1].toFixed(4)}, ${info.hsl[2].toFixed(4)}]</div>
-                    <div><strong>HSV:</strong> [${info.hsv[0].toFixed(1)}°, ${info.hsv[1].toFixed(4)}, ${info.hsv[2].toFixed(4)}]</div>
-                    <div><strong>CMYK:</strong> [${info.cmyk[0].toFixed(4)}, ${info.cmyk[1].toFixed(4)}, ${info.cmyk[2].toFixed(4)}, ${info.cmyk[3].toFixed(4)}]</div>
-                    <div><strong>XYZ:</strong> [${info.xyz[0].toFixed(4)}, ${info.xyz[1].toFixed(4)}, ${info.xyz[2].toFixed(4)}]</div>
-                    <div><strong>CIELAB:</strong> [${info.lab[0].toFixed(4)}, ${info.lab[1].toFixed(4)}, ${info.lab[2].toFixed(4)}]</div>
-                `;
+        // Color Converter Functions - moved to head section
 
-            } catch (error) {
-                console.error('Error showing color info:', error);
-            }
-        }
-
-        function generateComplementary() {
-            if (!colorConverter) return;
-            
-            try {
-                const fromSpace = document.getElementById('from-color-space').value;
-                const alpha = parseFloat(document.getElementById('alpha-value').value);
-                let input = getCurrentColorInput(fromSpace, alpha);
-                
-                if (!input) return;
-                
-                const result = colorConverter.generateComplementary(input, fromSpace);
-                if (result.error) {
-                    showColorError(result.error);
-                } else {
-                    // Set the complementary color as input
-                    setColorInput(result.complementary, fromSpace);
-                    updateColorPreview();
-                    convertColor();
-                }
-            } catch (error) {
-                showColorError(error.message);
-            }
-        }
-
-        function generateAnalogous() {
-            if (!colorConverter) return;
-            
-            try {
-                const fromSpace = document.getElementById('from-color-space').value;
-                const alpha = parseFloat(document.getElementById('alpha-value').value);
-                let input = getCurrentColorInput(fromSpace, alpha);
-                
-                if (!input) return;
-                
-                const result = colorConverter.generateAnalogous(input, fromSpace, 3);
-                if (result.error) {
-                    showColorError(result.error);
-                } else {
-                    // Show analogous colors in info section
-                    document.getElementById('color-info').classList.remove('hidden');
-                    const infoContent = document.getElementById('info-content');
-                    
-                    infoContent.innerHTML = `
-                        <div><strong>Original:</strong> ${JSON.stringify(result.original)}</div>
-                        <div><strong>Analogous 1:</strong> ${JSON.stringify(result.analogous[0])}</div>
-                        <div><strong>Analogous 2:</strong> ${JSON.stringify(result.analogous[1])}</div>
-                        <div><strong>Analogous 3:</strong> ${JSON.stringify(result.analogous[2])}</div>
-                    `;
-                }
-            } catch (error) {
-                showColorError(error.message);
-            }
-        }
-
-        function generateTriadic() {
-            if (!colorConverter) return;
-            
-            try {
-                const fromSpace = document.getElementById('from-color-space').value;
-                const alpha = parseFloat(document.getElementById('alpha-value').value);
-                let input = getCurrentColorInput(fromSpace, alpha);
-                
-                if (!input) return;
-                
-                const result = colorConverter.generateTriadic(input, fromSpace);
-                if (result.error) {
-                    showColorError(result.error);
-                } else {
-                    // Show triadic colors in info section
-                    document.getElementById('color-info').classList.remove('hidden');
-                    const infoContent = document.getElementById('info-content');
-                    
-                    infoContent.innerHTML = `
-                        <div><strong>Original:</strong> ${JSON.stringify(result.original)}</div>
-                        <div><strong>Triadic 1:</strong> ${JSON.stringify(result.triadic1)}</div>
-                        <div><strong>Triadic 2:</strong> ${JSON.stringify(result.triadic2)}</div>
-                    `;
-                }
-            } catch (error) {
-                showColorError(error.message);
-            }
-        }
-
-        function setQuickColor(color, space) {
-            document.getElementById('from-color-space').value = space;
-            updateColorInputs();
-            
-            if (space === 'hex') {
-                document.getElementById('hex-input').value = color;
-            }
-            
-            updateColorPreview();
-            convertColor();
-        }
-
-        function getCurrentColorInput(space, alpha) {
-            try {
-                switch (space) {
-                    case 'hex':
-                        const hexInput = document.getElementById('hex-input');
-                        return hexInput && hexInput.value ? hexInput.value : null;
-                        
-                    case 'srgb8':
-                    case 'srgb':
-                    case 'srgb-linear':
-                        const r = parseFloat(document.getElementById('r-input')?.value || 0);
-                        const g = parseFloat(document.getElementById('g-input')?.value || 0);
-                        const b = parseFloat(document.getElementById('b-input')?.value || 0);
-                        return [r, g, b, alpha];
-                        
-                    case 'hsl':
-                        const h = parseFloat(document.getElementById('h-input')?.value || 0);
-                        const s = parseFloat(document.getElementById('s-input')?.value || 0);
-                        const l = parseFloat(document.getElementById('l-input')?.value || 1);
-                        return [h, s, l, alpha];
-                        
-                    case 'hsv':
-                        const hh = parseFloat(document.getElementById('h-input')?.value || 0);
-                        const ss = parseFloat(document.getElementById('s-input')?.value || 0);
-                        const v = parseFloat(document.getElementById('v-input')?.value || 1);
-                        return [hh, ss, v, alpha];
-                        
-                    case 'cmyk':
-                        const c = parseFloat(document.getElementById('c-input')?.value || 0);
-                        const m = parseFloat(document.getElementById('m-input')?.value || 0);
-                        const y = parseFloat(document.getElementById('y-input')?.value || 0);
-                        const k = parseFloat(document.getElementById('k-input')?.value || 0);
-                        return [c, m, y, k, alpha];
-                        
-                    case 'xyz':
-                        const x = parseFloat(document.getElementById('x-input')?.value || 0);
-                        const yy = parseFloat(document.getElementById('y-input')?.value || 0);
-                        const z = parseFloat(document.getElementById('z-input')?.value || 0);
-                        return [x, yy, z, alpha];
-                        
-                    case 'lab':
-                        const ll = parseFloat(document.getElementById('l-input')?.value || 0);
-                        const aa = parseFloat(document.getElementById('a-input')?.value || 0);
-                        const bb = parseFloat(document.getElementById('b-input')?.value || 0);
-                        return [ll, aa, bb, alpha];
-                        
-                    default:
-                        return null;
-                }
-            } catch (error) {
-                return null;
-            }
-        }
-
-        function setColorInput(color, space) {
-            try {
-                switch (space) {
-                    case 'hex':
-                        if (document.getElementById('hex-input')) {
-                            document.getElementById('hex-input').value = color;
-                        }
-                        break;
-                        
-                    case 'srgb8':
-                    case 'srgb':
-                    case 'srgb-linear':
-                        if (color.length >= 3) {
-                            if (document.getElementById('r-input')) document.getElementById('r-input').value = color[0];
-                            if (document.getElementById('g-input')) document.getElementById('g-input').value = color[1];
-                            if (document.getElementById('b-input')) document.getElementById('b-input').value = color[2];
-                        }
-                        break;
-                        
-                    case 'hsl':
-                        if (color.length >= 3) {
-                            if (document.getElementById('h-input')) document.getElementById('h-input').value = color[0];
-                            if (document.getElementById('s-input')) document.getElementById('s-input').value = color[1];
-                            if (document.getElementById('l-input')) document.getElementById('l-input').value = color[2];
-                        }
-                        break;
-                        
-                    case 'hsv':
-                        if (color.length >= 3) {
-                            if (document.getElementById('h-input')) document.getElementById('h-input').value = color[0];
-                            if (document.getElementById('s-input')) document.getElementById('s-input').value = color[1];
-                            if (document.getElementById('v-input')) document.getElementById('v-input').value = color[2];
-                        }
-                        break;
-                        
-                    case 'cmyk':
-                        if (color.length >= 4) {
-                            if (document.getElementById('c-input')) document.getElementById('c-input').value = color[0];
-                            if (document.getElementById('m-input')) document.getElementById('m-input').value = color[1];
-                            if (document.getElementById('y-input')) document.getElementById('y-input').value = color[2];
-                            if (document.getElementById('k-input')) document.getElementById('k-input').value = color[3];
-                        }
-                        break;
-                        
-                    case 'xyz':
-                        if (color.length >= 3) {
-                            if (document.getElementById('x-input')) document.getElementById('x-input').value = color[0];
-                            if (document.getElementById('y-input')) document.getElementById('y-input').value = color[1];
-                            if (document.getElementById('z-input')) document.getElementById('z-input').value = color[2];
-                        }
-                        break;
-                        
-                    case 'lab':
-                        if (color.length >= 3) {
-                            if (document.getElementById('l-input')) document.getElementById('l-input').value = color[0];
-                            if (document.getElementById('a-input')) document.getElementById('a-input').value = color[1];
-                            if (document.getElementById('b-input')) document.getElementById('b-input').value = color[2];
-                        }
-                        break;
-                }
-            } catch (error) {
-                console.error('Error setting color input:', error);
-            }
-        }
-
-        function updateColorConversion() {
-            // This function is called when the target color space changes
-            // We can add logic here if needed
-        }
-
-        // Initialize color converter when color modal is opened
-        function openColorModal() {
-            openModal('color');
-            initializeColorConverter();
-        }
+        // Color Converter Functions - moved to head section
 
         // Test function for debugging
         function testUnitConverter() {
