@@ -110,7 +110,7 @@ export class AdvancedQRGenerator {
                 data: data,
                 segments: segments,
                 totalBits: dataBits.length,
-                totalCodewords: codewords.length
+                totalCodewords: errorCorrectedBytes.length
             };
 
             console.log('QR Code generation completed successfully');

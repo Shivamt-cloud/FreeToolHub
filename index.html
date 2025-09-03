@@ -906,6 +906,8 @@ ith<!DOCTYPE html>
                     output += `✅ Basic generation test passed\n`;
                     output += `Generated version: ${testResult.version}\n`;
                     output += `Generated size: ${testResult.matrix.size}×${testResult.matrix.size}\n`;
+                    output += `Total bits: ${testResult.totalBits}\n`;
+                    output += `Total codewords: ${testResult.totalCodewords}\n`;
                 } else {
                     output += '❌ QR Generator initialization failed\n';
                 }
