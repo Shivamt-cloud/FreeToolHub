@@ -1121,9 +1121,20 @@ ith<!DOCTYPE html>
 
         function initializeCurrencyConverter() {
             if (!window.currencyConverter) {
-                window.currencyConverter = new CurrencyConverter();
-                console.log('Currency Converter initialized');
+                try {
+                    if (typeof AdvancedCurrencyConverter === 'undefined') {
+                        console.error('AdvancedCurrencyConverter class not found!');
+                        return false;
+                    }
+                    window.currencyConverter = new AdvancedCurrencyConverter();
+                    console.log('Advanced Currency Converter initialized successfully');
+                    return true;
+                } catch (error) {
+                    console.error('Error initializing Advanced Currency Converter:', error);
+                    return false;
+                }
             }
+            return true;
         }
 
         function initializeColorConverter() {
@@ -1293,14 +1304,144 @@ ith<!DOCTYPE html>
             updateCurrencyConversion();
         }
 
-        async function populateCurrencyDropdowns() {
+        // Initialize currency converter when currency modal is opened
+        function openCurrencyModal() {
+            console.log('Opening currency modal...');
+            openModal('currency');
+            // Initialize and populate dropdowns
+            setTimeout(() => {
+                console.log('Initializing currency converter...');
+                const initSuccess = initializeCurrencyConverter();
+                if (initSuccess) {
+                    console.log('Populating currency dropdowns...');
+                    populateCurrencyDropdowns();
+                } else {
+                    console.error('Failed to initialize currency converter');
+                }
+            }, 100);
+        }
+
+        // Debug functions for currency converter
+        function testCurrencyConverter() {
+            const debugOutput = document.getElementById('debug-output');
+            debugOutput.classList.remove('hidden');
+            
+            let output = '=== Currency Converter Test ===\n';
+            
+            // Check if class is available
+            output += `AdvancedCurrencyConverter available: ${typeof AdvancedCurrencyConverter !== 'undefined'}\n`;
+            output += `AdvancedCurrencyConverter type: ${typeof AdvancedCurrencyConverter}\n`;
+            
+            // Check if instance exists
+            output += `window.currencyConverter exists: ${!!window.currencyConverter}\n`;
+            
+            if (window.currencyConverter) {
+                output += `Currency converter instance: ${window.currencyConverter.constructor.name}\n`;
+                
+                // Test methods
+                try {
+                    const currencies = window.currencyConverter.getSupportedCurrencies();
+                    output += `Supported currencies: ${currencies.length} found\n`;
+                    output += `First 5 currencies: ${currencies.slice(0, 5).join(', ')}\n`;
+                } catch (error) {
+                    output += `Error getting currencies: ${error.message}\n`;
+                }
+                
+                try {
+                    const popular = window.currencyConverter.getPopularCurrencies();
+                    output += `Popular currencies: ${popular.length} found\n`;
+                    output += `Popular: ${popular.join(', ')}\n`;
+                } catch (error) {
+                    output += `Error getting popular currencies: ${error.message}\n`;
+                }
+            }
+            
+            // Check DOM elements
+            const fromSelect = document.getElementById('from-currency');
+            const toSelect = document.getElementById('to-currency');
+            output += `From select exists: ${!!fromSelect}\n`;
+            output += `To select exists: ${!!toSelect}\n`;
+            
+            if (fromSelect) {
+                output += `From select options: ${fromSelect.options.length}\n`;
+            }
+            if (toSelect) {
+                output += `To select options: ${toSelect.options.length}\n`;
+            }
+            
+            debugOutput.textContent = output;
+        }
+
+        function debugCurrencyDropdowns() {
+            const debugOutput = document.getElementById('debug-output');
+            debugOutput.classList.remove('hidden');
+            
+            let output = '=== Currency Dropdowns Debug ===\n';
+            
+            // Check initialization
+            output += `Currency converter initialized: ${!!window.currencyConverter}\n`;
+            
+            if (window.currencyConverter) {
+                output += `Converter class: ${window.currencyConverter.constructor.name}\n`;
+                
+                // Test population
+                try {
+                    populateCurrencyDropdowns();
+                    output += 'Dropdown population attempted\n';
+                    
+                    const fromSelect = document.getElementById('from-currency');
+                    const toSelect = document.getElementById('to-currency');
+                    
+                    if (fromSelect && toSelect) {
+                        output += `From options: ${fromSelect.options.length}\n`;
+                        output += `To options: ${toSelect.options.length}\n`;
+                        
+                        if (fromSelect.options.length > 0) {
+                            output += `First option: ${fromSelect.options[0].textContent}\n`;
+                        }
+                    }
+                } catch (error) {
+                    output += `Error populating dropdowns: ${error.message}\n`;
+                }
+            } else {
+                output += 'Currency converter not initialized\n';
+                output += 'Attempting to initialize...\n';
+                
+                try {
+                    initializeCurrencyConverter();
+                    output += 'Initialization attempted\n';
+                    
+                    if (window.currencyConverter) {
+                        output += 'Now initialized, attempting to populate...\n';
+                        populateCurrencyDropdowns();
+                        output += 'Population attempted\n';
+                    }
+                } catch (error) {
+                    output += `Error during initialization: ${error.message}\n`;
+                }
+            }
+            
+            debugOutput.textContent = output;
+        }
+
+        function populateCurrencyDropdowns() {
             if (!window.currencyConverter) {
+                console.log('Currency converter not initialized, initializing now...');
                 initializeCurrencyConverter();
+                // Wait a bit for initialization to complete
+                setTimeout(() => {
+                    populateCurrencyDropdowns();
+                }, 200);
                 return;
             }
 
             try {
-                const currencies = await window.currencyConverter.getAvailableCurrencies();
+                console.log('Populating currency dropdowns...');
+                const currencies = window.currencyConverter.getSupportedCurrencies();
+                const popularCurrencies = window.currencyConverter.getPopularCurrencies();
+                
+                console.log('Available currencies:', currencies);
+                console.log('Popular currencies:', popularCurrencies);
                 
                 const fromSelect = document.getElementById('from-currency');
                 const toSelect = document.getElementById('to-currency');
@@ -1310,24 +1451,46 @@ ith<!DOCTYPE html>
                     fromSelect.innerHTML = '';
                     toSelect.innerHTML = '';
                     
-                    // Add currency options
-                    currencies.forEach(currency => {
+                    // Add popular currencies first
+                    popularCurrencies.forEach(currency => {
                         const fromOption = document.createElement('option');
-                        fromOption.value = currency.code;
-                        fromOption.textContent = `${currency.code} - ${currency.name}`;
+                        fromOption.value = currency;
+                        fromOption.textContent = `${currency} - ${window.currencyConverter.getCurrencyName(currency)}`;
                         fromSelect.appendChild(fromOption);
                         
                         const toOption = document.createElement('option');
-                        toOption.value = currency.code;
-                        toOption.textContent = `${currency.code} - ${currency.name}`;
+                        toOption.value = currency;
+                        toOption.textContent = `${currency} - ${window.currencyConverter.getCurrencyName(currency)}`;
+                        toSelect.appendChild(toOption);
+                    });
+                    
+                    // Add separator
+                    const separator = document.createElement('option');
+                    separator.disabled = true;
+                    separator.textContent = '──────────';
+                    fromSelect.appendChild(separator);
+                    toSelect.appendChild(separator);
+                    
+                    // Add all other currencies
+                    currencies.filter(c => !popularCurrencies.includes(c)).forEach(currency => {
+                        const fromOption = document.createElement('option');
+                        fromOption.value = currency;
+                        fromOption.textContent = `${currency} - ${window.currencyConverter.getCurrencyName(currency)}`;
+                        fromSelect.appendChild(fromOption);
+                        
+                        const toOption = document.createElement('option');
+                        toOption.value = currency;
+                        toOption.textContent = `${currency} - ${window.currencyConverter.getCurrencyName(currency)}`;
                         toSelect.appendChild(toOption);
                     });
                     
                     // Set default values
-                    if (currencies.length > 0) {
-                        fromSelect.value = 'USD';
-                        toSelect.value = 'EUR';
-                    }
+                    fromSelect.value = 'USD';
+                    toSelect.value = 'EUR';
+                    
+                    console.log('Currency dropdowns populated successfully');
+                } else {
+                    console.error('Currency select elements not found');
                 }
             } catch (error) {
                 console.error('Error populating currency dropdowns:', error);
@@ -2092,7 +2255,7 @@ ith<!DOCTYPE html>
                     <p class="text-gray-600 text-sm">Convert units with exact constants & dimensional validation</p>
                 </div>
 
-                <div class="tool-card p-6 rounded-2xl" onclick="openModal('currency')">
+                <div class="tool-card p-6 rounded-2xl" onclick="openCurrencyModal()">
                     <div class="tool-icon bg-gradient-to-r from-yellow-500 to-orange-600 mx-auto">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
@@ -4100,6 +4263,20 @@ ith<!DOCTYPE html>
                 </div>
             </div>
 
+            <!-- Debug Section -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h4 class="font-medium text-gray-800 mb-3">🔧 Debug & Test</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button onclick="testCurrencyConverter()" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Test Currency Converter
+                    </button>
+                    <button onclick="debugCurrencyDropdowns()" class="p-2 bg-green-500 text-white rounded hover:bg-green-600">
+                        Debug Dropdowns
+                    </button>
+                </div>
+                <div id="debug-output" class="mt-3 p-2 bg-gray-100 rounded text-xs font-mono hidden"></div>
+            </div>
+
             <!-- Popular Currency Pairs -->
             <div class="mb-6">
                 <h4 class="font-medium text-gray-800 mb-3">💡 Popular Conversions</h4>
@@ -4548,7 +4725,7 @@ ith<!DOCTYPE html>
 
         // Advanced Color Converter instance - moved to head section
 
-        // Initialize percentage calculator on page load
+        // Initialize all calculators on page load
         document.addEventListener('DOMContentLoaded', function() {
             initializePercentageCalculator();
             
@@ -4567,6 +4744,41 @@ ith<!DOCTYPE html>
                 }, 100);
             } else {
                 console.error('❌ UnitConverter class is NOT available');
+            }
+            
+            // Test if AdvancedCurrencyConverter is available
+            console.log('DOM loaded, checking AdvancedCurrencyConverter availability...');
+            console.log('AdvancedCurrencyConverter type:', typeof AdvancedCurrencyConverter);
+            console.log('AdvancedCurrencyConverter value:', AdvancedCurrencyConverter);
+            
+            if (typeof AdvancedCurrencyConverter !== 'undefined') {
+                console.log('✅ AdvancedCurrencyConverter class is available');
+                // Pre-initialize currency converter
+                setTimeout(() => {
+                    try {
+                        window.currencyConverter = new AdvancedCurrencyConverter();
+                        console.log('✅ AdvancedCurrencyConverter pre-initialized');
+                    } catch (error) {
+                        console.error('❌ Error pre-initializing AdvancedCurrencyConverter:', error);
+                    }
+                }, 200);
+            } else {
+                console.error('❌ AdvancedCurrencyConverter class is NOT available');
+                // Check if it's available after a delay (script loading issue)
+                setTimeout(() => {
+                    console.log('Delayed check - AdvancedCurrencyConverter type:', typeof AdvancedCurrencyConverter);
+                    if (typeof AdvancedCurrencyConverter !== 'undefined') {
+                        console.log('✅ AdvancedCurrencyConverter now available after delay');
+                        try {
+                            window.currencyConverter = new AdvancedCurrencyConverter();
+                            console.log('✅ AdvancedCurrencyConverter initialized after delay');
+                        } catch (error) {
+                            console.error('❌ Error initializing AdvancedCurrencyConverter after delay:', error);
+                        }
+                    } else {
+                        console.error('❌ AdvancedCurrencyConverter still not available after delay');
+                    }
+                }, 1000);
             }
         });
 
@@ -5087,194 +5299,13 @@ ith<!DOCTYPE html>
 
         // Unit Converter Functions - moved to head section
 
-        // Currency Converter Functions
-        function initializeCurrencyConverter() {
-            console.log('Initializing Advanced Currency Converter...');
-            if (!currencyConverter) {
-                try {
-                    console.log('Creating new AdvancedCurrencyConverter instance...');
-                    currencyConverter = new AdvancedCurrencyConverter();
-                    console.log('AdvancedCurrencyConverter created successfully:', currencyConverter);
-                    
-                    // Populate currency dropdowns
-                    populateCurrencyDropdowns();
-                    
-                } catch (error) {
-                    console.error('Error creating AdvancedCurrencyConverter:', error);
-                }
-            } else {
-                console.log('AdvancedCurrencyConverter already exists');
-                populateCurrencyDropdowns();
-            }
-        }
+        // Currency Converter Functions - moved to head section
 
-        function populateCurrencyDropdowns() {
-            if (!currencyConverter) return;
+        // Currency Converter Functions - moved to head section
 
-            try {
-                const currencies = currencyConverter.getSupportedCurrencies();
-                const popularCurrencies = currencyConverter.getPopularCurrencies();
-                
-                // Populate from currency dropdown
-                const fromSelect = document.getElementById('from-currency');
-                fromSelect.innerHTML = '';
-                
-                // Add popular currencies first
-                popularCurrencies.forEach(currency => {
-                    const option = document.createElement('option');
-                    option.value = currency;
-                    option.textContent = `${currency} - ${currencyConverter.getCurrencyName(currency)}`;
-                    fromSelect.appendChild(option);
-                });
-                
-                // Add separator
-                const separator = document.createElement('option');
-                separator.disabled = true;
-                separator.textContent = '──────────';
-                fromSelect.appendChild(separator);
-                
-                // Add all other currencies
-                currencies.filter(c => !popularCurrencies.includes(c)).forEach(currency => {
-                    const option = document.createElement('option');
-                    option.value = currency;
-                    option.textContent = `${currency} - ${currencyConverter.getCurrencyName(currency)}`;
-                    fromSelect.appendChild(option);
-                });
+        // Currency Converter Functions - moved to head section
 
-                // Populate to currency dropdown
-                const toSelect = document.getElementById('to-currency');
-                toSelect.innerHTML = '';
-                
-                // Add popular currencies first
-                popularCurrencies.forEach(currency => {
-                    const option = document.createElement('option');
-                    option.value = currency;
-                    option.textContent = `${currency} - ${currencyConverter.getCurrencyName(currency)}`;
-                    toSelect.appendChild(option);
-                });
-                
-                // Add separator
-                const separator2 = document.createElement('option');
-                separator2.disabled = true;
-                separator2.textContent = '──────────';
-                toSelect.appendChild(separator2);
-                
-                // Add all other currencies
-                currencies.filter(c => !popularCurrencies.includes(c)).forEach(currency => {
-                    const option = document.createElement('option');
-                    option.value = currency;
-                    option.textContent = `${currency} - ${currencyConverter.getCurrencyName(currency)}`;
-                    toSelect.appendChild(option);
-                });
-
-                // Set default values
-                fromSelect.value = 'USD';
-                toSelect.value = 'EUR';
-                
-            } catch (error) {
-                console.error('Error populating currency dropdowns:', error);
-            }
-        }
-
-        async function updateCurrencyConversion() {
-            if (!currencyConverter) {
-                initializeCurrencyConverter();
-                return;
-            }
-
-            const fromCurrency = document.getElementById('from-currency').value;
-            const toCurrency = document.getElementById('to-currency').value;
-            const amount = parseFloat(document.getElementById('from-amount').value);
-            const markupBps = parseInt(document.getElementById('markup-bps').value) || 0;
-            const feeMode = document.getElementById('fee-mode').value;
-            const feeValue = parseFloat(document.getElementById('fee-value').value) || 0;
-            const historicalDate = document.getElementById('historical-date').value || null;
-
-            if (!fromCurrency || !toCurrency || isNaN(amount) || amount <= 0) {
-                clearCurrencyResults();
-                return;
-            }
-
-            try {
-                const result = await currencyConverter.convertAmount(amount, fromCurrency, toCurrency, {
-                    markupBps: markupBps,
-                    feeMode: feeMode,
-                    feeValue: feeValue,
-                    asOf: historicalDate
-                });
-
-                if (result.success) {
-                    showCurrencyResult(result);
-                } else {
-                    showCurrencyError(result.error);
-                }
-            } catch (error) {
-                showCurrencyError('Error performing conversion: ' + error.message);
-            }
-        }
-
-        function showCurrencyResult(result) {
-            // Hide error, show result
-            document.getElementById('currency-error').classList.add('hidden');
-            document.getElementById('currency-result').classList.remove('hidden');
-            document.getElementById('rate-info').classList.remove('hidden');
-
-            // Display result
-            const resultAmount = document.getElementById('result-amount');
-            resultAmount.textContent = `${result.to.symbol}${result.to.amount.toLocaleString()} ${result.to.currency}`;
-
-            const resultDetails = document.getElementById('result-details');
-            resultDetails.textContent = `${result.from.symbol}${result.from.amount.toLocaleString()} ${result.from.currency} = ${result.to.symbol}${result.to.amount.toLocaleString()} ${result.to.currency}`;
-
-            // Display rate information
-            document.getElementById('raw-rate').textContent = result.rate.raw.toFixed(6);
-            document.getElementById('effective-rate').textContent = result.rate.effective.toFixed(6);
-            
-            const markupInfo = document.getElementById('markup-info');
-            if (result.rate.markup > 0) {
-                markupInfo.textContent = `${result.rate.markup} bps (${(result.rate.markup / 100).toFixed(2)}%)`;
-            } else {
-                markupInfo.textContent = 'None';
-            }
-
-            const feesInfo = document.getElementById('fees-info');
-            if (result.fees.amount > 0) {
-                feesInfo.textContent = `${result.fees.mode}: ${result.fees.amount.toFixed(2)}`;
-            } else {
-                feesInfo.textContent = 'None';
-            }
-
-            // Update to amount field
-            document.getElementById('to-amount').value = result.to.amount;
-        }
-
-        function showCurrencyError(message) {
-            // Hide result, show error
-            document.getElementById('currency-result').classList.add('hidden');
-            document.getElementById('rate-info').classList.add('hidden');
-            document.getElementById('currency-error').classList.remove('hidden');
-            document.getElementById('currency-error-message').textContent = message;
-        }
-
-        function clearCurrencyResults() {
-            document.getElementById('currency-result').classList.add('hidden');
-            document.getElementById('currency-error').classList.add('hidden');
-            document.getElementById('rate-info').classList.add('hidden');
-            document.getElementById('to-amount').value = '';
-        }
-
-        function setQuickConversion(fromCurrency, toCurrency, amount) {
-            document.getElementById('from-currency').value = fromCurrency;
-            document.getElementById('to-currency').value = toCurrency;
-            document.getElementById('from-amount').value = amount;
-            updateCurrencyConversion();
-        }
-
-        // Initialize currency converter when currency modal is opened
-        function openCurrencyModal() {
-            openModal('currency');
-            initializeCurrencyConverter();
-        }
+        // Currency Converter Functions - moved to head section
 
         // Color Converter Functions
         function initializeColorConverter() {
