@@ -1615,9 +1615,13 @@ ith<!DOCTYPE html>
 
 
         function initializeAdvancedQRGenerator() {
-            if (!window.qrGenerator) {
-                window.qrGenerator = new AdvancedQRGenerator();
-                console.log('Advanced QR Generator initialized');
+            if (!window.advancedQRGen) {
+                try {
+                    window.advancedQRGen = new AdvancedQRGenerator();
+                    console.log('✅ AdvancedQRGenerator initialized successfully');
+                } catch (error) {
+                    console.error('❌ Error creating AdvancedQRGenerator:', error);
+                }
             }
         }
 
@@ -3410,6 +3414,35 @@ ith<!DOCTYPE html>
         .password-mode.hidden {
             display: none;
         }
+
+        /* QR Generator Styles */
+        .qr-tab {
+            transition: all 0.2s ease;
+            background: transparent;
+            color: #6b7280;
+        }
+
+        .qr-tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .qr-tab:hover:not(.active) {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .qr-mode {
+            transition: all 0.3s ease;
+        }
+
+        .qr-mode.hidden {
+            display: none;
+        }
+
+        .calc-tab.active {
+            background: white;
+            color: #7c3aed;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
@@ -7440,16 +7473,7 @@ ith<!DOCTYPE html>
         // Advanced QR Code Generator Functions
         let advancedQRGen = null;
 
-        function initializeAdvancedQRGenerator() {
-            if (!advancedQRGen) {
-                try {
-                    advancedQRGen = new AdvancedQRGenerator();
-                    console.log('✅ AdvancedQRGenerator initialized successfully');
-                } catch (error) {
-                    console.error('❌ Error creating AdvancedQRGenerator:', error);
-                }
-            }
-        }
+
 
         function switchQRMode(mode) {
             // Hide all modes
@@ -7473,39 +7497,54 @@ ith<!DOCTYPE html>
 
         // Basic QR Code Generation
         function generateBasicQR() {
+            console.log('generateBasicQR called');
+            
             const text = document.getElementById('qr-text').value;
+            console.log('Input text:', text);
+            
             if (!text) {
                 alert('Please enter text to generate QR code');
                 return;
             }
 
             try {
-                if (!advancedQRGen) {
+                if (!window.advancedQRGen) {
+                    console.log('Initializing AdvancedQRGenerator...');
                     initializeAdvancedQRGenerator();
                 }
 
-                const svg = advancedQRGen.generateSVG(text, {
+                console.log('AdvancedQRGenerator instance:', window.advancedQRGen);
+                console.log('Generating SVG with options:', { errorCorrectionLevel: 'M', quietZone: 4 });
+
+                const svg = window.advancedQRGen.generateSVG(text, {
                     errorCorrectionLevel: 'M',
                     quietZone: 4
                 });
 
+                console.log('Generated SVG:', svg);
                 displayQRResult(svg, text);
                 updateQRInfo(text);
             } catch (error) {
+                console.error('Error in generateBasicQR:', error);
                 alert(`Error generating QR code: ${error.message}`);
             }
         }
 
         // Advanced QR Code Generation
         function generateAdvancedQR() {
+            console.log('generateAdvancedQR called');
+            
             const text = document.getElementById('qr-advanced-text').value;
+            console.log('Input text:', text);
+            
             if (!text) {
                 alert('Please enter data to encode');
                 return;
             }
 
             try {
-                if (!advancedQRGen) {
+                if (!window.advancedQRGen) {
+                    console.log('Initializing AdvancedQRGenerator...');
                     initializeAdvancedQRGenerator();
                 }
 
@@ -7516,10 +7555,16 @@ ith<!DOCTYPE html>
                     quietZone: parseInt(document.getElementById('qr-quiet-zone').value)
                 };
 
-                const svg = advancedQRGen.generateSVG(text, options);
+                console.log('Generation options:', options);
+                console.log('AdvancedQRGenerator instance:', window.advancedQRGen);
+
+                const svg = window.advancedQRGen.generateSVG(text, options);
+                console.log('Generated SVG:', svg);
+                
                 displayQRResult(svg, text);
                 updateQRInfo(text, options);
             } catch (error) {
+                console.error('Error in generateAdvancedQR:', error);
                 alert(`Error generating advanced QR code: ${error.message}`);
             }
         }
@@ -7533,7 +7578,7 @@ ith<!DOCTYPE html>
             }
 
             try {
-                if (!advancedQRGen) {
+                if (!window.advancedQRGen) {
                     initializeAdvancedQRGenerator();
                 }
 
@@ -7544,7 +7589,7 @@ ith<!DOCTYPE html>
                     quietZone: parseInt(document.getElementById('qr-quiet-zone').value)
                 };
 
-                const svg = advancedQRGen.generateSVG(text, options);
+                const svg = window.advancedQRGen.generateSVG(text, options);
                 displayQRResult(svg, text);
                 updateQRInfo(text, options);
             } catch (error) {
@@ -7561,11 +7606,11 @@ ith<!DOCTYPE html>
             }
 
             try {
-                if (!advancedQRGen) {
+                if (!window.advancedQRGen) {
                     initializeAdvancedQRGenerator();
                 }
 
-                const info = advancedQRGen.getQRInfo(text);
+                const info = window.advancedQRGen.getQRInfo(text);
                 displayQRAnalysis(info);
                 updateQRInfo(text);
             } catch (error) {
@@ -7612,11 +7657,11 @@ ith<!DOCTYPE html>
         // Update QR Code Information
         function updateQRInfo(text, options = {}) {
             try {
-                if (!advancedQRGen) {
+                if (!window.advancedQRGen) {
                     initializeAdvancedQRGenerator();
                 }
 
-                const info = advancedQRGen.getQRInfo(text, options);
+                const info = window.advancedQRGen.getQRInfo(text, options);
                 const container = document.getElementById('qr-info');
                 
                 container.innerHTML = `
