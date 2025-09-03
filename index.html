@@ -248,12 +248,17 @@ ith<!DOCTYPE html>
         }
 
         function generateAdvancedPassword() {
+            console.log('generateAdvancedPassword called');
+            
             if (!window.advancedPasswordGen) {
+                console.log('Initializing AdvancedPasswordGenerator...');
                 initializeAdvancedPasswordGenerator();
             }
 
             try {
                 const mode = document.getElementById('password-mode').value;
+                console.log('Mode:', mode);
+                
                 const targetEntropy = parseInt(document.getElementById('target-entropy').value) || 96;
                 const minLength = parseInt(document.getElementById('min-length').value) || 8;
                 const maxLength = parseInt(document.getElementById('max-length').value) || 128;
@@ -261,9 +266,13 @@ ith<!DOCTYPE html>
                 const separator = document.getElementById('passphrase-separator').value || ' ';
                 const addRandomChars = document.getElementById('add-random-chars').checked;
 
+                console.log('Parameters:', { targetEntropy, minLength, maxLength, screenBreached, separator, addRandomChars });
+
                 let result;
                 if (mode === 'characters') {
+                    console.log('Generating character-based password...');
                     const alphabet = getSelectedAlphabet();
+                    console.log('Selected alphabet length:', alphabet.length);
                     result = window.advancedPasswordGen.generatePassword({
                         targetEntropy,
                         alphabet,
@@ -272,6 +281,7 @@ ith<!DOCTYPE html>
                         screenBreached
                     });
                 } else if (mode === 'diceware') {
+                    console.log('Generating diceware passphrase...');
                     result = window.advancedPasswordGen.generatePassphrase({
                         targetEntropy,
                         separator,
@@ -280,6 +290,7 @@ ith<!DOCTYPE html>
                     });
                 }
 
+                console.log('Generated result:', result);
                 displayPasswordResult(result);
             } catch (error) {
                 console.error('Error generating password:', error);
@@ -335,7 +346,7 @@ ith<!DOCTYPE html>
 
             try {
                 const count = parseInt(document.getElementById('password-count').value) || 5;
-                const targetEntropy = parseInt(document.getElementById('target-entropy').value) || 90;
+                const targetEntropy = parseInt(document.getElementById('diceware-target-entropy').value) || 90;
                 const separator = document.getElementById('passphrase-separator').value || ' ';
                 const addRandomChars = document.getElementById('add-random-chars').checked;
                 const screenBreached = document.getElementById('screen-breached').checked;
@@ -360,7 +371,7 @@ ith<!DOCTYPE html>
             }
 
             try {
-                const targetEntropy = parseInt(document.getElementById('target-entropy').value) || 90;
+                const targetEntropy = parseInt(document.getElementById('diceware-target-entropy').value) || 90;
                 const separator = document.getElementById('passphrase-separator').value || ' ';
                 const addRandomChars = document.getElementById('add-random-chars').checked;
                 const screenBreached = document.getElementById('screen-breached').checked;
@@ -400,19 +411,33 @@ ith<!DOCTYPE html>
         }
 
         function getSelectedAlphabet() {
+            console.log('getSelectedAlphabet called');
             const alphabetType = document.getElementById('alphabet-type').value;
+            console.log('Alphabet type:', alphabetType);
+            
+            let alphabet;
             switch (alphabetType) {
                 case 'full-ascii':
-                    return CharacterSets.FULL_ASCII;
+                    alphabet = CharacterSets.FULL_ASCII;
+                    break;
                 case 'alphanumeric':
-                    return CharacterSets.ALPHANUMERIC;
+                    alphabet = CharacterSets.ALPHANUMERIC;
+                    break;
                 case 'letters-only':
-                    return CharacterSets.LETTERS_ONLY;
+                    alphabet = CharacterSets.LETTERS_ONLY;
+                    break;
                 case 'custom':
-                    return document.getElementById('custom-chars').value || CharacterSets.FULL_ASCII;
+                    const customChars = document.getElementById('custom-chars').value;
+                    alphabet = customChars || CharacterSets.FULL_ASCII;
+                    break;
                 default:
-                    return CharacterSets.FULL_ASCII;
+                    alphabet = CharacterSets.FULL_ASCII;
+                    break;
             }
+            
+            console.log('Selected alphabet length:', alphabet.length);
+            console.log('Alphabet preview:', alphabet.substring(0, 50) + '...');
+            return alphabet;
         }
 
         function displayPasswordResult(result) {
@@ -4454,7 +4479,7 @@ ith<!DOCTYPE html>
                                     <option value="custom">Custom Character Set</option>
                                 </select>
                             </div>
-                            <div id="custom-chars" class="hidden">
+                            <div id="custom-chars-container" class="hidden">
                                 <label class="block text-sm font-medium mb-2">Custom Characters</label>
                                 <input type="text" id="custom-chars" placeholder="Enter custom characters" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                             </div>
@@ -4504,7 +4529,7 @@ ith<!DOCTYPE html>
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-sm font-medium mb-2">Target Entropy (bits)</label>
-                                <select id="target-entropy" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <select id="diceware-target-entropy" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                                     <option value="77">77 bits (~6 words)</option>
                                     <option value="90" selected>90 bits (~7 words)</option>
                                     <option value="103">103 bits (~8 words)</option>
@@ -6302,7 +6327,7 @@ ith<!DOCTYPE html>
 
             // Add event listener for custom characters toggle
             const alphabetTypeSelect = document.getElementById('alphabet-type');
-            const customCharsDiv = document.getElementById('custom-chars');
+            const customCharsDiv = document.getElementById('custom-chars-container');
             
             if (alphabetTypeSelect && customCharsDiv) {
                 alphabetTypeSelect.addEventListener('change', function() {
