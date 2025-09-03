@@ -15,6 +15,7 @@ ith<!DOCTYPE html>
     <script src="src/js/color-converter.js"></script>
     <script src="src/js/base64-encoder.js"></script>
     <script src="src/js/advanced-password-generator.js"></script>
+    <script src="src/js/advanced-qr-generator.js" type="module"></script>
 
     
     <script>
@@ -65,6 +66,13 @@ ith<!DOCTYPE html>
                         initializeAdvancedPasswordGenerator();
                     } else {
                         console.error('initializeAdvancedPasswordGenerator function not found');
+                    }
+                } else if (modalId === 'qr') {
+                    if (typeof initializeAdvancedQRGenerator === 'function') {
+                        console.log('Initializing Advanced QR Code Generator...');
+                        initializeAdvancedQRGenerator();
+                    } else {
+                        console.error('initializeAdvancedQRGenerator function not found');
                     }
                 } else if (modalId === 'calculator') {
                     if (typeof initializeAdvancedCalculator === 'function') {
@@ -693,6 +701,312 @@ ith<!DOCTYPE html>
                 document.getElementById('calc-result').textContent = `Result: ${result}`;
             } catch (error) {
                 alert(`Error: ${error.message}`);
+            }
+        }
+
+        // Advanced QR Code Generator Functions
+        let windowAdvancedQRGen = null;
+
+        function initializeAdvancedQRGenerator() {
+            try {
+                console.log('Initializing Advanced QR Code Generator...');
+                
+                // Check if the module is available
+                if (typeof AdvancedQRGenerator === 'undefined') {
+                    console.error('AdvancedQRGenerator class not found!');
+                    showError('QR Code Generator module not loaded');
+                    return false;
+                }
+
+                // Create instance
+                windowAdvancedQRGen = new AdvancedQRGenerator();
+                console.log('Advanced QR Code Generator initialized successfully');
+                return true;
+            } catch (error) {
+                console.error('Error initializing Advanced QR Code Generator:', error);
+                showError(`Error initializing QR Code Generator: ${error.message}`);
+                return false;
+            }
+        }
+
+        function generateBasicQR() {
+            if (!windowAdvancedQRGen) {
+                if (!initializeAdvancedQRGenerator()) {
+                    return;
+                }
+            }
+
+            try {
+                const input = document.getElementById('qr-input').value.trim();
+                if (!input) {
+                    showError('Please enter text to encode');
+                    return;
+                }
+
+                const eccLevel = document.getElementById('qr-ecc-level').value;
+                const moduleSize = parseInt(document.getElementById('qr-module-size').value) || 4;
+                const foreground = document.getElementById('qr-foreground').value;
+                const background = document.getElementById('qr-background').value;
+
+                console.log('Generating basic QR code with:', { input, eccLevel, moduleSize, foreground, background });
+
+                const result = windowAdvancedQRGen.generate(input, {
+                    eccLevel,
+                    autoVersion: true,
+                    autoMask: true,
+                    quietZone: 4
+                });
+
+                console.log('QR generation result:', result);
+                displayQRResult(result, { moduleSize, foreground, background });
+            } catch (error) {
+                console.error('Error generating basic QR code:', error);
+                showError(`Error generating QR code: ${error.message}`);
+            }
+        }
+
+        function generateAdvancedQR() {
+            if (!windowAdvancedQRGen) {
+                if (!initializeAdvancedQRGenerator()) {
+                    return;
+                }
+            }
+
+            try {
+                const input = document.getElementById('qr-advanced-input').value.trim();
+                if (!input) {
+                    showError('Please enter text to encode');
+                    return;
+                }
+
+                const version = document.getElementById('qr-version').value;
+                const eccLevel = document.getElementById('qr-advanced-ecc').value;
+                const maskPattern = document.getElementById('qr-mask-pattern').value;
+                const moduleSize = parseInt(document.getElementById('qr-advanced-module-size').value) || 4;
+                const quietZone = parseInt(document.getElementById('qr-quiet-zone').value) || 4;
+                const foreground = document.getElementById('qr-advanced-foreground').value;
+                const background = document.getElementById('qr-advanced-background').value;
+
+                const options = {
+                    eccLevel,
+                    quietZone,
+                    autoVersion: version === 'auto',
+                    autoMask: maskPattern === 'auto'
+                };
+
+                if (version !== 'auto') {
+                    options.version = parseInt(version);
+                }
+
+                if (maskPattern !== 'auto') {
+                    options.maskPattern = parseInt(maskPattern);
+                }
+
+                console.log('Generating advanced QR code with:', { input, options });
+
+                const result = windowAdvancedQRGen.generate(input, options);
+                console.log('Advanced QR generation result:', result);
+                displayQRResult(result, { moduleSize, foreground, background });
+            } catch (error) {
+                console.error('Error generating advanced QR code:', error);
+                showError(`Error generating QR code: ${error.message}`);
+            }
+        }
+
+        function displayQRResult(result, renderOptions) {
+            const resultDiv = document.getElementById('qr-result');
+            const displayDiv = document.getElementById('qr-display');
+            const detailsDiv = document.getElementById('qr-details');
+
+            if (!resultDiv || !displayDiv || !detailsDiv) return;
+
+            try {
+                // Generate SVG
+                const svg = windowAdvancedQRGen.renderSVG(result.matrix, renderOptions);
+                displayDiv.innerHTML = svg;
+
+                // Display details
+                const info = result;
+                detailsDiv.innerHTML = `
+                    <div class="space-y-2">
+                        <div><strong>Version:</strong> ${info.version}</div>
+                        <div><strong>Size:</strong> ${info.matrix.size}×${info.matrix.size} modules</div>
+                        <div><strong>ECC Level:</strong> ${info.eccLevel} (${getECCDescription(info.eccLevel)})</div>
+                        <div><strong>Mask Pattern:</strong> ${info.maskPattern}</div>
+                        <div><strong>Data Length:</strong> ${info.data.length} characters</div>
+                        <div><strong>Total Bits:</strong> ${info.totalBits}</div>
+                        <div><strong>Total Codewords:</strong> ${info.totalCodewords}</div>
+                        <div><strong>Segments:</strong> ${info.segments.length}</div>
+                    </div>
+                `;
+
+                resultDiv.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error displaying QR result:', error);
+                showError(`Error displaying QR result: ${error.message}`);
+            }
+        }
+
+        function getECCDescription(eccLevel) {
+            const descriptions = {
+                'L': 'Low (7% recovery)',
+                'M': 'Medium (15% recovery)',
+                'Q': 'Quartile (25% recovery)',
+                'H': 'High (30% recovery)'
+            };
+            return descriptions[eccLevel] || 'Unknown';
+        }
+
+        function switchQRMode(mode) {
+            // Hide all modes
+            document.querySelectorAll('.qr-mode').forEach(el => el.classList.add('hidden'));
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.qr-tab').forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected mode and activate tab
+            if (mode === 'basic') {
+                document.getElementById('qr-basic-mode').classList.remove('hidden');
+                document.getElementById('qr-basic-tab').classList.add('active');
+            } else if (mode === 'advanced') {
+                document.getElementById('qr-advanced-mode').classList.remove('hidden');
+                document.getElementById('qr-advanced-tab').classList.add('active');
+            } else if (mode === 'analysis') {
+                document.getElementById('qr-analysis-mode').classList.remove('hidden');
+                document.getElementById('qr-analysis-tab').classList.add('active');
+            }
+        }
+
+        function testQRModule() {
+            console.log('Testing QR Module...');
+            let output = '=== QR Module Test ===\n';
+            
+            try {
+                output += `AdvancedQRGenerator available: ${typeof AdvancedQRGenerator !== 'undefined'}\n`;
+                output += `AdvancedQRGenerator type: ${typeof AdvancedQRGenerator}\n`;
+                
+                if (typeof AdvancedQRGenerator !== 'undefined') {
+                    output += '✅ AdvancedQRGenerator class is available\n';
+                    
+                    // Test initialization
+                    if (initializeAdvancedQRGenerator()) {
+                        output += '✅ QR Generator initialized successfully\n';
+                        output += `Instance type: ${windowAdvancedQRGen.constructor.name}\n`;
+                        
+                        // Test basic generation
+                        const testResult = windowAdvancedQRGen.generate('Test');
+                        output += `✅ Basic generation test passed\n`;
+                        output += `Generated version: ${testResult.version}\n`;
+                        output += `Generated size: ${testResult.matrix.size}×${testResult.matrix.size}\n`;
+                    } else {
+                        output += '❌ QR Generator initialization failed\n';
+                    }
+                } else {
+                    output += '❌ AdvancedQRGenerator class not found\n';
+                }
+            } catch (error) {
+                output += `❌ Error during testing: ${error.message}\n`;
+                console.error('QR Module test error:', error);
+            }
+            
+            console.log(output);
+            alert(output);
+        }
+
+        function previewQR() {
+            // This would show a preview of the QR code before final generation
+            showInfo('Preview functionality coming soon!');
+        }
+
+        function analyzeQR() {
+            // This would analyze the current QR code
+            showInfo('Analysis functionality coming soon!');
+        }
+
+        function updateQRInfo() {
+            // This would update the analysis information
+            showInfo('Update info functionality coming soon!');
+        }
+
+        function downloadQR() {
+            try {
+                const displayDiv = document.getElementById('qr-display');
+                if (!displayDiv || !displayDiv.innerHTML) {
+                    showError('No QR code to download');
+                    return;
+                }
+
+                const svg = displayDiv.innerHTML;
+                const blob = new Blob([svg], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'qr-code.svg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showSuccess('QR code downloaded successfully!');
+            } catch (error) {
+                console.error('Error downloading QR code:', error);
+                showError(`Error downloading QR code: ${error.message}`);
+            }
+        }
+
+        function copyQR() {
+            try {
+                const displayDiv = document.getElementById('qr-display');
+                if (!displayDiv || !displayDiv.innerHTML) {
+                    showError('No QR code to copy');
+                    return;
+                }
+
+                const svg = displayDiv.innerHTML;
+                navigator.clipboard.writeText(svg).then(() => {
+                    showSuccess('QR code SVG copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    showError('Failed to copy to clipboard');
+                });
+            } catch (error) {
+                console.error('Error copying QR code:', error);
+                showError(`Error copying QR code: ${error.message}`);
+            }
+        }
+
+        function printQR() {
+            try {
+                const displayDiv = document.getElementById('qr-display');
+                if (!displayDiv || !displayDiv.innerHTML) {
+                    showError('No QR code to print');
+                    return;
+                }
+
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>QR Code Print</title>
+                            <style>
+                                body { margin: 20px; font-family: Arial, sans-serif; }
+                                .qr-container { text-align: center; }
+                                .qr-code { max-width: 100%; height: auto; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="qr-container">
+                                <h2>QR Code</h2>
+                                ${displayDiv.innerHTML}
+                            </div>
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.print();
+            } catch (error) {
+                console.error('Error printing QR code:', error);
+                showError(`Error printing QR code: ${error.message}`);
             }
         }
 
@@ -3383,7 +3697,30 @@ ith<!DOCTYPE html>
             display: none;
         }
 
+        /* QR Code Generator Styles */
+        .qr-tab {
+            transition: all 0.2s ease;
+            background: transparent;
+            color: #6b7280;
+        }
 
+        .qr-tab.active {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .qr-tab:hover:not(.active) {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .qr-mode {
+            transition: all 0.3s ease;
+        }
+
+        .qr-mode.hidden {
+            display: none;
+        }
 
         .calc-tab.active {
             background: white;
@@ -3743,6 +4080,16 @@ ith<!DOCTYPE html>
                     <p class="text-gray-600 text-sm">CSPRNG-based generation with entropy-driven sizing, Diceware support, and modern security standards</p>
                 </div>
 
+                <div class="tool-card p-6 rounded-2xl" onclick="openModal('qr')">
+                    <div class="tool-icon bg-gradient-to-r from-purple-600 to-pink-600 mx-auto">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zm12 0h2a1 1 0 001-1V6a1 1 0 00-1-1h-2a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">📱 Advanced QR Code Generator</h3>
+                    <p class="text-gray-600 text-sm">ISO/IEC 18004:2024 compliant QR codes with optimal segmentation, ECC levels, and mask selection</p>
+                </div>
+
 
 
                 <div class="tool-card p-6 rounded-2xl" onclick="openModal('uuid')">
@@ -3951,7 +4298,7 @@ ith<!DOCTYPE html>
                     <ul class="space-y-2 text-gray-400">
                         <li><a href="#" class="hover:text-white transition-colors">Calculator</a></li>
                         <li><a href="#" class="hover:text-white transition-colors">Password Generator</a></li>
-
+                        <li><a href="#" class="hover:text-white transition-colors">QR Code Generator</a></li>
                         <li><a href="#" class="hover:text-white transition-colors">Unit Converter</a></li>
                     </ul>
                 </div>
@@ -5789,6 +6136,222 @@ ith<!DOCTYPE html>
                     <div>
                         <strong>CIELAB:</strong> L* (0-100), a* (-128 to 127), b* (-128 to 127)
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced QR Code Generator Modal -->
+    <div id="qr" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gradient">📱 Advanced QR Code Generator</h3>
+                <button onclick="closeModal('qr')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Generator Mode Tabs -->
+            <div class="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                <button onclick="switchQRMode('basic')" id="qr-basic-tab" class="flex-1 py-2 px-4 rounded-md font-medium transition-colors qr-tab active">Basic</button>
+                <button onclick="switchQRMode('advanced')" id="qr-advanced-tab" class="flex-1 py-2 px-4 rounded-md font-medium transition-colors qr-tab">Advanced</button>
+                <button onclick="switchQRMode('analysis')" id="qr-analysis-tab" class="flex-1 py-2 px-4 rounded-md font-medium transition-colors qr-tab">Analysis</button>
+            </div>
+
+            <!-- Basic Mode -->
+            <div id="qr-basic-mode" class="qr-mode">
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">📝 Input Data</h4>
+                    <textarea id="qr-input" placeholder="Enter text, URL, or data to encode..." rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <h4 class="font-medium text-gray-800 mb-3">⚙️ Basic Settings</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Error Correction Level</label>
+                                <select id="qr-ecc-level" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    <option value="L">L - Low (7%)</option>
+                                    <option value="M" selected>M - Medium (15%)</option>
+                                    <option value="Q">Q - Quartile (25%)</option>
+                                    <option value="H">H - High (30%)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Module Size (pixels)</label>
+                                <input type="number" id="qr-module-size" value="4" min="1" max="20" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-medium text-gray-800 mb-3">🎨 Appearance</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Foreground Color</label>
+                                <input type="color" id="qr-foreground" value="#000000" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Background Color</label>
+                                <input type="color" id="qr-background" value="#FFFFFF" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3 mb-6">
+                    <button onclick="generateBasicQR()" class="btn-primary flex-1 text-white py-3 rounded-lg font-semibold">
+                        📱 Generate QR Code
+                    </button>
+                    <button onclick="testQRModule()" class="bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600">
+                        🧪 Test Module
+                    </button>
+                </div>
+            </div>
+
+            <!-- Advanced Mode -->
+            <div id="qr-advanced-mode" class="qr-mode hidden">
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">📝 Input Data</h4>
+                    <textarea id="qr-advanced-input" placeholder="Enter text, URL, or data to encode..." rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <h4 class="font-medium text-gray-800 mb-3">⚙️ Advanced Settings</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Version (1-40)</label>
+                                <select id="qr-version" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    <option value="auto" selected>Auto (Recommended)</option>
+                                    <option value="1">Version 1 (21×21)</option>
+                                    <option value="2">Version 2 (25×25)</option>
+                                    <option value="3">Version 3 (29×29)</option>
+                                    <option value="4">Version 4 (33×33)</option>
+                                    <option value="5">Version 5 (37×37)</option>
+                                    <option value="10">Version 10 (57×57)</option>
+                                    <option value="20">Version 20 (97×97)</option>
+                                    <option value="30">Version 30 (137×137)</option>
+                                    <option value="40">Version 40 (177×177)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Error Correction Level</label>
+                                <select id="qr-advanced-ecc" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    <option value="L">L - Low (7%)</option>
+                                    <option value="M" selected>M - Medium (15%)</option>
+                                    <option value="Q">Q - Quartile (25%)</option>
+                                    <option value="H">H - High (30%)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Mask Pattern</label>
+                                <select id="qr-mask-pattern" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    <option value="auto" selected>Auto (Best Quality)</option>
+                                    <option value="0">Pattern 0</option>
+                                    <option value="1">Pattern 1</option>
+                                    <option value="2">Pattern 2</option>
+                                    <option value="3">Pattern 3</option>
+                                    <option value="4">Pattern 4</option>
+                                    <option value="5">Pattern 5</option>
+                                    <option value="6">Pattern 6</option>
+                                    <option value="7">Pattern 7</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-medium text-gray-800 mb-3">🎨 Rendering Options</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Module Size (pixels)</label>
+                                <input type="number" id="qr-advanced-module-size" value="4" min="1" max="20" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Quiet Zone</label>
+                                <input type="number" id="qr-quiet-zone" value="4" min="2" max="10" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Foreground Color</label>
+                                <input type="color" id="qr-advanced-foreground" value="#000000" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Background Color</label>
+                                <input type="color" id="qr-advanced-background" value="#FFFFFF" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3 mb-6">
+                    <button onclick="generateAdvancedQR()" class="btn-primary flex-1 text-white py-3 rounded-lg font-semibold">
+                        📱 Generate Advanced QR Code
+                    </button>
+                    <button onclick="previewQR()" class="bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600">
+                        👁️ Preview
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analysis Mode -->
+            <div id="qr-analysis-mode" class="qr-mode hidden">
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">📊 QR Code Analysis</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h5 class="font-medium text-gray-700 mb-2">Input Analysis</h5>
+                            <div id="qr-analysis-input" class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <p class="text-sm text-gray-600">Enter data in Basic or Advanced mode to see analysis</p>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="font-medium text-gray-700 mb-2">QR Code Information</h5>
+                            <div id="qr-analysis-info" class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <p class="text-sm text-gray-600">Generate a QR code to see detailed information</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3 mb-6">
+                    <button onclick="analyzeQR()" class="bg-purple-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-600">
+                        🔍 Analyze Current QR Code
+                    </button>
+                    <button onclick="updateQRInfo()" class="bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600">
+                        📋 Update Info
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Display -->
+            <div id="qr-result" class="hidden mb-6">
+                <h4 class="font-medium text-gray-800 mb-3">📱 Generated QR Code</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex justify-center">
+                        <div id="qr-display" class="border border-gray-300 rounded-lg p-4 bg-white"></div>
+                    </div>
+                    <div>
+                        <h5 class="font-medium text-gray-700 mb-2">QR Code Details</h5>
+                        <div id="qr-details" class="p-4 bg-gray-50 rounded-lg border border-gray-200 text-sm">
+                            <p class="text-gray-600">QR code details will appear here</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3 mt-4">
+                    <button onclick="downloadQR()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                        💾 Download SVG
+                    </button>
+                    <button onclick="copyQR()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        📋 Copy SVG
+                    </button>
+                    <button onclick="printQR()" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors">
+                        🖨️ Print
+                    </button>
                 </div>
             </div>
         </div>
