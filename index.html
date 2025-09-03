@@ -1614,13 +1614,53 @@ ith<!DOCTYPE html>
 
 
 
+        // Test QR Module functionality
+        function testQRModule() {
+            console.log('🧪 Testing QR Module...');
+            
+            // Check if classes are available
+            const classes = ['AdvancedQRGenerator', 'QRConstants', 'BitBuffer', 'InputSegmenter', 'ReedSolomonEncoder', 'QRMatrix'];
+            classes.forEach(className => {
+                const available = typeof window[className] !== 'undefined';
+                console.log(`${className}: ${available ? '✅ Available' : '❌ Missing'}`);
+            });
+            
+            // Try to create instance
+            try {
+                if (typeof AdvancedQRGenerator !== 'undefined') {
+                    const testInstance = new AdvancedQRGenerator();
+                    console.log('✅ Instance created successfully');
+                    console.log('Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(testInstance)));
+                    
+                    // Test basic generation
+                    const testResult = testInstance.generateQR('test', { errorCorrectionLevel: 'L' });
+                    console.log('Test generation result:', testResult);
+                } else {
+                    console.error('❌ AdvancedQRGenerator class not available');
+                }
+            } catch (error) {
+                console.error('❌ Error testing QR module:', error);
+                console.error('Error stack:', error.stack);
+            }
+        }
+
         function initializeAdvancedQRGenerator() {
+            console.log('initializeAdvancedQRGenerator called');
+            console.log('AdvancedQRGenerator class available:', typeof AdvancedQRGenerator);
+            console.log('QRConstants available:', typeof QRConstants);
+            console.log('BitBuffer available:', typeof BitBuffer);
+            console.log('InputSegmenter available:', typeof InputSegmenter);
+            console.log('ReedSolomonEncoder available:', typeof ReedSolomonEncoder);
+            console.log('QRMatrix available:', typeof QRMatrix);
+            
             if (!window.advancedQRGen) {
                 try {
                     window.advancedQRGen = new AdvancedQRGenerator();
                     console.log('✅ AdvancedQRGenerator initialized successfully');
+                    console.log('Instance methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(window.advancedQRGen)));
                 } catch (error) {
                     console.error('❌ Error creating AdvancedQRGenerator:', error);
+                    console.error('Error stack:', error.stack);
                 }
             }
         }
@@ -4820,9 +4860,12 @@ ith<!DOCTYPE html>
                         <label class="block text-sm font-medium mb-2">Text or URL</label>
                         <input type="text" id="qr-text" placeholder="Enter text, URL, or data to encode" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                 </div>
+                    <button onclick="testQRModule()" class="bg-yellow-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-yellow-700 mb-3">
+                        🧪 Test Module
+                    </button>
                     <button onclick="generateBasicQR()" class="btn-primary w-full text-white py-3 rounded-lg font-semibold">
                         🔒 Generate QR Code
-                </button>
+                    </button>
                 </div>
             </div>
 
@@ -7508,14 +7551,34 @@ ith<!DOCTYPE html>
             }
 
             try {
+                // Check if AdvancedQRGenerator class is available
+                if (typeof AdvancedQRGenerator === 'undefined') {
+                    console.error('AdvancedQRGenerator class not found!');
+                    alert('QR Generator module not loaded. Please refresh the page.');
+                    return;
+                }
+
                 if (!window.advancedQRGen) {
                     console.log('Initializing AdvancedQRGenerator...');
                     initializeAdvancedQRGenerator();
                 }
 
                 console.log('AdvancedQRGenerator instance:', window.advancedQRGen);
-                console.log('Generating SVG with options:', { errorCorrectionLevel: 'M', quietZone: 4 });
+                console.log('Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(window.advancedQRGen)));
+                
+                // Test basic functionality first
+                console.log('Testing basic QR generation...');
+                const testResult = window.advancedQRGen.generateQR(text, {
+                    errorCorrectionLevel: 'M',
+                    quietZone: 4
+                });
+                console.log('Test result:', testResult);
 
+                if (!testResult.success) {
+                    throw new Error(testResult.error);
+                }
+
+                console.log('Generating SVG with options:', { errorCorrectionLevel: 'M', quietZone: 4 });
                 const svg = window.advancedQRGen.generateSVG(text, {
                     errorCorrectionLevel: 'M',
                     quietZone: 4
