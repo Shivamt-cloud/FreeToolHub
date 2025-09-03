@@ -302,7 +302,8 @@ export class InputSegmenter {
      * Get data capacity in bits for given version and ECC level
      */
     getDataCapacity(version, eccLevel) {
-        // Simplified capacity calculation
+        // This will be overridden by the main generator
+        // For now, use a reasonable estimate
         const baseCapacity = {
             'L': 0.93, 'M': 0.85, 'Q': 0.75, 'H': 0.70
         };

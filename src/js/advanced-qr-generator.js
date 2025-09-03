@@ -28,6 +28,8 @@ import {
 export class AdvancedQRGenerator {
     constructor() {
         this.segmenter = new InputSegmenter();
+        // Override the capacity function with the correct one
+        this.segmenter.getDataCapacity = this.getDataCapacity.bind(this);
         this.version = 1;
         this.eccLevel = 'M';
         this.maskPattern = 0;
@@ -70,15 +72,17 @@ export class AdvancedQRGenerator {
             console.log(`Data bitstream length: ${dataBits.length} bits`);
 
             // Step 4: Apply Reed-Solomon error correction
-            const codewords = this.applyErrorCorrection(dataBits);
-            console.log(`Total codewords: ${codewords.length}`);
+            const dataBytes = this.bitsToBytes(dataBits);
+            const errorCorrectedBytes = this.applyErrorCorrection(dataBytes);
+            console.log(`Data bytes: ${dataBytes.length}, Total codewords: ${errorCorrectedBytes.length}`);
 
             // Step 5: Create and populate matrix
             const matrix = this.createMatrix();
             console.log(`Matrix size: ${matrix.size}x${matrix.size}`);
 
-            // Step 6: Place data
-            DataPlacer.placeData(matrix, codewords);
+            // Step 6: Place data (data bits + error correction bits)
+            const allBits = this.bytesToBits(errorCorrectedBytes);
+            DataPlacer.placeData(matrix, allBits);
 
             // Step 7: Apply best mask pattern
             if (autoMask) {
@@ -184,15 +188,30 @@ export class AdvancedQRGenerator {
      * Calculate remaining capacity in bits
      */
     getRemainingCapacity(currentBits) {
-        const totalCapacity = getDataCapacity(this.version, this.eccLevel) * 8;
+        const totalCapacity = this.getDataCapacity(this.version, this.eccLevel) * 8;
         return Math.max(0, totalCapacity - currentBits.length);
+    }
+
+    /**
+     * Get data capacity in codewords for given version and ECC level
+     */
+    getDataCapacity(version, eccLevel) {
+        const versionInfo = QR_VERSIONS[version];
+        if (!versionInfo) {
+            throw new Error(`Invalid QR version: ${version}`);
+        }
+        const capacityInCodewords = versionInfo.dataCapacity[eccLevel];
+        if (capacityInCodewords === undefined) {
+            throw new Error(`Invalid ECC level: ${eccLevel}`);
+        }
+        return capacityInCodewords;
     }
 
     /**
      * Calculate pad bytes needed
      */
     calculatePadBytes(currentBits) {
-        const totalCapacity = getDataCapacity(this.version, this.eccLevel) * 8;
+        const totalCapacity = this.getDataCapacity(this.version, this.eccLevel) * 8;
         const remainingBits = totalCapacity - currentBits.length;
         const remainingBytes = Math.floor(remainingBits / 8);
         
@@ -205,19 +224,37 @@ export class AdvancedQRGenerator {
     }
 
     /**
+     * Convert bits to bytes
+     */
+    bitsToBytes(bits) {
+        const bytes = [];
+        for (let i = 0; i < bits.length; i += 8) {
+            let byte = 0;
+            for (let j = 0; j < 8 && i + j < bits.length; j++) {
+                byte = (byte << 1) | bits[i + j];
+            }
+            bytes.push(byte);
+        }
+        return bytes;
+    }
+
+    /**
+     * Convert bytes to bits
+     */
+    bytesToBits(bytes) {
+        const bits = [];
+        for (const byte of bytes) {
+            for (let i = 7; i >= 0; i--) {
+                bits.push((byte >> i) & 1);
+            }
+        }
+        return bits;
+    }
+
+    /**
      * Apply Reed-Solomon error correction
      */
-    applyErrorCorrection(dataBits) {
-        // Convert bits to bytes
-        const dataBytes = [];
-        for (let i = 0; i < dataBits.length; i += 8) {
-            let byte = 0;
-            for (let j = 0; j < 8 && i + j < dataBits.length; j++) {
-                byte = (byte << 1) | dataBits[i + j];
-            }
-            dataBytes.push(byte);
-        }
-        
+    applyErrorCorrection(dataBytes) {
         // Get ECC parameters
         const eccCodewords = RSUtils.getECCCodewords(this.version, this.eccLevel);
         
@@ -228,15 +265,7 @@ export class AdvancedQRGenerator {
         // Encode with error correction
         const encoded = encoder.encode(dataBytes);
         
-        // Convert back to bits
-        const result = [];
-        for (const byte of encoded) {
-            for (let i = 7; i >= 0; i--) {
-                result.push((byte >> i) & 1);
-            }
-        }
-        
-        return result;
+        return encoded;
     }
 
     /**
