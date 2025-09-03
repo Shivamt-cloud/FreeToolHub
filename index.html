@@ -1174,13 +1174,22 @@ ith<!DOCTYPE html>
         }
 
         function initializeAdvancedPasswordGenerator() {
+            console.log('🔧 initializeAdvancedPasswordGenerator called');
+            console.log('AdvancedPasswordGenerator class available:', typeof AdvancedPasswordGenerator);
+            console.log('window.advancedPasswordGen before:', window.advancedPasswordGen);
+            
             if (!window.advancedPasswordGen) {
                 try {
+                    console.log('🚀 Creating new AdvancedPasswordGenerator instance...');
                     window.advancedPasswordGen = new AdvancedPasswordGenerator();
                     console.log('✅ Advanced Password Generator initialized successfully');
+                    console.log('window.advancedPasswordGen after:', window.advancedPasswordGen);
                 } catch (error) {
                     console.error('❌ Error creating AdvancedPasswordGenerator:', error);
+                    console.error('Error stack:', error.stack);
                 }
+            } else {
+                console.log('ℹ️ AdvancedPasswordGenerator already initialized');
             }
         }
 
@@ -5876,6 +5885,41 @@ ith<!DOCTYPE html>
                     }
                 }, 1400);
             }
+            
+            // Test if AdvancedPasswordGenerator is available
+            console.log('DOM loaded, checking AdvancedPasswordGenerator availability...');
+            console.log('AdvancedPasswordGenerator type:', typeof AdvancedPasswordGenerator);
+            console.log('AdvancedPasswordGenerator value:', AdvancedPasswordGenerator);
+            
+            if (typeof AdvancedPasswordGenerator !== 'undefined') {
+                console.log('✅ AdvancedPasswordGenerator class is available');
+                // Pre-initialize password generator
+                setTimeout(() => {
+                    try {
+                        window.advancedPasswordGen = new AdvancedPasswordGenerator();
+                        console.log('✅ AdvancedPasswordGenerator pre-initialized');
+                    } catch (error) {
+                        console.error('❌ Error pre-initializing AdvancedPasswordGenerator:', error);
+                    }
+                }, 500);
+            } else {
+                console.error('❌ AdvancedPasswordGenerator class is NOT available');
+                // Check if it's available after a delay (script loading issue)
+                setTimeout(() => {
+                    console.log('Delayed check - AdvancedPasswordGenerator type:', typeof AdvancedPasswordGenerator);
+                    if (typeof AdvancedPasswordGenerator !== 'undefined') {
+                        console.log('✅ AdvancedPasswordGenerator now available after delay');
+                        try {
+                            window.advancedPasswordGen = new AdvancedPasswordGenerator();
+                            console.log('✅ AdvancedPasswordGenerator initialized after delay');
+                        } catch (error) {
+                            console.error('❌ Error initializing AdvancedPasswordGenerator after delay:', error);
+                        }
+                    } else {
+                        console.error('❌ AdvancedPasswordGenerator still not available after delay');
+                    }
+                }, 1500);
+            }
         });
 
         // Advanced Calculator functions - moved to head section
@@ -6333,8 +6377,16 @@ ith<!DOCTYPE html>
         }
 
         function generateAdvancedPassword() {
+            console.log('🔐 generateAdvancedPassword called');
+            console.log('window.advancedPasswordGen:', window.advancedPasswordGen);
+            
             if (!window.advancedPasswordGen) {
+                console.log('❌ advancedPasswordGen not found, initializing...');
                 initializeAdvancedPasswordGenerator();
+                if (!window.advancedPasswordGen) {
+                    alert('Failed to initialize Advanced Password Generator. Please refresh the page.');
+                    return;
+                }
             }
 
             try {
@@ -6348,6 +6400,18 @@ ith<!DOCTYPE html>
                 const requireLowercase = document.getElementById('require-lowercase').checked;
                 const requireDigits = document.getElementById('require-digits').checked;
                 const requireSymbols = document.getElementById('require-symbols').checked;
+
+                console.log('📊 Password generation options:', {
+                    targetEntropy,
+                    characterSet,
+                    minLength,
+                    maxLength,
+                    screenBreached,
+                    requireUppercase,
+                    requireLowercase,
+                    requireDigits,
+                    requireSymbols
+                });
 
                 let alphabet;
                 switch (characterSet) {
@@ -6371,6 +6435,8 @@ ith<!DOCTYPE html>
                         alphabet = CharacterSets.FULL_ASCII;
                 }
 
+                console.log('🔤 Selected alphabet length:', alphabet.length);
+
                 const policy = {
                     minLength,
                     maxLength,
@@ -6379,6 +6445,9 @@ ith<!DOCTYPE html>
                     requireDigits,
                     requireSymbols
                 };
+
+                console.log('⚙️ Policy:', policy);
+                console.log('🚀 Calling generatePassword...');
 
                 const result = window.advancedPasswordGen.generatePassword({
                     targetEntropy,
@@ -6389,8 +6458,10 @@ ith<!DOCTYPE html>
                     policy
                 });
 
+                console.log('✅ Password generated successfully:', result);
                 displayPasswordResult(result);
             } catch (error) {
+                console.error('❌ Error generating password:', error);
                 alert(`Error generating password: ${error.message}`);
             }
         }
