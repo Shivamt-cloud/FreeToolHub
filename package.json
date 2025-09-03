@@ -1,0 +1,41 @@
+{
+  "name": "freetoolhub",
+  "version": "1.0.0",
+  "description": "A beautiful collection of free online tools for productivity and development",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server --port=3000 --open=/",
+    "dev": "live-server --port=3000 --open=/",
+    "build": "echo 'No build process needed - pure HTML/CSS/JS'",
+    "lint": "eslint . --ext .js",
+    "format": "prettier --write .",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "tools",
+    "calculator",
+    "converter",
+    "generator",
+    "utility",
+    "web",
+    "html",
+    "css",
+    "javascript"
+  ],
+  "author": "SHIVAM",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/freetoolhub.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/freetoolhub/issues"
+  },
+  "homepage": "https://github.com/yourusername/freetoolhub#readme"
+}
+
