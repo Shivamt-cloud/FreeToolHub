@@ -6275,7 +6275,8 @@ ith<!DOCTYPE html>
         }
 
 
-        function generateAdvancedPassword() {
+        // Make function globally accessible
+        window.generateAdvancedPassword = function() {
             console.log('🔐 generateAdvancedPassword called');
             console.log('window.advancedPasswordGen:', window.advancedPasswordGen);
             
