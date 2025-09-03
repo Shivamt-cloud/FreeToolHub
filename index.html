@@ -2187,31 +2187,45 @@ ith<!DOCTYPE html>
             }
 
             try {
-                const input = document.getElementById('base64-input').value;
-                const inputType = document.getElementById('input-type').value;
-                const urlSafe = document.getElementById('url-safe').checked;
-                const wrapMime = document.getElementById('wrap-mime').checked;
-                const omitPadding = document.getElementById('omit-padding').checked;
+                const inputType = document.getElementById('base64-input-type').value;
+                let input, data;
 
-                if (!input) {
-                    showBase64Error('Please enter input data');
-                    return;
-                }
-
-                let data;
                 if (inputType === 'text') {
+                    input = document.getElementById('base64-text').value;
+                    if (!input) {
+                        showBase64Error('Please enter text to encode');
+                        return;
+                    }
                     data = input;
                 } else if (inputType === 'hex') {
+                    input = document.getElementById('base64-hex').value;
+                    if (!input) {
+                        showBase64Error('Please enter hex string to encode');
+                        return;
+                    }
                     // Convert hex string to bytes
                     if (input.length % 2 !== 0) {
                         showBase64Error('Hex string must have even length');
                         return;
                     }
                     data = new Uint8Array(input.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+                } else if (inputType === 'file') {
+                    const fileInput = document.getElementById('base64-file');
+                    if (!fileInput.files[0]) {
+                        showBase64Error('Please select a file to encode');
+                        return;
+                    }
+                    // For file encoding, we'll need to handle it differently
+                    showBase64Error('File encoding not yet implemented');
+                    return;
                 } else {
                     showBase64Error('Invalid input type');
                     return;
                 }
+
+                const urlSafe = document.getElementById('base64-url-safe').checked;
+                const wrapMime = document.getElementById('base64-mime-wrap').checked;
+                const omitPadding = document.getElementById('base64-omit-padding').checked;
 
                 const encoded = window.base64Encoder.encode(data, {
                     urlSafe,
@@ -2220,7 +2234,7 @@ ith<!DOCTYPE html>
                 });
 
                 // Show result
-                document.getElementById('base64-result').textContent = encoded;
+                document.getElementById('base64-result-content').textContent = encoded;
                 document.getElementById('base64-result').classList.remove('hidden');
                 document.getElementById('base64-error').classList.add('hidden');
 
@@ -2244,14 +2258,25 @@ ith<!DOCTYPE html>
             }
 
             try {
-                const input = document.getElementById('base64-input').value;
-                const urlSafe = document.getElementById('url-safe').checked;
-                const strict = document.getElementById('strict-mode').checked;
+                const inputType = document.getElementById('base64-input-type').value;
+                let input;
 
-                if (!input) {
-                    showBase64Error('Please enter Base64 data');
+                if (inputType === 'text') {
+                    input = document.getElementById('base64-text').value;
+                } else if (inputType === 'hex') {
+                    input = document.getElementById('base64-hex').value;
+                } else {
+                    showBase64Error('Please select text or hex input type for decoding');
                     return;
                 }
+
+                if (!input) {
+                    showBase64Error('Please enter Base64 data to decode');
+                    return;
+                }
+
+                const urlSafe = document.getElementById('base64-url-safe').checked;
+                const strict = document.getElementById('base64-strict-mode').checked;
 
                 const decoded = window.base64Encoder.decode(input, {
                     urlSafe,
@@ -2263,10 +2288,7 @@ ith<!DOCTYPE html>
                 const hexString = Array.from(decoded).map(b => b.toString(16).padStart(2, '0')).join('');
 
                 // Show results
-                document.getElementById('decoded-text').textContent = decodedString;
-                document.getElementById('decoded-hex').textContent = hexString;
-                document.getElementById('decoded-bytes').textContent = decoded.length + ' bytes';
-                
+                document.getElementById('base64-result-content').textContent = `Decoded: ${decodedString}\nHex: ${hexString}\nBytes: ${decoded.length}`;
                 document.getElementById('base64-result').classList.remove('hidden');
                 document.getElementById('base64-error').classList.add('hidden');
 
@@ -2282,13 +2304,24 @@ ith<!DOCTYPE html>
             }
 
             try {
-                const input = document.getElementById('base64-input').value;
-                const urlSafe = document.getElementById('url-safe').checked;
+                const inputType = document.getElementById('base64-input-type').value;
+                let input;
 
-                if (!input) {
-                    showBase64Error('Please enter Base64 data');
+                if (inputType === 'text') {
+                    input = document.getElementById('base64-text').value;
+                } else if (inputType === 'hex') {
+                    input = document.getElementById('base64-hex').value;
+                } else {
+                    showBase64Error('Please select text or hex input type for validation');
                     return;
                 }
+
+                if (!input) {
+                    showBase64Error('Please enter Base64 data to validate');
+                    return;
+                }
+
+                const urlSafe = document.getElementById('base64-url-safe').checked;
 
                 const validation = window.base64Encoder.validate(input, {
                     urlSafe,
@@ -2297,8 +2330,8 @@ ith<!DOCTYPE html>
                 });
 
                 if (validation.isValid) {
-                    document.getElementById('validation-result').textContent = `Valid Base64: ${validation.length} characters, ${validation.padding} padding characters`;
-                    document.getElementById('validation-result').classList.remove('hidden');
+                    document.getElementById('base64-result-content').textContent = `Valid Base64: ${validation.length} characters, ${validation.padding} padding characters`;
+                    document.getElementById('base64-result').classList.remove('hidden');
                     document.getElementById('base64-error').classList.add('hidden');
                 } else {
                     showBase64Error('Invalid Base64: ' + validation.error);
@@ -2357,15 +2390,33 @@ ith<!DOCTYPE html>
         }
 
         function clearBase64Results() {
-            document.getElementById('base64-input').value = '';
+            document.getElementById('base64-text').value = '';
+            document.getElementById('base64-hex').value = '';
             document.getElementById('base64-result').classList.add('hidden');
             document.getElementById('base64-error').classList.add('hidden');
             document.getElementById('base64-stats').classList.add('hidden');
             document.getElementById('base64-variants').classList.add('hidden');
-            document.getElementById('validation-result').classList.add('hidden');
-            document.getElementById('decoded-text').textContent = '';
-            document.getElementById('decoded-hex').textContent = '';
-            document.getElementById('decoded-bytes').textContent = '';
+        }
+
+        function updateBase64Inputs() {
+            const inputType = document.getElementById('base64-input-type').value;
+            
+            // Hide all input containers
+            document.getElementById('base64-text-input').classList.add('hidden');
+            document.getElementById('base64-hex-input').classList.add('hidden');
+            document.getElementById('base64-file-input').classList.add('hidden');
+            
+            // Show the selected input type
+            if (inputType === 'text') {
+                document.getElementById('base64-text-input').classList.remove('hidden');
+            } else if (inputType === 'hex') {
+                document.getElementById('base64-hex-input').classList.remove('hidden');
+            } else if (inputType === 'file') {
+                document.getElementById('base64-file-input').classList.remove('hidden');
+            }
+            
+            // Clear results when switching input types
+            clearBase64Results();
         }
 
         function runBase64Tests() {
