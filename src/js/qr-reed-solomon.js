@@ -64,9 +64,18 @@ export class GaloisField {
  */
 export class Polynomial {
     constructor(coefficients = []) {
-        this.coefficients = coefficients.filter(c => c !== 0);
-        if (this.coefficients.length === 0) {
-            this.coefficients = [0];
+        // Ensure coefficients is an array
+        if (!Array.isArray(coefficients)) {
+            if (coefficients === undefined || coefficients === null) {
+                this.coefficients = [0];
+            } else {
+                this.coefficients = [coefficients];
+            }
+        } else {
+            this.coefficients = coefficients.filter(c => c !== 0);
+            if (this.coefficients.length === 0) {
+                this.coefficients = [0];
+            }
         }
     }
 
@@ -74,6 +83,9 @@ export class Polynomial {
      * Get the degree of the polynomial
      */
     get degree() {
+        if (!this.coefficients || this.coefficients.length === 0) {
+            return -1;
+        }
         return this.coefficients.length - 1;
     }
 
@@ -81,6 +93,10 @@ export class Polynomial {
      * Get coefficient at given power
      */
     getCoefficient(power) {
+        if (!this.coefficients || this.coefficients.length === 0) {
+            return 0;
+        }
+        
         const index = this.degree - power;
         return index >= 0 && index < this.coefficients.length ? this.coefficients[index] : 0;
     }
@@ -89,6 +105,10 @@ export class Polynomial {
      * Add another polynomial
      */
     add(other) {
+        if (!other || !other.coefficients) {
+            return new Polynomial(this.coefficients);
+        }
+        
         const maxDegree = Math.max(this.degree, other.degree);
         const result = new Array(maxDegree + 1).fill(0);
         
@@ -107,6 +127,10 @@ export class Polynomial {
      * Multiply by another polynomial
      */
     multiply(other) {
+        if (!other || !other.coefficients) {
+            return new Polynomial([0]);
+        }
+        
         const result = new Array(this.degree + other.degree + 1).fill(0);
         
         for (let i = 0; i <= this.degree; i++) {
@@ -127,6 +151,10 @@ export class Polynomial {
      * Multiply by a scalar
      */
     multiplyScalar(scalar) {
+        if (scalar === undefined || scalar === null) {
+            return new Polynomial([0]);
+        }
+        
         const result = this.coefficients.map(coeff => 
             GaloisField.multiply(coeff, scalar)
         );
@@ -137,6 +165,10 @@ export class Polynomial {
      * Evaluate polynomial at given point
      */
     evaluate(x) {
+        if (!this.coefficients || this.coefficients.length === 0) {
+            return 0;
+        }
+        
         let result = 0;
         for (let i = 0; i < this.coefficients.length; i++) {
             const power = this.degree - i;
@@ -189,7 +221,8 @@ export class ReedSolomonEncoder {
         
         for (let i = 0; i <= dataPolynomial.degree; i++) {
             if (remainder.coefficients[0] === 0) {
-                remainder = new Polynomial(remainder.coefficients.slice(1));
+                const slicedCoeffs = remainder.coefficients.slice(1);
+                remainder = new Polynomial(slicedCoeffs.length > 0 ? slicedCoeffs : [0]);
                 continue;
             }
             
@@ -200,7 +233,8 @@ export class ReedSolomonEncoder {
             const shifted = new Polynomial([...new Array(i).fill(0), ...term.coefficients]);
             
             remainder = remainder.add(shifted);
-            remainder = new Polynomial(remainder.coefficients.slice(1));
+            const slicedCoeffs = remainder.coefficients.slice(1);
+            remainder = new Polynomial(slicedCoeffs.length > 0 ? slicedCoeffs : [0]);
         }
         
         return remainder;
