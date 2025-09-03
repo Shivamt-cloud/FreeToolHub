@@ -1174,9 +1174,13 @@ ith<!DOCTYPE html>
         }
 
         function initializeAdvancedPasswordGenerator() {
-            if (!window.passwordGenerator) {
-                window.passwordGenerator = new AdvancedPasswordGenerator();
-                console.log('Advanced Password Generator initialized');
+            if (!window.advancedPasswordGen) {
+                try {
+                    window.advancedPasswordGen = new AdvancedPasswordGenerator();
+                    console.log('✅ Advanced Password Generator initialized successfully');
+                } catch (error) {
+                    console.error('❌ Error creating AdvancedPasswordGenerator:', error);
+                }
             }
         }
 
@@ -6229,17 +6233,6 @@ ith<!DOCTYPE html>
         // Advanced Password Generator Functions
         let advancedPasswordGen = null;
 
-        function initializeAdvancedPasswordGenerator() {
-            if (!advancedPasswordGen) {
-                try {
-                    advancedPasswordGen = new AdvancedPasswordGenerator();
-                    console.log('✅ AdvancedPasswordGenerator initialized successfully');
-                } catch (error) {
-                    console.error('❌ Error creating AdvancedPasswordGenerator:', error);
-                }
-            }
-        }
-
         function switchPasswordMode(mode) {
             // Hide all modes
             document.querySelectorAll('.password-mode').forEach(el => el.classList.add('hidden'));
@@ -6262,13 +6255,29 @@ ith<!DOCTYPE html>
             }
         }
 
+        // Show/hide custom character input when custom character set is selected
+        document.addEventListener('DOMContentLoaded', function() {
+            const characterSetSelect = document.getElementById('character-set');
+            const customCharsDiv = document.getElementById('custom-chars');
+            
+            if (characterSetSelect && customCharsDiv) {
+                characterSetSelect.addEventListener('change', function() {
+                    if (this.value === 'custom') {
+                        customCharsDiv.classList.remove('hidden');
+                    } else {
+                        customCharsDiv.classList.add('hidden');
+                    }
+                });
+            }
+        });
+
         function updateEntropyInfo() {
-            if (!advancedPasswordGen) {
+            if (!window.advancedPasswordGen) {
                 initializeAdvancedPasswordGenerator();
             }
 
             try {
-                const entropyInfo = advancedPasswordGen.getEntropyInfo();
+                const entropyInfo = window.advancedPasswordGen.getEntropyInfo();
                 const container = document.getElementById('entropy-info');
                 
                 let html = '';
@@ -6296,12 +6305,12 @@ ith<!DOCTYPE html>
         }
 
         function updateDicewareInfo() {
-            if (!advancedPasswordGen) {
+            if (!window.advancedPasswordGen) {
                 initializeAdvancedPasswordGenerator();
             }
 
             try {
-                const entropyInfo = advancedPasswordGen.getEntropyInfo();
+                const entropyInfo = window.advancedPasswordGen.getEntropyInfo();
                 const dicewareInfo = entropyInfo['Diceware (EFF)'];
                 const targetEntropy = parseInt(document.getElementById('diceware-entropy').value);
                 
@@ -6310,7 +6319,7 @@ ith<!DOCTYPE html>
                 
                 document.getElementById('diceware-word-count').textContent = wordCount;
                 document.getElementById('diceware-bits-per-word').textContent = dicewareInfo.bitsPerWord.toFixed(1);
-                document.getElementById('diceware-total-entropy').textContent = totalEntropy.toFixed(1);
+                document.getElementById('diceware-crack-time').textContent = totalEntropy.toFixed(1);
                 
                 let crackTime = 'Centuries';
                 if (totalEntropy < 64) crackTime = 'Days to weeks';
@@ -6324,7 +6333,7 @@ ith<!DOCTYPE html>
         }
 
         function generateAdvancedPassword() {
-            if (!advancedPasswordGen) {
+            if (!window.advancedPasswordGen) {
                 initializeAdvancedPasswordGenerator();
             }
 
@@ -6371,7 +6380,7 @@ ith<!DOCTYPE html>
                     requireSymbols
                 };
 
-                const result = advancedPasswordGen.generatePassword({
+                const result = window.advancedPasswordGen.generatePassword({
                     targetEntropy,
                     alphabet,
                     minLength,
@@ -6387,7 +6396,7 @@ ith<!DOCTYPE html>
         }
 
         function generateDicewarePassphrase() {
-            if (!advancedPasswordGen) {
+            if (!window.advancedPasswordGen) {
                 initializeAdvancedPasswordGenerator();
             }
 
@@ -6396,7 +6405,7 @@ ith<!DOCTYPE html>
                 const separator = document.getElementById('word-separator').value;
                 const addRandomChars = document.getElementById('add-random-chars').checked;
 
-                const result = advancedPasswordGen.generatePassphrase({
+                const result = window.advancedPasswordGen.generatePassphrase({
                     targetEntropy,
                     separator,
                     addRandomChars
@@ -6409,7 +6418,7 @@ ith<!DOCTYPE html>
         }
 
         function generateMultiplePasswords() {
-            if (!advancedPasswordGen) {
+            if (!window.advancedPasswordGen) {
                 initializeAdvancedPasswordGenerator();
             }
 
@@ -6417,7 +6426,7 @@ ith<!DOCTYPE html>
                 const count = 5; // Generate 5 passwords
                 const options = getPasswordOptions();
                 
-                const results = advancedPasswordGen.generateMultiplePasswords(count, options);
+                const results = window.advancedPasswordGen.generateMultiplePasswords(count, options);
                 
                 if (results.length > 0) {
                     displayMultiplePasswords(results);
@@ -6430,7 +6439,7 @@ ith<!DOCTYPE html>
         }
 
         function generateMultiplePassphrases() {
-            if (!advancedPasswordGen) {
+            if (!window.advancedPasswordGen) {
                 initializeAdvancedPasswordGenerator();
             }
 
@@ -6438,7 +6447,7 @@ ith<!DOCTYPE html>
                 const count = 5; // Generate 5 passphrases
                 const options = getPassphraseOptions();
                 
-                const results = advancedPasswordGen.generateMultiplePassphrases(count, options);
+                const results = window.advancedPasswordGen.generateMultiplePassphrases(count, options);
                 
                 if (results.length > 0) {
                     displayMultiplePasswords(results);
@@ -6451,7 +6460,7 @@ ith<!DOCTYPE html>
         }
 
         function validatePassword() {
-            if (!advancedPasswordGen) {
+            if (!window.advancedPasswordGen) {
                 initializeAdvancedPasswordGenerator();
             }
 
@@ -6462,7 +6471,7 @@ ith<!DOCTYPE html>
                     return;
                 }
 
-                const assessment = advancedPasswordGen.validatePassword(password);
+                const assessment = window.advancedPasswordGen.validatePassword(password);
                 displayPasswordValidation(assessment);
             } catch (error) {
                 alert(`Error validating password: ${error.message}`);
