@@ -6274,8 +6274,349 @@ ith<!DOCTYPE html>
             alert('Password copied to clipboard!');
         }
 
-        // Advanced Password Generator Functions
-        let advancedPasswordGen = null;
+
+        function generateAdvancedPassword() {
+            console.log('🔐 generateAdvancedPassword called');
+            console.log('window.advancedPasswordGen:', window.advancedPasswordGen);
+            
+            if (!window.advancedPasswordGen) {
+                console.log('❌ advancedPasswordGen not found, initializing...');
+                initializeAdvancedPasswordGenerator();
+                if (!window.advancedPasswordGen) {
+                    alert('Failed to initialize Advanced Password Generator. Please refresh the page.');
+                    return;
+                }
+            }
+
+            try {
+                const targetEntropy = parseInt(document.getElementById('target-entropy').value);
+                const characterSet = document.getElementById('character-set').value;
+                const minLength = parseInt(document.getElementById('min-length').value);
+                const maxLength = parseInt(document.getElementById('max-length').value);
+                const screenBreached = document.getElementById('screen-breached').checked;
+                
+                const requireUppercase = document.getElementById('require-uppercase').checked;
+                const requireLowercase = document.getElementById('require-lowercase').checked;
+                const requireDigits = document.getElementById('require-digits').checked;
+                const requireSymbols = document.getElementById('require-symbols').checked;
+
+                console.log('📊 Password generation options:', {
+                    targetEntropy,
+                    characterSet,
+                    minLength,
+                    maxLength,
+                    screenBreached,
+                    requireUppercase,
+                    requireLowercase,
+                    requireDigits,
+                    requireSymbols
+                });
+
+                let alphabet;
+                switch (characterSet) {
+                    case 'full-ascii':
+                        alphabet = CharacterSets.FULL_ASCII;
+                        break;
+                    case 'alphanumeric':
+                        alphabet = CharacterSets.ALPHANUMERIC;
+                        break;
+                    case 'letters-only':
+                        alphabet = CharacterSets.UPPERCASE + CharacterSets.LOWERCASE;
+                        break;
+                    case 'custom':
+                        alphabet = document.getElementById('custom-characters').value;
+                        if (!alphabet) {
+                            alert('Please enter custom characters');
+                            return;
+                        }
+                        break;
+                    default:
+                        alphabet = CharacterSets.FULL_ASCII;
+                }
+
+                console.log('🔤 Selected alphabet length:', alphabet.length);
+
+                const policy = {
+                    minLength,
+                    maxLength,
+                    requireUppercase,
+                    requireLowercase,
+                    requireDigits,
+                    requireSymbols
+                };
+
+                console.log('⚙️ Policy:', policy);
+                console.log('🚀 Calling generatePassword...');
+
+                const result = window.advancedPasswordGen.generatePassword({
+                    targetEntropy,
+                    alphabet,
+                    minLength,
+                    maxLength,
+                    screenBreached,
+                    policy
+                });
+
+                console.log('✅ Password generated successfully:', result);
+                displayPasswordResult(result);
+            } catch (error) {
+                console.error('❌ Error generating password:', error);
+                alert(`Error generating password: ${error.message}`);
+            }
+        }
+
+        function generateDicewarePassphrase() {
+            if (!window.advancedPasswordGen) {
+                initializeAdvancedPasswordGenerator();
+            }
+
+            try {
+                const targetEntropy = parseInt(document.getElementById('diceware-entropy').value);
+                const separator = document.getElementById('word-separator').value;
+                const addRandomChars = document.getElementById('add-random-chars').checked;
+
+                const result = window.advancedPasswordGen.generatePassphrase({
+                    targetEntropy,
+                    separator,
+                    addRandomChars
+                });
+
+                displayPasswordResult(result);
+            } catch (error) {
+                alert(`Error generating passphrase: ${error.message}`);
+            }
+        }
+
+        function generateMultiplePasswords() {
+            if (!window.advancedPasswordGen) {
+                initializeAdvancedPasswordGenerator();
+            }
+
+            try {
+                const count = 5; // Generate 5 passwords
+                const options = getPasswordOptions();
+                
+                const results = window.advancedPasswordGen.generateMultiplePasswords(count, options);
+                
+                if (results.length > 0) {
+                    displayMultiplePasswords(results);
+                } else {
+                    alert('Failed to generate any passwords');
+                }
+            } catch (error) {
+                alert(`Error generating multiple passwords: ${error.message}`);
+            }
+        }
+
+        function generateMultiplePassphrases() {
+            if (!window.advancedPasswordGen) {
+                initializeAdvancedPasswordGenerator();
+            }
+
+            try {
+                const count = 5; // Generate 5 passphrases
+                const options = getPassphraseOptions();
+                
+                const results = window.advancedPasswordGen.generateMultiplePassphrases(count, options);
+                
+                if (results.length > 0) {
+                    displayMultiplePasswords(results);
+                } else {
+                    alert('Failed to generate any passphrases');
+                }
+            } catch (error) {
+                alert(`Error generating multiple passphrases: ${error.message}`);
+            }
+        }
+
+        function validatePassword() {
+            if (!window.advancedPasswordGen) {
+                initializeAdvancedPasswordGenerator();
+            }
+
+            try {
+                const password = document.getElementById('password-to-validate').value;
+                if (!password) {
+                    alert('Please enter a password to validate');
+                    return;
+                }
+
+                const assessment = window.advancedPasswordGen.validatePassword(password);
+                displayPasswordValidation(assessment);
+            } catch (error) {
+                alert(`Error validating password: ${error.message}`);
+            }
+        }
+
+        function getPasswordOptions() {
+            const targetEntropy = parseInt(document.getElementById('target-entropy').value);
+            const characterSet = document.getElementById('character-set').value;
+            const minLength = parseInt(document.getElementById('min-length').value);
+            const maxLength = parseInt(document.getElementById('max-length').value);
+            const screenBreached = document.getElementById('screen-breached').checked;
+            
+            const requireUppercase = document.getElementById('require-uppercase').checked;
+            const requireLowercase = document.getElementById('require-lowercase').checked;
+            const requireDigits = document.getElementById('require-digits').checked;
+            const requireSymbols = document.getElementById('require-symbols').checked;
+
+            let alphabet;
+            switch (characterSet) {
+                case 'full-ascii':
+                    alphabet = CharacterSets.FULL_ASCII;
+                    break;
+                case 'alphanumeric':
+                    alphabet = CharacterSets.ALPHANUMERIC;
+                    break;
+                case 'letters-only':
+                    alphabet = CharacterSets.UPPERCASE + CharacterSets.LOWERCASE;
+                    break;
+                case 'custom':
+                    alphabet = document.getElementById('custom-characters').value;
+                    break;
+                default:
+                    alphabet = CharacterSets.FULL_ASCII;
+            }
+
+            return {
+                targetEntropy,
+                alphabet,
+                minLength,
+                maxLength,
+                screenBreached,
+                policy: {
+                    minLength,
+                    maxLength,
+                    requireUppercase,
+                    requireLowercase,
+                    requireDigits,
+                    requireSymbols
+                }
+            };
+        }
+
+        function getPassphraseOptions() {
+            const targetEntropy = parseInt(document.getElementById('diceware-entropy').value);
+            const separator = document.getElementById('word-separator').value;
+            const addRandomChars = document.getElementById('add-random-chars').checked;
+
+            return {
+                targetEntropy,
+                separator,
+                addRandomChars
+            };
+        }
+
+        function displayPasswordResult(result) {
+            document.getElementById('advanced-generated-password').value = result.password;
+            document.getElementById('password-results').classList.remove('hidden');
+
+            const analysisContainer = document.getElementById('password-analysis');
+            analysisContainer.innerHTML = `
+                <div class="bg-white p-4 rounded border">
+                    <h5 class="font-medium text-gray-800 mb-2">Security Analysis</h5>
+                    <div class="space-y-2 text-sm">
+                        <div><strong>Entropy:</strong> ${result.entropy.toFixed(1)} bits</div>
+                        <div><strong>Strength:</strong> <span class="font-medium text-${getStrengthColor(result.strength)}">${result.strength}</span></div>
+                        <div><strong>Length:</strong> ${result.length} characters</div>
+                        <div><strong>Mode:</strong> ${result.mode}</div>
+                        <div><strong>Breached:</strong> ${result.isBreached ? '❌ Yes' : '✅ No'}</div>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded border">
+                    <h5 class="font-medium text-gray-800 mb-2">Policy Check</h5>
+                    <div class="space-y-2 text-sm">
+                        <div><strong>Valid:</strong> ${result.policyCheck.valid ? '✅ Yes' : '❌ No'}</div>
+                        ${!result.policyCheck.valid ? `<div><strong>Reason:</strong> ${result.policyCheck.reason}</div>` : ''}
+                        <div><strong>Method:</strong> ${result.generationMethod}</div>
+                        <div><strong>Generated:</strong> ${new Date(result.timestamp).toLocaleString()}</div>
+                    </div>
+                </div>
+            `;
+
+            if (result.recommendations.length > 0) {
+                const recommendationsDiv = document.createElement('div');
+                recommendationsDiv.className = 'col-span-2 bg-yellow-50 p-4 rounded border';
+                recommendationsDiv.innerHTML = `
+                    <h5 class="font-medium text-yellow-800 mb-2">💡 Recommendations</h5>
+                    <ul class="text-sm text-yellow-700 space-y-1">
+                        ${result.recommendations.map(rec => `<li>• ${rec}</li>`).join('')}
+                    </ul>
+                `;
+                analysisContainer.appendChild(recommendationsDiv);
+            }
+        }
+
+        function displayMultiplePasswords(results) {
+            const container = document.getElementById('password-analysis');
+            container.innerHTML = `
+                <div class="col-span-2 bg-white p-4 rounded border">
+                    <h5 class="font-medium text-gray-800 mb-2">Generated Passwords</h5>
+                    <div class="space-y-2">
+                        ${results.map((result, index) => `
+                            <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                <span class="font-mono text-sm">${result.password}</span>
+                                <div class="text-xs text-gray-600">
+                                    ${result.entropy.toFixed(1)} bits • ${result.strength}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayPasswordValidation(assessment) {
+            const container = document.getElementById('password-analysis');
+            container.innerHTML = `
+                <div class="col-span-2 bg-white p-4 rounded border">
+                <h5 class="font-medium text-gray-800 mb-2">Password Validation Results</h5>
+                <div class="space-y-2 text-sm">
+                    <div><strong>Entropy:</strong> ${assessment.entropy.toFixed(1)} bits</div>
+                    <div><strong>Strength:</strong> <span class="font-medium text-${getStrengthColor(assessment.strength)}">${result.strength}</span></div>
+                    <div><strong>Breached:</strong> ${assessment.isBreached ? '❌ Yes' : '✅ No'}</div>
+                    <div><strong>Policy:</strong> ${assessment.policyCheck.valid ? '✅ Valid' : '❌ Invalid'}</div>
+                    ${!assessment.policyCheck.valid ? `<div><strong>Reason:</strong> ${assessment.policyCheck.reason}</div>` : ''}
+                </div>
+                ${assessment.recommendations.length > 0 ? `
+                    <div class="mt-3 pt-3 border-t">
+                        <h6 class="font-medium text-gray-700 mb-2">Recommendations:</h6>
+                        <ul class="text-xs text-gray-600 space-y-1">
+                            ${assessment.recommendations.map(rec => `<li>• ${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            </div>
+            `;
+        }
+
+        function getStrengthColor(strength) {
+            switch (strength) {
+                case 'very strong': return 'green-600';
+                case 'strong': return 'blue-600';
+                case 'moderate': return 'yellow-600';
+                case 'weak': return 'red-600';
+                default: return 'gray-600';
+            }
+        }
+
+        function copyAdvancedPassword() {
+            const passwordField = document.getElementById('advanced-generated-password');
+            passwordField.select();
+            document.execCommand('copy');
+            
+            // Show feedback
+            const copyButton = document.querySelector('[onclick="copyAdvancedPassword()"]');
+            if (copyButton) {
+                const originalText = copyButton.innerHTML;
+                copyButton.innerHTML = '✅ Copied!';
+                copyButton.classList.add('bg-green-600');
+                setTimeout(() => {
+                    copyButton.innerHTML = originalText;
+                    copyButton.classList.remove('bg-green-600');
+                }, 2000);
+            }
+        }
 
         function switchPasswordMode(mode) {
             // Hide all modes
@@ -6299,21 +6640,66 @@ ith<!DOCTYPE html>
             }
         }
 
-        // Show/hide custom character input when custom character set is selected
-        document.addEventListener('DOMContentLoaded', function() {
-            const characterSetSelect = document.getElementById('character-set');
-            const customCharsDiv = document.getElementById('custom-chars');
-            
-            if (characterSetSelect && customCharsDiv) {
-                characterSetSelect.addEventListener('change', function() {
-                    if (this.value === 'custom') {
-                        customCharsDiv.classList.remove('hidden');
-                    } else {
-                        customCharsDiv.classList.add('hidden');
-                    }
-                });
+        function updateEntropyInfo() {
+            if (!window.advancedPasswordGen) {
+                initializeAdvancedPasswordGenerator();
             }
-        });
+
+            try {
+                const entropyInfo = window.advancedPasswordGen.getEntropyInfo();
+                const container = document.getElementById('entropy-info');
+                
+                let html = '';
+                for (const [name, info] of Object.entries(entropyInfo)) {
+                    if (name !== 'Diceware (EFF)') {
+                        html += `
+                            <div class="bg-white p-3 rounded border">
+                                <div class="font-medium text-gray-800 mb-2">${name}</div>
+                                <div class="text-xs text-gray-600 space-y-1">
+                                    <div>Alphabet size: ${info.alphabetSize}</div>
+                                    <div>Bits per char: ${info.bitsPerChar.toFixed(1)}</div>
+                                    <div>Length for 80 bits: ${result.lengthFor80Bits}</div>
+                                    <div>Length for 96 bits: ${result.lengthFor96Bits}</div>
+                                    <div>Length for 128 bits: ${result.lengthFor128Bits}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error updating entropy info:', error);
+            }
+        }
+
+        function updateDicewareInfo() {
+            if (!window.advancedPasswordGen) {
+                initializeAdvancedPasswordGenerator();
+            }
+
+            try {
+                const entropyInfo = window.advancedPasswordGen.getEntropyInfo();
+                const dicewareInfo = entropyInfo['Diceware (EFF)'];
+                const targetEntropy = parseInt(document.getElementById('diceware-entropy').value);
+                
+                const wordCount = Math.ceil(targetEntropy / dicewareInfo.bitsPerWord);
+                const totalEntropy = wordCount * dicewareInfo.bitsPerWord;
+                
+                document.getElementById('diceware-word-count').textContent = wordCount;
+                document.getElementById('diceware-bits-per-word').textContent = dicewareInfo.bitsPerWord.toFixed(1);
+                document.getElementById('diceware-total-entropy').textContent = totalEntropy.toFixed(1);
+                
+                let crackTime = 'Centuries';
+                if (totalEntropy < 64) crackTime = 'Days to weeks';
+                else if (totalEntropy < 80) crackTime = 'Months to years';
+                else if (totalEntropy < 96) crackTime = 'Years to decades';
+                
+                document.getElementById('diceware-crack-time').textContent = crackTime;
+            } catch (error) {
+                console.error('Error updating diceware info:', error);
+            }
+        }
 
         function updateEntropyInfo() {
             if (!window.advancedPasswordGen) {
