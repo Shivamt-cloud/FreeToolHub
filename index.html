@@ -463,6 +463,230 @@ ith<!DOCTYPE html>
             }
         }
 
+        function getGlobalSettings() {
+            const decimals = document.getElementById('global-decimals') ? 
+                parseInt(document.getElementById('global-decimals').value) : 2;
+            const roundingMode = document.getElementById('global-rounding') ? 
+                document.getElementById('global-rounding').value : 'round';
+            
+            return { decimals, roundingMode };
+        }
+
+        function calculatePercentOf() {
+            if (!window.percentageCalc) {
+                initializePercentageCalculator();
+            }
+
+            const p = parseFloat(document.getElementById('percent-of-p').value);
+            const N = parseFloat(document.getElementById('percent-of-n').value);
+            const inputType = document.querySelector('input[name="percent-of-input-type"]:checked').value;
+            const settings = getGlobalSettings();
+
+            if (isNaN(p) || isNaN(N)) {
+                showPercentageError('Please enter valid numbers');
+                return;
+            }
+
+            const result = window.percentageCalc.calculate(window.percentageCalc.operations.PERCENT_OF, {
+                p: p,
+                N: N,
+                inputType: inputType,
+                decimals: settings.decimals,
+                roundingMode: settings.roundingMode
+            });
+
+            if (result.success) {
+                showPercentageResult(result.result, result.metadata.formula);
+            } else {
+                showPercentageError(result.error);
+            }
+        }
+
+        function calculateWhatPercent() {
+            if (!window.percentageCalc) {
+                initializePercentageCalculator();
+            }
+
+            const A = parseFloat(document.getElementById('what-percent-a').value);
+            const B = parseFloat(document.getElementById('what-percent-b').value);
+            const settings = getGlobalSettings();
+
+            if (isNaN(A) || isNaN(B)) {
+                showPercentageError('Please enter valid numbers');
+            }
+
+            const result = window.percentageCalc.calculate(window.percentageCalc.operations.WHAT_PERCENT, {
+                A: A,
+                B: B,
+                decimals: settings.decimals,
+                roundingMode: settings.roundingMode
+            });
+
+            if (result.success) {
+                showPercentageResult(window.percentageCalc.formatPercentage(result.result), result.metadata.formula);
+            } else {
+                showPercentageError(result.error);
+            }
+        }
+
+        function calculateApplyChange() {
+            if (!window.percentageCalc) {
+                initializePercentageCalculator();
+            }
+
+            const N = parseFloat(document.getElementById('apply-change-n').value);
+            const p = parseFloat(document.getElementById('apply-change-p').value);
+            const changeType = document.querySelector('input[name="apply-change-type"]:checked').value;
+            const inputType = document.querySelector('input[name="apply-change-input-type"]:checked').value;
+            const settings = getGlobalSettings();
+
+            if (isNaN(N) || isNaN(p)) {
+                showPercentageError('Please enter valid numbers');
+                return;
+            }
+
+            const operation = changeType === 'increase' ? 
+                window.percentageCalc.operations.APPLY_INCREASE : 
+                window.percentageCalc.operations.APPLY_DECREASE;
+
+            const result = window.percentageCalc.calculate(operation, {
+                N: N,
+                p: p,
+                inputType: inputType,
+                decimals: settings.decimals,
+                roundingMode: settings.roundingMode
+            });
+
+            if (result.success) {
+                showPercentageResult(result.result, result.metadata.formula);
+            } else {
+                showPercentageError(result.error);
+            }
+        }
+
+        function calculatePercentChange() {
+            if (!window.percentageCalc) {
+                initializePercentageCalculator();
+            }
+
+            const old = parseFloat(document.getElementById('percent-change-old').value);
+            const newVal = parseFloat(document.getElementById('percent-change-new').value);
+            const settings = getGlobalSettings();
+
+            if (isNaN(old) || isNaN(newVal)) {
+                showPercentageError('Please enter valid numbers');
+                return;
+            }
+
+            const result = window.percentageCalc.calculate(window.percentageCalc.operations.PERCENT_CHANGE, {
+                old: old,
+                new: newVal,
+                decimals: settings.decimals,
+                roundingMode: settings.roundingMode
+            });
+
+            if (result.success) {
+                const sign = result.result >= 0 ? '+' : '';
+                showPercentageResult(sign + window.percentageCalc.formatPercentage(result.result), result.metadata.formula);
+            } else {
+                showPercentageError(result.error);
+            }
+        }
+
+        function calculateReversePercent() {
+            if (!window.percentageCalc) {
+                initializePercentageCalculator();
+            }
+
+            const newVal = parseFloat(document.getElementById('percent-change-new').value);
+            const p = parseFloat(document.getElementById('reverse-percent-p').value);
+            const changeType = document.querySelector('input[name="reverse-percent-type"]:checked').value;
+            const inputType = document.querySelector('input[name="reverse-percent-type"]:checked').value;
+            const settings = getGlobalSettings();
+
+            if (isNaN(newVal) || isNaN(p)) {
+                showPercentageError('Please enter valid numbers');
+                return;
+            }
+
+            const result = window.percentageCalc.calculate(window.percentageCalc.operations.REVERSE_PERCENT, {
+                new: newVal,
+                p: p,
+                changeType: changeType,
+                inputType: inputType,
+                decimals: settings.decimals,
+                roundingMode: settings.roundingMode
+            });
+
+            if (result.success) {
+                showPercentageResult(result.result, result.metadata.formula);
+            } else {
+                showPercentageError(result.error);
+            }
+        }
+
+        function calculatePercentDifference() {
+            if (!window.percentageCalc) {
+                initializePercentageCalculator();
+            }
+
+            const a = parseFloat(document.getElementById('percent-difference-a').value);
+            const b = parseFloat(document.getElementById('percent-difference-b').value);
+            const settings = getGlobalSettings();
+
+            if (isNaN(a) || isNaN(b)) {
+                showPercentageError('Please enter valid numbers');
+                return;
+            }
+
+            const result = window.percentageCalc.calculate(window.percentageCalc.operations.PERCENT_DIFFERENCE, {
+                a: a,
+                b: b,
+                decimals: settings.decimals,
+                roundingMode: settings.roundingMode
+            });
+
+            if (result.success) {
+                showPercentageResult(window.percentageCalc.formatPercentage(result.result), result.metadata.formula);
+            } else {
+                showPercentageError(result.error);
+            }
+        }
+
+        function showPercentageResult(value, formula) {
+            const resultDiv = document.getElementById('percentage-result');
+            const errorDiv = document.getElementById('percentage-error');
+            const resultValue = document.getElementById('percentage-result-value');
+            const resultFormula = document.getElementById('percentage-result-formula');
+
+            if (resultDiv && errorDiv && resultValue && resultFormula) {
+                resultValue.textContent = value;
+                resultFormula.textContent = formula;
+                resultDiv.classList.remove('hidden');
+                errorDiv.classList.add('hidden');
+            }
+        }
+
+        function showPercentageError(message) {
+            const resultDiv = document.getElementById('percentage-result');
+            const errorDiv = document.getElementById('percentage-error');
+            const errorMessage = document.getElementById('percentage-error-message');
+
+            if (resultDiv && errorDiv && errorMessage) {
+                errorMessage.textContent = message;
+                errorDiv.classList.remove('hidden');
+                resultDiv.classList.add('hidden');
+            }
+        }
+
+        function clearPercentageResults() {
+            const resultDiv = document.getElementById('percentage-result');
+            const errorDiv = document.getElementById('percentage-error');
+            
+            if (resultDiv) resultDiv.classList.add('hidden');
+            if (errorDiv) errorDiv.classList.add('hidden');
+        }
+
         function initializeBMICalculator() {
             console.log('Initializing BMI Calculator...');
             console.log('BMICalculator class available:', typeof BMICalculator);
@@ -4106,23 +4330,17 @@ ith<!DOCTYPE html>
         // Advanced Calculator instance
         // let advancedCalc = null; // Now managed in head
 
-        // Percentage Calculator instance
-        let percentageCalc = null;
+        // Percentage Calculator instance - moved to head section
 
-        // BMI Calculator instance
-        let bmiCalc = null;
+        // BMI Calculator instance - moved to head section
 
-        // Age Calculator instance
-        let ageCalc = null;
+        // Age Calculator instance - moved to head section
 
-        // Unit Converter instance
-        let unitConverter = null;
+        // Unit Converter instance - moved to head section
 
-        // Advanced Currency Converter instance
-        let currencyConverter = null;
+        // Advanced Currency Converter instance - moved to head section
 
-        // Advanced Color Converter instance
-        let colorConverter = null;
+        // Advanced Color Converter instance - moved to head section
 
         // Initialize percentage calculator on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -4135,7 +4353,7 @@ ith<!DOCTYPE html>
                 // Pre-initialize unit converter
                 setTimeout(() => {
                     try {
-                        unitConverter = new UnitConverter();
+                        window.unitConverter = new UnitConverter();
                         console.log('✅ UnitConverter pre-initialized');
                     } catch (error) {
                         console.error('❌ Error pre-initializing UnitConverter:', error);
@@ -4154,81 +4372,9 @@ ith<!DOCTYPE html>
 
         // Advanced Calculator Functions moved to head section
 
-        function addToExpr(value) {
-            const input = document.getElementById('expr-input');
-            input.value += value;
-        }
+        // Advanced Calculator Functions - moved to head section
 
-        function clearExpression() {
-            document.getElementById('expr-input').value = '';
-            document.getElementById('expr-result').classList.add('hidden');
-        }
-
-        function evaluateExpression() {
-            if (!advancedCalc) {
-                initializeAdvancedCalculator();
-            }
-
-            const expression = document.getElementById('expr-input').value.trim();
-            if (!expression) {
-                alert('Please enter an expression');
-                return;
-            }
-
-            try {
-                const result = advancedCalc.evalExpr(expression, advancedCalc.getMode());
-                document.getElementById('expr-result-value').textContent = result;
-                document.getElementById('expr-result').classList.remove('hidden');
-                
-                // Update memory display
-                updateMemoryDisplay();
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            }
-        }
-
-        function setCalcMode(mode) {
-            if (!advancedCalc) {
-                initializeAdvancedCalculator();
-            }
-
-            advancedCalc.setMode(mode);
-            
-            // Update button styles
-            if (mode === 'radians') {
-                document.getElementById('radians-btn').className = 'px-3 py-1 rounded text-sm bg-purple-600 text-white';
-                document.getElementById('degrees-btn').className = 'px-3 py-1 rounded text-sm bg-gray-200 text-gray-700';
-            } else {
-                document.getElementById('degrees-btn').className = 'px-3 py-1 rounded text-sm bg-purple-600 text-white';
-                document.getElementById('radians-btn').className = 'px-3 py-1 rounded text-sm bg-gray-200 text-gray-700';
-            }
-        }
-
-        function calculateTwoOperand() {
-            if (!advancedCalc) {
-                initializeAdvancedCalculator();
-            }
-
-            const a = document.getElementById('calc-a').value;
-            const b = document.getElementById('calc-b').value;
-            const op = document.getElementById('calc-operation').value;
-
-            if (!a || !b) {
-                alert('Please enter both numbers');
-                return;
-            }
-
-            try {
-                const result = advancedCalc.computeTwoOperand(a, b, op);
-                document.getElementById('two-op-result-value').textContent = result;
-                document.getElementById('two-op-result').classList.remove('hidden');
-                
-                // Update memory display
-                updateMemoryDisplay();
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            }
-        }
+        // Advanced Calculator Functions - moved to head section
 
         function clearTwoOperand() {
             document.getElementById('calc-a').value = '';
@@ -4697,264 +4843,11 @@ ith<!DOCTYPE html>
             }
         });
 
-        // Percentage Calculator Functions
-        function initializePercentageCalculator() {
-            if (!percentageCalc) {
-                try {
-                    percentageCalc = new PercentageCalculator();
-                } catch (error) {
-                    console.error('Error creating PercentageCalculator:', error);
-                }
-            }
-        }
+        // Percentage Calculator Functions - moved to head section
 
-        function switchPercentageMode(mode) {
-            // Hide all modes
-            document.querySelectorAll('.percentage-mode').forEach(el => el.classList.add('hidden'));
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.percentage-tab').forEach(tab => tab.classList.remove('active'));
-            
-            // Show selected mode and activate tab
-            const modeId = mode.replace('_', '-') + '-mode';
-            const tabId = mode.replace('_', '-') + '-tab';
-            
-            const modeElement = document.getElementById(modeId);
-            const tabElement = document.getElementById(tabId);
-            
-            if (modeElement && tabElement) {
-                modeElement.classList.remove('hidden');
-                tabElement.classList.add('active');
-            }
-            
-            // Initialize calculator if needed
-            initializePercentageCalculator();
-            
-            // Clear previous results
-            clearPercentageResults();
-        }
+        // Percentage Calculator Functions - moved to head section
 
-        function clearPercentageResults() {
-            document.getElementById('percentage-result').classList.add('hidden');
-            document.getElementById('percentage-error').classList.add('hidden');
-        }
-
-        function getGlobalSettings() {
-            const decimals = document.getElementById('global-decimals').value;
-            const rounding = document.getElementById('global-rounding').value;
-            
-            return {
-                decimals: decimals === 'null' ? null : parseInt(decimals),
-                roundingMode: rounding
-            };
-        }
-
-        function calculatePercentOf() {
-            if (!percentageCalc) {
-                initializePercentageCalculator();
-            }
-
-            const p = parseFloat(document.getElementById('percent-of-p').value);
-            const N = parseFloat(document.getElementById('percent-of-n').value);
-            const inputType = document.querySelector('input[name="percent-of-input-type"]:checked').value;
-            const settings = getGlobalSettings();
-
-            if (isNaN(p) || isNaN(N)) {
-                showPercentageError('Please enter valid numbers');
-                return;
-            }
-
-            const result = percentageCalc.calculate(percentageCalc.operations.PERCENT_OF, {
-                p: p,
-                N: N,
-                inputType: inputType,
-                decimals: settings.decimals,
-                roundingMode: settings.roundingMode
-            });
-
-            if (result.success) {
-                showPercentageResult(result.result, result.metadata.formula);
-            } else {
-                showPercentageError(result.error);
-            }
-        }
-
-        function calculateWhatPercent() {
-            if (!percentageCalc) {
-                initializePercentageCalculator();
-            }
-
-            const A = parseFloat(document.getElementById('what-percent-a').value);
-            const B = parseFloat(document.getElementById('what-percent-b').value);
-            const settings = getGlobalSettings();
-
-            if (isNaN(A) || isNaN(B)) {
-                showPercentageError('Please enter valid numbers');
-                return;
-            }
-
-            const result = percentageCalc.calculate(percentageCalc.operations.WHAT_PERCENT, {
-                A: A,
-                B: B,
-                decimals: settings.decimals,
-                roundingMode: settings.roundingMode
-            });
-
-            if (result.success) {
-                showPercentageResult(percentageCalc.formatPercentage(result.result), result.metadata.formula);
-            } else {
-                showPercentageError(result.error);
-            }
-        }
-
-        function calculateApplyChange() {
-            if (!percentageCalc) {
-                initializePercentageCalculator();
-            }
-
-            const N = parseFloat(document.getElementById('apply-change-n').value);
-            const p = parseFloat(document.getElementById('apply-change-p').value);
-            const changeType = document.querySelector('input[name="apply-change-type"]:checked').value;
-            const inputType = document.querySelector('input[name="apply-change-input-type"]:checked').value;
-            const settings = getGlobalSettings();
-
-            if (isNaN(N) || isNaN(p)) {
-                showPercentageError('Please enter valid numbers');
-                return;
-            }
-
-            const operation = changeType === 'increase' ? 
-                percentageCalc.operations.APPLY_INCREASE : 
-                percentageCalc.operations.APPLY_DECREASE;
-
-            const result = percentageCalc.calculate(operation, {
-                N: N,
-                p: p,
-                inputType: inputType,
-                decimals: settings.decimals,
-                roundingMode: settings.roundingMode
-            });
-
-            if (result.success) {
-                showPercentageResult(result.result, result.metadata.formula);
-            } else {
-                showPercentageError(result.error);
-            }
-        }
-
-        function calculatePercentChange() {
-            if (!percentageCalc) {
-                initializePercentageCalculator();
-            }
-
-            const old = parseFloat(document.getElementById('percent-change-old').value);
-            const newVal = parseFloat(document.getElementById('percent-change-new').value);
-            const settings = getGlobalSettings();
-
-            if (isNaN(old) || isNaN(newVal)) {
-                showPercentageError('Please enter valid numbers');
-                return;
-            }
-
-            const result = percentageCalc.calculate(percentageCalc.operations.PERCENT_CHANGE, {
-                old: old,
-                new: newVal,
-                decimals: settings.decimals,
-                roundingMode: settings.roundingMode
-            });
-
-            if (result.success) {
-                const sign = result.result >= 0 ? '+' : '';
-                showPercentageResult(sign + percentageCalc.formatPercentage(result.result), result.metadata.formula);
-            } else {
-                showPercentageError(result.error);
-            }
-        }
-
-        function calculateReversePercent() {
-            if (!percentageCalc) {
-                initializePercentageCalculator();
-            }
-
-            const newVal = parseFloat(document.getElementById('reverse-percent-new').value);
-            const p = parseFloat(document.getElementById('reverse-percent-p').value);
-            const changeType = document.querySelector('input[name="reverse-percent-type"]:checked').value;
-            const inputType = document.querySelector('input[name="reverse-percent-input-type"]:checked').value;
-            const settings = getGlobalSettings();
-
-            if (isNaN(newVal) || isNaN(p)) {
-                showPercentageError('Please enter valid numbers');
-                return;
-            }
-
-            const result = percentageCalc.calculate(percentageCalc.operations.REVERSE_PERCENT, {
-                new: newVal,
-                p: p,
-                changeType: changeType,
-                inputType: inputType,
-                decimals: settings.decimals,
-                roundingMode: settings.roundingMode
-            });
-
-            if (result.success) {
-                showPercentageResult(result.result, result.metadata.formula);
-            } else {
-                showPercentageError(result.error);
-            }
-        }
-
-        function calculatePercentDifference() {
-            if (!percentageCalc) {
-                initializePercentageCalculator();
-            }
-
-            const a = parseFloat(document.getElementById('percent-difference-a').value);
-            const b = parseFloat(document.getElementById('percent-difference-b').value);
-            const settings = getGlobalSettings();
-
-            if (isNaN(a) || isNaN(b)) {
-                showPercentageError('Please enter valid numbers');
-                return;
-            }
-
-            const result = percentageCalc.calculate(percentageCalc.operations.PERCENT_DIFFERENCE, {
-                a: a,
-                b: b,
-                decimals: settings.decimals,
-                roundingMode: settings.roundingMode
-            });
-
-            if (result.success) {
-                showPercentageResult(percentageCalc.formatPercentage(result.result), result.metadata.formula);
-            } else {
-                showPercentageError(result.error);
-            }
-        }
-
-        function showPercentageResult(value, formula) {
-            document.getElementById('percentage-result-value').textContent = value;
-            document.getElementById('percentage-result-formula').textContent = formula;
-            document.getElementById('percentage-result').classList.remove('hidden');
-            document.getElementById('percentage-error').classList.add('hidden');
-        }
-
-        function showPercentageError(message) {
-            document.getElementById('percentage-error-message').textContent = message;
-            document.getElementById('percentage-error').classList.remove('hidden');
-            document.getElementById('percentage-result').classList.add('hidden');
-        }
-
-        // BMI Calculator Functions
-        function initializeBMICalculator() {
-            if (!bmiCalc) {
-                try {
-                    bmiCalc = new BMICalculator();
-                    populateBMICategories();
-                } catch (error) {
-                    console.error('Error creating BMICalculator:', error);
-                }
-            }
-        }
+        // BMI Calculator Functions - moved to head section
 
         // BMI Calculator Functions - moved to head section
 
