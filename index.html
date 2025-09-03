@@ -874,7 +874,7 @@ ith<!DOCTYPE html>
         }
 
         // QR Generator Functions
-        function switchQRMode(mode) {
+        window.switchQRMode = function(mode) {
             // Hide all modes
             document.querySelectorAll('.qr-mode').forEach(el => el.classList.add('hidden'));
             
@@ -7523,28 +7523,10 @@ ith<!DOCTYPE html>
 
 
 
-        function switchQRMode(mode) {
-            // Hide all modes
-            document.querySelectorAll('.qr-mode').forEach(el => el.classList.add('hidden'));
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.qr-tab').forEach(tab => tab.classList.remove('active'));
-            
-            // Show selected mode and activate tab
-            if (mode === 'basic') {
-                document.getElementById('qr-basic-mode').classList.remove('hidden');
-                document.getElementById('qr-basic-tab').classList.add('active');
-            } else if (mode === 'advanced') {
-                document.getElementById('qr-advanced-mode').classList.remove('hidden');
-                document.getElementById('qr-advanced-tab').classList.add('active');
-            } else if (mode === 'analysis') {
-                document.getElementById('qr-analysis-mode').classList.remove('hidden');
-                document.getElementById('qr-analysis-tab').classList.add('active');
-            }
-        }
+
 
         // Basic QR Code Generation
-        function generateBasicQR() {
+        window.generateBasicQR = function() {
             console.log('generateBasicQR called');
             
             const text = document.getElementById('qr-text').value;
@@ -7599,7 +7581,7 @@ ith<!DOCTYPE html>
         }
 
         // Advanced QR Code Generation
-        function generateAdvancedQR() {
+        window.generateAdvancedQR = function() {
             console.log('generateAdvancedQR called');
             
             const text = document.getElementById('qr-advanced-text').value;
@@ -7638,7 +7620,7 @@ ith<!DOCTYPE html>
         }
 
         // QR Code Preview
-        function previewQR() {
+        window.previewQR = function() {
             const text = document.getElementById('qr-advanced-text').value;
             if (!text) {
                 alert('Please enter data to preview');
@@ -7666,7 +7648,7 @@ ith<!DOCTYPE html>
         }
 
         // QR Code Analysis
-        function analyzeQR() {
+        window.analyzeQR = function() {
             const text = document.getElementById('qr-analysis-text').value;
             if (!text) {
                 alert('Please enter data to analyze');
@@ -7687,14 +7669,14 @@ ith<!DOCTYPE html>
         }
 
         // Display QR Code Result
-        function displayQRResult(svg, text) {
+        window.displayQRResult = function(svg, text) {
             const qrCode = document.getElementById('qr-code');
             qrCode.innerHTML = svg;
             document.getElementById('qr-results').classList.remove('hidden');
         }
 
         // Display QR Code Analysis
-        function displayQRAnalysis(info) {
+        window.displayQRAnalysis = function(info) {
             const container = document.getElementById('qr-analysis');
             container.innerHTML = `
                 <div class="bg-white p-4 rounded border">
@@ -7723,7 +7705,7 @@ ith<!DOCTYPE html>
         }
 
         // Update QR Code Information
-        function updateQRInfo(text, options = {}) {
+        window.updateQRInfo = function(text, options = {}) {
             try {
                 if (!window.advancedQRGen) {
                     initializeAdvancedQRGenerator();
@@ -7757,7 +7739,7 @@ ith<!DOCTYPE html>
         }
 
         // Get recommended ECC level based on data length
-        function getRecommendedECC(length) {
+        window.getRecommendedECC = function(length) {
             if (length <= 50) return 'L (Low)';
             if (length <= 100) return 'M (Medium)';
             if (length <= 200) return 'Q (Quartile)';
@@ -7765,7 +7747,7 @@ ith<!DOCTYPE html>
         }
 
         // Download QR Code as SVG
-        function downloadQR() {
+        window.downloadQR = function() {
             const svg = document.querySelector('#qr-code svg');
             if (!svg) {
                 alert('No QR code to download');
@@ -7786,7 +7768,7 @@ ith<!DOCTYPE html>
         }
 
         // Copy QR Code SVG
-        function copyQR() {
+        window.copyQR = function() {
             const svg = document.querySelector('#qr-code svg');
             if (!svg) {
                 alert('No QR code to copy');
@@ -7809,7 +7791,7 @@ ith<!DOCTYPE html>
         }
 
         // Print QR Code
-        function printQR() {
+        window.printQR = function() {
             const svg = document.querySelector('#qr-code svg');
             if (!svg) {
                 alert('No QR code to print');
@@ -7838,7 +7820,7 @@ ith<!DOCTYPE html>
         }
 
         // Legacy QR Code Generation (for backward compatibility)
-        function generateQR() {
+        window.generateQR = function() {
             generateBasicQR();
         }
 
