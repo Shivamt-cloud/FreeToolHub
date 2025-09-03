@@ -3723,42 +3723,42 @@ ith<!DOCTYPE html>
 
             <!-- Basic Calculator Mode -->
             <div id="basic-calc" class="calc-mode">
-                <div class="bg-gray-100 p-4 rounded-lg mb-4">
-                    <input type="text" id="calc-display" class="w-full text-right text-2xl font-mono bg-transparent border-none outline-none" value="0" readonly>
-                </div>
-                <div class="grid grid-cols-4 gap-3">
-                    <button onclick="clearCalc()" class="btn-primary text-white p-4 rounded-lg font-semibold">C</button>
-                    <button onclick="calcInput('/')" class="bg-gray-200 hover:bg-gray-300 p-4 rounded-lg font-semibold">÷</button>
-                    <button onclick="calcInput('*')" class="bg-gray-200 hover:bg-gray-300 p-4 rounded-lg font-semibold">×</button>
-                    <button onclick="deleteLast()" class="bg-gray-200 hover:bg-gray-300 p-4 rounded-lg font-semibold">⌫</button>
-                    
-                    <button onclick="calcInput('7')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">7</button>
-                    <button onclick="calcInput('8')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">8</button>
-                    <button onclick="calcInput('9')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">9</button>
-                    <button onclick="calcInput('-')" class="bg-gray-200 hover:bg-gray-300 p-4 rounded-lg font-semibold">-</button>
-                    
-                    <button onclick="calcInput('4')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">4</button>
-                    <button onclick="calcInput('5')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">5</button>
-                    <button onclick="calcInput('6')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">6</button>
-                    <button onclick="calcInput('+')" class="bg-gray-200 hover:bg-gray-300 p-4 rounded-lg font-semibold">+</button>
-                    
-                    <button onclick="calcInput('1')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">1</button>
-                    <button onclick="calcInput('2')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">2</button>
-                    <button onclick="calcInput('3')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">3</button>
-                    <button onclick="calculate()" class="btn-primary text-white p-4 rounded-lg font-semibold row-span-2">=</button>
-                    
-                    <button onclick="calcInput('0')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border col-span-2">0</button>
-                    <button onclick="calcInput('.')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">.</button>
-                </div>
+            <div class="bg-gray-100 p-4 rounded-lg mb-4">
+                <input type="text" id="calc-display" class="w-full text-right text-2xl font-mono bg-transparent border-none outline-none" value="0" readonly>
             </div>
+            <div class="grid grid-cols-4 gap-3">
+                <button onclick="clearCalc()" class="btn-primary text-white p-4 rounded-lg font-semibold">C</button>
+                <button onclick="calcInput('/')" class="bg-gray-200 hover:bg-gray-300 p-4 rounded-lg font-semibold">÷</button>
+                <button onclick="calcInput('*')" class="bg-gray-200 hover:bg-gray-300 p-4 rounded-lg font-semibold">×</button>
+                <button onclick="deleteLast()" class="bg-gray-200 hover:bg-gray-300 p-4 rounded-lg font-semibold">⌫</button>
+                
+                <button onclick="calcInput('7')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">7</button>
+                <button onclick="calcInput('8')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">8</button>
+                <button onclick="calcInput('9')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">9</button>
+                <button onclick="calcInput('-')" class="bg-gray-200 hover:bg-gray-300 p-4 rounded-lg font-semibold">-</button>
+                
+                <button onclick="calcInput('4')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">4</button>
+                <button onclick="calcInput('5')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">5</button>
+                <button onclick="calcInput('6')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">6</button>
+                <button onclick="calcInput('+')" class="bg-gray-200 hover:bg-gray-300 p-4 rounded-lg font-semibold">+</button>
+                
+                <button onclick="calcInput('1')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">1</button>
+                <button onclick="calcInput('2')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">2</button>
+                <button onclick="calcInput('3')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">3</button>
+                <button onclick="calculate()" class="btn-primary text-white p-4 rounded-lg font-semibold row-span-2">=</button>
+                
+                <button onclick="calcInput('0')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border col-span-2">0</button>
+                <button onclick="calcInput('.')" class="bg-white hover:bg-gray-50 p-4 rounded-lg font-semibold border">.</button>
+            </div>
+        </div>
 
             <!-- Advanced Expression Mode -->
             <div id="advanced-calc" class="calc-mode hidden">
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Expression Input</label>
                     <input type="text" id="expr-input" placeholder="e.g., 2+3*4, sin(90), sqrt(16)" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                </div>
-                
+    </div>
+
                 <div class="flex space-x-2 mb-4">
                     <button onclick="addToExpr('(')" class="bg-gray-200 hover:bg-gray-300 px-3 py-2 rounded text-sm">(</button>
                     <button onclick="addToExpr(')')" class="bg-gray-200 hover:bg-gray-300 px-3 py-2 rounded text-sm">)</button>
@@ -4008,7 +4008,7 @@ ith<!DOCTYPE html>
             <!-- Character Mode -->
             <div id="characters-mode" class="password-mode">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
+                <div>
                         <h4 class="font-medium text-gray-800 mb-3">🎯 Entropy & Length</h4>
                         <div class="space-y-3">
                             <div>
@@ -4044,29 +4044,29 @@ ith<!DOCTYPE html>
                                     <input type="number" id="min-length" placeholder="Min" value="8" min="1" max="128" class="p-2 border border-gray-300 rounded-lg text-sm">
                                     <input type="number" id="max-length" placeholder="Max" value="128" min="1" max="256" class="p-2 border border-gray-300 rounded-lg text-sm">
                                 </div>
-                            </div>
-                            <div class="space-y-2">
-                                <label class="flex items-center">
+                </div>
+                <div class="space-y-2">
+                    <label class="flex items-center">
                                     <input type="checkbox" id="screen-breached" checked class="mr-2">
                                     <span class="text-sm">Screen against breached passwords</span>
-                                </label>
-                                <label class="flex items-center">
+                    </label>
+                    <label class="flex items-center">
                                     <input type="checkbox" id="require-uppercase" class="mr-2">
                                     <span class="text-sm">Require uppercase letter</span>
-                                </label>
-                                <label class="flex items-center">
+                    </label>
+                    <label class="flex items-center">
                                     <input type="checkbox" id="require-lowercase" class="mr-2">
                                     <span class="text-sm">Require lowercase letter</span>
-                                </label>
-                                <label class="flex items-center">
+                    </label>
+                    <label class="flex items-center">
                                     <input type="checkbox" id="require-digits" class="mr-2">
                                     <span class="text-sm">Require digit</span>
                                 </label>
                                 <label class="flex items-center">
                                     <input type="checkbox" id="require-symbols" class="mr-2">
                                     <span class="text-sm">Require symbol</span>
-                                </label>
-                            </div>
+                    </label>
+                </div>
                         </div>
                     </div>
                 </div>
@@ -4227,7 +4227,7 @@ ith<!DOCTYPE html>
                 <button onclick="calculateAdultBMI()" class="btn-primary w-full text-white py-3 rounded-lg font-semibold">
                     Calculate BMI
                 </button>
-            </div>
+                </div>
 
             <!-- Child/Teen Mode -->
             <div id="child-teen-mode" class="bmi-mode hidden">
@@ -4235,14 +4235,14 @@ ith<!DOCTYPE html>
                     <div>
                         <label class="block text-sm font-medium mb-2">Age (years)</label>
                         <input type="number" id="child-age" placeholder="10" min="2" max="19" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                    </div>
+            </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Sex</label>
                         <select id="child-sex" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                         </select>
-                    </div>
+        </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div>
@@ -4259,7 +4259,7 @@ ith<!DOCTYPE html>
                 <button onclick="calculateChildBMI()" class="btn-primary w-full text-white py-3 rounded-lg font-semibold">
                     Calculate BMI
                 </button>
-            </div>
+    </div>
 
             <!-- Results Display -->
             <div id="bmi-result" class="hidden mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
@@ -4352,14 +4352,14 @@ ith<!DOCTYPE html>
 
             <!-- Basic Mode -->
             <div id="qr-basic-mode" class="qr-mode">
-                <div class="space-y-4">
-                    <div>
+            <div class="space-y-4">
+                <div>
                         <label class="block text-sm font-medium mb-2">Text or URL</label>
                         <input type="text" id="qr-text" placeholder="Enter text, URL, or data to encode" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                    </div>
+                </div>
                     <button onclick="generateBasicQR()" class="btn-primary w-full text-white py-3 rounded-lg font-semibold">
                         🔒 Generate QR Code
-                    </button>
+                </button>
                 </div>
             </div>
 
@@ -4572,8 +4572,8 @@ ith<!DOCTYPE html>
                     <button onclick="calculatePercentOf()" class="btn-primary w-full text-white py-3 rounded-lg font-semibold mt-4">
                         Calculate
                     </button>
-                </div>
-            </div>
+        </div>
+    </div>
 
             <!-- What Percent Mode -->
             <div id="what-percent-mode" class="percentage-mode hidden">
@@ -6222,7 +6222,7 @@ ith<!DOCTYPE html>
                     console.log('Registry units:', testConverter.registry.units);
                     console.log('Registry dimensions:', testConverter.registry.dimBase);
                     
-                } catch (error) {
+            } catch (error) {
                     console.error('❌ Error creating test converter:', error);
                     console.error('Error stack:', error.stack);
                 }
