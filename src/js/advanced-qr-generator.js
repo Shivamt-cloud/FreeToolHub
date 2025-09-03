@@ -429,3 +429,5 @@ export class QRUtils {
         return segmenter.findMinimumVersion(segments, eccLevel);
     }
 }
+
+

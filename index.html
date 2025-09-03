@@ -15,7 +15,7 @@ ith<!DOCTYPE html>
     <script src="src/js/color-converter.js"></script>
     <script src="src/js/base64-encoder.js"></script>
     <script src="src/js/advanced-password-generator.js"></script>
-    <script src="src/js/advanced-qr-generator.js" type="module"></script>
+
 
     
     <script>
@@ -70,7 +70,9 @@ ith<!DOCTYPE html>
                 } else if (modalId === 'qr') {
                     if (typeof initializeAdvancedQRGenerator === 'function') {
                         console.log('Initializing Advanced QR Code Generator...');
-                        initializeAdvancedQRGenerator();
+                        initializeAdvancedQRGenerator().catch(error => {
+                            console.error('Failed to initialize QR Generator:', error);
+                        });
                     } else {
                         console.error('initializeAdvancedQRGenerator function not found');
                     }
@@ -705,21 +707,29 @@ ith<!DOCTYPE html>
         }
 
         // Advanced QR Code Generator Functions
-        let windowAdvancedQRGen = null;
+        let AdvancedQRGen = null;
 
-        function initializeAdvancedQRGenerator() {
+        async function initializeAdvancedQRGenerator() {
             try {
                 console.log('Initializing Advanced QR Code Generator...');
                 
-                // Check if the module is available
+                // Check if the module is already loaded
                 if (typeof AdvancedQRGenerator === 'undefined') {
-                    console.error('AdvancedQRGenerator class not found!');
-                    showError('QR Code Generator module not loaded');
-                    return false;
+                    console.log('Loading QR Code Generator module...');
+                    try {
+                        const module = await import('./src/js/advanced-qr-generator.js');
+                        window.AdvancedQRGenerator = module.AdvancedQRGenerator;
+                        window.QRUtils = module.QRUtils;
+                        console.log('QR Code Generator module loaded successfully');
+                    } catch (importError) {
+                        console.error('Failed to import QR Code Generator module:', importError);
+                        showError('Failed to load QR Code Generator module');
+                        return false;
+                    }
                 }
 
                 // Create instance
-                windowAdvancedQRGen = new AdvancedQRGenerator();
+                AdvancedQRGen = new AdvancedQRGenerator();
                 console.log('Advanced QR Code Generator initialized successfully');
                 return true;
             } catch (error) {
@@ -729,9 +739,9 @@ ith<!DOCTYPE html>
             }
         }
 
-        function generateBasicQR() {
-            if (!windowAdvancedQRGen) {
-                if (!initializeAdvancedQRGenerator()) {
+        async function generateBasicQR() {
+            if (!AdvancedQRGen) {
+                if (!(await initializeAdvancedQRGenerator())) {
                     return;
                 }
             }
@@ -750,7 +760,7 @@ ith<!DOCTYPE html>
 
                 console.log('Generating basic QR code with:', { input, eccLevel, moduleSize, foreground, background });
 
-                const result = windowAdvancedQRGen.generate(input, {
+                const result = AdvancedQRGen.generate(input, {
                     eccLevel,
                     autoVersion: true,
                     autoMask: true,
@@ -765,9 +775,9 @@ ith<!DOCTYPE html>
             }
         }
 
-        function generateAdvancedQR() {
-            if (!windowAdvancedQRGen) {
-                if (!initializeAdvancedQRGenerator()) {
+        async function generateAdvancedQR() {
+            if (!AdvancedQRGen) {
+                if (!(await initializeAdvancedQRGenerator())) {
                     return;
                 }
             }
@@ -804,7 +814,7 @@ ith<!DOCTYPE html>
 
                 console.log('Generating advanced QR code with:', { input, options });
 
-                const result = windowAdvancedQRGen.generate(input, options);
+                const result = AdvancedQRGen.generate(input, options);
                 console.log('Advanced QR generation result:', result);
                 displayQRResult(result, { moduleSize, foreground, background });
             } catch (error) {
@@ -822,7 +832,7 @@ ith<!DOCTYPE html>
 
             try {
                 // Generate SVG
-                const svg = windowAdvancedQRGen.renderSVG(result.matrix, renderOptions);
+                const svg = AdvancedQRGen.renderSVG(result.matrix, renderOptions);
                 displayDiv.innerHTML = svg;
 
                 // Display details
@@ -877,7 +887,7 @@ ith<!DOCTYPE html>
             }
         }
 
-        function testQRModule() {
+        async function testQRModule() {
             console.log('Testing QR Module...');
             let output = '=== QR Module Test ===\n';
             
@@ -885,24 +895,19 @@ ith<!DOCTYPE html>
                 output += `AdvancedQRGenerator available: ${typeof AdvancedQRGenerator !== 'undefined'}\n`;
                 output += `AdvancedQRGenerator type: ${typeof AdvancedQRGenerator}\n`;
                 
-                if (typeof AdvancedQRGenerator !== 'undefined') {
+                // Try to initialize the module
+                if (await initializeAdvancedQRGenerator()) {
                     output += '✅ AdvancedQRGenerator class is available\n';
+                    output += '✅ QR Generator initialized successfully\n';
+                    output += `Instance type: ${AdvancedQRGen.constructor.name}\n`;
                     
-                    // Test initialization
-                    if (initializeAdvancedQRGenerator()) {
-                        output += '✅ QR Generator initialized successfully\n';
-                        output += `Instance type: ${windowAdvancedQRGen.constructor.name}\n`;
-                        
-                        // Test basic generation
-                        const testResult = windowAdvancedQRGen.generate('Test');
-                        output += `✅ Basic generation test passed\n`;
-                        output += `Generated version: ${testResult.version}\n`;
-                        output += `Generated size: ${testResult.matrix.size}×${testResult.matrix.size}\n`;
-                    } else {
-                        output += '❌ QR Generator initialization failed\n';
-                    }
+                    // Test basic generation
+                    const testResult = AdvancedQRGen.generate('Test');
+                    output += `✅ Basic generation test passed\n`;
+                    output += `Generated version: ${testResult.version}\n`;
+                    output += `Generated size: ${testResult.matrix.size}×${testResult.matrix.size}\n`;
                 } else {
-                    output += '❌ AdvancedQRGenerator class not found\n';
+                    output += '❌ QR Generator initialization failed\n';
                 }
             } catch (error) {
                 output += `❌ Error during testing: ${error.message}\n`;
