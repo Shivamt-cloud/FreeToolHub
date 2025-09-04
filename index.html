@@ -172,6 +172,24 @@ ith<!DOCTYPE html>
                     } else {
                         console.error('initializePercentageCalculator function not found');
                     }
+                } else if (modalId === 'timestamp') {
+                    if (typeof initializeAdvancedTimestampConverter === 'function') {
+                        console.log('Initializing Advanced Timestamp Converter...');
+                        initializeAdvancedTimestampConverter().catch(error => {
+                            console.error('Failed to initialize Timestamp Converter:', error);
+                        });
+                    } else {
+                        console.error('initializeAdvancedTimestampConverter function not found');
+                    }
+                } else if (modalId === 'timezone') {
+                    if (typeof initializeAdvancedTimezoneConverter === 'function') {
+                        console.log('Initializing Advanced Timezone Converter...');
+                        initializeAdvancedTimezoneConverter().catch(error => {
+                            console.error('Failed to initialize Timezone Converter:', error);
+                        });
+                    } else {
+                        console.error('initializeAdvancedTimezoneConverter function not found');
+                    }
                 }
             } else {
                 console.error('Modal not found:', modalId);
@@ -2837,6 +2855,213 @@ ith<!DOCTYPE html>
         }
 
         function showTimestampSuccess(message) {
+            // Create a temporary success message
+            const successDiv = document.createElement('div');
+            successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            successDiv.textContent = message;
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                document.body.removeChild(successDiv);
+            }, 3000);
+        }
+
+        // Advanced Timezone Converter Functions
+        let AdvancedTimezoneConverter = null;
+
+        async function initializeAdvancedTimezoneConverter() {
+            try {
+                console.log('Initializing Advanced Timezone Converter...');
+                
+                // Check if the module is already loaded
+                if (typeof window.TimezoneConverter === 'undefined') {
+                    console.log('Loading Timezone Converter module...');
+                    try {
+                        const module = await import('./src/js/advanced-timezone-converter.js');
+                        window.TimezoneConverter = module.TimezoneConverter;
+                        window.TimezoneUtils = module.TimezoneUtils;
+                        console.log('Timezone Converter module loaded successfully');
+                    } catch (importError) {
+                        console.error('Failed to import Timezone Converter module:', importError);
+                        showTimezoneError('Failed to load Timezone Converter module');
+                        return false;
+                    }
+                }
+
+                // Create instance
+                AdvancedTimezoneConverter = new window.TimezoneConverter();
+                console.log('Advanced Timezone Converter initialized successfully');
+                
+                return true;
+            } catch (error) {
+                console.error('Error initializing Advanced Timezone Converter:', error);
+                showTimezoneError(`Error initializing Timezone Converter: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function convertTimezone() {
+            try {
+                if (!AdvancedTimezoneConverter) {
+                    const initialized = await initializeAdvancedTimezoneConverter();
+                    if (!initialized) return;
+                }
+
+                const inputValue = document.getElementById('timezone-input').value.trim();
+                const inputFormat = document.getElementById('timezone-input-format').value.trim() || null;
+                const sourceTz = document.getElementById('timezone-source').value;
+                const targetTz = document.getElementById('timezone-target').value;
+                const outputFormat = document.getElementById('timezone-output-format').value;
+
+                if (!inputValue) {
+                    showTimezoneError('Please enter an input value');
+                    return;
+                }
+
+                hideTimezoneError();
+
+                const result = AdvancedTimezoneConverter.convert(inputValue, inputFormat, sourceTz, targetTz, outputFormat);
+                document.getElementById('timezone-output').value = result;
+                
+            } catch (error) {
+                console.error('Timezone conversion error:', error);
+                showTimezoneError(`Conversion failed: ${error.message}`);
+            }
+        }
+
+        async function updateCurrentTimes() {
+            try {
+                if (!AdvancedTimezoneConverter) {
+                    const initialized = await initializeAdvancedTimezoneConverter();
+                    if (!initialized) return;
+                }
+
+                const timezones = [
+                    { id: 'current-utc', tz: 'UTC' },
+                    { id: 'current-ny', tz: 'America/New_York' },
+                    { id: 'current-london', tz: 'Europe/London' },
+                    { id: 'current-tokyo', tz: 'Asia/Tokyo' },
+                    { id: 'current-kolkata', tz: 'Asia/Kolkata' },
+                    { id: 'current-sydney', tz: 'Australia/Sydney' }
+                ];
+
+                for (const { id, tz } of timezones) {
+                    try {
+                        const currentTime = window.TimezoneUtils.getCurrentTimeInTimezone(tz, 'YYYY-MM-DD HH:mm:ss z');
+                        document.getElementById(id).textContent = currentTime;
+                    } catch (error) {
+                        document.getElementById(id).textContent = 'Error loading time';
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating current times:', error);
+            }
+        }
+
+        async function showTimezoneInfo() {
+            try {
+                if (!AdvancedTimezoneConverter) {
+                    const initialized = await initializeAdvancedTimezoneConverter();
+                    if (!initialized) return;
+                }
+
+                const selectedTz = document.getElementById('timezone-info-select').value;
+                if (!selectedTz) {
+                    document.getElementById('timezone-info-display').classList.add('hidden');
+                    return;
+                }
+
+                const info = AdvancedTimezoneConverter.getTimezoneInfo(selectedTz);
+                if (!info) {
+                    document.getElementById('timezone-info-display').classList.add('hidden');
+                    return;
+                }
+
+                const currentOffset = window.TimezoneUtils.getCurrentTimezoneOffset(selectedTz);
+                const observesDST = window.TimezoneUtils.observesDST(selectedTz);
+                const currentAbbr = window.TimezoneUtils.getCurrentTimezoneAbbreviation(selectedTz);
+
+                const infoHtml = `
+                    <div class="space-y-2">
+                        <div><strong>Name:</strong> ${info.name}</div>
+                        <div><strong>Current Abbreviation:</strong> ${currentAbbr}</div>
+                        <div><strong>Current Offset:</strong> ${currentOffset > 0 ? '+' : ''}${currentOffset / 60} hours</div>
+                        <div><strong>Observes DST:</strong> ${observesDST ? 'Yes' : 'No'}</div>
+                        ${info.transitions && info.transitions.length > 0 ? `
+                            <div><strong>Recent Transitions:</strong></div>
+                            <div class="ml-4 text-xs">
+                                ${info.transitions.slice(-3).map(t => 
+                                    `${new Date(t.at_utc_ms).toLocaleDateString()}: ${t.abbreviation} (${t.offset_minutes / 60 > 0 ? '+' : ''}${t.offset_minutes / 60}h)`
+                                ).join('<br>')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                document.getElementById('timezone-info-content-display').innerHTML = infoHtml;
+                document.getElementById('timezone-info-display').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error showing timezone info:', error);
+            }
+        }
+
+        function switchTimezoneTab(mode) {
+            // Hide all tab contents
+            document.querySelectorAll('.timezone-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            // Remove active class from all tabs
+            document.querySelectorAll('[id^="timezone-"][id$="-tab"]').forEach(tab => {
+                tab.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+                tab.classList.add('text-gray-500');
+            });
+
+            // Show selected tab content
+            document.getElementById(`timezone-${mode}-content`).classList.remove('hidden');
+
+            // Add active class to selected tab
+            const activeTab = document.getElementById(`timezone-${mode}-tab`);
+            activeTab.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+            activeTab.classList.remove('text-gray-500');
+
+            // Auto-update current times when switching to current tab
+            if (mode === 'current') {
+                updateCurrentTimes();
+            }
+        }
+
+        function copyTimezoneResult() {
+            const output = document.getElementById('timezone-output').value;
+            if (output) {
+                navigator.clipboard.writeText(output).then(() => {
+                    showTimezoneSuccess('Converted timestamp copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    showTimezoneError('Failed to copy to clipboard');
+                });
+            }
+        }
+
+        function clearTimezoneInput() {
+            document.getElementById('timezone-input').value = '';
+            document.getElementById('timezone-input-format').value = '';
+            document.getElementById('timezone-output').value = '';
+            hideTimezoneError();
+        }
+
+        function showTimezoneError(message) {
+            const errorDiv = document.getElementById('timezone-error');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function hideTimezoneError() {
+            const errorDiv = document.getElementById('timezone-error');
+            errorDiv.classList.add('hidden');
+        }
+
+        function showTimezoneSuccess(message) {
             // Create a temporary success message
             const successDiv = document.createElement('div');
             successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
@@ -6138,8 +6363,8 @@ ith<!DOCTYPE html>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">Timezone Converter</h3>
-                    <p class="text-gray-600 text-sm">Convert time between timezones</p>
+                    <h3 class="text-xl font-semibold mb-2">Advanced Timezone Converter</h3>
+                    <p class="text-gray-600 text-sm">Convert time between timezones with DST support</p>
                 </div>
 
                 <!-- More Tools -->
@@ -9353,7 +9578,188 @@ ith<!DOCTYPE html>
         </div>
     </div>
 
-    <div id="timezone" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">Timezone Converter</h3><button onclick="closeModal('timezone')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">🌍</div><h4 class="text-xl font-semibold mb-2">Timezone Converter</h4><p class="text-gray-600">Convert time between different timezones.</p></div></div></div>
+    <!-- Advanced Timezone Converter Modal -->
+    <div id="timezone" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gradient">🌍 Advanced Timezone Converter</h3>
+                <button onclick="closeModal('timezone')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                <button id="timezone-convert-tab" onclick="switchTimezoneTab('convert')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md bg-white text-blue-600 shadow-sm">
+                    Convert
+                </button>
+                <button id="timezone-current-tab" onclick="switchTimezoneTab('current')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                    Current Time
+                </button>
+                <button id="timezone-info-tab" onclick="switchTimezoneTab('info')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                    Timezone Info
+                </button>
+            </div>
+
+            <!-- Convert Tab -->
+            <div id="timezone-convert-content" class="timezone-tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Input Section -->
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-semibold text-gray-800">Input</h4>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Input Value</label>
+                            <textarea id="timezone-input" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter timestamp (e.g., 2024-09-04T12:00:00Z, 1693843200000, or 2024-09-04 12:00:00)"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Input Format (Optional)</label>
+                            <input type="text" id="timezone-input-format" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., YYYY-MM-DD HH:mm:ss, DD/MM/YYYY h:mm A">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Source Timezone</label>
+                            <select id="timezone-source" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="UTC">UTC</option>
+                                <option value="America/New_York">America/New_York (EST/EDT)</option>
+                                <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+                                <option value="Europe/London">Europe/London (GMT/BST)</option>
+                                <option value="Europe/Berlin">Europe/Berlin (CET/CEST)</option>
+                                <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                                <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+                                <option value="Asia/Shanghai">Asia/Shanghai (CST)</option>
+                                <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+                                <option value="Pacific/Auckland">Pacific/Auckland (NZST/NZDT)</option>
+                                <option value="+05:30">+05:30 (Fixed Offset)</option>
+                                <option value="-07:00">-07:00 (Fixed Offset)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Output Section -->
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-semibold text-gray-800">Output</h4>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Target Timezone</label>
+                            <select id="timezone-target" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="UTC">UTC</option>
+                                <option value="America/New_York">America/New_York (EST/EDT)</option>
+                                <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+                                <option value="Europe/London">Europe/London (GMT/BST)</option>
+                                <option value="Europe/Berlin">Europe/Berlin (CET/CEST)</option>
+                                <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                                <option value="Asia/Kolkata" selected>Asia/Kolkata (IST)</option>
+                                <option value="Asia/Shanghai">Asia/Shanghai (CST)</option>
+                                <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+                                <option value="Pacific/Auckland">Pacific/Auckland (NZST/NZDT)</option>
+                                <option value="+05:30">+05:30 (Fixed Offset)</option>
+                                <option value="-07:00">-07:00 (Fixed Offset)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Output Format</label>
+                            <select id="timezone-output-format" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="ISO8601">ISO 8601 (2024-09-04T12:00:00.000+05:30)</option>
+                                <option value="YYYY-MM-DD HH:mm:ss Z">YYYY-MM-DD HH:mm:ss Z</option>
+                                <option value="YYYY/MM/DD HH:mm:ss z">YYYY/MM/DD HH:mm:ss z</option>
+                                <option value="DD-MM-YYYY h:mm A z">DD-MM-YYYY h:mm A z</option>
+                                <option value="MM/DD/YYYY HH:mm:ss Z">MM/DD/YYYY HH:mm:ss Z</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Result</label>
+                            <textarea id="timezone-output" rows="3" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50" readonly placeholder="Converted timestamp will appear here"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-3 mt-6">
+                    <button onclick="convertTimezone()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        Convert Timezone
+                    </button>
+                    <button onclick="copyTimezoneResult()" class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+                        Copy Result
+                    </button>
+                    <button onclick="clearTimezoneInput()" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors">
+                        Clear
+                    </button>
+                </div>
+            </div>
+
+            <!-- Current Time Tab -->
+            <div id="timezone-current-content" class="timezone-tab-content hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="p-4 bg-blue-50 rounded-lg">
+                        <h5 class="font-semibold text-blue-800 mb-2">UTC</h5>
+                        <div id="current-utc" class="text-sm text-blue-600">Loading...</div>
+                    </div>
+                    <div class="p-4 bg-green-50 rounded-lg">
+                        <h5 class="font-semibold text-green-800 mb-2">New York (EST/EDT)</h5>
+                        <div id="current-ny" class="text-sm text-green-600">Loading...</div>
+                    </div>
+                    <div class="p-4 bg-purple-50 rounded-lg">
+                        <h5 class="font-semibold text-purple-800 mb-2">London (GMT/BST)</h5>
+                        <div id="current-london" class="text-sm text-purple-600">Loading...</div>
+                    </div>
+                    <div class="p-4 bg-orange-50 rounded-lg">
+                        <h5 class="font-semibold text-orange-800 mb-2">Tokyo (JST)</h5>
+                        <div id="current-tokyo" class="text-sm text-orange-600">Loading...</div>
+                    </div>
+                    <div class="p-4 bg-red-50 rounded-lg">
+                        <h5 class="font-semibold text-red-800 mb-2">Kolkata (IST)</h5>
+                        <div id="current-kolkata" class="text-sm text-red-600">Loading...</div>
+                    </div>
+                    <div class="p-4 bg-indigo-50 rounded-lg">
+                        <h5 class="font-semibold text-indigo-800 mb-2">Sydney (AEST/AEDT)</h5>
+                        <div id="current-sydney" class="text-sm text-indigo-600">Loading...</div>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <button onclick="updateCurrentTimes()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        Refresh Times
+                    </button>
+                </div>
+            </div>
+
+            <!-- Timezone Info Tab -->
+            <div id="timezone-info-content" class="timezone-tab-content hidden">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Timezone</label>
+                        <select id="timezone-info-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" onchange="showTimezoneInfo()">
+                            <option value="">Select a timezone...</option>
+                            <option value="UTC">UTC</option>
+                            <option value="America/New_York">America/New_York</option>
+                            <option value="America/Los_Angeles">America/Los_Angeles</option>
+                            <option value="Europe/London">Europe/London</option>
+                            <option value="Europe/Berlin">Europe/Berlin</option>
+                            <option value="Asia/Tokyo">Asia/Tokyo</option>
+                            <option value="Asia/Kolkata">Asia/Kolkata</option>
+                            <option value="Asia/Shanghai">Asia/Shanghai</option>
+                            <option value="Australia/Sydney">Australia/Sydney</option>
+                            <option value="Pacific/Auckland">Pacific/Auckland</option>
+                        </select>
+                    </div>
+                    
+                    <div id="timezone-info-display" class="p-4 bg-gray-50 rounded-lg hidden">
+                        <h5 class="font-semibold text-gray-800 mb-3">Timezone Information</h5>
+                        <div id="timezone-info-content-display" class="text-sm text-gray-600"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Display -->
+            <div id="timezone-error" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden"></div>
+        </div>
+    </div>
 
     <div id="lorem" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">Lorem Generator</h3><button onclick="closeModal('lorem')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">📝</div><h4 class="text-xl font-semibold mb-2">Lorem Generator</h4><p class="text-gray-600">Generate placeholder text for your designs.</p></div></div></div>
 
