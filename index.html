@@ -1211,7 +1211,7 @@ ith<!DOCTYPE html>
                 console.log('Initializing Advanced Word Counter...');
                 
                 // Check if the module is already loaded
-                if (typeof AdvancedWordCounter === 'undefined') {
+                if (typeof window.AdvancedWordCounter === 'undefined') {
                     console.log('Loading Word Counter module...');
                     try {
                         const module = await import('./src/js/advanced-word-counter.js');
@@ -1226,7 +1226,7 @@ ith<!DOCTYPE html>
                 }
 
                 // Create instance
-                AdvancedWordCounter = new AdvancedWordCounter();
+                AdvancedWordCounter = new window.AdvancedWordCounter();
                 console.log('Advanced Word Counter initialized successfully');
                 return true;
             } catch (error) {
@@ -1260,7 +1260,9 @@ ith<!DOCTYPE html>
                     readingSpeed: parseInt(document.getElementById('reading-speed').value) || 200
                 };
 
+                console.log('Analyzing text with options:', options);
                 const result = AdvancedWordCounter.countWords(text, options);
+                console.log('Analysis result:', result);
 
                 // Display basic statistics
                 displayBasicStats(result.basicStatistics);
@@ -1289,7 +1291,7 @@ ith<!DOCTYPE html>
 
         function displayBasicStats(stats) {
             const statsDiv = document.getElementById('word-stats');
-            const summary = WordCounterUtils.getTextSummary(stats);
+            const summary = window.WordCounterUtils.getTextSummary(stats);
             
             statsDiv.innerHTML = `
                 <div class="bg-gray-50 p-4 rounded-lg">
@@ -1369,8 +1371,8 @@ ith<!DOCTYPE html>
         function displayReadabilityScores(scores) {
             const readabilityDiv = document.getElementById('readability-scores');
             
-            const fleschLevel = WordCounterUtils.getReadabilityLevel(scores.fleschReadingEase, 'flesch');
-            const gradeLevel = WordCounterUtils.getReadabilityLevel(scores.fleschKincaidGrade, 'grade');
+            const fleschLevel = window.WordCounterUtils.getReadabilityLevel(scores.fleschReadingEase, 'flesch');
+            const gradeLevel = window.WordCounterUtils.getReadabilityLevel(scores.fleschKincaidGrade, 'grade');
             
             readabilityDiv.innerHTML = `
                 <div class="bg-green-50 p-4 rounded-lg">
@@ -1398,7 +1400,7 @@ ith<!DOCTYPE html>
 
         function displayReadingTime(readingTime) {
             const readingTimeDiv = document.getElementById('reading-time');
-            const description = WordCounterUtils.getReadingTimeDescription(readingTime.minutes);
+            const description = window.WordCounterUtils.getReadingTimeDescription(readingTime.minutes);
             
             readingTimeDiv.innerHTML = `
                 <div class="bg-orange-50 p-4 rounded-lg">
