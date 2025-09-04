@@ -193,6 +193,11 @@ export class InputSegmenter {
             return [];
         }
 
+        // Check if this looks like a URL - if so, use Byte mode for the entire string
+        if (this.looksLikeURL(input)) {
+            return [new DataSegment('BYTE', input, 0, input.length)];
+        }
+
         const segments = [];
         let currentMode = this.detectMode(input[0]);
         let startIndex = 0;
@@ -224,6 +229,20 @@ export class InputSegmenter {
         ));
 
         return this.optimizeSegments(segments);
+    }
+
+    /**
+     * Check if input looks like a URL
+     */
+    looksLikeURL(input) {
+        // Simple URL detection patterns
+        const urlPatterns = [
+            /^https?:\/\//i,           // http:// or https://
+            /^www\./i,                 // www.
+            /\.(com|org|net|edu|gov|mil|int|co|uk|de|fr|jp|au|ca|us|in|br|cn|ru|es|it|nl|se|no|dk|fi|pl|tr|mx|ar|cl|pe|ve|ec|uy|py|bo|gf|sr|gy|fk|gs|tc|vg|ai|ag|bb|bs|bz|dm|gd|jm|kn|lc|ms|pr|tt|vc|vi|as|gu|mp|pw|mh|fm|ki|nr|tv|vu|sb|to|ws|fj|pg|nc|pf|wf|yt|re|pm|bl|mf|sx|bq|cw|aw|an|gl|fo|ax|je|gg|im|gi|ad|sm|va|mc|li|ch|at|be|lu|is|ie|mt|cy|ee|lv|lt|si|sk|cz|hu|ro|bg|hr|ba|rs|me|mk|al|md|ua|by|kz|kg|tj|tm|uz|az|ge|am|mn|kp|kr|tw|hk|mo|sg|my|th|la|kh|mm|bn|id|ph|vn|tl|nz)$/i
+        ];
+        
+        return urlPatterns.some(pattern => pattern.test(input));
     }
 
     /**
