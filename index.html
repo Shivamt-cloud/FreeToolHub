@@ -121,6 +121,15 @@ ith<!DOCTYPE html>
                     } else {
                         console.error('initializeAdvancedURLProcessor function not found');
                     }
+                } else if (modalId === 'json') {
+                    if (typeof initializeAdvancedJSONProcessor === 'function') {
+                        console.log('Initializing Advanced JSON Processor...');
+                        initializeAdvancedJSONProcessor().catch(error => {
+                            console.error('Failed to initialize JSON Processor:', error);
+                        });
+                    } else {
+                        console.error('initializeAdvancedJSONProcessor function not found');
+                    }
                 } else if (modalId === 'calculator') {
                     if (typeof initializeAdvancedCalculator === 'function') {
                         console.log('Initializing Advanced Calculator...');
@@ -2250,6 +2259,593 @@ ith<!DOCTYPE html>
                 selectedTab.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
                 selectedTab.classList.remove('text-gray-500', 'hover:text-gray-700');
             }
+        }
+
+        // Advanced JSON Processor Functions
+        let AdvancedJSONProcessor = null;
+
+        async function initializeAdvancedJSONProcessor() {
+            try {
+                console.log('Initializing Advanced JSON Processor...');
+                
+                // Check if the module is already loaded
+                if (typeof window.AdvancedJSONProcessor === 'undefined') {
+                    console.log('Loading JSON Processor module...');
+                    try {
+                        const module = await import('./src/js/advanced-json-formatter.js');
+                        window.AdvancedJSONProcessor = module.AdvancedJSONProcessor;
+                        window.JSONUtils = module.JSONUtils;
+                        console.log('JSON Processor module loaded successfully');
+                    } catch (importError) {
+                        console.error('Failed to import JSON Processor module:', importError);
+                        showError('Failed to load JSON Processor module');
+                        return false;
+                    }
+                }
+
+                // Create instance
+                AdvancedJSONProcessor = new window.AdvancedJSONProcessor();
+                console.log('Advanced JSON Processor initialized successfully');
+                
+                return true;
+            } catch (error) {
+                console.error('Error initializing Advanced JSON Processor:', error);
+                showError(`Error initializing JSON Processor: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function formatJSON() {
+            if (!AdvancedJSONProcessor) {
+                if (!(await initializeAdvancedJSONProcessor())) {
+                    return;
+                }
+            }
+
+            try {
+                const jsonText = document.getElementById('json-input').value.trim();
+                if (!jsonText) {
+                    showError('Please enter JSON to format');
+                    return;
+                }
+
+                const options = {
+                    indent_size: parseInt(document.getElementById('json-indent-size').value) || 2,
+                    use_tabs: false, // Not implemented in UI yet
+                    sort_keys: document.getElementById('json-sort-keys').checked,
+                    max_line_length: parseInt(document.getElementById('json-max-line-length').value) || 80,
+                    ensure_ascii: false // Not implemented in UI yet
+                };
+
+                console.log('Formatting JSON with options:', options);
+                const result = AdvancedJSONProcessor.processJson(jsonText, 'format', options);
+                console.log('Formatting result:', result);
+
+                if (result.success) {
+                    displayJSONResult(result.output, 'formatted', 'Formatted JSON');
+                } else {
+                    displayJSONErrors(result.errors);
+                }
+
+            } catch (error) {
+                console.error('Error formatting JSON:', error);
+                showError(`Error formatting JSON: ${error.message}`);
+            }
+        }
+
+        async function minifyJSON() {
+            if (!AdvancedJSONProcessor) {
+                if (!(await initializeAdvancedJSONProcessor())) {
+                    return;
+                }
+            }
+
+            try {
+                const jsonText = document.getElementById('json-minify-input').value.trim();
+                if (!jsonText) {
+                    showError('Please enter JSON to minify');
+                    return;
+                }
+
+                console.log('Minifying JSON...');
+                const result = AdvancedJSONProcessor.processJson(jsonText, 'minify');
+                console.log('Minification result:', result);
+
+                if (result.success) {
+                    displayJSONMinifyResult(result.output, result.metadata.compression_ratio);
+                } else {
+                    displayJSONErrors(result.errors);
+                }
+
+            } catch (error) {
+                console.error('Error minifying JSON:', error);
+                showError(`Error minifying JSON: ${error.message}`);
+            }
+        }
+
+        async function validateJSON() {
+            if (!AdvancedJSONProcessor) {
+                if (!(await initializeAdvancedJSONProcessor())) {
+                    return;
+                }
+            }
+
+            try {
+                const jsonText = document.getElementById('json-validate-input').value.trim();
+                if (!jsonText) {
+                    showError('Please enter JSON to validate');
+                    return;
+                }
+
+                console.log('Validating JSON...');
+                const result = AdvancedJSONProcessor.processJson(jsonText, 'validate');
+                console.log('Validation result:', result);
+
+                if (result.success) {
+                    const tokenCount = result.metadata.token_count || 0;
+                    displayJSONValidationResult(true, [], tokenCount);
+                } else {
+                    displayJSONValidationResult(false, result.errors, 0);
+                }
+
+            } catch (error) {
+                console.error('Error validating JSON:', error);
+                showError(`Error validating JSON: ${error.message}`);
+            }
+        }
+
+        async function highlightJSON() {
+            if (!AdvancedJSONProcessor) {
+                if (!(await initializeAdvancedJSONProcessor())) {
+                    return;
+                }
+            }
+
+            try {
+                const jsonText = document.getElementById('json-highlight-input').value.trim();
+                if (!jsonText) {
+                    showError('Please enter JSON to highlight');
+                    return;
+                }
+
+                console.log('Highlighting JSON...');
+                const result = AdvancedJSONProcessor.processJson(jsonText, 'highlight');
+                console.log('Highlighting result:', result);
+
+                if (result.success) {
+                    displayJSONHighlight(result.output);
+                } else {
+                    displayJSONErrors(result.errors);
+                }
+
+            } catch (error) {
+                console.error('Error highlighting JSON:', error);
+                showError(`Error highlighting JSON: ${error.message}`);
+            }
+        }
+
+        function displayJSONResult(output, type, title) {
+            const resultDiv = document.getElementById('json-result');
+            const icon = type === 'formatted' ? '📄' : type === 'minified' ? '🗜️' : type === 'valid' ? '✅' : '📄';
+            
+            resultDiv.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-semibold mb-3">${icon} ${title}</h4>
+                    <div class="flex items-start space-x-2">
+                        <textarea id="json-output" readonly 
+                                  class="flex-1 p-3 border border-gray-300 rounded-lg bg-white font-mono text-sm min-h-[200px]">${output}</textarea>
+                        <button onclick="copyToClipboard('${output.replace(/'/g, "\\'")}')" 
+                                class="btn-secondary px-4 py-2 text-sm">
+                            📋 Copy
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayJSONHighlight(htmlOutput) {
+            const resultDiv = document.getElementById('json-result');
+            
+            resultDiv.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-semibold mb-3">🎨 Syntax Highlighted JSON</h4>
+                    <div class="bg-white border border-gray-300 rounded-lg p-4 font-mono text-sm min-h-[200px] overflow-auto">
+                        ${htmlOutput}
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayJSONErrors(errors) {
+            const resultDiv = document.getElementById('json-result');
+            
+            if (errors && errors.length > 0) {
+                const errorHtml = errors.map(error => `
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-2">
+                        <div class="flex items-start space-x-2">
+                            <span class="text-red-500 text-lg">❌</span>
+                            <div>
+                                <p class="text-red-800 font-medium">${error.message}</p>
+                                ${error.line ? `<p class="text-red-600 text-sm">Line ${error.line}, Column ${error.column}</p>` : ''}
+                                ${error.token ? `<p class="text-red-600 text-sm">Token: "${error.token}"</p>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                resultDiv.innerHTML = `
+                    <div class="bg-red-50 p-4 rounded-lg">
+                        <h4 class="font-semibold mb-3 text-red-800">❌ JSON Validation Errors</h4>
+                        ${errorHtml}
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="bg-red-50 p-4 rounded-lg">
+                        <h4 class="font-semibold mb-3 text-red-800">❌ JSON Processing Error</h4>
+                        <p class="text-red-600">An unknown error occurred while processing the JSON.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function switchJSONTab(mode) {
+            // Hide all tab contents
+            document.querySelectorAll('.json-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('[id^="json-"][id$="-tab"]').forEach(tab => {
+                tab.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+                tab.classList.add('text-gray-500', 'hover:text-gray-700');
+            });
+            
+            // Show selected tab content
+            const selectedContent = document.getElementById(`json-${mode}-content`);
+            if (selectedContent) {
+                selectedContent.classList.remove('hidden');
+            }
+            
+            // Add active class to selected tab
+            const selectedTab = document.getElementById(`json-${mode}-tab`);
+            if (selectedTab) {
+                selectedTab.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+                selectedTab.classList.remove('text-gray-500', 'hover:text-gray-700');
+            }
+        }
+
+        // JSON Formatter Utility Functions
+        function copyJSONResult() {
+            const output = document.getElementById('json-output').value;
+            if (output) {
+                navigator.clipboard.writeText(output).then(() => {
+                    showSuccess('Formatted JSON copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    showError('Failed to copy to clipboard');
+                });
+            }
+        }
+
+        function copyJSONMinifyResult() {
+            const output = document.getElementById('json-minify-output').value;
+            if (output) {
+                navigator.clipboard.writeText(output).then(() => {
+                    showSuccess('Minified JSON copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    showError('Failed to copy to clipboard');
+                });
+            }
+        }
+
+        function copyJSONHighlightResult() {
+            const output = document.getElementById('json-highlight-output').innerHTML;
+            if (output) {
+                navigator.clipboard.writeText(output).then(() => {
+                    showSuccess('Highlighted JSON HTML copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    showError('Failed to copy to clipboard');
+                });
+            }
+        }
+
+        function clearJSONInput() {
+            document.getElementById('json-input').value = '';
+            document.getElementById('json-output').value = '';
+            hideJSONError();
+        }
+
+        function showJSONError(message) {
+            const errorDiv = document.getElementById('json-error');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function hideJSONError() {
+            const errorDiv = document.getElementById('json-error');
+            errorDiv.classList.add('hidden');
+        }
+
+        function showSuccess(message) {
+            // Create a temporary success message
+            const successDiv = document.createElement('div');
+            successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            successDiv.textContent = message;
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                document.body.removeChild(successDiv);
+            }, 3000);
+        }
+
+        function showError(message) {
+            showJSONError(message);
+        }
+
+        // Update the display functions to work with the new modal structure
+        function displayJSONResult(output, type, title) {
+            const outputElement = document.getElementById('json-output');
+            if (outputElement) {
+                outputElement.value = output;
+            }
+        }
+
+        function displayJSONMinifyResult(output, compressionRatio) {
+            const outputElement = document.getElementById('json-minify-output');
+            const infoElement = document.getElementById('json-compression-info');
+            
+            if (outputElement) {
+                outputElement.value = output;
+            }
+            
+            if (infoElement && compressionRatio !== undefined) {
+                infoElement.textContent = `Compression ratio: ${compressionRatio}%`;
+            }
+        }
+
+        function displayJSONValidationResult(isValid, errors, tokenCount) {
+            const resultsDiv = document.getElementById('json-validation-results');
+            const statusDiv = document.getElementById('json-validation-status');
+            const detailsDiv = document.getElementById('json-validation-details');
+            
+            if (resultsDiv) {
+                resultsDiv.classList.remove('hidden');
+                
+                if (isValid) {
+                    resultsDiv.className = 'p-4 rounded-lg border border-green-200 bg-green-50';
+                    statusDiv.textContent = '✅ Valid JSON';
+                    statusDiv.className = 'font-medium mb-2 text-green-800';
+                    detailsDiv.textContent = `Valid JSON structure with ${tokenCount || 0} tokens`;
+                    detailsDiv.className = 'text-sm text-green-600';
+                } else {
+                    resultsDiv.className = 'p-4 rounded-lg border border-red-200 bg-red-50';
+                    statusDiv.textContent = '❌ Invalid JSON';
+                    statusDiv.className = 'font-medium mb-2 text-red-800';
+                    
+                    if (errors && errors.length > 0) {
+                        detailsDiv.innerHTML = errors.map(error => 
+                            `<div class="mb-1">• ${error.message}${error.line ? ` (Line ${error.line}, Column ${error.column})` : ''}</div>`
+                        ).join('');
+                    } else {
+                        detailsDiv.textContent = 'Unknown validation error';
+                    }
+                    detailsDiv.className = 'text-sm text-red-600';
+                }
+            }
+        }
+
+        function displayJSONHighlight(htmlOutput) {
+            const outputElement = document.getElementById('json-highlight-output');
+            if (outputElement) {
+                outputElement.innerHTML = htmlOutput;
+            }
+        }
+
+        function displayJSONErrors(errors) {
+            if (errors && errors.length > 0) {
+                const errorMessage = errors.map(error => 
+                    `${error.message}${error.line ? ` (Line ${error.line}, Column ${error.column})` : ''}`
+                ).join('; ');
+                showJSONError(errorMessage);
+            } else {
+                showJSONError('An unknown error occurred while processing the JSON.');
+            }
+        }
+
+        // Advanced Timestamp Converter Functions
+        let AdvancedTimestampConverter = null;
+
+        async function initializeAdvancedTimestampConverter() {
+            try {
+                console.log('Initializing Advanced Timestamp Converter...');
+                
+                // Check if the module is already loaded
+                if (typeof window.AdvancedTimestampConverter === 'undefined') {
+                    console.log('Loading Timestamp Converter module...');
+                    try {
+                        const module = await import('./src/js/advanced-timestamp-converter.js');
+                        window.AdvancedTimestampConverter = module.TimestampConverter;
+                        window.TimestampUtils = module.TimestampUtils;
+                        console.log('Timestamp Converter module loaded successfully');
+                    } catch (importError) {
+                        console.error('Failed to import Timestamp Converter module:', importError);
+                        showTimestampError('Failed to load Timestamp Converter module');
+                        return false;
+                    }
+                }
+
+                // Create instance
+                AdvancedTimestampConverter = new window.AdvancedTimestampConverter();
+                console.log('Advanced Timestamp Converter initialized successfully');
+                
+                return true;
+            } catch (error) {
+                console.error('Error initializing Advanced Timestamp Converter:', error);
+                showTimestampError(`Error initializing Timestamp Converter: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function convertTimestamp() {
+            if (!AdvancedTimestampConverter) {
+                if (!(await initializeAdvancedTimestampConverter())) {
+                    return;
+                }
+            }
+
+            try {
+                const inputValue = document.getElementById('timestamp-input').value.trim();
+                if (!inputValue) {
+                    showTimestampError('Please enter a timestamp to convert');
+                    return;
+                }
+
+                const inputFormat = document.getElementById('timestamp-input-format').value || null;
+                const outputFormat = document.getElementById('timestamp-output-format').value || 'ISO8601';
+                const targetTimezone = document.getElementById('timestamp-timezone').value || 'UTC';
+
+                console.log('Converting timestamp:', { inputValue, inputFormat, outputFormat, targetTimezone });
+                const result = AdvancedTimestampConverter.convert(inputValue, inputFormat, outputFormat, targetTimezone);
+                console.log('Conversion result:', result);
+
+                document.getElementById('timestamp-output').value = result;
+                hideTimestampError();
+
+            } catch (error) {
+                console.error('Error converting timestamp:', error);
+                showTimestampError(`Error converting timestamp: ${error.message}`);
+            }
+        }
+
+        async function updateCurrentTime() {
+            if (!AdvancedTimestampConverter) {
+                if (!(await initializeAdvancedTimestampConverter())) {
+                    return;
+                }
+            }
+
+            try {
+                const now = Date.now();
+                
+                // Update epoch seconds
+                document.getElementById('now-epoch-s').textContent = Math.floor(now / 1000);
+                
+                // Update epoch milliseconds
+                document.getElementById('now-epoch-ms').textContent = now;
+                
+                // Update ISO 8601 UTC
+                document.getElementById('now-iso-utc').textContent = AdvancedTimestampConverter.convert(now, null, 'ISO8601', 'UTC');
+                
+                // Update ISO 8601 Local (using browser's timezone)
+                const localOffset = new Date().getTimezoneOffset();
+                const localTimezone = localOffset === 0 ? 'UTC' : `+${Math.floor(Math.abs(localOffset) / 60).toString().padStart(2, '0')}:${(Math.abs(localOffset) % 60).toString().padStart(2, '0')}`;
+                document.getElementById('now-iso-local').textContent = AdvancedTimestampConverter.convert(now, null, 'ISO8601', localTimezone);
+
+            } catch (error) {
+                console.error('Error updating current time:', error);
+                showTimestampError(`Error updating current time: ${error.message}`);
+            }
+        }
+
+        async function calculateRelativeTime() {
+            if (!AdvancedTimestampConverter) {
+                if (!(await initializeAdvancedTimestampConverter())) {
+                    return;
+                }
+            }
+
+            try {
+                const inputValue = document.getElementById('relative-input').value.trim();
+                if (!inputValue) {
+                    showTimestampError('Please enter a timestamp for relative time calculation');
+                    return;
+                }
+
+                const result = AdvancedTimestampConverter.convert(inputValue, null, 'relative');
+                document.getElementById('relative-output').textContent = result;
+                hideTimestampError();
+
+            } catch (error) {
+                console.error('Error calculating relative time:', error);
+                showTimestampError(`Error calculating relative time: ${error.message}`);
+            }
+        }
+
+        function switchTimestampTab(mode) {
+            // Hide all tab contents
+            document.querySelectorAll('.timestamp-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('[id^="timestamp-"][id$="-tab"]').forEach(tab => {
+                tab.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+                tab.classList.add('text-gray-500', 'hover:text-gray-700');
+            });
+            
+            // Show selected tab content
+            const selectedContent = document.getElementById(`timestamp-${mode}-content`);
+            if (selectedContent) {
+                selectedContent.classList.remove('hidden');
+            }
+            
+            // Add active class to selected tab
+            const selectedTab = document.getElementById(`timestamp-${mode}-tab`);
+            if (selectedTab) {
+                selectedTab.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+                selectedTab.classList.remove('text-gray-500', 'hover:text-gray-700');
+            }
+
+            // Auto-update current time when switching to now tab
+            if (mode === 'now') {
+                updateCurrentTime();
+            }
+        }
+
+        function copyTimestampResult() {
+            const output = document.getElementById('timestamp-output').value;
+            if (output) {
+                navigator.clipboard.writeText(output).then(() => {
+                    showTimestampSuccess('Converted timestamp copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    showTimestampError('Failed to copy to clipboard');
+                });
+            }
+        }
+
+        function clearTimestampInput() {
+            document.getElementById('timestamp-input').value = '';
+            document.getElementById('timestamp-output').value = '';
+            document.getElementById('relative-input').value = '';
+            document.getElementById('relative-output').textContent = '';
+            hideTimestampError();
+        }
+
+        function showTimestampError(message) {
+            const errorDiv = document.getElementById('timestamp-error');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function hideTimestampError() {
+            const errorDiv = document.getElementById('timestamp-error');
+            errorDiv.classList.add('hidden');
+        }
+
+        function showTimestampSuccess(message) {
+            // Create a temporary success message
+            const successDiv = document.createElement('div');
+            successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            successDiv.textContent = message;
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                document.body.removeChild(successDiv);
+            }, 3000);
         }
 
         async function testQRModule() {
@@ -5521,8 +6117,8 @@ ith<!DOCTYPE html>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">JSON Formatter</h3>
-                    <p class="text-gray-600 text-sm">Format and validate JSON data</p>
+                    <h3 class="text-xl font-semibold mb-2">📄 Advanced JSON Formatter</h3>
+                    <p class="text-gray-600 text-sm">Comprehensive JSON processing with validation, formatting, minification, and syntax highlighting</p>
                 </div>
 
                 <!-- Time Tools -->
@@ -8424,9 +9020,338 @@ ith<!DOCTYPE html>
         </div>
     </div>
 
-    <div id="json" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">JSON Formatter</h3><button onclick="closeModal('json')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">📋</div><h4 class="text-xl font-semibold mb-2">JSON Formatter</h4><p class="text-gray-600">Format and validate JSON data.</p></div></div></div>
+    <div id="json" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gradient">📄 Advanced JSON Formatter</h3>
+                <button onclick="closeModal('json')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
 
-    <div id="timestamp" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">Timestamp Converter</h3><button onclick="closeModal('timestamp')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">⏰</div><h4 class="text-xl font-semibold mb-2">Timestamp Converter</h4><p class="text-gray-600">Convert Unix timestamps to readable dates.</p></div></div></div>
+            <!-- Tab Navigation -->
+            <div class="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                <button onclick="switchJSONTab('format')" id="json-format-tab" class="flex-1 py-2 px-4 text-sm font-medium rounded-md bg-white text-blue-600 shadow-sm">
+                    🎨 Format/Beautify
+                </button>
+                <button onclick="switchJSONTab('minify')" id="json-minify-tab" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                    📦 Minify
+                </button>
+                <button onclick="switchJSONTab('validate')" id="json-validate-tab" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                    ✅ Validate
+                </button>
+                <button onclick="switchJSONTab('highlight')" id="json-highlight-tab" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                    🌈 Highlight
+                </button>
+            </div>
+
+            <!-- Format/Beautify Tab -->
+            <div id="json-format-content" class="json-tab-content">
+                <!-- Input Section -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">JSON Input</label>
+                    <textarea id="json-input" rows="8" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder="Enter your JSON data here...">{
+  "name": "John Doe",
+  "age": 30,
+  "city": "New York",
+  "active": true
+}</textarea>
+                </div>
+
+                <!-- Format Options -->
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Indent Size</label>
+                        <select id="json-indent-size" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="2">2 spaces</option>
+                            <option value="4" selected>4 spaces</option>
+                            <option value="8">8 spaces</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Max Line Length</label>
+                        <input type="number" id="json-max-line-length" value="80" min="10" max="200" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="json-sort-keys" class="mr-2">
+                        <label for="json-sort-keys" class="text-sm font-medium text-gray-700">Sort Keys</label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mb-6 flex space-x-3">
+                    <button onclick="formatJSON()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        🎨 Format JSON
+                    </button>
+                    <button onclick="copyJSONResult()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        📋 Copy Result
+                    </button>
+                    <button onclick="clearJSONInput()" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                        🗑️ Clear
+                    </button>
+                </div>
+
+                <!-- Output Section -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Formatted Output</label>
+                    <textarea id="json-output" rows="8" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm" readonly placeholder="Formatted JSON will appear here..."></textarea>
+                </div>
+            </div>
+
+            <!-- Minify Tab -->
+            <div id="json-minify-content" class="json-tab-content hidden">
+                <!-- Input Section -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">JSON Input</label>
+                    <textarea id="json-minify-input" rows="8" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder="Enter your JSON data here...">{
+  "name": "John Doe",
+  "age": 30,
+  "city": "New York",
+  "active": true
+}</textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mb-6 flex space-x-3">
+                    <button onclick="minifyJSON()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                        📦 Minify JSON
+                    </button>
+                    <button onclick="copyJSONMinifyResult()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        📋 Copy Result
+                    </button>
+                </div>
+
+                <!-- Output Section -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Minified Output</label>
+                    <textarea id="json-minify-output" rows="4" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm" readonly placeholder="Minified JSON will appear here..."></textarea>
+                    <div id="json-compression-info" class="mt-2 text-sm text-gray-600"></div>
+                </div>
+            </div>
+
+            <!-- Validate Tab -->
+            <div id="json-validate-content" class="json-tab-content hidden">
+                <!-- Input Section -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">JSON Input</label>
+                    <textarea id="json-validate-input" rows="8" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder="Enter your JSON data to validate...">{
+  "name": "John Doe",
+  "age": 30,
+  "city": "New York",
+  "active": true
+}</textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mb-6 flex space-x-3">
+                    <button onclick="validateJSON()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                        ✅ Validate JSON
+                    </button>
+                </div>
+
+                <!-- Validation Results -->
+                <div id="json-validation-results" class="p-4 rounded-lg border hidden">
+                    <div id="json-validation-status" class="font-medium mb-2"></div>
+                    <div id="json-validation-details" class="text-sm"></div>
+                </div>
+            </div>
+
+            <!-- Highlight Tab -->
+            <div id="json-highlight-content" class="json-tab-content hidden">
+                <!-- Input Section -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">JSON Input</label>
+                    <textarea id="json-highlight-input" rows="8" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder="Enter your JSON data here...">{
+  "name": "John Doe",
+  "age": 30,
+  "city": "New York",
+  "active": true
+}</textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mb-6 flex space-x-3">
+                    <button onclick="highlightJSON()" class="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition-colors">
+                        🌈 Highlight JSON
+                    </button>
+                    <button onclick="copyJSONHighlightResult()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        📋 Copy HTML
+                    </button>
+                </div>
+
+                <!-- Output Section -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Highlighted Output</label>
+                    <div id="json-highlight-output" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm min-h-[200px] overflow-auto" style="white-space: pre-wrap;"></div>
+                </div>
+            </div>
+
+            <!-- Error Display -->
+            <div id="json-error" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden"></div>
+        </div>
+    </div>
+
+    <div id="timestamp" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gradient">⏰ Advanced Timestamp Converter</h3>
+                <button onclick="closeModal('timestamp')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                <button onclick="switchTimestampTab('convert')" id="timestamp-convert-tab" class="flex-1 py-2 px-4 text-sm font-medium rounded-md bg-white text-blue-600 shadow-sm">
+                    🔄 Convert
+                </button>
+                <button onclick="switchTimestampTab('now')" id="timestamp-now-tab" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                    ⏰ Current Time
+                </button>
+                <button onclick="switchTimestampTab('relative')" id="timestamp-relative-tab" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                    📅 Relative Time
+                </button>
+            </div>
+
+            <!-- Convert Tab -->
+            <div id="timestamp-convert-content" class="timestamp-tab-content">
+                <!-- Input Section -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Input Timestamp</label>
+                    <textarea id="timestamp-input" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder="Enter timestamp (epoch, ISO 8601, or custom format)...">1693867800000</textarea>
+                </div>
+
+                <!-- Input Format Options -->
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Input Format</label>
+                        <select id="timestamp-input-format" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="">Auto-detect</option>
+                            <option value="epoch_s">Epoch Seconds</option>
+                            <option value="epoch_ms">Epoch Milliseconds</option>
+                            <option value="ISO8601">ISO 8601</option>
+                            <option value="YYYY-MM-DD HH:mm:ss">YYYY-MM-DD HH:mm:ss</option>
+                            <option value="MM/DD/YYYY HH:mm:ss">MM/DD/YYYY HH:mm:ss</option>
+                            <option value="DD/MM/YYYY HH:mm:ss">DD/MM/YYYY HH:mm:ss</option>
+                            <option value="YYYY-MM-DD h:mm A">YYYY-MM-DD h:mm A</option>
+                            <option value="MM/DD/YYYY h:mm A">MM/DD/YYYY h:mm A</option>
+                            <option value="DD/MM/YYYY h:mm A">DD/MM/YYYY h:mm A</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Target Timezone</label>
+                        <select id="timestamp-timezone" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="UTC">UTC</option>
+                            <option value="America/New_York">America/New_York (EST/EDT)</option>
+                            <option value="America/Chicago">America/Chicago (CST/CDT)</option>
+                            <option value="America/Denver">America/Denver (MST/MDT)</option>
+                            <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+                            <option value="Europe/London">Europe/London (GMT/BST)</option>
+                            <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
+                            <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                            <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+                            <option value="Asia/Shanghai">Asia/Shanghai (CST)</option>
+                            <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Output Format Options -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Output Format</label>
+                    <select id="timestamp-output-format" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="ISO8601">ISO 8601 (2023-09-04T22:50:00.000Z)</option>
+                        <option value="epoch_s">Epoch Seconds</option>
+                        <option value="epoch_ms">Epoch Milliseconds</option>
+                        <option value="relative">Relative Time (2 days ago)</option>
+                        <option value="YYYY-MM-DD HH:mm:ss">YYYY-MM-DD HH:mm:ss</option>
+                        <option value="MM/DD/YYYY HH:mm:ss">MM/DD/YYYY HH:mm:ss</option>
+                        <option value="DD/MM/YYYY HH:mm:ss">DD/MM/YYYY HH:mm:ss</option>
+                        <option value="YYYY-MM-DD h:mm A">YYYY-MM-DD h:mm A</option>
+                        <option value="MM/DD/YYYY h:mm A">MM/DD/YYYY h:mm A</option>
+                        <option value="DD/MM/YYYY h:mm A">DD/MM/YYYY h:mm A</option>
+                        <option value="YYYY-MM-DD HH:mm:ss Z">YYYY-MM-DD HH:mm:ss Z</option>
+                    </select>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mb-6 flex space-x-3">
+                    <button onclick="convertTimestamp()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        🔄 Convert Timestamp
+                    </button>
+                    <button onclick="copyTimestampResult()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        📋 Copy Result
+                    </button>
+                    <button onclick="clearTimestampInput()" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                        🗑️ Clear
+                    </button>
+                </div>
+
+                <!-- Output Section -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Converted Result</label>
+                    <textarea id="timestamp-output" rows="4" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm" readonly placeholder="Converted timestamp will appear here..."></textarea>
+                </div>
+            </div>
+
+            <!-- Current Time Tab -->
+            <div id="timestamp-now-content" class="timestamp-tab-content hidden">
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold mb-4">Current Time in Different Formats</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <h5 class="font-medium mb-2">Epoch Seconds</h5>
+                            <div id="now-epoch-s" class="font-mono text-sm bg-white p-2 rounded border"></div>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <h5 class="font-medium mb-2">Epoch Milliseconds</h5>
+                            <div id="now-epoch-ms" class="font-mono text-sm bg-white p-2 rounded border"></div>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <h5 class="font-medium mb-2">ISO 8601 (UTC)</h5>
+                            <div id="now-iso-utc" class="font-mono text-sm bg-white p-2 rounded border"></div>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <h5 class="font-medium mb-2">ISO 8601 (Local)</h5>
+                            <div id="now-iso-local" class="font-mono text-sm bg-white p-2 rounded border"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <button onclick="updateCurrentTime()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                        🔄 Refresh Current Time
+                    </button>
+                </div>
+            </div>
+
+            <!-- Relative Time Tab -->
+            <div id="timestamp-relative-content" class="timestamp-tab-content hidden">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Enter Timestamp for Relative Time</label>
+                    <textarea id="relative-input" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder="Enter timestamp to get relative time..."></textarea>
+                </div>
+
+                <div class="mb-6">
+                    <button onclick="calculateRelativeTime()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                        📅 Calculate Relative Time
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Relative Time Result</label>
+                    <div id="relative-output" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm min-h-[100px]"></div>
+                </div>
+            </div>
+
+            <!-- Error Display -->
+            <div id="timestamp-error" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden"></div>
+        </div>
+    </div>
 
     <div id="timezone" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">Timezone Converter</h3><button onclick="closeModal('timezone')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">🌍</div><h4 class="text-xl font-semibold mb-2">Timezone Converter</h4><p class="text-gray-600">Convert time between different timezones.</p></div></div></div>
 
