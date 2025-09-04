@@ -494,6 +494,9 @@ export class DataPlacer {
         let bitIndex = 0;
         let direction = -1; // Start going up
         let col = matrix.size - 1;
+        let placedBits = 0;
+        
+        console.log(`Starting data placement with ${dataBits.length} bits`);
         
         // Process columns in pairs from right to left
         while (col >= 0) {
@@ -506,6 +509,7 @@ export class DataPlacer {
                     if (bitIndex < dataBits.length) {
                         matrix.set(currentRow, col, dataBits[bitIndex]);
                         bitIndex++;
+                        placedBits++;
                     } else {
                         // Fill remaining data modules with 0 (light)
                         matrix.set(currentRow, col, false);
@@ -517,6 +521,7 @@ export class DataPlacer {
                     if (bitIndex < dataBits.length) {
                         matrix.set(currentRow, col - 1, dataBits[bitIndex]);
                         bitIndex++;
+                        placedBits++;
                     } else {
                         // Fill remaining data modules with 0 (light)
                         matrix.set(currentRow, col - 1, false);
@@ -528,6 +533,8 @@ export class DataPlacer {
             col -= 2;
             direction *= -1;
         }
+        
+        console.log(`Placed ${placedBits} data bits out of ${dataBits.length} total bits`);
         
         // Ensure all data modules are filled (not null)
         this.fillRemainingDataModules(matrix);

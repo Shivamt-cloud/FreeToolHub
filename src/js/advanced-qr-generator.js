@@ -82,7 +82,20 @@ export class AdvancedQRGenerator {
 
             // Step 6: Place data (data bits + error correction bits)
             const allBits = this.bytesToBits(errorCorrectedBytes);
+            console.log(`Total bits to place: ${allBits.length}`);
+            console.log(`First 20 bits:`, allBits.slice(0, 20));
             DataPlacer.placeData(matrix, allBits);
+            
+            // Debug: Count placed data modules
+            let dataModules = 0;
+            for (let row = 0; row < matrix.size; row++) {
+                for (let col = 0; col < matrix.size; col++) {
+                    if (!matrix.isReserved(row, col) && matrix.get(row, col) !== null) {
+                        dataModules++;
+                    }
+                }
+            }
+            console.log(`Data modules placed: ${dataModules}`);
 
             // Step 7: Apply best mask pattern
             if (autoMask) {
@@ -256,7 +269,7 @@ export class AdvancedQRGenerator {
      */
     applyErrorCorrection(dataBytes) {
         // Get ECC parameters
-        const eccCodewords = RSUtils.getECCCodewords(this.version, this.eccLevel);
+        const eccCodewords = RSUtils.getECCCodewords(this.version, this.eccLevel, QR_VERSIONS);
         
         // Create Reed-Solomon encoder
         const generatorPolynomial = ReedSolomonEncoder.createGeneratorPolynomial(eccCodewords);

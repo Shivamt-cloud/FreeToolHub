@@ -262,22 +262,36 @@ export class RSUtils {
     /**
      * Get the number of ECC codewords for given version and ECC level
      */
-    static getECCCodewords(version, eccLevel) {
+    static getECCCodewords(version, eccLevel, qrVersions) {
+        const versionInfo = qrVersions[version];
+        if (!versionInfo) {
+            throw new Error(`Invalid QR version: ${version}`);
+        }
+        
+        const dataCapacity = versionInfo.dataCapacity[eccLevel];
+        if (dataCapacity === undefined) {
+            throw new Error(`Invalid ECC level: ${eccLevel}`);
+        }
+        
         const totalCodewords = Math.floor((version * 4 + 17) * (version * 4 + 17) / 8);
-        const dataCodewords = this.getDataCodewords(version, eccLevel);
-        return totalCodewords - dataCodewords;
+        return totalCodewords - dataCapacity;
     }
 
     /**
      * Get the number of data codewords for given version and ECC level
      */
-    static getDataCodewords(version, eccLevel) {
-        // This is a simplified calculation - in practice, use the capacity tables
-        const baseCapacity = {
-            'L': 0.93, 'M': 0.85, 'Q': 0.75, 'H': 0.70
-        };
-        const totalCodewords = Math.floor((version * 4 + 17) * (version * 4 + 17) / 8);
-        return Math.floor(totalCodewords * baseCapacity[eccLevel]);
+    static getDataCodewords(version, eccLevel, qrVersions) {
+        const versionInfo = qrVersions[version];
+        if (!versionInfo) {
+            throw new Error(`Invalid QR version: ${version}`);
+        }
+        
+        const dataCapacity = versionInfo.dataCapacity[eccLevel];
+        if (dataCapacity === undefined) {
+            throw new Error(`Invalid ECC level: ${eccLevel}`);
+        }
+        
+        return dataCapacity;
     }
 
     /**
