@@ -495,29 +495,54 @@ export class DataPlacer {
         let direction = -1; // Start going up
         let col = matrix.size - 1;
         
-        for (let colGroup = 0; colGroup < Math.ceil(matrix.size / 2); colGroup++) {
-            col = matrix.size - 1 - colGroup * 2;
-            
+        // Process columns in pairs from right to left
+        while (col >= 0) {
+            // Process two columns at a time
             for (let row = 0; row < matrix.size; row++) {
                 const currentRow = direction === 1 ? row : matrix.size - 1 - row;
                 
-                // Place two columns
+                // Place bit in right column
                 if (col >= 0 && matrix.isAvailable(currentRow, col)) {
                     if (bitIndex < dataBits.length) {
                         matrix.set(currentRow, col, dataBits[bitIndex]);
                         bitIndex++;
+                    } else {
+                        // Fill remaining data modules with 0 (light)
+                        matrix.set(currentRow, col, false);
                     }
                 }
                 
+                // Place bit in left column
                 if (col - 1 >= 0 && matrix.isAvailable(currentRow, col - 1)) {
                     if (bitIndex < dataBits.length) {
                         matrix.set(currentRow, col - 1, dataBits[bitIndex]);
                         bitIndex++;
+                    } else {
+                        // Fill remaining data modules with 0 (light)
+                        matrix.set(currentRow, col - 1, false);
                     }
                 }
             }
             
-            direction *= -1; // Reverse direction
+            // Move to next pair of columns and reverse direction
+            col -= 2;
+            direction *= -1;
+        }
+        
+        // Ensure all data modules are filled (not null)
+        this.fillRemainingDataModules(matrix);
+    }
+    
+    /**
+     * Fill any remaining null data modules with false (light)
+     */
+    static fillRemainingDataModules(matrix) {
+        for (let row = 0; row < matrix.size; row++) {
+            for (let col = 0; col < matrix.size; col++) {
+                if (matrix.get(row, col) === null && !matrix.isReserved(row, col)) {
+                    matrix.set(row, col, false);
+                }
+            }
         }
     }
 }

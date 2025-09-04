@@ -319,10 +319,14 @@ export class AdvancedQRGenerator {
         for (let row = 0; row < matrix.size; row++) {
             for (let col = 0; col < matrix.size; col++) {
                 const value = matrix.get(row, col);
+                const x = (col + quietZone) * moduleSize;
+                const y = (row + quietZone) * moduleSize;
+                
                 if (value === true) {
-                    const x = (col + quietZone) * moduleSize;
-                    const y = (row + quietZone) * moduleSize;
                     svg += `<rect x="${x}" y="${y}" width="${moduleSize}" height="${moduleSize}" fill="${foreground}"/>`;
+                } else {
+                    // Explicitly render light modules to ensure complete matrix
+                    svg += `<rect x="${x}" y="${y}" width="${moduleSize}" height="${moduleSize}" fill="${background}"/>`;
                 }
             }
         }
@@ -354,13 +358,18 @@ export class AdvancedQRGenerator {
         ctx.fillRect(0, 0, canvasSize, canvasSize);
         
         // Draw modules
-        ctx.fillStyle = foreground;
         for (let row = 0; row < matrix.size; row++) {
             for (let col = 0; col < matrix.size; col++) {
                 const value = matrix.get(row, col);
+                const x = (col + quietZone) * moduleSize;
+                const y = (row + quietZone) * moduleSize;
+                
                 if (value === true) {
-                    const x = (col + quietZone) * moduleSize;
-                    const y = (row + quietZone) * moduleSize;
+                    ctx.fillStyle = foreground;
+                    ctx.fillRect(x, y, moduleSize, moduleSize);
+                } else {
+                    // Explicitly render light modules to ensure complete matrix
+                    ctx.fillStyle = background;
                     ctx.fillRect(x, y, moduleSize, moduleSize);
                 }
             }
