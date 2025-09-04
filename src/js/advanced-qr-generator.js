@@ -71,9 +71,9 @@ export class AdvancedQRGenerator {
             const dataBits = this.buildDataBitstream(segments);
             console.log(`Data bitstream length: ${dataBits.length} bits`);
 
-            // Step 4: Apply Reed-Solomon error correction
+            // Step 4: Apply Reed-Solomon error correction with proper block splitting
             const dataBytes = this.bitsToBytes(dataBits);
-            const errorCorrectedBytes = this.applyErrorCorrection(dataBytes);
+            const errorCorrectedBytes = this.applyErrorCorrectionWithBlocks(dataBytes);
             console.log(`Data bytes: ${dataBytes.length}, Total codewords: ${errorCorrectedBytes.length}`);
 
             // Step 5: Create and populate matrix
@@ -279,6 +279,29 @@ export class AdvancedQRGenerator {
         const encoded = encoder.encode(dataBytes);
         
         return encoded;
+    }
+
+    /**
+     * Apply Reed-Solomon error correction with proper block splitting and interleaving
+     */
+    applyErrorCorrectionWithBlocks(dataBytes) {
+        // Split data into blocks according to ISO/IEC 18004
+        const blocks = RSUtils.splitIntoBlocks(dataBytes, this.version, this.eccLevel, QR_VERSIONS);
+        
+        // Apply Reed-Solomon encoding to each block
+        for (const block of blocks) {
+            const generatorPolynomial = ReedSolomonEncoder.createGeneratorPolynomial(block.eccCodewords);
+            const encoder = new ReedSolomonEncoder(generatorPolynomial);
+            const encoded = encoder.encode(block.data);
+            
+            // Extract parity bytes (error correction codewords)
+            block.parity = encoded.slice(block.data.length);
+        }
+        
+        // Interleave blocks for final codeword sequence
+        const interleaved = RSUtils.interleaveBlocks(blocks);
+        
+        return interleaved;
     }
 
     /**

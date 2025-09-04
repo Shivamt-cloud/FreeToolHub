@@ -488,7 +488,7 @@ export class FunctionPatternPlacer {
  */
 export class DataPlacer {
     /**
-     * Place data bits in zigzag pattern
+     * Place data bits in zigzag pattern from bottom-right according to ISO/IEC 18004
      */
     static placeData(matrix, dataBits) {
         let bitIndex = 0;
@@ -504,7 +504,7 @@ export class DataPlacer {
             for (let row = 0; row < matrix.size; row++) {
                 const currentRow = direction === 1 ? row : matrix.size - 1 - row;
                 
-                // Place bit in right column
+                // Place bit in right column (if available and not reserved)
                 if (col >= 0 && matrix.isAvailable(currentRow, col)) {
                     if (bitIndex < dataBits.length) {
                         matrix.set(currentRow, col, dataBits[bitIndex]);
@@ -516,7 +516,7 @@ export class DataPlacer {
                     }
                 }
                 
-                // Place bit in left column
+                // Place bit in left column (if available and not reserved)
                 if (col - 1 >= 0 && matrix.isAvailable(currentRow, col - 1)) {
                     if (bitIndex < dataBits.length) {
                         matrix.set(currentRow, col - 1, dataBits[bitIndex]);

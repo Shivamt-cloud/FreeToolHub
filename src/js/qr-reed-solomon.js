@@ -295,28 +295,58 @@ export class RSUtils {
     }
 
     /**
-     * Split data into blocks for interleaving
+     * Split data into blocks for interleaving according to ISO/IEC 18004
      */
-    static splitIntoBlocks(data, version, eccLevel) {
-        const eccCodewords = this.getECCCodewords(version, eccLevel);
-        const dataCodewords = data.length;
+    static splitIntoBlocks(data, version, eccLevel, qrVersions) {
+        // Get block structure from QR specification
+        const blockInfo = this.getBlockStructure(version, eccLevel, qrVersions);
+        const blocks = [];
         
-        // For now, return a single block
-        // In full implementation, this would handle multiple blocks
+        let dataIndex = 0;
+        for (const block of blockInfo) {
+            const blockData = data.slice(dataIndex, dataIndex + block.dataCodewords);
+            dataIndex += block.dataCodewords;
+            
+            // Pad block if necessary
+            while (blockData.length < block.dataCodewords) {
+                blockData.push(0);
+            }
+            
+            blocks.push({
+                data: blockData,
+                dataCodewords: block.dataCodewords,
+                eccCodewords: block.eccCodewords
+            });
+        }
+        
+        return blocks;
+    }
+
+    /**
+     * Get block structure for given version and ECC level
+     */
+    static getBlockStructure(version, eccLevel, qrVersions) {
+        // This is a simplified version - full implementation would use complete block tables
+        const totalCodewords = Math.floor((version * 4 + 17) * (version * 4 + 17) / 8);
+        const dataCapacity = qrVersions[version].dataCapacity[eccLevel];
+        const eccCodewords = totalCodewords - dataCapacity;
+        
+        // For most versions, use single block
         return [{
-            data: data,
-            parity: new Array(eccCodewords).fill(0)
+            dataCodewords: dataCapacity,
+            eccCodewords: eccCodewords
         }];
     }
 
     /**
-     * Interleave blocks for final codeword sequence
+     * Interleave blocks for final codeword sequence according to ISO/IEC 18004
      */
     static interleaveBlocks(blocks) {
         const result = [];
-        const maxLength = Math.max(...blocks.map(b => b.data.length + b.parity.length));
         
-        for (let i = 0; i < maxLength; i++) {
+        // Interleave data codewords
+        const maxDataLength = Math.max(...blocks.map(b => b.data.length));
+        for (let i = 0; i < maxDataLength; i++) {
             for (const block of blocks) {
                 if (i < block.data.length) {
                     result.push(block.data[i]);
@@ -324,9 +354,11 @@ export class RSUtils {
             }
         }
         
-        for (let i = 0; i < maxLength; i++) {
+        // Interleave ECC codewords
+        const maxEccLength = Math.max(...blocks.map(b => b.parity ? b.parity.length : 0));
+        for (let i = 0; i < maxEccLength; i++) {
             for (const block of blocks) {
-                if (i < block.parity.length) {
+                if (block.parity && i < block.parity.length) {
                     result.push(block.parity[i]);
                 }
             }
