@@ -1097,7 +1097,7 @@ ith<!DOCTYPE html>
             }
 
             try {
-                const input = document.getElementById('hash-input').value.trim();
+                const input = document.getElementById('hash-multiple-input').value.trim();
                 if (!input) {
                     showError('Please enter data to hash');
                     return;
@@ -1114,28 +1114,32 @@ ith<!DOCTYPE html>
                 const results = HashUtils.generateMultiple(input, selectedAlgorithms);
 
                 // Display results
-                const resultDiv = document.getElementById('hash-result');
+                const resultDiv = document.getElementById('hash-multiple-result');
                 resultDiv.innerHTML = `
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <h4 class="font-semibold mb-2">Generated Hashes:</h4>
                         <div class="space-y-3">
-                            ${Object.entries(results).map(([algorithm, result]) => `
+                            ${Object.entries(results).map(([algorithm, result]) => {
+                                const hashValue = typeof result === 'object' && result.error ? null : (typeof result === 'object' ? result.hash : result);
+                                const displayValue = hashValue ? (typeof hashValue === 'string' ? hashValue : hashValue.toString()) : '';
+                                return `
                                 <div class="border rounded p-3">
                                     <div class="font-medium text-gray-800 mb-2">${algorithm.toUpperCase()}</div>
                                     ${typeof result === 'object' && result.error ? `
                                         <div class="text-red-600 text-sm">Error: ${result.error}</div>
                                     ` : `
                                         <div class="flex items-center space-x-2">
-                                            <input type="text" value="${typeof result === 'object' ? result.hash : result}" readonly 
+                                            <input type="text" value="${displayValue}" readonly 
                                                    class="flex-1 p-2 border rounded font-mono text-sm bg-white">
-                                            <button onclick="copyToClipboard('${typeof result === 'object' ? result.hash : result}')" 
+                                            <button onclick="copyToClipboard('${displayValue}')" 
                                                     class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs">
                                                 Copy
                                             </button>
                                         </div>
                                     `}
                                 </div>
-                            `).join('')}
+                            `;
+                            }).join('')}
                         </div>
                     </div>
                 `;
@@ -7216,7 +7220,7 @@ ith<!DOCTYPE html>
             <div id="hash-multiple-mode" class="hash-mode hidden">
                 <div class="mb-6">
                     <h4 class="font-medium text-gray-800 mb-3">📝 Input Data</h4>
-                    <textarea id="hash-input" placeholder="Enter text or data to hash..." rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"></textarea>
+                    <textarea id="hash-multiple-input" placeholder="Enter text or data to hash..." rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"></textarea>
                 </div>
 
                 <div class="mb-6">
@@ -7256,7 +7260,7 @@ ith<!DOCTYPE html>
                 </div>
 
                 <!-- Results -->
-                <div id="hash-result"></div>
+                <div id="hash-multiple-result"></div>
             </div>
 
             <!-- Validate Mode -->
