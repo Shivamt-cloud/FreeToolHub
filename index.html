@@ -76,6 +76,15 @@ ith<!DOCTYPE html>
                     } else {
                         console.error('initializeAdvancedQRGenerator function not found');
                     }
+                } else if (modalId === 'uuid') {
+                    if (typeof initializeAdvancedUUIDGenerator === 'function') {
+                        console.log('Initializing Advanced UUID Generator...');
+                        initializeAdvancedUUIDGenerator().catch(error => {
+                            console.error('Failed to initialize UUID Generator:', error);
+                        });
+                    } else {
+                        console.error('initializeAdvancedUUIDGenerator function not found');
+                    }
                 } else if (modalId === 'calculator') {
                     if (typeof initializeAdvancedCalculator === 'function') {
                         console.log('Initializing Advanced Calculator...');
@@ -706,6 +715,209 @@ ith<!DOCTYPE html>
             }
         }
 
+        // Advanced UUID Generator Functions
+        let AdvancedUUIDGen = null;
+
+        async function initializeAdvancedUUIDGenerator() {
+            try {
+                console.log('Initializing Advanced UUID Generator...');
+                
+                // Check if the module is already loaded
+                if (typeof AdvancedUUIDGenerator === 'undefined') {
+                    console.log('Loading UUID Generator module...');
+                    try {
+                        const module = await import('./src/js/advanced-uuid-generator.js');
+                        window.AdvancedUUIDGenerator = module.AdvancedUUIDGenerator;
+                        window.UUIDUtils = module.UUIDUtils;
+                        console.log('UUID Generator module loaded successfully');
+                    } catch (importError) {
+                        console.error('Failed to import UUID Generator module:', importError);
+                        showError('Failed to load UUID Generator module');
+                        return false;
+                    }
+                }
+
+                // Create instance
+                AdvancedUUIDGen = new AdvancedUUIDGenerator();
+                console.log('Advanced UUID Generator initialized successfully');
+                return true;
+            } catch (error) {
+                console.error('Error initializing Advanced UUID Generator:', error);
+                showError(`Error initializing UUID Generator: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function generateUUID(version) {
+            if (!AdvancedUUIDGen) {
+                if (!(await initializeAdvancedUUIDGenerator())) {
+                    return;
+                }
+            }
+
+            try {
+                // Show/hide name inputs for v3 and v5
+                const nameInputs = document.getElementById('uuid-name-inputs');
+                if (version === 3 || version === 5) {
+                    nameInputs.classList.remove('hidden');
+                } else {
+                    nameInputs.classList.add('hidden');
+                }
+
+                let uuid;
+                const count = parseInt(document.getElementById('uuid-count').value) || 1;
+                
+                switch (version) {
+                    case 1:
+                        uuid = AdvancedUUIDGen.generateV1();
+                        break;
+                    case 3:
+                        const name3 = document.getElementById('uuid-name').value.trim();
+                        const namespace3 = document.getElementById('uuid-namespace').value.trim();
+                        if (!name3 || !namespace3) {
+                            showError('Please enter name and namespace for v3 UUID');
+                            return;
+                        }
+                        uuid = AdvancedUUIDGen.generateV3(name3, namespace3);
+                        break;
+                    case 4:
+                        uuid = AdvancedUUIDGen.generateV4();
+                        break;
+                    case 5:
+                        const name5 = document.getElementById('uuid-name').value.trim();
+                        const namespace5 = document.getElementById('uuid-namespace').value.trim();
+                        if (!name5 || !namespace5) {
+                            showError('Please enter name and namespace for v5 UUID');
+                            return;
+                        }
+                        uuid = AdvancedUUIDGen.generateV5(name5, namespace5);
+                        break;
+                    case 7:
+                        uuid = AdvancedUUIDGen.generateV7();
+                        break;
+                    default:
+                        showError('Invalid UUID version');
+                        return;
+                }
+
+                // Generate multiple UUIDs if requested
+                const uuids = [];
+                for (let i = 0; i < count; i++) {
+                    if (version === 1) {
+                        uuids.push(AdvancedUUIDGen.generateV1());
+                    } else if (version === 3) {
+                        uuids.push(AdvancedUUIDGen.generateV3(name3, namespace3));
+                    } else if (version === 4) {
+                        uuids.push(AdvancedUUIDGen.generateV4());
+                    } else if (version === 5) {
+                        uuids.push(AdvancedUUIDGen.generateV5(name5, namespace5));
+                    } else if (version === 7) {
+                        uuids.push(AdvancedUUIDGen.generateV7());
+                    }
+                }
+
+                // Display results
+                const resultDiv = document.getElementById('uuid-result');
+                if (count === 1) {
+                    resultDiv.innerHTML = `
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-semibold mb-2">Generated UUID v${version}:</h4>
+                            <div class="flex items-center space-x-2">
+                                <input type="text" value="${uuids[0]}" readonly 
+                                       class="flex-1 p-2 border rounded font-mono text-sm bg-white">
+                                <button onclick="copyToClipboard('${uuids[0]}')" 
+                                        class="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-semibold mb-2">Generated ${count} UUID v${version}s:</h4>
+                            <div class="space-y-2 max-h-60 overflow-y-auto">
+                                ${uuids.map((uuid, index) => `
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm text-gray-500 w-8">${index + 1}.</span>
+                                        <input type="text" value="${uuid}" readonly 
+                                               class="flex-1 p-2 border rounded font-mono text-sm bg-white">
+                                        <button onclick="copyToClipboard('${uuid}')" 
+                                                class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs">
+                                            Copy
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Show UUID information
+                const info = AdvancedUUIDGen.getUUIDInfo(uuids[0]);
+                const infoDiv = document.getElementById('uuid-info');
+                infoDiv.innerHTML = `
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h4 class="font-semibold mb-2">UUID Information:</h4>
+                        <div class="text-sm space-y-1">
+                            <div><strong>Version:</strong> ${info.version}</div>
+                            <div><strong>Variant:</strong> ${info.variant}</div>
+                            ${info.timestamp ? `<div><strong>Timestamp:</strong> ${info.timestamp.toISOString()}</div>` : ''}
+                            ${info.nodeId ? `<div><strong>Node ID:</strong> ${info.nodeId}</div>` : ''}
+                            ${info.clockSequence ? `<div><strong>Clock Sequence:</strong> ${info.clockSequence}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error generating UUID:', error);
+                showError(`Error generating UUID: ${error.message}`);
+            }
+        }
+
+        async function validateUUID() {
+            if (!AdvancedUUIDGen) {
+                if (!(await initializeAdvancedUUIDGenerator())) {
+                    return;
+                }
+            }
+
+            try {
+                const input = document.getElementById('uuid-validate-input').value.trim();
+                if (!input) {
+                    showError('Please enter a UUID to validate');
+                    return;
+                }
+
+                const validation = AdvancedUUIDGen.validateUUID(input);
+                const resultDiv = document.getElementById('uuid-validate-result');
+                
+                if (validation.valid) {
+                    resultDiv.innerHTML = `
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-green-800 mb-2">✅ Valid UUID</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Version:</strong> ${validation.version}</div>
+                                <div><strong>Variant:</strong> ${validation.variant}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-red-800 mb-2">❌ Invalid UUID</h4>
+                            <div class="text-sm text-red-700">
+                                ${validation.error}
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error validating UUID:', error);
+                showError(`Error validating UUID: ${error.message}`);
+            }
+        }
+
         // Advanced QR Code Generator Functions
         let AdvancedQRGen = null;
 
@@ -884,6 +1096,23 @@ ith<!DOCTYPE html>
             } else if (mode === 'analysis') {
                 document.getElementById('qr-analysis-mode').classList.remove('hidden');
                 document.getElementById('qr-analysis-tab').classList.add('active');
+            }
+        }
+
+        function switchUUIDMode(mode) {
+            // Hide all modes
+            document.querySelectorAll('.uuid-mode').forEach(el => el.classList.add('hidden'));
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.uuid-tab').forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected mode and activate tab
+            if (mode === 'generate') {
+                document.getElementById('uuid-generate-mode').classList.remove('hidden');
+                document.getElementById('uuid-generate-tab').classList.add('active');
+            } else if (mode === 'validate') {
+                document.getElementById('uuid-validate-mode').classList.remove('hidden');
+                document.getElementById('uuid-validate-tab').classList.add('active');
             }
         }
 
@@ -4105,8 +4334,8 @@ ith<!DOCTYPE html>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">UUID Generator</h3>
-                    <p class="text-gray-600 text-sm">Generate unique identifiers</p>
+                    <h3 class="text-xl font-semibold mb-2">🆔 Advanced UUID Generator</h3>
+                    <p class="text-gray-600 text-sm">RFC 4122 compliant UUIDs with versions 1, 3, 4, 5, and 7 support</p>
                 </div>
 
                 <div class="tool-card p-6 rounded-2xl" onclick="openModal('hash')">
@@ -6360,6 +6589,107 @@ ith<!DOCTYPE html>
                         🖨️ Print
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced UUID Generator Modal -->
+    <div id="uuid" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gradient">🆔 Advanced UUID Generator</h3>
+                <button onclick="closeModal('uuid')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Generator Mode Tabs -->
+            <div class="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                <button onclick="switchUUIDMode('generate')" id="uuid-generate-tab" class="flex-1 py-2 px-4 rounded-md font-medium transition-colors uuid-tab active">Generate</button>
+                <button onclick="switchUUIDMode('validate')" id="uuid-validate-tab" class="flex-1 py-2 px-4 rounded-md font-medium transition-colors uuid-tab">Validate</button>
+            </div>
+
+            <!-- Generate Mode -->
+            <div id="uuid-generate-mode" class="uuid-mode">
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">🆔 UUID Version Selection</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <button onclick="generateUUID(1)" class="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                            <div class="font-semibold text-gray-800">Version 1</div>
+                            <div class="text-sm text-gray-600">Time-based with MAC address</div>
+                        </button>
+                        <button onclick="generateUUID(4)" class="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                            <div class="font-semibold text-gray-800">Version 4</div>
+                            <div class="text-sm text-gray-600">Random (most common)</div>
+                        </button>
+                        <button onclick="generateUUID(7)" class="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                            <div class="font-semibold text-gray-800">Version 7</div>
+                            <div class="text-sm text-gray-600">Time-ordered (sortable)</div>
+                        </button>
+                        <button onclick="generateUUID(3)" class="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                            <div class="font-semibold text-gray-800">Version 3</div>
+                            <div class="text-sm text-gray-600">Name-based (MD5)</div>
+                        </button>
+                    </div>
+                    <button onclick="generateUUID(5)" class="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                        <div class="font-semibold text-gray-800">Version 5</div>
+                        <div class="text-sm text-gray-600">Name-based (SHA-1)</div>
+                    </button>
+                </div>
+
+                <!-- Name-based UUID inputs (for v3 and v5) -->
+                <div id="uuid-name-inputs" class="mb-6 hidden">
+                    <h4 class="font-medium text-gray-800 mb-3">📝 Name-based UUID Parameters</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Name</label>
+                            <input type="text" id="uuid-name" placeholder="Enter name (e.g., 'example.com')" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Namespace UUID</label>
+                            <input type="text" id="uuid-namespace" placeholder="Enter namespace UUID (e.g., '6ba7b810-9dad-11d1-80b4-00c04fd430c8')" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <div class="text-xs text-gray-500 mt-1">
+                                Common namespaces: DNS (6ba7b810-9dad-11d1-80b4-00c04fd430c8), URL (6ba7b811-9dad-11d1-80b4-00c04fd430c8)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generation Options -->
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">⚙️ Generation Options</h4>
+                    <div class="flex items-center space-x-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Count</label>
+                            <input type="number" id="uuid-count" value="1" min="1" max="100" class="w-20 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div id="uuid-result" class="mb-6"></div>
+                <div id="uuid-info"></div>
+            </div>
+
+            <!-- Validate Mode -->
+            <div id="uuid-validate-mode" class="uuid-mode hidden">
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">🔍 UUID Validation</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">UUID to Validate</label>
+                            <input type="text" id="uuid-validate-input" placeholder="Enter UUID to validate (e.g., 550e8400-e29b-41d4-a716-446655440000)" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono">
+                        </div>
+                        <button onclick="validateUUID()" class="btn-primary text-white py-3 rounded-lg font-semibold">
+                            🔍 Validate UUID
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Validation Results -->
+                <div id="uuid-validate-result"></div>
             </div>
         </div>
     </div>
