@@ -94,6 +94,15 @@ ith<!DOCTYPE html>
                     } else {
                         console.error('initializeAdvancedHashGenerator function not found');
                     }
+                } else if (modalId === 'wordcount') {
+                    if (typeof initializeAdvancedWordCounter === 'function') {
+                        console.log('Initializing Advanced Word Counter...');
+                        initializeAdvancedWordCounter().catch(error => {
+                            console.error('Failed to initialize Word Counter:', error);
+                        });
+                    } else {
+                        console.error('initializeAdvancedWordCounter function not found');
+                    }
                 } else if (modalId === 'calculator') {
                     if (typeof initializeAdvancedCalculator === 'function') {
                         console.log('Initializing Advanced Calculator...');
@@ -1192,6 +1201,243 @@ ith<!DOCTYPE html>
                 console.error('Error validating hash:', error);
                 showError(`Error validating hash: ${error.message}`);
             }
+        }
+
+        // Advanced Word Counter Functions
+        let AdvancedWordCounter = null;
+
+        async function initializeAdvancedWordCounter() {
+            try {
+                console.log('Initializing Advanced Word Counter...');
+                
+                // Check if the module is already loaded
+                if (typeof AdvancedWordCounter === 'undefined') {
+                    console.log('Loading Word Counter module...');
+                    try {
+                        const module = await import('./src/js/advanced-word-counter.js');
+                        window.AdvancedWordCounter = module.AdvancedWordCounter;
+                        window.WordCounterUtils = module.WordCounterUtils;
+                        console.log('Word Counter module loaded successfully');
+                    } catch (importError) {
+                        console.error('Failed to import Word Counter module:', importError);
+                        showError('Failed to load Word Counter module');
+                        return false;
+                    }
+                }
+
+                // Create instance
+                AdvancedWordCounter = new AdvancedWordCounter();
+                console.log('Advanced Word Counter initialized successfully');
+                return true;
+            } catch (error) {
+                console.error('Error initializing Advanced Word Counter:', error);
+                showError(`Error initializing Word Counter: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function analyzeText() {
+            if (!AdvancedWordCounter) {
+                if (!(await initializeAdvancedWordCounter())) {
+                    return;
+                }
+            }
+
+            try {
+                const text = document.getElementById('word-text').value.trim();
+                if (!text) {
+                    showError('Please enter text to analyze');
+                    return;
+                }
+
+                const options = {
+                    includeFrequency: document.getElementById('include-frequency').checked,
+                    includeReadability: document.getElementById('include-readability').checked,
+                    includeReadingTime: document.getElementById('include-reading-time').checked,
+                    excludeStopWords: document.getElementById('exclude-stop-words').checked,
+                    minWordLength: parseInt(document.getElementById('min-word-length').value) || 1,
+                    topNWords: parseInt(document.getElementById('top-n-words').value) || 20,
+                    readingSpeed: parseInt(document.getElementById('reading-speed').value) || 200
+                };
+
+                const result = AdvancedWordCounter.countWords(text, options);
+
+                // Display basic statistics
+                displayBasicStats(result.basicStatistics);
+
+                // Display advanced analytics
+                if (result.advancedAnalytics.frequencyAnalysis) {
+                    displayFrequencyAnalysis(result.advancedAnalytics.frequencyAnalysis);
+                }
+
+                if (result.advancedAnalytics.readabilityScores) {
+                    displayReadabilityScores(result.advancedAnalytics.readabilityScores);
+                }
+
+                if (result.advancedAnalytics.readingTime) {
+                    displayReadingTime(result.advancedAnalytics.readingTime);
+                }
+
+                // Display processing info
+                displayProcessingInfo(result.processingInfo);
+
+            } catch (error) {
+                console.error('Error analyzing text:', error);
+                showError(`Error analyzing text: ${error.message}`);
+            }
+        }
+
+        function displayBasicStats(stats) {
+            const statsDiv = document.getElementById('word-stats');
+            const summary = WordCounterUtils.getTextSummary(stats);
+            
+            statsDiv.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-semibold mb-3">📊 Basic Statistics</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-600">${summary.words}</div>
+                            <div class="text-sm text-gray-600">Words</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-600">${summary.characters}</div>
+                            <div class="text-sm text-gray-600">Characters</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600">${summary.sentences}</div>
+                            <div class="text-sm text-gray-600">Sentences</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-orange-600">${summary.paragraphs}</div>
+                            <div class="text-sm text-gray-600">Paragraphs</div>
+                        </div>
+                    </div>
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="text-center">
+                            <div class="text-lg font-semibold text-gray-800">${summary.avgWordsPerSentence}</div>
+                            <div class="text-sm text-gray-600">Avg Words/Sentence</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-lg font-semibold text-gray-800">${summary.avgSentencesPerParagraph}</div>
+                            <div class="text-sm text-gray-600">Avg Sentences/Paragraph</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayFrequencyAnalysis(freqAnalysis) {
+            const freqDiv = document.getElementById('frequency-analysis');
+            
+            const topWordsHtml = freqAnalysis.topWords.slice(0, 10).map(word => `
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                    <span class="font-medium">${word.word}</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-600">${word.count}</span>
+                        <span class="text-xs text-gray-500">(${word.percentage.toFixed(1)}%)</span>
+                    </div>
+                </div>
+            `).join('');
+
+            freqDiv.innerHTML = `
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h4 class="font-semibold mb-3">📈 Frequency Analysis</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div class="text-center">
+                            <div class="text-xl font-bold text-blue-600">${freqAnalysis.totalWords}</div>
+                            <div class="text-sm text-gray-600">Total Words</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xl font-bold text-green-600">${freqAnalysis.uniqueWords}</div>
+                            <div class="text-sm text-gray-600">Unique Words</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xl font-bold text-purple-600">${(freqAnalysis.lexicalDiversity * 100).toFixed(1)}%</div>
+                            <div class="text-sm text-gray-600">Lexical Diversity</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="font-medium mb-2">Top Words:</h5>
+                        <div class="max-h-48 overflow-y-auto">
+                            ${topWordsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayReadabilityScores(scores) {
+            const readabilityDiv = document.getElementById('readability-scores');
+            
+            const fleschLevel = WordCounterUtils.getReadabilityLevel(scores.fleschReadingEase, 'flesch');
+            const gradeLevel = WordCounterUtils.getReadabilityLevel(scores.fleschKincaidGrade, 'grade');
+            
+            readabilityDiv.innerHTML = `
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="font-semibold mb-3">📚 Readability Scores</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div class="text-xl font-bold text-green-600">${scores.fleschReadingEase?.toFixed(1) || 'N/A'}</div>
+                            <div class="text-sm text-gray-600">Flesch Reading Ease</div>
+                            <div class="text-xs text-gray-500">${fleschLevel}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xl font-bold text-blue-600">${scores.fleschKincaidGrade?.toFixed(1) || 'N/A'}</div>
+                            <div class="text-sm text-gray-600">Flesch-Kincaid Grade</div>
+                            <div class="text-xs text-gray-500">${gradeLevel}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xl font-bold text-purple-600">${scores.ari?.toFixed(1) || 'N/A'}</div>
+                            <div class="text-sm text-gray-600">ARI</div>
+                            <div class="text-xs text-gray-500">Automated Readability</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayReadingTime(readingTime) {
+            const readingTimeDiv = document.getElementById('reading-time');
+            const description = WordCounterUtils.getReadingTimeDescription(readingTime.minutes);
+            
+            readingTimeDiv.innerHTML = `
+                <div class="bg-orange-50 p-4 rounded-lg">
+                    <h4 class="font-semibold mb-3">⏱️ Reading Time</h4>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-orange-600">${description}</div>
+                        <div class="text-sm text-gray-600 mt-2">
+                            ${readingTime.minutes} minutes (${readingTime.seconds} seconds)
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            Based on ${readingTime.readingSpeedWpm} words per minute
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayProcessingInfo(info) {
+            const infoDiv = document.getElementById('processing-info');
+            
+            infoDiv.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-semibold mb-3">ℹ️ Processing Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="font-medium">Language:</span> ${info.language}
+                        </div>
+                        <div>
+                            <span class="font-medium">Original Length:</span> ${info.originalLength} characters
+                        </div>
+                        <div>
+                            <span class="font-medium">Processed Length:</span> ${info.processedLength} characters
+                        </div>
+                        <div>
+                            <span class="font-medium">Encoding:</span> ${info.encoding}
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         // Advanced QR Code Generator Functions
@@ -4651,8 +4897,8 @@ ith<!DOCTYPE html>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">Word Counter</h3>
-                    <p class="text-gray-600 text-sm">Count words, characters, paragraphs</p>
+                    <h3 class="text-xl font-semibold mb-2">📊 Advanced Word Counter</h3>
+                    <p class="text-gray-600 text-sm">Comprehensive text analysis with Unicode support, readability scores, and frequency analysis</p>
                 </div>
 
                 <div class="tool-card p-6 rounded-2xl" onclick="openModal('case')">
@@ -5597,36 +5843,93 @@ ith<!DOCTYPE html>
 
 
 
+    <!-- Advanced Word Counter Modal -->
     <div id="wordcount" class="modal">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-gradient">Word Counter</h3>
+                <h3 class="text-2xl font-bold text-gradient">📊 Advanced Word Counter</h3>
                 <button onclick="closeModal('wordcount')" class="text-gray-500 hover:text-gray-700">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
-            <div class="space-y-4">
-                <textarea id="word-text" class="input-field w-full px-4 py-3 rounded-lg" rows="8" placeholder="Type or paste your text here..." oninput="countWords()"></textarea>
-                <div class="grid grid-cols-4 gap-4 text-center">
-                    <div class="bg-gray-100 p-4 rounded-lg">
-                        <div class="text-2xl font-bold text-gradient" id="word-count">0</div>
-                        <div class="text-sm text-gray-600">Words</div>
+
+            <!-- Text Input -->
+            <div class="mb-6">
+                <h4 class="font-medium text-gray-800 mb-3">📝 Text Input</h4>
+                <textarea id="word-text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent" rows="8" placeholder="Type or paste your text here for comprehensive analysis..."></textarea>
+            </div>
+
+            <!-- Analysis Options -->
+            <div class="mb-6">
+                <h4 class="font-medium text-gray-800 mb-3">⚙️ Analysis Options</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="space-y-3">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="include-frequency" checked class="rounded">
+                            <span class="text-sm">Frequency Analysis</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="include-readability" class="rounded">
+                            <span class="text-sm">Readability Scores</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="include-reading-time" checked class="rounded">
+                            <span class="text-sm">Reading Time</span>
+                        </label>
                     </div>
-                    <div class="bg-gray-100 p-4 rounded-lg">
-                        <div class="text-2xl font-bold text-gradient" id="char-count">0</div>
-                        <div class="text-sm text-gray-600">Characters</div>
+                    <div class="space-y-3">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="exclude-stop-words" class="rounded">
+                            <span class="text-sm">Exclude Stop Words</span>
+                        </label>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Min Word Length</label>
+                            <input type="number" id="min-word-length" value="1" min="1" max="10" class="w-full p-2 border border-gray-300 rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Top N Words</label>
+                            <input type="number" id="top-n-words" value="20" min="5" max="100" class="w-full p-2 border border-gray-300 rounded text-sm">
+                        </div>
                     </div>
-                    <div class="bg-gray-100 p-4 rounded-lg">
-                        <div class="text-2xl font-bold text-gradient" id="char-no-space">0</div>
-                        <div class="text-sm text-gray-600">No Spaces</div>
-                    </div>
-                    <div class="bg-gray-100 p-4 rounded-lg">
-                        <div class="text-2xl font-bold text-gradient" id="paragraph-count">0</div>
-                        <div class="text-sm text-gray-600">Paragraphs</div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Reading Speed (WPM)</label>
+                            <select id="reading-speed" class="w-full p-2 border border-gray-300 rounded text-sm">
+                                <option value="150">Slow (150 WPM)</option>
+                                <option value="200" selected>Average (200 WPM)</option>
+                                <option value="250">Fast (250 WPM)</option>
+                                <option value="300">Very Fast (300 WPM)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Analyze Button -->
+            <div class="mb-6">
+                <button onclick="analyzeText()" class="btn-primary w-full text-white py-3 rounded-lg font-semibold">
+                    📊 Analyze Text
+                </button>
+            </div>
+
+            <!-- Results -->
+            <div class="space-y-6">
+                <!-- Basic Statistics -->
+                <div id="word-stats"></div>
+                
+                <!-- Frequency Analysis -->
+                <div id="frequency-analysis"></div>
+                
+                <!-- Readability Scores -->
+                <div id="readability-scores"></div>
+                
+                <!-- Reading Time -->
+                <div id="reading-time"></div>
+                
+                <!-- Processing Information -->
+                <div id="processing-info"></div>
             </div>
         </div>
     </div>
