@@ -85,6 +85,15 @@ ith<!DOCTYPE html>
                     } else {
                         console.error('initializeAdvancedUUIDGenerator function not found');
                     }
+                } else if (modalId === 'hash') {
+                    if (typeof initializeAdvancedHashGenerator === 'function') {
+                        console.log('Initializing Advanced Hash Generator...');
+                        initializeAdvancedHashGenerator().catch(error => {
+                            console.error('Failed to initialize Hash Generator:', error);
+                        });
+                    } else {
+                        console.error('initializeAdvancedHashGenerator function not found');
+                    }
                 } else if (modalId === 'calculator') {
                     if (typeof initializeAdvancedCalculator === 'function') {
                         console.log('Initializing Advanced Calculator...');
@@ -918,6 +927,269 @@ ith<!DOCTYPE html>
             }
         }
 
+        // Advanced Hash Generator Functions
+        let AdvancedHashGen = null;
+
+        async function initializeAdvancedHashGenerator() {
+            try {
+                console.log('Initializing Advanced Hash Generator...');
+                
+                // Check if the module is already loaded
+                if (typeof AdvancedHashGenerator === 'undefined') {
+                    console.log('Loading Hash Generator module...');
+                    try {
+                        const module = await import('./src/js/advanced-hash-generator.js');
+                        window.AdvancedHashGenerator = module.AdvancedHashGenerator;
+                        window.HashUtils = module.HashUtils;
+                        console.log('Hash Generator module loaded successfully');
+                    } catch (importError) {
+                        console.error('Failed to import Hash Generator module:', importError);
+                        showError('Failed to load Hash Generator module');
+                        return false;
+                    }
+                }
+
+                // Create instance
+                AdvancedHashGen = new AdvancedHashGenerator();
+                console.log('Advanced Hash Generator initialized successfully');
+                return true;
+            } catch (error) {
+                console.error('Error initializing Advanced Hash Generator:', error);
+                showError(`Error initializing Hash Generator: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function generateHash() {
+            if (!AdvancedHashGen) {
+                if (!(await initializeAdvancedHashGenerator())) {
+                    return;
+                }
+            }
+
+            try {
+                const input = document.getElementById('hash-input').value.trim();
+                if (!input) {
+                    showError('Please enter data to hash');
+                    return;
+                }
+
+                const algorithm = document.getElementById('hash-algorithm').value;
+                const options = {};
+
+                // Get algorithm-specific options
+                if (algorithm === 'argon2id') {
+                    options.memory_kb = parseInt(document.getElementById('argon2-memory').value) || 65536;
+                    options.iterations = parseInt(document.getElementById('argon2-iterations').value) || 3;
+                    options.salt = AdvancedHashGen.generateSalt(32);
+                } else if (algorithm === 'bcrypt') {
+                    options.rounds = parseInt(document.getElementById('bcrypt-rounds').value) || 12;
+                    options.salt = AdvancedHashGen.generateBcryptSalt();
+                } else if (algorithm === 'pbkdf2') {
+                    options.iterations = parseInt(document.getElementById('pbkdf2-iterations').value) || 600000;
+                    options.key_length = parseInt(document.getElementById('pbkdf2-key-length').value) || 32;
+                    options.salt = AdvancedHashGen.generateSalt(32);
+                } else if (algorithm === 'blake2b') {
+                    options.size = parseInt(document.getElementById('blake2b-size').value) || 64;
+                } else if (algorithm === 'xxhash64') {
+                    options.seed = parseInt(document.getElementById('xxhash-seed').value) || 0;
+                }
+
+                const result = AdvancedHashGen.generateHash(input, algorithm, options);
+
+                // Display results
+                const resultDiv = document.getElementById('hash-result');
+                if (typeof result === 'object' && result.hash) {
+                    // Password hashing result
+                    resultDiv.innerHTML = `
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-semibold mb-2">Generated ${algorithm.toUpperCase()} Hash:</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Hash:</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="text" value="${result.hash}" readonly 
+                                               class="flex-1 p-2 border rounded font-mono text-sm bg-white">
+                                        <button onclick="copyToClipboard('${result.hash}')" 
+                                                class="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                            Copy
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Salt:</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="text" value="${result.salt}" readonly 
+                                               class="flex-1 p-2 border rounded font-mono text-sm bg-white">
+                                        <button onclick="copyToClipboard('${result.salt}')" 
+                                                class="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs">
+                                            Copy
+                                        </button>
+                                    </div>
+                                </div>
+                                ${result.parameters ? `
+                                    <div class="text-sm text-gray-600">
+                                        <strong>Parameters:</strong> ${JSON.stringify(result.parameters)}
+                                    </div>
+                                ` : ''}
+                                ${result.rounds ? `
+                                    <div class="text-sm text-gray-600">
+                                        <strong>Rounds:</strong> ${result.rounds}
+                                    </div>
+                                ` : ''}
+                                ${result.iterations ? `
+                                    <div class="text-sm text-gray-600">
+                                        <strong>Iterations:</strong> ${result.iterations}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Simple hash result
+                    resultDiv.innerHTML = `
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-semibold mb-2">Generated ${algorithm.toUpperCase()} Hash:</h4>
+                            <div class="flex items-center space-x-2">
+                                <input type="text" value="${result}" readonly 
+                                       class="flex-1 p-2 border rounded font-mono text-sm bg-white">
+                                <button onclick="copyToClipboard('${result}')" 
+                                        class="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                    Copy
+                                </button>
+                            </div>
+                            <div class="text-sm text-gray-600 mt-2">
+                                <strong>Length:</strong> ${result.length} characters
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Show algorithm information
+                const info = AdvancedHashGen.getAlgorithmInfo(algorithm);
+                const infoDiv = document.getElementById('hash-info');
+                if (info) {
+                    infoDiv.innerHTML = `
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-semibold mb-2">Algorithm Information:</h4>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Name:</strong> ${info.name}</div>
+                                <div><strong>Type:</strong> ${info.type}</div>
+                                <div><strong>Output Size:</strong> ${info.outputSize}</div>
+                                <div><strong>Security:</strong> ${info.security}</div>
+                                <div><strong>Use Case:</strong> ${info.use}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Error generating hash:', error);
+                showError(`Error generating hash: ${error.message}`);
+            }
+        }
+
+        async function generateMultipleHashes() {
+            if (!AdvancedHashGen) {
+                if (!(await initializeAdvancedHashGenerator())) {
+                    return;
+                }
+            }
+
+            try {
+                const input = document.getElementById('hash-input').value.trim();
+                if (!input) {
+                    showError('Please enter data to hash');
+                    return;
+                }
+
+                const selectedAlgorithms = Array.from(document.querySelectorAll('input[name="hash-algorithms"]:checked'))
+                    .map(cb => cb.value);
+
+                if (selectedAlgorithms.length === 0) {
+                    showError('Please select at least one algorithm');
+                    return;
+                }
+
+                const results = HashUtils.generateMultiple(input, selectedAlgorithms);
+
+                // Display results
+                const resultDiv = document.getElementById('hash-result');
+                resultDiv.innerHTML = `
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-semibold mb-2">Generated Hashes:</h4>
+                        <div class="space-y-3">
+                            ${Object.entries(results).map(([algorithm, result]) => `
+                                <div class="border rounded p-3">
+                                    <div class="font-medium text-gray-800 mb-2">${algorithm.toUpperCase()}</div>
+                                    ${typeof result === 'object' && result.error ? `
+                                        <div class="text-red-600 text-sm">Error: ${result.error}</div>
+                                    ` : `
+                                        <div class="flex items-center space-x-2">
+                                            <input type="text" value="${typeof result === 'object' ? result.hash : result}" readonly 
+                                                   class="flex-1 p-2 border rounded font-mono text-sm bg-white">
+                                            <button onclick="copyToClipboard('${typeof result === 'object' ? result.hash : result}')" 
+                                                    class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs">
+                                                Copy
+                                            </button>
+                                        </div>
+                                    `}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error generating multiple hashes:', error);
+                showError(`Error generating multiple hashes: ${error.message}`);
+            }
+        }
+
+        async function validateHash() {
+            if (!AdvancedHashGen) {
+                if (!(await initializeAdvancedHashGenerator())) {
+                    return;
+                }
+            }
+
+            try {
+                const hash = document.getElementById('hash-validate-input').value.trim();
+                const algorithm = document.getElementById('hash-validate-algorithm').value;
+
+                if (!hash) {
+                    showError('Please enter a hash to validate');
+                    return;
+                }
+
+                const isValid = HashUtils.validateHash(hash, algorithm);
+                const resultDiv = document.getElementById('hash-validate-result');
+                
+                if (isValid) {
+                    resultDiv.innerHTML = `
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-green-800 mb-2">✅ Valid Hash</h4>
+                            <div class="text-sm text-green-700">
+                                The hash format is valid for ${algorithm.toUpperCase()}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-red-800 mb-2">❌ Invalid Hash</h4>
+                            <div class="text-sm text-red-700">
+                                The hash format is not valid for ${algorithm.toUpperCase()}
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error validating hash:', error);
+                showError(`Error validating hash: ${error.message}`);
+            }
+        }
+
         // Advanced QR Code Generator Functions
         let AdvancedQRGen = null;
 
@@ -1113,6 +1385,26 @@ ith<!DOCTYPE html>
             } else if (mode === 'validate') {
                 document.getElementById('uuid-validate-mode').classList.remove('hidden');
                 document.getElementById('uuid-validate-tab').classList.add('active');
+            }
+        }
+
+        function switchHashMode(mode) {
+            // Hide all modes
+            document.querySelectorAll('.hash-mode').forEach(el => el.classList.add('hidden'));
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.hash-tab').forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected mode and activate tab
+            if (mode === 'generate') {
+                document.getElementById('hash-generate-mode').classList.remove('hidden');
+                document.getElementById('hash-generate-tab').classList.add('active');
+            } else if (mode === 'multiple') {
+                document.getElementById('hash-multiple-mode').classList.remove('hidden');
+                document.getElementById('hash-multiple-tab').classList.add('active');
+            } else if (mode === 'validate') {
+                document.getElementById('hash-validate-mode').classList.remove('hidden');
+                document.getElementById('hash-validate-tab').classList.add('active');
             }
         }
 
@@ -4344,8 +4636,8 @@ ith<!DOCTYPE html>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">Hash Generator</h3>
-                    <p class="text-gray-600 text-sm">Generate MD5, SHA1, SHA256 hashes</p>
+                    <h3 class="text-xl font-semibold mb-2">🔐 Advanced Hash Generator</h3>
+                    <p class="text-gray-600 text-sm">SHA-256, BLAKE2, Argon2, bcrypt, PBKDF2, xxHash, CRC32 with security best practices</p>
                 </div>
 
                 <!-- Text Tools -->
@@ -6853,7 +7145,150 @@ ith<!DOCTYPE html>
 
     <div id="uuid" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">UUID Generator</h3><button onclick="closeModal('uuid')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">🆔</div><h4 class="text-xl font-semibold mb-2">UUID Generator</h4><p class="text-gray-600">Generate unique identifiers for your projects.</p></div></div></div>
 
-    <div id="hash" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">Hash Generator</h3><button onclick="closeModal('hash')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">🔗</div><h4 class="text-xl font-semibold mb-2">Hash Generator</h4><p class="text-gray-600">Generate MD5, SHA1, and SHA256 hashes.</p></div></div></div>
+    <!-- Advanced Hash Generator Modal -->
+    <div id="hash" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gradient">🔐 Advanced Hash Generator</h3>
+                <button onclick="closeModal('hash')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Generator Mode Tabs -->
+            <div class="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                <button onclick="switchHashMode('generate')" id="hash-generate-tab" class="flex-1 py-2 px-4 rounded-md font-medium transition-colors hash-tab active">Generate</button>
+                <button onclick="switchHashMode('multiple')" id="hash-multiple-tab" class="flex-1 py-2 px-4 rounded-md font-medium transition-colors hash-tab">Multiple</button>
+                <button onclick="switchHashMode('validate')" id="hash-validate-tab" class="flex-1 py-2 px-4 rounded-md font-medium transition-colors hash-tab">Validate</button>
+            </div>
+
+            <!-- Generate Mode -->
+            <div id="hash-generate-mode" class="hash-mode">
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">📝 Input Data</h4>
+                    <textarea id="hash-input" placeholder="Enter text or data to hash..." rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <h4 class="font-medium text-gray-800 mb-3">🔐 Algorithm Selection</h4>
+                        <select id="hash-algorithm" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                            <optgroup label="Cryptographic">
+                                <option value="sha256">SHA-256 (Recommended)</option>
+                                <option value="blake2b">BLAKE2b (High-speed)</option>
+                                <option value="md5">MD5 (Deprecated)</option>
+                                <option value="sha1">SHA-1 (Deprecated)</option>
+                            </optgroup>
+                            <optgroup label="Password Hashing">
+                                <option value="argon2id">Argon2id (Recommended)</option>
+                                <option value="bcrypt">bcrypt (Widely supported)</option>
+                                <option value="pbkdf2">PBKDF2 (NIST approved)</option>
+                            </optgroup>
+                            <optgroup label="Non-cryptographic">
+                                <option value="xxhash64">xxHash64 (High-speed)</option>
+                                <option value="crc32">CRC32 (Error detection)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div>
+                        <h4 class="font-medium text-gray-800 mb-3">⚙️ Algorithm Options</h4>
+                        <div id="hash-options" class="space-y-3">
+                            <!-- Options will be populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3 mb-6">
+                    <button onclick="generateHash()" class="btn-primary flex-1 text-white py-3 rounded-lg font-semibold">
+                        🔐 Generate Hash
+                    </button>
+                </div>
+
+                <!-- Results -->
+                <div id="hash-result" class="mb-6"></div>
+                <div id="hash-info"></div>
+            </div>
+
+            <!-- Multiple Mode -->
+            <div id="hash-multiple-mode" class="hash-mode hidden">
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">📝 Input Data</h4>
+                    <textarea id="hash-input" placeholder="Enter text or data to hash..." rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"></textarea>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">🔐 Select Algorithms</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="hash-algorithms" value="sha256" checked class="rounded">
+                            <span class="text-sm">SHA-256</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="hash-algorithms" value="blake2b" class="rounded">
+                            <span class="text-sm">BLAKE2b</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="hash-algorithms" value="xxhash64" class="rounded">
+                            <span class="text-sm">xxHash64</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="hash-algorithms" value="crc32" class="rounded">
+                            <span class="text-sm">CRC32</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="hash-algorithms" value="md5" class="rounded">
+                            <span class="text-sm">MD5</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="hash-algorithms" value="sha1" class="rounded">
+                            <span class="text-sm">SHA-1</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3 mb-6">
+                    <button onclick="generateMultipleHashes()" class="btn-primary flex-1 text-white py-3 rounded-lg font-semibold">
+                        🔐 Generate Multiple Hashes
+                    </button>
+                </div>
+
+                <!-- Results -->
+                <div id="hash-result"></div>
+            </div>
+
+            <!-- Validate Mode -->
+            <div id="hash-validate-mode" class="hash-mode hidden">
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">🔍 Hash Validation</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Hash to Validate</label>
+                            <input type="text" id="hash-validate-input" placeholder="Enter hash to validate..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Algorithm</label>
+                            <select id="hash-validate-algorithm" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                                <option value="sha256">SHA-256</option>
+                                <option value="md5">MD5</option>
+                                <option value="sha1">SHA-1</option>
+                                <option value="crc32">CRC32</option>
+                                <option value="xxhash64">xxHash64</option>
+                            </select>
+                        </div>
+                        <button onclick="validateHash()" class="btn-primary text-white py-3 rounded-lg font-semibold">
+                            🔍 Validate Hash
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Validation Results -->
+                <div id="hash-validate-result"></div>
+            </div>
+        </div>
+    </div>
 
     <div id="case" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">Case Converter</h3><button onclick="closeModal('case')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">🔤</div><h4 class="text-xl font-semibold mb-2">Case Converter</h4><p class="text-gray-600">Convert text between different cases.</p></div></div></div>
 
