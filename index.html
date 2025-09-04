@@ -5288,7 +5288,7 @@ ith<!DOCTYPE html>
             <div id="characters-mode" class="password-mode">
                 <input type="hidden" id="password-mode" value="characters">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
+                <div>
                         <h4 class="font-medium text-gray-800 mb-3">🎯 Entropy & Length</h4>
                         <div class="space-y-3">
                             <div>
@@ -5328,12 +5328,12 @@ ith<!DOCTYPE html>
                             <div>
                                 <label class="block text-sm font-medium mb-2">Password Count (for multiple generation)</label>
                                 <input type="number" id="password-count" placeholder="5" value="5" min="1" max="20" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
-                            </div>
-                                            <div class="space-y-2">
-                                <label class="flex items-center">
+                </div>
+                <div class="space-y-2">
+                    <label class="flex items-center">
                                     <input type="checkbox" id="screen-breached" checked class="mr-2">
                                     <span class="text-sm">Screen against breached passwords</span>
-                                </label>
+                    </label>
                             </div>
                         </div>
                     </div>
@@ -5370,11 +5370,11 @@ ith<!DOCTYPE html>
                                 <input type="text" id="passphrase-separator" value=" " class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                             </div>
                             <div>
-                                <label class="flex items-center">
+                    <label class="flex items-center">
                                     <input type="checkbox" id="add-random-chars" class="mr-2">
                                     <span class="text-sm">Add random symbols/digits (legacy compliance)</span>
-                                </label>
-                            </div>
+                    </label>
+                </div>
                         </div>
                     </div>
 
@@ -5394,12 +5394,12 @@ ith<!DOCTYPE html>
                 <div class="flex space-x-3 mb-6">
                     <button onclick="generateDicewarePassphrase()" class="btn-primary flex-1 text-white py-3 rounded-lg font-semibold">
                         🎲 Generate Passphrase
-                    </button>
+                </button>
                     <button onclick="generateMultiplePassphrases()" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700">
                         🔄 Generate Multiple
-                    </button>
+                        </button>
+                    </div>
                 </div>
-            </div>
 
             <!-- Validation Mode -->
             <div id="validation-mode" class="password-mode hidden">
@@ -5414,9 +5414,9 @@ ith<!DOCTYPE html>
                         <button onclick="validatePassword()" class="btn-primary text-white py-3 px-6 rounded-lg font-semibold">
                             ✅ Validate Password
                         </button>
-                    </div>
-                </div>
             </div>
+        </div>
+    </div>
 
             <!-- Error Display -->
             <div id="password-error" class="hidden mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg"></div>
@@ -5502,23 +5502,23 @@ ith<!DOCTYPE html>
                             <option value="female">Female</option>
                         </select>
         </div>
-                </div>
+    </div>
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div>
                         <label class="block text-sm font-medium mb-2">Height</label>
                         <div id="child-height-input">
                             <input type="number" id="child-height-metric" placeholder="1.40" step="0.01" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                        </div>
+            </div>
                     </div>
-                    <div>
+                <div>
                         <label class="block text-sm font-medium mb-2">Weight</label>
                         <input type="number" id="child-weight-metric" placeholder="35" step="0.1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                    </div>
+                </div>
                 </div>
                 <button onclick="calculateChildBMI()" class="btn-primary w-full text-white py-3 rounded-lg font-semibold">
                     Calculate BMI
                 </button>
-    </div>
+                </div>
 
             <!-- Results Display -->
             <div id="bmi-result" class="hidden mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
@@ -5526,7 +5526,7 @@ ith<!DOCTYPE html>
                     <div class="text-4xl font-bold text-green-800 mb-2" id="bmi-value"></div>
                     <div class="text-lg font-semibold text-green-700 mb-2" id="bmi-category"></div>
                     <div class="text-sm text-green-600" id="bmi-description"></div>
-                </div>
+            </div>
                 
                 <div id="bmi-additional-info" class="hidden text-left">
                     <div class="grid grid-cols-2 gap-4 text-sm">
@@ -5546,8 +5546,8 @@ ith<!DOCTYPE html>
                             <span class="font-medium text-green-700">Percentile:</span>
                             <span id="bmi-percentile" class="ml-2"></span>
                         </div>
-                    </div>
-                </div>
+        </div>
+    </div>
                 
                 <div class="mt-4 p-3 bg-blue-50 rounded-lg">
                     <div class="font-medium text-blue-800 mb-2">💡 Recommendation:</div>

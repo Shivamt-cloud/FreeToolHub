@@ -213,7 +213,16 @@ export class AdvancedHashGenerator {
         // For production use, use a proper Argon2 library
         
         const memoryBlocks = Math.floor(memoryKB * 1024 / 1024); // 1KB blocks
-        const hash = this.sha256(new Uint8Array([...password, ...salt]));
+        
+        // Ensure password and salt are Uint8Array
+        const passwordBytes = typeof password === 'string' ? new TextEncoder().encode(password) : password;
+        const saltBytes = salt instanceof Uint8Array ? salt : new Uint8Array(salt);
+        
+        const combined = new Uint8Array(passwordBytes.length + saltBytes.length);
+        combined.set(passwordBytes, 0);
+        combined.set(saltBytes, passwordBytes.length);
+        
+        const hash = this.sha256(combined);
         
         // Simulate memory-hard computation
         let result = new TextEncoder().encode(hash);
@@ -225,7 +234,7 @@ export class AdvancedHashGenerator {
         
         return {
             hash: Array.from(result).map(b => b.toString(16).padStart(2, '0')).join(''),
-            salt: Array.from(salt).map(b => b.toString(16).padStart(2, '0')).join(''),
+            salt: Array.from(saltBytes).map(b => b.toString(16).padStart(2, '0')).join(''),
             parameters: {
                 memory_kb: memoryKB,
                 iterations,
@@ -244,14 +253,20 @@ export class AdvancedHashGenerator {
         const iterations = Math.pow(2, rounds);
         let hash = new TextEncoder().encode(password);
         
+        // Ensure salt is Uint8Array
+        const saltBytes = salt instanceof Uint8Array ? salt : new Uint8Array(salt);
+        
         // Simulate bcrypt rounds
         for (let i = 0; i < iterations; i++) {
-            hash = this.sha256(new Uint8Array([...hash, ...salt]));
+            const combined = new Uint8Array(hash.length + saltBytes.length);
+            combined.set(hash, 0);
+            combined.set(saltBytes, hash.length);
+            hash = this.sha256(combined);
         }
         
         return {
             hash: Array.from(hash).map(b => b.toString(16).padStart(2, '0')).join(''),
-            salt: Array.from(salt).map(b => b.toString(16).padStart(2, '0')).join(''),
+            salt: Array.from(saltBytes).map(b => b.toString(16).padStart(2, '0')).join(''),
             rounds
         };
     }
@@ -264,11 +279,18 @@ export class AdvancedHashGenerator {
         const blockCount = Math.ceil(keyLength / hashLength);
         const derivedKey = new Uint8Array(keyLength);
         
+        // Ensure salt is Uint8Array
+        const saltBytes = salt instanceof Uint8Array ? salt : new Uint8Array(salt);
+        
         for (let i = 1; i <= blockCount; i++) {
             const blockIndex = new Uint8Array(4);
             new DataView(blockIndex.buffer).setUint32(0, i, false); // Big-endian
             
-            let u = this.hmac(hashFunc, password, new Uint8Array([...salt, ...blockIndex]));
+            const combined = new Uint8Array(saltBytes.length + blockIndex.length);
+            combined.set(saltBytes, 0);
+            combined.set(blockIndex, saltBytes.length);
+            
+            let u = this.hmac(hashFunc, password, combined);
             const t = new Uint8Array(u);
             
             for (let j = 1; j < iterations; j++) {
@@ -285,7 +307,7 @@ export class AdvancedHashGenerator {
         
         return {
             hash: Array.from(derivedKey).map(b => b.toString(16).padStart(2, '0')).join(''),
-            salt: Array.from(salt).map(b => b.toString(16).padStart(2, '0')).join(''),
+            salt: Array.from(saltBytes).map(b => b.toString(16).padStart(2, '0')).join(''),
             iterations,
             key_length: keyLength
         };

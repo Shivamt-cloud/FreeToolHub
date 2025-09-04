@@ -2,6 +2,7 @@
   "name": "freetoolhub",
   "version": "1.0.0",
   "description": "A beautiful collection of free online tools for productivity and development",
+  "type": "module",
   "main": "index.html",
   "scripts": {
     "start": "live-server --port=3000 --open=/",
