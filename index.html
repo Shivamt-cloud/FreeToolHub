@@ -112,6 +112,15 @@ ith<!DOCTYPE html>
                     } else {
                         console.error('initializeAdvancedCaseConverter function not found');
                     }
+                } else if (modalId === 'url') {
+                    if (typeof initializeAdvancedURLProcessor === 'function') {
+                        console.log('Initializing Advanced URL Processor...');
+                        initializeAdvancedURLProcessor().catch(error => {
+                            console.error('Failed to initialize URL Processor:', error);
+                        });
+                    } else {
+                        console.error('initializeAdvancedURLProcessor function not found');
+                    }
                 } else if (modalId === 'calculator') {
                     if (typeof initializeAdvancedCalculator === 'function') {
                         console.log('Initializing Advanced Calculator...');
@@ -1683,6 +1692,322 @@ ith<!DOCTYPE html>
             }
         }
 
+        // Advanced URL Processor Functions
+        let AdvancedURLProcessor = null;
+
+        async function initializeAdvancedURLProcessor() {
+            try {
+                console.log('Initializing Advanced URL Processor...');
+                
+                // Check if the module is already loaded
+                if (typeof window.AdvancedURLProcessor === 'undefined') {
+                    console.log('Loading URL Processor module...');
+                    try {
+                        const module = await import('./src/js/advanced-url-encoder.js');
+                        window.AdvancedURLProcessor = module.AdvancedURLProcessor;
+                        window.URLProcessorUtils = module.URLProcessorUtils;
+                        console.log('URL Processor module loaded successfully');
+                    } catch (importError) {
+                        console.error('Failed to import URL Processor module:', importError);
+                        showError('Failed to load URL Processor module');
+                        return false;
+                    }
+                }
+
+                // Create instance
+                AdvancedURLProcessor = new window.AdvancedURLProcessor();
+                console.log('Advanced URL Processor initialized successfully');
+                
+                // Populate mode options
+                populateURLModes();
+                
+                return true;
+            } catch (error) {
+                console.error('Error initializing Advanced URL Processor:', error);
+                showError(`Error initializing URL Processor: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function encodeURL() {
+            if (!AdvancedURLProcessor) {
+                if (!(await initializeAdvancedURLProcessor())) {
+                    return;
+                }
+            }
+
+            try {
+                const text = document.getElementById('url-text').value.trim();
+                if (!text) {
+                    showError('Please enter text to encode');
+                    return;
+                }
+
+                const mode = document.getElementById('url-mode').value;
+                const options = {
+                    strictSurrogates: document.getElementById('strict-surrogates').checked
+                };
+
+                console.log('Encoding URL with mode:', mode);
+                const result = AdvancedURLProcessor.encoder.encode(text, mode, options);
+                console.log('Encoding result:', result);
+
+                // Display result
+                displayURLResult(result, mode, 'encode');
+
+            } catch (error) {
+                console.error('Error encoding URL:', error);
+                showError(`Error encoding URL: ${error.message}`);
+            }
+        }
+
+        async function decodeURL() {
+            if (!AdvancedURLProcessor) {
+                if (!(await initializeAdvancedURLProcessor())) {
+                    return;
+                }
+            }
+
+            try {
+                const text = document.getElementById('url-text').value.trim();
+                if (!text) {
+                    showError('Please enter text to decode');
+                    return;
+                }
+
+                const mode = document.getElementById('url-mode').value;
+                const options = {
+                    strictUnicode: document.getElementById('strict-unicode').checked,
+                    strictPercent: document.getElementById('strict-percent').checked
+                };
+
+                console.log('Decoding URL with mode:', mode);
+                const result = AdvancedURLProcessor.decoder.decode(text, mode, options);
+                console.log('Decoding result:', result);
+
+                // Display result
+                displayURLResult(result, mode, 'decode');
+
+            } catch (error) {
+                console.error('Error decoding URL:', error);
+                showError(`Error decoding URL: ${error.message}`);
+            }
+        }
+
+        function displayURLResult(result, mode, operation) {
+            const resultDiv = document.getElementById('url-result');
+            const description = window.URLProcessorUtils.getModeDescription(mode);
+            const icon = window.URLProcessorUtils.getModeIcon(mode);
+            const operationText = operation === 'encode' ? 'Encoded' : 'Decoded';
+            
+            resultDiv.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-semibold mb-3">${icon} ${operationText} Result</h4>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-2">${description}</label>
+                        <div class="flex items-center space-x-2">
+                            <textarea id="url-result-text" readonly 
+                                      class="flex-1 p-3 border border-gray-300 rounded-lg bg-white font-mono text-sm min-h-[100px]">${result}</textarea>
+                            <button onclick="copyToClipboard('${result.replace(/'/g, "\\'")}')" 
+                                    class="btn-secondary px-4 py-2 text-sm">
+                                📋 Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function populateURLModes() {
+            if (!AdvancedURLProcessor) return;
+            
+            try {
+                const supportedModes = AdvancedURLProcessor.getSupportedModes();
+                const modeSelect = document.getElementById('url-mode');
+                
+                if (modeSelect) {
+                    modeSelect.innerHTML = '';
+                    
+                    // Add encoding modes
+                    const encodingGroup = document.createElement('optgroup');
+                    encodingGroup.label = 'Encoding Modes';
+                    supportedModes.encoding.forEach(mode => {
+                        const option = document.createElement('option');
+                        option.value = mode;
+                        option.textContent = window.URLProcessorUtils.formatMode(mode);
+                        encodingGroup.appendChild(option);
+                    });
+                    modeSelect.appendChild(encodingGroup);
+                    
+                    // Add decoding modes
+                    const decodingGroup = document.createElement('optgroup');
+                    decodingGroup.label = 'Decoding Modes';
+                    supportedModes.decoding.forEach(mode => {
+                        const option = document.createElement('option');
+                        option.value = mode;
+                        option.textContent = window.URLProcessorUtils.formatMode(mode);
+                        decodingGroup.appendChild(option);
+                    });
+                    modeSelect.appendChild(decodingGroup);
+                }
+            } catch (error) {
+                console.error('Error populating URL modes:', error);
+            }
+        }
+
+        async function processFormData() {
+            if (!AdvancedURLProcessor) return;
+            
+            try {
+                const formDataText = document.getElementById('form-data-input').value.trim();
+                if (!formDataText) {
+                    showError('Please enter form data');
+                    return;
+                }
+
+                const operation = document.getElementById('form-operation').value;
+                let result;
+
+                if (operation === 'encode') {
+                    // Parse as JSON or key=value pairs
+                    let data;
+                    try {
+                        data = JSON.parse(formDataText);
+                    } catch {
+                        // Try parsing as key=value pairs
+                        const pairs = formDataText.split('\n').filter(line => line.trim());
+                        data = {};
+                        for (const pair of pairs) {
+                            if (pair.includes('=')) {
+                                const [key, value] = pair.split('=', 2);
+                                data[key.trim()] = value.trim();
+                            }
+                        }
+                    }
+                    
+                    result = AdvancedURLProcessor.formProcessor.encodeFormData(data);
+                } else {
+                    result = AdvancedURLProcessor.formProcessor.decodeFormData(formDataText);
+                }
+
+                // Display result
+                const resultDiv = document.getElementById('form-data-result');
+                resultDiv.innerHTML = `
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-semibold mb-3">📝 Form Data ${operation === 'encode' ? 'Encoded' : 'Decoded'}</h4>
+                        <div class="flex items-center space-x-2">
+                            <textarea id="form-data-result-text" readonly 
+                                      class="flex-1 p-3 border border-gray-300 rounded-lg bg-white font-mono text-sm min-h-[100px]">${result}</textarea>
+                            <button onclick="copyToClipboard('${result.replace(/'/g, "\\'")}')" 
+                                    class="btn-secondary px-4 py-2 text-sm">
+                                📋 Copy
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error processing form data:', error);
+                showError(`Error processing form data: ${error.message}`);
+            }
+        }
+
+        async function processBase64URL() {
+            if (!AdvancedURLProcessor) return;
+            
+            try {
+                const text = document.getElementById('base64url-input').value.trim();
+                if (!text) {
+                    showError('Please enter text for Base64URL processing');
+                    return;
+                }
+
+                const operation = document.getElementById('base64url-operation').value;
+                let result;
+
+                if (operation === 'encode') {
+                    result = AdvancedURLProcessor.base64url.encodeBase64url(text);
+                } else {
+                    const decoded = AdvancedURLProcessor.base64url.decodeBase64url(text);
+                    result = new TextDecoder().decode(decoded);
+                }
+
+                // Display result
+                const resultDiv = document.getElementById('base64url-result');
+                resultDiv.innerHTML = `
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-semibold mb-3">🔐 Base64URL ${operation === 'encode' ? 'Encoded' : 'Decoded'}</h4>
+                        <div class="flex items-center space-x-2">
+                            <textarea id="base64url-result-text" readonly 
+                                      class="flex-1 p-3 border border-gray-300 rounded-lg bg-white font-mono text-sm min-h-[100px]">${result}</textarea>
+                            <button onclick="copyToClipboard('${result.replace(/'/g, "\\'")}')" 
+                                    class="btn-secondary px-4 py-2 text-sm">
+                                📋 Copy
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error processing Base64URL:', error);
+                showError(`Error processing Base64URL: ${error.message}`);
+            }
+        }
+
+        async function processFullURL() {
+            if (!AdvancedURLProcessor) return;
+            
+            try {
+                const urlText = document.getElementById('full-url-input').value.trim();
+                if (!urlText) {
+                    showError('Please enter a URL');
+                    return;
+                }
+
+                const operation = document.getElementById('full-url-operation').value;
+                const result = AdvancedURLProcessor.processFullUrl(urlText, operation);
+
+                // Display result
+                const resultDiv = document.getElementById('full-url-result');
+                resultDiv.innerHTML = `
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-semibold mb-3">🌐 Full URL ${operation === 'encode' ? 'Encoded' : 'Decoded'}</h4>
+                        <div class="flex items-center space-x-2">
+                            <textarea id="full-url-result-text" readonly 
+                                      class="flex-1 p-3 border border-gray-300 rounded-lg bg-white font-mono text-sm min-h-[100px]">${result}</textarea>
+                            <button onclick="copyToClipboard('${result.replace(/'/g, "\\'")}')" 
+                                    class="btn-secondary px-4 py-2 text-sm">
+                                📋 Copy
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                // Show URL info
+                const urlInfo = window.URLProcessorUtils.getUrlInfo(result);
+                if (urlInfo.isValid) {
+                    const infoDiv = document.getElementById('url-info');
+                    infoDiv.innerHTML = `
+                        <div class="bg-blue-50 p-3 rounded-lg">
+                            <h5 class="font-medium mb-2">🔍 URL Information</h5>
+                            <div class="text-sm space-y-1">
+                                <div><strong>Scheme:</strong> ${urlInfo.scheme || 'N/A'}</div>
+                                <div><strong>Host:</strong> ${urlInfo.host || 'N/A'}</div>
+                                <div><strong>Port:</strong> ${urlInfo.port || 'N/A'}</div>
+                                <div><strong>Path:</strong> ${urlInfo.path || 'N/A'}</div>
+                                <div><strong>Query:</strong> ${urlInfo.query || 'N/A'}</div>
+                                <div><strong>Fragment:</strong> ${urlInfo.fragment || 'N/A'}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Error processing full URL:', error);
+                showError(`Error processing full URL: ${error.message}`);
+            }
+        }
+
         // Advanced QR Code Generator Functions
         let AdvancedQRGen = null;
 
@@ -1898,6 +2223,32 @@ ith<!DOCTYPE html>
             } else if (mode === 'validate') {
                 document.getElementById('hash-validate-mode').classList.remove('hidden');
                 document.getElementById('hash-validate-tab').classList.add('active');
+            }
+        }
+
+        function switchURLTab(mode) {
+            // Hide all tab contents
+            document.querySelectorAll('.url-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('[id^="url-"][id$="-tab"]').forEach(tab => {
+                tab.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+                tab.classList.add('text-gray-500', 'hover:text-gray-700');
+            });
+            
+            // Show selected tab content
+            const selectedContent = document.getElementById(`url-${mode}-content`);
+            if (selectedContent) {
+                selectedContent.classList.remove('hidden');
+            }
+            
+            // Add active class to selected tab
+            const selectedTab = document.getElementById(`url-${mode}-tab`);
+            if (selectedTab) {
+                selectedTab.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+                selectedTab.classList.remove('text-gray-500', 'hover:text-gray-700');
             }
         }
 
@@ -5160,8 +5511,8 @@ ith<!DOCTYPE html>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">URL Encoder/Decoder</h3>
-                    <p class="text-gray-600 text-sm">Encode and decode URLs</p>
+                    <h3 class="text-xl font-semibold mb-2">🔗 Advanced URL Encoder/Decoder</h3>
+                    <p class="text-gray-600 text-sm">RFC 3986 compliant URL encoding with form data processing and Base64URL support</p>
                 </div>
 
                 <div class="tool-card p-6 rounded-2xl" onclick="openModal('json')">
@@ -7918,7 +8269,160 @@ ith<!DOCTYPE html>
         </div>
     </div>
 
-    <div id="url" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">URL Encoder/Decoder</h3><button onclick="closeModal('url')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">🔗</div><h4 class="text-xl font-semibold mb-2">URL Encoder/Decoder</h4><p class="text-gray-600">Encode and decode URLs safely.</p></div></div></div>
+    <!-- Advanced URL Encoder/Decoder Modal -->
+    <div id="url" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gradient">🔗 Advanced URL Encoder/Decoder</h3>
+                <button onclick="closeModal('url')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                <button onclick="switchURLTab('basic')" id="url-basic-tab" class="flex-1 py-2 px-4 text-sm font-medium rounded-md bg-white text-blue-600 shadow-sm">
+                    🔗 Basic Encode/Decode
+                </button>
+                <button onclick="switchURLTab('form')" id="url-form-tab" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                    📝 Form Data
+                </button>
+                <button onclick="switchURLTab('base64url')" id="url-base64url-tab" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                    🔐 Base64URL
+                </button>
+                <button onclick="switchURLTab('full')" id="url-full-tab" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                    🌐 Full URL
+                </button>
+            </div>
+
+            <!-- Basic Encode/Decode Tab -->
+            <div id="url-basic-content" class="url-tab-content">
+                <!-- Text Input -->
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">📝 Text Input</h4>
+                    <textarea id="url-text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="4" placeholder="Enter text to encode or decode..."></textarea>
+                </div>
+
+                <!-- Mode Selection -->
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">🔄 Encoding/Decoding Mode</h4>
+                    <select id="url-mode" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="uri_component">URI Component</option>
+                        <option value="uri_full">URI Full</option>
+                        <option value="form_urlencoded">Form URL Encoded</option>
+                        <option value="rfc3986_strict">RFC 3986 Strict</option>
+                    </select>
+                </div>
+
+                <!-- Options -->
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">⚙️ Options</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="strict-surrogates" class="rounded">
+                            <span class="text-sm">Strict Surrogates</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="strict-unicode" class="rounded">
+                            <span class="text-sm">Strict Unicode</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="strict-percent" class="rounded">
+                            <span class="text-sm">Strict Percent</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mb-6 flex space-x-3">
+                    <button onclick="encodeURL()" class="btn-primary flex-1 text-white py-3 rounded-lg font-semibold">
+                        🔗 Encode
+                    </button>
+                    <button onclick="decodeURL()" class="btn-secondary flex-1 py-3 rounded-lg font-semibold">
+                        🔓 Decode
+                    </button>
+                </div>
+
+                <!-- Results -->
+                <div id="url-result"></div>
+            </div>
+
+            <!-- Form Data Tab -->
+            <div id="url-form-content" class="url-tab-content hidden">
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">📝 Form Data Input</h4>
+                    <textarea id="form-data-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="6" placeholder='Enter form data as JSON: {"name": "John", "email": "john@example.com"} or as key=value pairs: name=John&#10;email=john@example.com'></textarea>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">🔄 Operation</h4>
+                    <select id="form-operation" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="encode">Encode Form Data</option>
+                        <option value="decode">Decode Form Data</option>
+                    </select>
+                </div>
+
+                <div class="mb-6">
+                    <button onclick="processFormData()" class="btn-primary w-full text-white py-3 rounded-lg font-semibold">
+                        📝 Process Form Data
+                    </button>
+                </div>
+
+                <div id="form-data-result"></div>
+            </div>
+
+            <!-- Base64URL Tab -->
+            <div id="url-base64url-content" class="url-tab-content hidden">
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">🔐 Base64URL Input</h4>
+                    <textarea id="base64url-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="4" placeholder="Enter text for Base64URL encoding/decoding..."></textarea>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">🔄 Operation</h4>
+                    <select id="base64url-operation" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="encode">Encode to Base64URL</option>
+                        <option value="decode">Decode from Base64URL</option>
+                    </select>
+                </div>
+
+                <div class="mb-6">
+                    <button onclick="processBase64URL()" class="btn-primary w-full text-white py-3 rounded-lg font-semibold">
+                        🔐 Process Base64URL
+                    </button>
+                </div>
+
+                <div id="base64url-result"></div>
+            </div>
+
+            <!-- Full URL Tab -->
+            <div id="url-full-content" class="url-tab-content hidden">
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">🌐 Full URL Input</h4>
+                    <textarea id="full-url-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="4" placeholder="Enter complete URL: https://example.com/path?query=value#fragment"></textarea>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-800 mb-3">🔄 Operation</h4>
+                    <select id="full-url-operation" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="encode">Encode URL Components</option>
+                        <option value="decode">Decode URL Components</option>
+                    </select>
+                </div>
+
+                <div class="mb-6">
+                    <button onclick="processFullURL()" class="btn-primary w-full text-white py-3 rounded-lg font-semibold">
+                        🌐 Process Full URL
+                    </button>
+                </div>
+
+                <div id="full-url-result"></div>
+                <div id="url-info"></div>
+            </div>
+        </div>
+    </div>
 
     <div id="json" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">JSON Formatter</h3><button onclick="closeModal('json')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">📋</div><h4 class="text-xl font-semibold mb-2">JSON Formatter</h4><p class="text-gray-600">Format and validate JSON data.</p></div></div></div>
 
