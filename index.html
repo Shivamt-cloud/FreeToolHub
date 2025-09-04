@@ -103,6 +103,15 @@ ith<!DOCTYPE html>
                     } else {
                         console.error('initializeAdvancedWordCounter function not found');
                     }
+                } else if (modalId === 'case') {
+                    if (typeof initializeAdvancedCaseConverter === 'function') {
+                        console.log('Initializing Advanced Case Converter...');
+                        initializeAdvancedCaseConverter().catch(error => {
+                            console.error('Failed to initialize Case Converter:', error);
+                        });
+                    } else {
+                        console.error('initializeAdvancedCaseConverter function not found');
+                    }
                 } else if (modalId === 'calculator') {
                     if (typeof initializeAdvancedCalculator === 'function') {
                         console.log('Initializing Advanced Calculator...');
@@ -1440,6 +1449,238 @@ ith<!DOCTYPE html>
                     </div>
                 </div>
             `;
+        }
+
+        // Advanced Case Converter Functions
+        let AdvancedCaseConverter = null;
+
+        async function initializeAdvancedCaseConverter() {
+            try {
+                console.log('Initializing Advanced Case Converter...');
+                
+                // Check if the module is already loaded
+                if (typeof window.AdvancedCaseConverter === 'undefined') {
+                    console.log('Loading Case Converter module...');
+                    try {
+                        const module = await import('./src/js/advanced-case-converter.js');
+                        window.AdvancedCaseConverter = module.AdvancedCaseConverter;
+                        window.CaseConverterUtils = module.CaseConverterUtils;
+                        console.log('Case Converter module loaded successfully');
+                    } catch (importError) {
+                        console.error('Failed to import Case Converter module:', importError);
+                        showError('Failed to load Case Converter module');
+                        return false;
+                    }
+                }
+
+                // Create instance
+                AdvancedCaseConverter = new window.AdvancedCaseConverter();
+                console.log('Advanced Case Converter initialized successfully');
+                return true;
+            } catch (error) {
+                console.error('Error initializing Advanced Case Converter:', error);
+                showError(`Error initializing Case Converter: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function convertText() {
+            if (!AdvancedCaseConverter) {
+                if (!(await initializeAdvancedCaseConverter())) {
+                    return;
+                }
+            }
+
+            try {
+                const text = document.getElementById('case-text').value.trim();
+                if (!text) {
+                    showError('Please enter text to convert');
+                    return;
+                }
+
+                const caseType = document.getElementById('case-type').value;
+                const options = {
+                    normalizeUnicode: document.getElementById('normalize-unicode').checked,
+                    preserveLeadingTrailingSpace: document.getElementById('preserve-spaces').checked,
+                    locale: document.getElementById('locale').value || null
+                };
+
+                console.log('Converting text with options:', options);
+                const result = AdvancedCaseConverter.convert(text, caseType, options);
+                console.log('Conversion result:', result);
+
+                // Display result
+                displayConversionResult(result, caseType);
+
+                // Update case detection
+                updateCaseDetection(text);
+
+            } catch (error) {
+                console.error('Error converting text:', error);
+                showError(`Error converting text: ${error.message}`);
+            }
+        }
+
+        function displayConversionResult(result, caseType) {
+            const resultDiv = document.getElementById('case-result');
+            const description = window.CaseConverterUtils.getCaseTypeDescription(caseType);
+            const icon = window.CaseConverterUtils.getCaseTypeIcon(caseType);
+            
+            resultDiv.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-semibold mb-3">${icon} Conversion Result</h4>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-2">${description}</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="converted-text" value="${result}" readonly 
+                                   class="flex-1 p-3 border border-gray-300 rounded-lg bg-white font-mono text-sm">
+                            <button onclick="copyToClipboard('${result.replace(/'/g, "\\'")}')" 
+                                    class="btn-secondary px-4 py-2 text-sm">
+                                📋 Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateCaseDetection(text) {
+            if (!AdvancedCaseConverter) return;
+            
+            try {
+                const detectedType = AdvancedCaseConverter.detectCaseType(text);
+                const detectionDiv = document.getElementById('case-detection');
+                
+                if (detectionDiv) {
+                    const description = window.CaseConverterUtils.getCaseTypeDescription(detectedType);
+                    const icon = window.CaseConverterUtils.getCaseTypeIcon(detectedType);
+                    
+                    detectionDiv.innerHTML = `
+                        <div class="bg-blue-50 p-3 rounded-lg">
+                            <h5 class="font-medium mb-2">🔍 Detected Case Type</h5>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg">${icon}</span>
+                                <span class="font-mono text-sm">${detectedType}</span>
+                                <span class="text-sm text-gray-600">(${description})</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error detecting case type:', error);
+            }
+        }
+
+        function populateCaseTypes() {
+            if (!AdvancedCaseConverter) return;
+            
+            try {
+                const supportedTypes = AdvancedCaseConverter.getSupportedCaseTypes();
+                const caseTypeSelect = document.getElementById('case-type');
+                
+                if (caseTypeSelect) {
+                    caseTypeSelect.innerHTML = '';
+                    
+                    // Add basic cases
+                    const basicGroup = document.createElement('optgroup');
+                    basicGroup.label = 'Basic Cases';
+                    supportedTypes.basic.forEach(caseType => {
+                        const option = document.createElement('option');
+                        option.value = caseType;
+                        option.textContent = window.CaseConverterUtils.formatCaseType(caseType);
+                        basicGroup.appendChild(option);
+                    });
+                    caseTypeSelect.appendChild(basicGroup);
+                    
+                    // Add programming cases
+                    const programmingGroup = document.createElement('optgroup');
+                    programmingGroup.label = 'Programming Cases';
+                    supportedTypes.programming.forEach(caseType => {
+                        const option = document.createElement('option');
+                        option.value = caseType;
+                        option.textContent = window.CaseConverterUtils.formatCaseType(caseType);
+                        programmingGroup.appendChild(option);
+                    });
+                    caseTypeSelect.appendChild(programmingGroup);
+                    
+                    // Add special cases
+                    const specialGroup = document.createElement('optgroup');
+                    specialGroup.label = 'Special Effects';
+                    supportedTypes.special.forEach(caseType => {
+                        const option = document.createElement('option');
+                        option.value = caseType;
+                        option.textContent = window.CaseConverterUtils.formatCaseType(caseType);
+                        specialGroup.appendChild(option);
+                    });
+                    caseTypeSelect.appendChild(specialGroup);
+                }
+            } catch (error) {
+                console.error('Error populating case types:', error);
+            }
+        }
+
+        function convertAllCases() {
+            if (!AdvancedCaseConverter) return;
+            
+            try {
+                const text = document.getElementById('case-text').value.trim();
+                if (!text) {
+                    showError('Please enter text to convert');
+                    return;
+                }
+
+                const supportedTypes = AdvancedCaseConverter.getSupportedCaseTypes();
+                const allTypes = [...supportedTypes.basic, ...supportedTypes.programming, ...supportedTypes.special];
+                
+                const resultsDiv = document.getElementById('all-conversions');
+                const results = [];
+                
+                allTypes.forEach(caseType => {
+                    try {
+                        const result = AdvancedCaseConverter.convert(text, caseType);
+                        results.push({ caseType, result });
+                    } catch (error) {
+                        console.error(`Error converting to ${caseType}:`, error);
+                    }
+                });
+                
+                // Display all results
+                const resultsHtml = results.map(({ caseType, result }) => {
+                    const description = window.CaseConverterUtils.getCaseTypeDescription(caseType);
+                    const icon = window.CaseConverterUtils.getCaseTypeIcon(caseType);
+                    const category = window.CaseConverterUtils.getCaseTypeCategory(caseType);
+                    
+                    return `
+                        <div class="border border-gray-200 rounded-lg p-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-lg">${icon}</span>
+                                    <span class="font-medium text-sm">${window.CaseConverterUtils.formatCaseType(caseType)}</span>
+                                    <span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">${category}</span>
+                                </div>
+                                <button onclick="copyToClipboard('${result.replace(/'/g, "\\'")}')" 
+                                        class="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200">
+                                    Copy
+                                </button>
+                            </div>
+                            <div class="font-mono text-sm bg-gray-50 p-2 rounded break-all">${result}</div>
+                        </div>
+                    `;
+                }).join('');
+                
+                resultsDiv.innerHTML = `
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-semibold mb-3">🔄 All Case Conversions</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
+                            ${resultsHtml}
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Error converting all cases:', error);
+                showError(`Error converting all cases: ${error.message}`);
+            }
         }
 
         // Advanced QR Code Generator Functions
@@ -4909,8 +5150,8 @@ ith<!DOCTYPE html>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">Case Converter</h3>
-                    <p class="text-gray-600 text-sm">Convert text case (upper, lower, title)</p>
+                    <h3 class="text-xl font-semibold mb-2">🔄 Advanced Case Converter</h3>
+                    <p class="text-gray-600 text-sm">Unicode-aware text case conversion with programming naming conventions and special effects</p>
                 </div>
 
                 <div class="tool-card p-6 rounded-2xl" onclick="openModal('url')">
@@ -7599,7 +7840,83 @@ ith<!DOCTYPE html>
         </div>
     </div>
 
-    <div id="case" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">Case Converter</h3><button onclick="closeModal('case')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">🔤</div><h4 class="text-xl font-semibold mb-2">Case Converter</h4><p class="text-gray-600">Convert text between different cases.</p></div></div></div>
+    <!-- Advanced Case Converter Modal -->
+    <div id="case" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gradient">🔄 Advanced Case Converter</h3>
+                <button onclick="closeModal('case')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Text Input -->
+            <div class="mb-6">
+                <h4 class="font-medium text-gray-800 mb-3">📝 Text Input</h4>
+                <textarea id="case-text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent" rows="4" placeholder="Enter text to convert between different cases..."></textarea>
+            </div>
+
+            <!-- Case Type Selection -->
+            <div class="mb-6">
+                <h4 class="font-medium text-gray-800 mb-3">🔄 Case Type</h4>
+                <select id="case-type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                    <option value="uppercase">Uppercase</option>
+                    <option value="lowercase">Lowercase</option>
+                    <option value="title_case">Title Case</option>
+                    <option value="camel_case">Camel Case</option>
+                    <option value="snake_case">Snake Case</option>
+                    <option value="kebab_case">Kebab Case</option>
+                </select>
+            </div>
+
+            <!-- Options -->
+            <div class="mb-6">
+                <h4 class="font-medium text-gray-800 mb-3">⚙️ Options</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="normalize-unicode" checked class="rounded">
+                        <span class="text-sm">Normalize Unicode</span>
+                    </label>
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="preserve-spaces" checked class="rounded">
+                        <span class="text-sm">Preserve Leading/Trailing Spaces</span>
+                    </label>
+                </div>
+                <div class="mt-3">
+                    <label class="block text-sm font-medium mb-1">Locale (for special cases)</label>
+                    <select id="locale" class="w-full p-2 border border-gray-300 rounded text-sm">
+                        <option value="">Default</option>
+                        <option value="tr">Turkish</option>
+                        <option value="az">Azerbaijani</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mb-6 flex space-x-3">
+                <button onclick="convertText()" class="btn-primary flex-1 text-white py-3 rounded-lg font-semibold">
+                    🔄 Convert Text
+                </button>
+                <button onclick="convertAllCases()" class="btn-secondary flex-1 py-3 rounded-lg font-semibold">
+                    🔄 Convert All Cases
+                </button>
+            </div>
+
+            <!-- Results -->
+            <div class="space-y-6">
+                <!-- Case Detection -->
+                <div id="case-detection"></div>
+                
+                <!-- Conversion Result -->
+                <div id="case-result"></div>
+                
+                <!-- All Conversions -->
+                <div id="all-conversions"></div>
+            </div>
+        </div>
+    </div>
 
     <div id="url" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">URL Encoder/Decoder</h3><button onclick="closeModal('url')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">🔗</div><h4 class="text-xl font-semibold mb-2">URL Encoder/Decoder</h4><p class="text-gray-600">Encode and decode URLs safely.</p></div></div></div>
 
