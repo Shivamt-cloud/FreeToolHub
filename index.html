@@ -3331,6 +3331,12 @@ ith<!DOCTYPE html>
             try {
                 console.log('Initializing Advanced Markdown Preview...');
                 
+                // Prevent multiple initializations
+                if (markdownPreview) {
+                    console.log('Markdown Preview already initialized');
+                    return;
+                }
+                
                 // Check if the module is already loaded
                 if (typeof window.MarkdownPreview === 'undefined') {
                     console.log('Loading Markdown Preview module...');
@@ -3365,7 +3371,13 @@ ith<!DOCTYPE html>
             }
         }
 
+        let markdownEventListenersSetup = false;
+        
         function setupMarkdownEventListeners() {
+            if (markdownEventListenersSetup) {
+                return; // Prevent duplicate event listeners
+            }
+            
             // Set up live preview for split view
             const splitInput = document.getElementById('markdown-split-input');
             if (splitInput) {
@@ -3385,6 +3397,8 @@ ith<!DOCTYPE html>
                     element.addEventListener('change', updateMarkdownPreview);
                 }
             });
+            
+            markdownEventListenersSetup = true;
         }
 
         function switchMarkdownTab(tabName) {
@@ -3491,16 +3505,17 @@ ith<!DOCTYPE html>
             }
         }
 
+        let markdownUpdateTimer = null;
+        
         function debounceMarkdownUpdate() {
-            if (markdownPreview && markdownPreview.updateTimer) {
-                clearTimeout(markdownPreview.updateTimer);
+            if (markdownUpdateTimer) {
+                clearTimeout(markdownUpdateTimer);
             }
             
-            if (markdownPreview) {
-                markdownPreview.updateTimer = setTimeout(() => {
-                    updateMarkdownPreview();
-                }, 300);
-            }
+            markdownUpdateTimer = setTimeout(() => {
+                updateMarkdownPreview();
+                markdownUpdateTimer = null;
+            }, 300);
         }
 
         function clearMarkdownInput() {
