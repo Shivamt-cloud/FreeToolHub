@@ -155,24 +155,26 @@ class MarkdownParser {
     }
 
     parseParagraph() {
-        // Collect consecutive text/inline tokens
-        const contentTokens = [];
+        const token = this.advance();
         
-        while (!this.isAtEnd() && this.isInlineToken(this.peek())) {
-            contentTokens.push(this.advance());
-        }
-        
-        if (contentTokens.length === 0) {
+        if (!token || token.type !== 'PARAGRAPH') {
             return null;
         }
         
-        // Parse inline elements within paragraph
-        const children = this.parseInlineTokens(contentTokens);
+        // Use inline tokens if available, otherwise parse the content
+        let children;
+        if (token.data.inlineTokens && token.data.inlineTokens.length > 0) {
+            children = this.parseInlineTokens(token.data.inlineTokens);
+        } else {
+            // Fallback: parse the content as inline text
+            const inlineTokens = this.tokenizeInline(token.data.content);
+            children = this.parseInlineTokens(inlineTokens);
+        }
         
         return {
             type: 'paragraph',
             children: children,
-            position: contentTokens[0]?.position
+            position: token.position
         };
     }
 
@@ -226,6 +228,20 @@ class MarkdownParser {
                         url: token.data.url,
                         alt: token.data.text,
                         title: token.data.title || null,
+                        position: token.position
+                    });
+                    break;
+                    
+                case 'AUTOLINK':
+                    nodes.push({
+                        type: 'link',
+                        url: token.data.url,
+                        title: null,
+                        children: [{
+                            type: 'text',
+                            value: token.data.text,
+                            position: token.position
+                        }],
                         position: token.position
                     });
                     break;
@@ -335,7 +351,7 @@ class MarkdownParser {
 
     isInlineToken(token) {
         if (!token) return false;
-        return ['TEXT', 'ITALIC', 'BOLD', 'LINK', 'IMAGE', 'INLINE_CODE'].includes(token.type);
+        return ['TEXT', 'ITALIC', 'BOLD', 'LINK', 'IMAGE', 'INLINE_CODE', 'AUTOLINK'].includes(token.type);
     }
 
     isOrderedList(marker) {
@@ -496,7 +512,20 @@ class HTMLRenderer {
     }
 
     renderText(node) {
-        return this.escapeHtml(node.value);
+        const text = this.escapeHtml(node.value);
+        // Convert bare URLs to links
+        return this.convertBareUrlsToLinks(text);
+    }
+    
+    convertBareUrlsToLinks(text) {
+        // Regex to match bare URLs (http:// or https://)
+        const urlRegex = /(https?:\/\/[^\s<>]+)/g;
+        
+        return text.replace(urlRegex, (match) => {
+            const url = this.sanitizeUrl(match);
+            const escapedUrl = this.escapeAttribute(url);
+            return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer">${match}</a>`;
+        });
     }
 
     renderThematicBreak(node) {

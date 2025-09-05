@@ -392,11 +392,74 @@ class MarkdownLexer {
         
         const content = lines.join('\n').trim();
         if (content) {
+            // Parse the paragraph content for inline elements
+            const inlineTokens = this.tokenizeInlineText(content);
+            
             this.addToken('PARAGRAPH', {
                 content,
+                inlineTokens: inlineTokens,
                 raw: this.getRawText(startPos)
             }, startPos);
         }
+    }
+    
+    tokenizeInlineText(text) {
+        // Create a temporary lexer state for parsing inline content
+        const originalState = {
+            text: this.text,
+            position: this.position,
+            line: this.line,
+            column: this.column,
+            currentChar: this.currentChar,
+            tokens: this.tokens
+        };
+        
+        // Set up for inline parsing
+        this.text = text;
+        this.position = 0;
+        this.line = 1;
+        this.column = 1;
+        this.currentChar = text.length > 0 ? text[0] : null;
+        this.tokens = []; // Start with empty tokens array
+        
+        while (!this.isAtEnd()) {
+            const startPosition = { line: this.line, column: this.column, position: this.position };
+            
+            if (this.currentChar === '*' || this.currentChar === '_') {
+                this.tokenizeEmphasis(startPosition);
+            } else if (this.currentChar === '[') {
+                this.tokenizeLinkOrImage(startPosition);
+            } else if (this.currentChar === '`') {
+                this.tokenizeInlineCode(startPosition);
+            } else if (this.currentChar === '<') {
+                this.tokenizeAutolinkOrHtml(startPosition);
+            } else if (this.currentChar === '\\') {
+                this.tokenizeEscape(startPosition);
+            } else if (this.currentChar === '\n' || this.currentChar === '\r') {
+                this.tokenizeLineBreak(startPosition);
+            } else if (this.checkAutolink()) {
+                this.tokenizeAutolink(startPosition);
+            } else {
+                this.tokenizeText(startPosition);
+            }
+            
+            // Safety check: if position hasn't advanced, force advance to prevent infinite loop
+            if (this.position === startPosition.position) {
+                this.advance();
+            }
+        }
+        
+        const inlineTokens = [...this.tokens]; // Copy the tokens
+        
+        // Restore original state
+        this.text = originalState.text;
+        this.position = originalState.position;
+        this.line = originalState.line;
+        this.column = originalState.column;
+        this.currentChar = originalState.currentChar;
+        this.tokens = originalState.tokens;
+        
+        return inlineTokens;
     }
 
     tokenizeInlineContent(startPos) {
@@ -412,6 +475,8 @@ class MarkdownLexer {
             this.tokenizeEscape(startPos);
         } else if (this.currentChar === '\n' || this.currentChar === '\r') {
             this.tokenizeLineBreak(startPos);
+        } else if (this.checkAutolink()) {
+            this.tokenizeAutolink(startPos);
         } else {
             this.tokenizeText(startPos);
         }
@@ -584,15 +649,49 @@ class MarkdownLexer {
     }
 
     tokenizeAutolinkOrHtml(startPos) {
-        const content = this.consumeUntil('>');
-        if (this.currentChar === '>') {
-            this.advance(); // Skip >
-            
-            this.addToken('HTML_TAG', {
-                content: content + '>',
+        // Check if this looks like an autolink (bare URL)
+        if (this.checkAutolink()) {
+            this.tokenizeAutolink(startPos);
+        } else {
+            // Handle HTML tags
+            const content = this.consumeUntil('>');
+            if (this.currentChar === '>') {
+                this.advance(); // Skip >
+                
+                this.addToken('HTML_TAG', {
+                    content: content + '>',
+                    raw: this.getRawText(startPos)
+                }, startPos);
+            } else {
+                this.tokenizeText(startPos);
+            }
+        }
+    }
+    
+    checkAutolink() {
+        // Check if current position starts with http:// or https://
+        const remaining = this.text.substring(this.position);
+        return remaining.match(/^https?:\/\/[^\s<>]+/);
+    }
+    
+    tokenizeAutolink(startPos) {
+        // Consume the URL until we hit whitespace or special characters
+        let url = '';
+        while (!this.isAtEnd() && !this.isSpecialChar() && this.currentChar !== ' ') {
+            url += this.currentChar;
+            this.advance();
+        }
+        
+        // Validate that it's a proper URL
+        if (url.match(/^https?:\/\/.+/)) {
+            this.addToken('AUTOLINK', {
+                url: url,
+                text: url,
                 raw: this.getRawText(startPos)
             }, startPos);
         } else {
+            // Not a valid URL, treat as text
+            this.position = startPos.position;
             this.tokenizeText(startPos);
         }
     }
