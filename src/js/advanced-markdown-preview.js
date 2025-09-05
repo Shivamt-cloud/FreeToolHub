@@ -43,6 +43,11 @@ class MarkdownLexer {
                 // Inline elements
                 this.tokenizeInlineContent(startPosition);
             }
+            
+            // Safety check: if position hasn't advanced, force advance to prevent infinite loop
+            if (this.position === startPosition.position) {
+                this.advance();
+            }
         }
         
         return this.tokens;
@@ -62,7 +67,7 @@ class MarkdownLexer {
     }
 
     isAtLineStart() {
-        return this.column === 1 || this.text[this.position - 1] === '\n';
+        return this.column === 1 || (this.position > 0 && this.text[this.position - 1] === '\n');
     }
 
     advance() {
