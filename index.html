@@ -190,6 +190,15 @@ ith<!DOCTYPE html>
                     } else {
                         console.error('initializeAdvancedTimezoneConverter function not found');
                     }
+                } else if (modalId === 'lorem') {
+                    if (typeof initializeAdvancedLoremGenerator === 'function') {
+                        console.log('Initializing Advanced Lorem Generator...');
+                        initializeAdvancedLoremGenerator().catch(error => {
+                            console.error('Failed to initialize Lorem Generator:', error);
+                        });
+                    } else {
+                        console.error('initializeAdvancedLoremGenerator function not found');
+                    }
                 }
             } else {
                 console.error('Modal not found:', modalId);
@@ -3071,6 +3080,239 @@ ith<!DOCTYPE html>
             setTimeout(() => {
                 document.body.removeChild(successDiv);
             }, 3000);
+        }
+
+        // Advanced Lorem Generator Functions
+        let loremGenerator = null;
+
+        async function initializeAdvancedLoremGenerator() {
+            try {
+                console.log('Initializing Advanced Lorem Generator...');
+                
+                // Check if the module is already loaded
+                if (typeof window.LoremGenerator === 'undefined') {
+                    console.log('Loading Lorem Generator module...');
+                    try {
+                        const module = await import('./src/js/advanced-lorem-generator.js');
+                        window.LoremGenerator = module.LoremGenerator;
+                        window.WordPoolManager = module.WordPoolManager;
+                        window.WeightedSelector = module.WeightedSelector;
+                        window.TextGenerator = module.TextGenerator;
+                        window.OutputFormatter = module.OutputFormatter;
+                        console.log('Lorem Generator module loaded successfully');
+                    } catch (importError) {
+                        console.error('Failed to import Lorem Generator module:', importError);
+                        showLoremError('Failed to load Lorem Generator module. Please refresh the page.');
+                        return;
+                    }
+                }
+                
+                // Initialize the generator
+                loremGenerator = new window.LoremGenerator();
+                console.log('Advanced Lorem Generator initialized successfully');
+                
+                // Populate themes dropdown
+                populateLoremThemes();
+                
+                // Set default tab
+                switchLoremTab('generate');
+                
+            } catch (error) {
+                console.error('Error initializing Advanced Lorem Generator:', error);
+                showLoremError('Failed to initialize Lorem Generator. Please try again.');
+            }
+        }
+
+        function populateLoremThemes() {
+            if (!loremGenerator) return;
+            
+            const themeSelect = document.getElementById('lorem-theme');
+            if (!themeSelect) return;
+            
+            // Clear existing options
+            themeSelect.innerHTML = '';
+            
+            const themes = loremGenerator.getAvailableThemes();
+            const themeNames = {
+                'lorem': 'Classic Lorem Ipsum',
+                'bacon': 'Bacon Ipsum',
+                'corporate': 'Corporate Ipsum',
+                'space': 'Space Ipsum',
+                'tech': 'Tech Ipsum'
+            };
+            
+            themes.forEach(theme => {
+                const option = document.createElement('option');
+                option.value = theme;
+                option.textContent = themeNames[theme] || theme.charAt(0).toUpperCase() + theme.slice(1);
+                themeSelect.appendChild(option);
+            });
+        }
+
+        function switchLoremTab(tabName) {
+            // Hide all tab contents
+            const contents = ['lorem-generate-content', 'lorem-themes-content', 'lorem-options-content'];
+            contents.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.classList.add('hidden');
+                }
+            });
+            
+            // Remove active class from all tabs
+            const tabs = ['lorem-generate-tab', 'lorem-themes-tab', 'lorem-options-tab'];
+            tabs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                    element.classList.add('text-gray-500');
+                }
+            });
+            
+            // Show selected tab content
+            const contentId = `lorem-${tabName}-content`;
+            const contentElement = document.getElementById(contentId);
+            if (contentElement) {
+                contentElement.classList.remove('hidden');
+            }
+            
+            // Add active class to selected tab
+            const tabId = `lorem-${tabName}-tab`;
+            const tabElement = document.getElementById(tabId);
+            if (tabElement) {
+                tabElement.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                tabElement.classList.remove('text-gray-500');
+            }
+        }
+
+        function generateLorem() {
+            if (!loremGenerator) {
+                showLoremError('Lorem Generator not initialized. Please refresh the page.');
+                return;
+            }
+            
+            try {
+                hideLoremError();
+                hideLoremSuccess();
+                
+                const outputType = document.getElementById('lorem-output-type').value;
+                const theme = document.getElementById('lorem-theme').value;
+                const count = parseInt(document.getElementById('lorem-count').value);
+                
+                if (isNaN(count) || count < 1 || count > 50) {
+                    showLoremError('Count must be between 1 and 50.');
+                    return;
+                }
+                
+                // Get options
+                const options = {
+                    includeHtml: document.getElementById('lorem-include-html').checked,
+                    randomFormatting: document.getElementById('lorem-random-formatting').checked,
+                    listType: document.getElementById('lorem-list-type').value,
+                    minWords: parseInt(document.getElementById('lorem-min-words').value) || 4,
+                    maxWords: parseInt(document.getElementById('lorem-max-words').value) || 20,
+                    sentencesPerParagraph: parseInt(document.getElementById('lorem-sentences-per-paragraph').value) || 4
+                };
+                
+                // Generate text
+                const result = loremGenerator.generate(outputType, count, theme, options);
+                
+                if (result.error) {
+                    showLoremError(result.error);
+                    return;
+                }
+                
+                // Display result
+                const outputElement = document.getElementById('lorem-output');
+                if (outputElement) {
+                    outputElement.value = result.content;
+                }
+                
+                // Show success message with metadata
+                const metadata = [];
+                if (result.metadata.wordCount) metadata.push(`${result.metadata.wordCount} words`);
+                if (result.metadata.sentenceCount) metadata.push(`${result.metadata.sentenceCount} sentences`);
+                if (result.metadata.paragraphCount) metadata.push(`${result.metadata.paragraphCount} paragraphs`);
+                if (result.metadata.itemCount) metadata.push(`${result.metadata.itemCount} items`);
+                
+                const message = `Generated ${result.outputType} in ${theme} theme${metadata.length ? ` (${metadata.join(', ')})` : ''}`;
+                showLoremSuccess(message);
+                
+            } catch (error) {
+                console.error('Error generating Lorem text:', error);
+                showLoremError('Failed to generate text. Please try again.');
+            }
+        }
+
+        function setLoremTheme(theme) {
+            const themeSelect = document.getElementById('lorem-theme');
+            if (themeSelect) {
+                themeSelect.value = theme;
+            }
+            
+            // Switch back to generate tab
+            switchLoremTab('generate');
+            
+            showLoremSuccess(`Theme set to ${theme}`);
+        }
+
+        function copyLoremOutput() {
+            const outputElement = document.getElementById('lorem-output');
+            if (!outputElement || !outputElement.value) {
+                showLoremError('No text to copy.');
+                return;
+            }
+            
+            navigator.clipboard.writeText(outputElement.value).then(() => {
+                showLoremSuccess('Text copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy text:', err);
+                showLoremError('Failed to copy text to clipboard.');
+            });
+        }
+
+        function clearLoremOutput() {
+            const outputElement = document.getElementById('lorem-output');
+            if (outputElement) {
+                outputElement.value = '';
+            }
+            hideLoremError();
+            hideLoremSuccess();
+        }
+
+        function showLoremError(message) {
+            const errorElement = document.getElementById('lorem-error');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.remove('hidden');
+            }
+        }
+
+        function hideLoremError() {
+            const errorElement = document.getElementById('lorem-error');
+            if (errorElement) {
+                errorElement.classList.add('hidden');
+            }
+        }
+
+        function showLoremSuccess(message) {
+            const successElement = document.getElementById('lorem-success');
+            if (successElement) {
+                successElement.textContent = message;
+                successElement.classList.remove('hidden');
+                
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    hideLoremSuccess();
+                }, 3000);
+            }
+        }
+
+        function hideLoremSuccess() {
+            const successElement = document.getElementById('lorem-success');
+            if (successElement) {
+                successElement.classList.add('hidden');
+            }
         }
 
         async function testQRModule() {
@@ -6374,8 +6616,8 @@ ith<!DOCTYPE html>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">Lorem Generator</h3>
-                    <p class="text-gray-600 text-sm">Generate placeholder text</p>
+                    <h3 class="text-xl font-semibold mb-2">Advanced Lorem Generator</h3>
+                    <p class="text-gray-600 text-sm">Generate themed placeholder text with multiple formats</p>
                 </div>
 
                 <div class="tool-card p-6 rounded-2xl" onclick="openModal('markdown')">
@@ -9761,7 +10003,168 @@ ith<!DOCTYPE html>
         </div>
     </div>
 
-    <div id="lorem" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">Lorem Generator</h3><button onclick="closeModal('lorem')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">📝</div><h4 class="text-xl font-semibold mb-2">Lorem Generator</h4><p class="text-gray-600">Generate placeholder text for your designs.</p></div></div></div>
+    <div id="lorem" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gradient">📝 Advanced Lorem Generator</h3>
+                <button onclick="closeModal('lorem')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                <button id="lorem-generate-tab" onclick="switchLoremTab('generate')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md bg-white text-gray-900 shadow-sm">
+                    Generate
+                </button>
+                <button id="lorem-themes-tab" onclick="switchLoremTab('themes')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                    Themes
+                </button>
+                <button id="lorem-options-tab" onclick="switchLoremTab('options')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                    Options
+                </button>
+            </div>
+
+            <!-- Generate Tab -->
+            <div id="lorem-generate-content" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Input Section -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Output Type</label>
+                            <select id="lorem-output-type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="words">Words</option>
+                                <option value="sentences">Sentences</option>
+                                <option value="paragraphs" selected>Paragraphs</option>
+                                <option value="list">List</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+                            <select id="lorem-theme" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="lorem" selected>Classic Lorem Ipsum</option>
+                                <option value="bacon">Bacon Ipsum</option>
+                                <option value="corporate">Corporate Ipsum</option>
+                                <option value="space">Space Ipsum</option>
+                                <option value="tech">Tech Ipsum</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Count</label>
+                            <input type="number" id="lorem-count" value="3" min="1" max="50" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <div class="flex space-x-4">
+                            <button onclick="generateLorem()" class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                                Generate Text
+                            </button>
+                            <button onclick="clearLoremOutput()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Output Section -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Generated Text</label>
+                        <div class="relative">
+                            <textarea id="lorem-output" rows="12" readonly class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm resize-none"></textarea>
+                            <button onclick="copyLoremOutput()" class="absolute top-2 right-2 p-2 text-gray-500 hover:text-gray-700 bg-white rounded border">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Themes Tab -->
+            <div id="lorem-themes-content" class="tab-content hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="p-4 border border-gray-200 rounded-lg">
+                        <h4 class="font-semibold text-gray-900 mb-2">Classic Lorem Ipsum</h4>
+                        <p class="text-sm text-gray-600 mb-3">Traditional pseudo-Latin text from Cicero's works</p>
+                        <button onclick="setLoremTheme('lorem')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Use Theme</button>
+                    </div>
+                    <div class="p-4 border border-gray-200 rounded-lg">
+                        <h4 class="font-semibold text-gray-900 mb-2">Bacon Ipsum</h4>
+                        <p class="text-sm text-gray-600 mb-3">Meat-themed placeholder text for food lovers</p>
+                        <button onclick="setLoremTheme('bacon')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Use Theme</button>
+                    </div>
+                    <div class="p-4 border border-gray-200 rounded-lg">
+                        <h4 class="font-semibold text-gray-900 mb-2">Corporate Ipsum</h4>
+                        <p class="text-sm text-gray-600 mb-3">Business buzzwords and corporate terminology</p>
+                        <button onclick="setLoremTheme('corporate')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Use Theme</button>
+                    </div>
+                    <div class="p-4 border border-gray-200 rounded-lg">
+                        <h4 class="font-semibold text-gray-900 mb-2">Space Ipsum</h4>
+                        <p class="text-sm text-gray-600 mb-3">Astronomical and space exploration terminology</p>
+                        <button onclick="setLoremTheme('space')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Use Theme</button>
+                    </div>
+                    <div class="p-4 border border-gray-200 rounded-lg">
+                        <h4 class="font-semibold text-gray-900 mb-2">Tech Ipsum</h4>
+                        <p class="text-sm text-gray-600 mb-3">Technology and programming terminology</p>
+                        <button onclick="setLoremTheme('tech')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Use Theme</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Options Tab -->
+            <div id="lorem-options-content" class="tab-content hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <h4 class="font-semibold text-gray-900">Formatting Options</h4>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="lorem-include-html" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="lorem-include-html" class="ml-2 text-sm text-gray-700">Include HTML markup</label>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="lorem-random-formatting" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="lorem-random-formatting" class="ml-2 text-sm text-gray-700">Add random bold/italic formatting</label>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">List Type (for list output)</label>
+                            <select id="lorem-list-type" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="unordered">Unordered (bullets)</option>
+                                <option value="ordered">Ordered (numbers)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h4 class="font-semibold text-gray-900">Advanced Options</h4>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Min Words per Sentence</label>
+                            <input type="number" id="lorem-min-words" value="4" min="2" max="20" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Max Words per Sentence</label>
+                            <input type="number" id="lorem-max-words" value="20" min="5" max="50" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Sentences per Paragraph</label>
+                            <input type="number" id="lorem-sentences-per-paragraph" value="4" min="1" max="15" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error/Success Messages -->
+            <div id="lorem-error" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg"></div>
+            <div id="lorem-success" class="hidden mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg"></div>
+        </div>
+    </div>
 
     <div id="markdown" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">Markdown Preview</h3><button onclick="closeModal('markdown')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">📄</div><h4 class="text-xl font-semibold mb-2">Markdown Preview</h4><p class="text-gray-600">Preview markdown in real-time.</p></div></div></div>
 
