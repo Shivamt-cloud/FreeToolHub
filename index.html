@@ -199,6 +199,15 @@ ith<!DOCTYPE html>
                     } else {
                         console.error('initializeAdvancedLoremGenerator function not found');
                     }
+                } else if (modalId === 'markdown') {
+                    if (typeof initializeAdvancedMarkdownPreview === 'function') {
+                        console.log('Initializing Advanced Markdown Preview...');
+                        initializeAdvancedMarkdownPreview().catch(error => {
+                            console.error('Failed to initialize Markdown Preview:', error);
+                        });
+                    } else {
+                        console.error('initializeAdvancedMarkdownPreview function not found');
+                    }
                 }
             } else {
                 console.error('Modal not found:', modalId);
@@ -3310,6 +3319,375 @@ ith<!DOCTYPE html>
 
         function hideLoremSuccess() {
             const successElement = document.getElementById('lorem-success');
+            if (successElement) {
+                successElement.classList.add('hidden');
+            }
+        }
+
+        // Advanced Markdown Preview Functions
+        let markdownPreview = null;
+
+        async function initializeAdvancedMarkdownPreview() {
+            try {
+                console.log('Initializing Advanced Markdown Preview...');
+                
+                // Check if the module is already loaded
+                if (typeof window.MarkdownPreview === 'undefined') {
+                    console.log('Loading Markdown Preview module...');
+                    try {
+                        const module = await import('./src/js/markdown-preview-index.js');
+                        window.MarkdownPreview = module.MarkdownPreview;
+                        window.MarkdownLexer = module.MarkdownLexer;
+                        window.MarkdownParser = module.MarkdownParser;
+                        window.HTMLRenderer = module.HTMLRenderer;
+                        window.SyntaxHighlighter = module.SyntaxHighlighter;
+                        console.log('Markdown Preview module loaded successfully');
+                    } catch (importError) {
+                        console.error('Failed to import Markdown Preview module:', importError);
+                        showMarkdownError('Failed to load Markdown Preview module. Please refresh the page.');
+                        return;
+                    }
+                }
+                
+                // Initialize the preview system
+                markdownPreview = new window.MarkdownPreview();
+                console.log('Advanced Markdown Preview initialized successfully');
+                
+                // Set default tab
+                switchMarkdownTab('editor');
+                
+                // Set up event listeners
+                setupMarkdownEventListeners();
+                
+            } catch (error) {
+                console.error('Error initializing Advanced Markdown Preview:', error);
+                showMarkdownError('Failed to initialize Markdown Preview. Please try again.');
+            }
+        }
+
+        function setupMarkdownEventListeners() {
+            // Set up live preview for split view
+            const splitInput = document.getElementById('markdown-split-input');
+            if (splitInput) {
+                splitInput.addEventListener('input', debounceMarkdownUpdate);
+            }
+            
+            // Set up options change listeners
+            const themeSelect = document.getElementById('markdown-theme');
+            if (themeSelect) {
+                themeSelect.addEventListener('change', updateMarkdownPreview);
+            }
+            
+            const options = ['markdown-syntax-highlighting', 'markdown-sanitize', 'markdown-target-blank'];
+            options.forEach(optionId => {
+                const element = document.getElementById(optionId);
+                if (element) {
+                    element.addEventListener('change', updateMarkdownPreview);
+                }
+            });
+        }
+
+        function switchMarkdownTab(tabName) {
+            // Hide all tab contents
+            const contents = ['markdown-editor-content', 'markdown-preview-content', 'markdown-split-content'];
+            contents.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.classList.add('hidden');
+                }
+            });
+            
+            // Remove active class from all tabs
+            const tabs = ['markdown-editor-tab', 'markdown-preview-tab', 'markdown-split-tab'];
+            tabs.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                    element.classList.add('text-gray-500');
+                }
+            });
+            
+            // Show selected tab content
+            const contentId = `markdown-${tabName}-content`;
+            const contentElement = document.getElementById(contentId);
+            if (contentElement) {
+                contentElement.classList.remove('hidden');
+            }
+            
+            // Add active class to selected tab
+            const tabId = `markdown-${tabName}-tab`;
+            const tabElement = document.getElementById(tabId);
+            if (tabElement) {
+                tabElement.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                tabElement.classList.remove('text-gray-500');
+            }
+            
+            // Update preview if switching to preview or split view
+            if (tabName === 'preview' || tabName === 'split') {
+                updateMarkdownPreview();
+            }
+        }
+
+        function updateMarkdownPreview() {
+            if (!markdownPreview) {
+                showMarkdownError('Markdown Preview not initialized. Please refresh the page.');
+                return;
+            }
+            
+            try {
+                hideMarkdownError();
+                hideMarkdownSuccess();
+                
+                // Get markdown input
+                const inputElement = document.getElementById('markdown-input');
+                const splitInputElement = document.getElementById('markdown-split-input');
+                const markdownText = inputElement?.value || splitInputElement?.value || '';
+                
+                if (!markdownText.trim()) {
+                    const previewElement = document.getElementById('markdown-preview-output');
+                    const splitPreviewElement = document.getElementById('markdown-split-preview');
+                    
+                    if (previewElement) {
+                        previewElement.innerHTML = '<div class="text-gray-500 text-center py-8">Enter markdown to see preview...</div>';
+                    }
+                    if (splitPreviewElement) {
+                        splitPreviewElement.innerHTML = '<div class="text-gray-500 text-center py-8">Start typing to see live preview...</div>';
+                    }
+                    return;
+                }
+                
+                // Get options
+                const options = {
+                    theme: document.getElementById('markdown-theme')?.value || 'github',
+                    sanitize: document.getElementById('markdown-sanitize')?.checked !== false,
+                    targetBlank: document.getElementById('markdown-target-blank')?.checked !== false,
+                    syntaxHighlighting: document.getElementById('markdown-syntax-highlighting')?.checked !== false
+                };
+                
+                // Generate preview
+                const result = markdownPreview.generatePreview(markdownText, options);
+                
+                if (!result.success) {
+                    showMarkdownError(result.error);
+                    return;
+                }
+                
+                // Update preview elements
+                const previewElement = document.getElementById('markdown-preview-output');
+                const splitPreviewElement = document.getElementById('markdown-split-preview');
+                
+                if (previewElement) {
+                    previewElement.innerHTML = result.html;
+                }
+                if (splitPreviewElement) {
+                    splitPreviewElement.innerHTML = result.html;
+                }
+                
+                showMarkdownSuccess('Preview updated successfully');
+                
+            } catch (error) {
+                console.error('Error updating markdown preview:', error);
+                showMarkdownError('Failed to update preview. Please try again.');
+            }
+        }
+
+        function debounceMarkdownUpdate() {
+            if (markdownPreview && markdownPreview.updateTimer) {
+                clearTimeout(markdownPreview.updateTimer);
+            }
+            
+            if (markdownPreview) {
+                markdownPreview.updateTimer = setTimeout(() => {
+                    updateMarkdownPreview();
+                }, 300);
+            }
+        }
+
+        function clearMarkdownInput() {
+            const inputElement = document.getElementById('markdown-input');
+            const splitInputElement = document.getElementById('markdown-split-input');
+            
+            if (inputElement) {
+                inputElement.value = '';
+            }
+            if (splitInputElement) {
+                splitInputElement.value = '';
+            }
+            
+            updateMarkdownPreview();
+            hideMarkdownError();
+            hideMarkdownSuccess();
+        }
+
+        function loadMarkdownSample() {
+            const sampleMarkdown = `# Advanced Markdown Preview
+
+This is a comprehensive **markdown preview** system with *syntax highlighting* and live updates.
+
+## Features
+
+- **Real-time preview** with live updates
+- **Syntax highlighting** for code blocks
+- **Multiple themes** (GitHub, Dark)
+- **HTML sanitization** for security
+- **Split view** for side-by-side editing
+
+## Code Examples
+
+### JavaScript
+\`\`\`javascript
+function greet(name) {
+    console.log(\`Hello, \${name}!\`);
+    return \`Welcome, \${name}!\`;
+}
+
+// Call the function
+const message = greet('World');
+console.log(message);
+\`\`\`
+
+### Python
+\`\`\`python
+def calculate_fibonacci(n):
+    if n <= 1:
+        return n
+    return calculate_fibonacci(n-1) + calculate_fibonacci(n-2)
+
+# Calculate first 10 Fibonacci numbers
+for i in range(10):
+    print(f"F({i}) = {calculate_fibonacci(i)}")
+\`\`\`
+
+## Lists
+
+### Unordered List
+- Item 1
+- Item 2
+  - Nested item 2.1
+  - Nested item 2.2
+- Item 3
+
+### Ordered List
+1. First item
+2. Second item
+3. Third item
+
+## Links and Images
+
+[Visit GitHub](https://github.com) for more information.
+
+## Blockquotes
+
+> This is a blockquote with some important information.
+> 
+> It can span multiple lines and contain **bold** or *italic* text.
+
+## Tables
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Syntax Highlighting | ✅ | Supports 10+ languages |
+| Live Preview | ✅ | Real-time updates |
+| Themes | ✅ | GitHub and Dark themes |
+| HTML Export | ✅ | Copy or download HTML |
+
+## Horizontal Rule
+
+---
+
+## Inline Code
+
+Use \`console.log()\` to output messages to the console.
+
+## Emphasis
+
+This text has **bold**, *italic*, and ***bold italic*** formatting.
+
+---
+
+*Enjoy using the Advanced Markdown Preview!*`;
+
+            const inputElement = document.getElementById('markdown-input');
+            const splitInputElement = document.getElementById('markdown-split-input');
+            
+            if (inputElement) {
+                inputElement.value = sampleMarkdown;
+            }
+            if (splitInputElement) {
+                splitInputElement.value = sampleMarkdown;
+            }
+            
+            updateMarkdownPreview();
+            showMarkdownSuccess('Sample markdown loaded');
+        }
+
+        function copyMarkdownHtml() {
+            const previewElement = document.getElementById('markdown-preview-output');
+            if (!previewElement || !previewElement.innerHTML) {
+                showMarkdownError('No HTML to copy. Generate a preview first.');
+                return;
+            }
+            
+            navigator.clipboard.writeText(previewElement.innerHTML).then(() => {
+                showMarkdownSuccess('HTML copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy HTML:', err);
+                showMarkdownError('Failed to copy HTML to clipboard.');
+            });
+        }
+
+        function downloadMarkdownHtml() {
+            const previewElement = document.getElementById('markdown-preview-output');
+            if (!previewElement || !previewElement.innerHTML) {
+                showMarkdownError('No HTML to download. Generate a preview first.');
+                return;
+            }
+            
+            const html = previewElement.innerHTML;
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'markdown-preview.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showMarkdownSuccess('HTML file downloaded');
+        }
+
+        function showMarkdownError(message) {
+            const errorElement = document.getElementById('markdown-error');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.remove('hidden');
+            }
+        }
+
+        function hideMarkdownError() {
+            const errorElement = document.getElementById('markdown-error');
+            if (errorElement) {
+                errorElement.classList.add('hidden');
+            }
+        }
+
+        function showMarkdownSuccess(message) {
+            const successElement = document.getElementById('markdown-success');
+            if (successElement) {
+                successElement.textContent = message;
+                successElement.classList.remove('hidden');
+                
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    hideMarkdownSuccess();
+                }, 3000);
+            }
+        }
+
+        function hideMarkdownSuccess() {
+            const successElement = document.getElementById('markdown-success');
             if (successElement) {
                 successElement.classList.add('hidden');
             }
@@ -6626,8 +7004,8 @@ ith<!DOCTYPE html>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">Markdown Preview</h3>
-                    <p class="text-gray-600 text-sm">Preview markdown in real-time</p>
+                    <h3 class="text-xl font-semibold mb-2">Advanced Markdown Preview</h3>
+                    <p class="text-gray-600 text-sm">Preview markdown with syntax highlighting and live updates</p>
                 </div>
 
                 <div class="tool-card p-6 rounded-2xl" onclick="openModal('minify')">
@@ -10166,7 +10544,149 @@ ith<!DOCTYPE html>
         </div>
     </div>
 
-    <div id="markdown" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">Markdown Preview</h3><button onclick="closeModal('markdown')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">📄</div><h4 class="text-xl font-semibold mb-2">Markdown Preview</h4><p class="text-gray-600">Preview markdown in real-time.</p></div></div></div>
+    <div id="markdown" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gradient">📄 Advanced Markdown Preview</h3>
+                <button onclick="closeModal('markdown')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                <button id="markdown-editor-tab" onclick="switchMarkdownTab('editor')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md bg-white text-gray-900 shadow-sm">
+                    Editor
+                </button>
+                <button id="markdown-preview-tab" onclick="switchMarkdownTab('preview')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                    Preview
+                </button>
+                <button id="markdown-split-tab" onclick="switchMarkdownTab('split')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                    Split View
+                </button>
+            </div>
+
+            <!-- Options Bar -->
+            <div class="flex flex-wrap gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-2">
+                    <label class="text-sm font-medium text-gray-700">Theme:</label>
+                    <select id="markdown-theme" class="text-sm border border-gray-300 rounded px-2 py-1">
+                        <option value="github">GitHub</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="markdown-syntax-highlighting" checked class="h-4 w-4 text-blue-600">
+                    <label for="markdown-syntax-highlighting" class="text-sm text-gray-700">Syntax Highlighting</label>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="markdown-sanitize" checked class="h-4 w-4 text-blue-600">
+                    <label for="markdown-sanitize" class="text-sm text-gray-700">Sanitize HTML</label>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="markdown-target-blank" checked class="h-4 w-4 text-blue-600">
+                    <label for="markdown-target-blank" class="text-sm text-gray-700">Open links in new tab</label>
+                </div>
+            </div>
+
+            <!-- Editor Tab -->
+            <div id="markdown-editor-content" class="tab-content">
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Markdown Input</label>
+                        <textarea id="markdown-input" rows="15" class="w-full p-3 border border-gray-300 rounded-lg font-mono text-sm resize-none" placeholder="Enter your markdown here...
+
+# Example Markdown
+
+This is a **bold** statement with *italic* text.
+
+## Code Example
+
+```javascript
+function hello() {
+    console.log('Hello, World!');
+}
+```
+
+### Lists
+
+- Item 1
+- Item 2
+- Item 3
+
+### Links
+
+[Visit Google](https://google.com)
+
+> This is a blockquote
+
+---
+
+### Table
+
+| Column 1 | Column 2 |
+|----------|----------|
+| Data 1   | Data 2   |"></textarea>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button onclick="updateMarkdownPreview()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                            Update Preview
+                        </button>
+                        <button onclick="clearMarkdownInput()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            Clear
+                        </button>
+                        <button onclick="loadMarkdownSample()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            Load Sample
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Tab -->
+            <div id="markdown-preview-content" class="tab-content hidden">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">HTML Preview</label>
+                    <div id="markdown-preview-output" class="w-full p-4 border border-gray-300 rounded-lg bg-white min-h-96 overflow-auto">
+                        <div class="text-gray-500 text-center py-8">
+                            Enter markdown in the Editor tab to see the preview here.
+                        </div>
+                    </div>
+                    <div class="flex space-x-4 mt-4">
+                        <button onclick="copyMarkdownHtml()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium">
+                            Copy HTML
+                        </button>
+                        <button onclick="downloadMarkdownHtml()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            Download HTML
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Split View Tab -->
+            <div id="markdown-split-content" class="tab-content hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Markdown Editor</label>
+                        <textarea id="markdown-split-input" rows="20" class="w-full p-3 border border-gray-300 rounded-lg font-mono text-sm resize-none" placeholder="Enter markdown here..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Live Preview</label>
+                        <div id="markdown-split-preview" class="w-full p-4 border border-gray-300 rounded-lg bg-white min-h-96 overflow-auto">
+                            <div class="text-gray-500 text-center py-8">
+                                Start typing to see live preview...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error/Success Messages -->
+            <div id="markdown-error" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg"></div>
+            <div id="markdown-success" class="hidden mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg"></div>
+        </div>
+    </div>
 
     <div id="minify" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">CSS/JS Minifier</h3><button onclick="closeModal('minify')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">🗜️</div><h4 class="text-xl font-semibold mb-2">CSS/JS Minifier</h4><p class="text-gray-600">Minify your CSS and JavaScript code.</p></div></div></div>
 
