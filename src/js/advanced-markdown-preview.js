@@ -43,11 +43,6 @@ class MarkdownLexer {
                 // Inline elements
                 this.tokenizeInlineContent(startPosition);
             }
-            
-            // Safety check: if position hasn't advanced, force advance to prevent infinite loop
-            if (this.position === startPosition.position) {
-                this.advance();
-            }
         }
         
         return this.tokens;
@@ -101,7 +96,8 @@ class MarkdownLexer {
     }
 
     getRawText(startPos) {
-        return this.text.substring(startPos.position, this.position);
+        const start = typeof startPos === 'object' ? startPos.position : startPos;
+        return this.text.substring(start, this.position);
     }
 
     addToken(type, data, position) {
@@ -392,12 +388,8 @@ class MarkdownLexer {
         
         const content = lines.join('\n').trim();
         if (content) {
-            // Parse the paragraph content for inline elements
-            const inlineTokens = this.tokenizeInlineText(content);
-            
             this.addToken('PARAGRAPH', {
                 content,
-                inlineTokens: inlineTokens,
                 raw: this.getRawText(startPos)
             }, startPos);
         }
@@ -479,6 +471,11 @@ class MarkdownLexer {
             this.tokenizeAutolink(startPos);
         } else {
             this.tokenizeText(startPos);
+        }
+        
+        // Ensure position advances after processing
+        if (this.position === startPos.position) {
+            this.advance();
         }
     }
 

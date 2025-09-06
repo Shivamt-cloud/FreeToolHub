@@ -161,15 +161,9 @@ class MarkdownParser {
             return null;
         }
         
-        // Use inline tokens if available, otherwise parse the content
-        let children;
-        if (token.data.inlineTokens && token.data.inlineTokens.length > 0) {
-            children = this.parseInlineTokens(token.data.inlineTokens);
-        } else {
-            // Fallback: parse the content as inline text
-            const inlineTokens = this.tokenizeInline(token.data.content);
-            children = this.parseInlineTokens(inlineTokens);
-        }
+        // Parse the content as inline text
+        const inlineTokens = this.tokenizeInline(token.data.content);
+        const children = this.parseInlineTokens(inlineTokens);
         
         return {
             type: 'paragraph',
