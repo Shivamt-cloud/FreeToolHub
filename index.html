@@ -1,4 +1,4 @@
-ith<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -3445,14 +3445,8 @@ ith<!DOCTYPE html>
         function updateMarkdownPreview() {
             console.log('updateMarkdownPreview called');
             
-            if (!markdownPreview) {
-                console.error('Markdown Preview not initialized');
-                showMarkdownError('Markdown Preview not initialized. Please refresh the page.');
-                return;
-            }
-            
             try {
-                console.log('Starting preview update...');
+                console.log('Starting simple markdown preview...');
                 hideMarkdownError();
                 hideMarkdownSuccess();
                 
@@ -3474,37 +3468,36 @@ ith<!DOCTYPE html>
                     return;
                 }
                 
-                // Get options
-                const options = {
-                    theme: document.getElementById('markdown-theme')?.value || 'github',
-                    sanitize: document.getElementById('markdown-sanitize')?.checked !== false,
-                    targetBlank: document.getElementById('markdown-target-blank')?.checked !== false,
-                    syntaxHighlighting: document.getElementById('markdown-syntax-highlighting')?.checked !== false
-                };
-                
-                // Generate preview
-                console.log('Calling generatePreview with text length:', markdownText.length);
-                const result = markdownPreview.generatePreview(markdownText, options);
-                console.log('generatePreview completed, success:', result.success);
-                
-                if (!result.success) {
-                    console.error('generatePreview failed:', result.error);
-                    showMarkdownError(result.error);
-                    return;
-                }
+                // Simple markdown to HTML conversion
+                let html = markdownText
+                    // Headers
+                    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                    // Bold
+                    .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                    // Italic
+                    .replace(/\*(.*)\*/gim, '<em>$1</em>')
+                    // Code blocks
+                    .replace(/```([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
+                    // Inline code
+                    .replace(/`(.*?)`/gim, '<code>$1</code>')
+                    // Line breaks
+                    .replace(/\n/gim, '<br>');
                 
                 // Update preview elements
                 const previewElement = document.getElementById('markdown-preview-output');
                 const splitPreviewElement = document.getElementById('markdown-split-preview');
                 
                 if (previewElement) {
-                    previewElement.innerHTML = result.html;
+                    previewElement.innerHTML = html;
                 }
                 if (splitPreviewElement) {
-                    splitPreviewElement.innerHTML = result.html;
+                    splitPreviewElement.innerHTML = html;
                 }
                 
                 showMarkdownSuccess('Preview updated successfully');
+                console.log('Simple markdown preview completed');
                 
             } catch (error) {
                 console.error('Error updating markdown preview:', error);
@@ -3540,6 +3533,7 @@ ith<!DOCTYPE html>
             hideMarkdownError();
             hideMarkdownSuccess();
         }
+
 
         function loadMarkdownSample() {
             const sampleMarkdown = `# Advanced Markdown Preview
