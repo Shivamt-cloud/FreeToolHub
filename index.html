@@ -15,6 +15,8 @@
     <script src="src/js/color-converter.js"></script>
     <script src="src/js/base64-encoder.js"></script>
     <script src="src/js/advanced-password-generator.js"></script>
+    <script src="src/js/advanced-css-js-minifier.js"></script>
+    <script src="src/js/advanced-regex-tester.js"></script>
 
 
     
@@ -3678,6 +3680,586 @@ This text has **bold**, *italic*, and ***bold italic*** formatting.`;
             }
         }
 
+        // Advanced CSS/JS Minifier Functions
+        let minifier = null;
+
+        function initializeMinifier() {
+            if (!minifier) {
+                minifier = new UnifiedMinifier();
+            }
+        }
+
+        function switchMinifierTab(tab) {
+            // Hide all modes
+            document.querySelectorAll('.minifier-mode').forEach(el => el.classList.add('hidden'));
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('[id^="minifier-"][id$="-tab"]').forEach(tab => tab.classList.remove('bg-white', 'text-gray-900', 'shadow-sm'));
+            document.querySelectorAll('[id^="minifier-"][id$="-tab"]').forEach(tab => tab.classList.add('text-gray-500', 'hover:text-gray-700'));
+            
+            // Show selected mode and activate tab
+            if (tab === 'css') {
+                document.getElementById('minifier-css-mode').classList.remove('hidden');
+                document.getElementById('minifier-css-tab').classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                document.getElementById('minifier-css-tab').classList.remove('text-gray-500', 'hover:text-gray-700');
+            } else if (tab === 'js') {
+                document.getElementById('minifier-js-mode').classList.remove('hidden');
+                document.getElementById('minifier-js-tab').classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                document.getElementById('minifier-js-tab').classList.remove('text-gray-500', 'hover:text-gray-700');
+            }
+        }
+
+        function minifyCSS() {
+            try {
+                initializeMinifier();
+                hideMinifierError();
+                hideMinifierSuccess();
+                
+                const cssInput = document.getElementById('css-input').value;
+                if (!cssInput.trim()) {
+                    showMinifierError('Please enter CSS code to minify.');
+                    return;
+                }
+                
+                // Get options
+                const options = {
+                    removeComments: document.getElementById('css-remove-comments').checked,
+                    removeWhitespace: document.getElementById('css-remove-whitespace').checked,
+                    optimizeColors: document.getElementById('css-optimize-colors').checked,
+                    optimizeValues: document.getElementById('css-optimize-values').checked,
+                    mergeSelectors: document.getElementById('css-merge-selectors').checked,
+                    removeEmptyRules: document.getElementById('css-remove-empty-rules').checked
+                };
+                
+                const result = minifier.minify(cssInput, 'css', options);
+                
+                if (result.success) {
+                    document.getElementById('css-output').value = result.minifiedCode;
+                    updateCSSStats(result);
+                    showMinifierSuccess('CSS minified successfully!');
+                } else {
+                    showMinifierError('Minification failed: ' + result.error);
+                }
+                
+            } catch (error) {
+                console.error('Error minifying CSS:', error);
+                showMinifierError('Failed to minify CSS: ' + error.message);
+            }
+        }
+
+        function minifyJS() {
+            try {
+                initializeMinifier();
+                hideMinifierError();
+                hideMinifierSuccess();
+                
+                const jsInput = document.getElementById('js-input').value;
+                if (!jsInput.trim()) {
+                    showMinifierError('Please enter JavaScript code to minify.');
+                    return;
+                }
+                
+                // Get options
+                const options = {
+                    mangleNames: document.getElementById('js-mangle-names').checked,
+                    removeDeadCode: document.getElementById('js-remove-dead-code').checked,
+                    compressExpressions: document.getElementById('js-compress-expressions').checked,
+                    removeConsole: document.getElementById('js-remove-console').checked,
+                    optimizeConditionals: document.getElementById('js-optimize-conditionals').checked,
+                    removeComments: document.getElementById('js-remove-comments').checked
+                };
+                
+                const result = minifier.minify(jsInput, 'javascript', options);
+                
+                if (result.success) {
+                    document.getElementById('js-output').value = result.minifiedCode;
+                    updateJSStats(result);
+                    showMinifierSuccess('JavaScript minified successfully!');
+                } else {
+                    showMinifierError('Minification failed: ' + result.error);
+                }
+                
+            } catch (error) {
+                console.error('Error minifying JavaScript:', error);
+                showMinifierError('Failed to minify JavaScript: ' + error.message);
+            }
+        }
+
+        function updateCSSStats(result) {
+            document.getElementById('css-original-size').textContent = result.originalSize + ' bytes';
+            document.getElementById('css-minified-size').textContent = result.minifiedSize + ' bytes';
+            document.getElementById('css-compression-ratio').textContent = result.compressionRatio + '%';
+            document.getElementById('css-stats').classList.remove('hidden');
+        }
+
+        function updateJSStats(result) {
+            document.getElementById('js-original-size').textContent = result.originalSize + ' bytes';
+            document.getElementById('js-minified-size').textContent = result.minifiedSize + ' bytes';
+            document.getElementById('js-compression-ratio').textContent = result.compressionRatio + '%';
+            document.getElementById('js-stats').classList.remove('hidden');
+        }
+
+        function loadCSSSample() {
+            const sampleCSS = `/* Main styles */
+.container {
+    background-color: #ffffff;
+    margin: 10px 0px 10px 0px;
+    padding: 0.0em;
+    border: 1px solid #cccccc;
+}
+
+.button {
+    color: red;
+    font-size: 16px;
+    background-color: rgb(255, 255, 255);
+    border-radius: 4px;
+    padding: 8px 16px;
+}
+
+/* Unused rule */
+.unused-class {
+    display: none;
+}
+
+/* Media query */
+@media (max-width: 768px) {
+    .container {
+        margin: 5px;
+        padding: 10px;
+    }
+}`;
+            
+            document.getElementById('css-input').value = sampleCSS;
+            showMinifierSuccess('Sample CSS loaded!');
+        }
+
+        function loadJSSample() {
+            const sampleJS = `function calculateTotal(price, tax) {
+    var total = 0;
+    
+    // Add price
+    total = total + price;
+    
+    // Add tax
+    if (tax > 0) {
+        total = total + (price * tax);
+    }
+    
+    // Unused variable
+    var unused = 42;
+    
+    console.log("Calculating total:", total);
+    
+    return total;
+}
+
+// Unused function
+function unusedFunction() {
+    return false;
+}
+
+// Complex expression
+var result = (true && false) || (10 > 5);
+console.log("Result:", result);`;
+            
+            document.getElementById('js-input').value = sampleJS;
+            showMinifierSuccess('Sample JavaScript loaded!');
+        }
+
+        function clearCSSInput() {
+            document.getElementById('css-input').value = '';
+            document.getElementById('css-output').value = '';
+            document.getElementById('css-stats').classList.add('hidden');
+            hideMinifierError();
+            hideMinifierSuccess();
+        }
+
+        function clearJSInput() {
+            document.getElementById('js-input').value = '';
+            document.getElementById('js-output').value = '';
+            document.getElementById('js-stats').classList.add('hidden');
+            hideMinifierError();
+            hideMinifierSuccess();
+        }
+
+        function showMinifierError(message) {
+            const errorElement = document.getElementById('minifier-error');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.remove('hidden');
+            }
+        }
+
+        function hideMinifierError() {
+            const errorElement = document.getElementById('minifier-error');
+            if (errorElement) {
+                errorElement.classList.add('hidden');
+            }
+        }
+
+        function showMinifierSuccess(message) {
+            const successElement = document.getElementById('minifier-success');
+            if (successElement) {
+                successElement.textContent = message;
+                successElement.classList.remove('hidden');
+                
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    hideMinifierSuccess();
+                }, 3000);
+            }
+        }
+
+        function hideMinifierSuccess() {
+            const successElement = document.getElementById('minifier-success');
+            if (successElement) {
+                successElement.classList.add('hidden');
+            }
+        }
+
+        // Advanced Regex Tester Functions
+        let regexTester = null;
+        let currentEngine = 'ECMAScript';
+
+        function initializeRegexTester() {
+            if (!regexTester) {
+                regexTester = new AdvancedRegexTester();
+                setupRegexFlags();
+            }
+        }
+
+        function setupRegexFlags() {
+            const flagsContainer = document.getElementById('regex-flags');
+            if (!flagsContainer) return;
+
+            const engine = document.getElementById('regex-engine').value;
+            const supportedFlags = regexTester.getEngineFlags(engine);
+            
+            flagsContainer.innerHTML = '';
+            
+            Object.entries(supportedFlags).forEach(([flag, description]) => {
+                const flagElement = document.createElement('label');
+                flagElement.className = 'flex items-center';
+                flagElement.innerHTML = `
+                    <input type="checkbox" id="regex-flag-${flag}" class="mr-2">
+                    <span class="text-sm">${flag}</span>
+                    <span class="text-xs text-gray-500 ml-1">(${description})</span>
+                `;
+                flagsContainer.appendChild(flagElement);
+            });
+        }
+
+        function switchRegexTab(tab) {
+            // Hide all tab contents
+            document.querySelectorAll('.regex-tab-content').forEach(el => el.classList.add('hidden'));
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('[id^="regex-"][id$="-tab"]').forEach(tab => tab.classList.remove('bg-white', 'text-gray-900', 'shadow-sm'));
+            document.querySelectorAll('[id^="regex-"][id$="-tab"]').forEach(tab => tab.classList.add('text-gray-500', 'hover:text-gray-700'));
+            
+            // Show selected tab content and activate tab
+            const contentId = `regex-${tab}-content`;
+            const tabId = `regex-${tab}-tab`;
+            
+            const contentElement = document.getElementById(contentId);
+            const tabElement = document.getElementById(tabId);
+            
+            if (contentElement) {
+                contentElement.classList.remove('hidden');
+            }
+            
+            if (tabElement) {
+                tabElement.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                tabElement.classList.remove('text-gray-500', 'hover:text-gray-700');
+            }
+        }
+
+        function testRegex() {
+            try {
+                initializeRegexTester();
+                hideRegexError();
+                hideRegexSuccess();
+                
+                const pattern = document.getElementById('regex-pattern').value;
+                const input = document.getElementById('regex-input').value;
+                const replacement = document.getElementById('regex-replacement').value;
+                const engine = document.getElementById('regex-engine').value;
+                
+                if (!pattern.trim()) {
+                    showRegexError('Please enter a regex pattern.');
+                    return;
+                }
+                
+                if (!input.trim()) {
+                    showRegexError('Please enter test input.');
+                    return;
+                }
+                
+                // Get flags
+                const flags = {};
+                const flagCheckboxes = document.querySelectorAll('#regex-flags input[type="checkbox"]');
+                flagCheckboxes.forEach(checkbox => {
+                    const flag = checkbox.id.replace('regex-flag-', '');
+                    flags[flag] = checkbox.checked;
+                });
+                
+                // Test the regex
+                const result = regexTester.test(pattern, flags, input, replacement || null, engine, 100);
+                
+                if (result.success) {
+                    displayRegexResults(result);
+                    showRegexSuccess('Pattern tested successfully!');
+                } else {
+                    showRegexError(result.error);
+                }
+                
+            } catch (error) {
+                console.error('Error testing regex:', error);
+                showRegexError('Failed to test pattern: ' + error.message);
+            }
+        }
+
+        function displayRegexResults(result) {
+            // Update statistics
+            document.getElementById('regex-execution-time').textContent = result.elapsed.toFixed(2) + 'ms';
+            document.getElementById('regex-matches-count').textContent = result.matches.length;
+            document.getElementById('regex-current-engine').textContent = currentEngine;
+            document.getElementById('regex-stats').classList.remove('hidden');
+            
+            // Display matches
+            displayMatches(result.matches, result.highlights);
+            
+            // Display groups
+            displayGroups(result.matches, result.groupHighlights);
+            
+            // Display replacement
+            if (result.replacement) {
+                displayReplacement(result.replacement);
+            }
+            
+            // Display explanation
+            if (result.explanation) {
+                displayExplanation(result.explanation);
+            }
+        }
+
+        function displayMatches(matches, highlights) {
+            const matchCount = document.getElementById('regex-match-count');
+            const matchTbody = document.getElementById('regex-match-tbody');
+            const highlightedInput = document.getElementById('regex-highlighted-input');
+            
+            // Update match count
+            matchCount.textContent = `${matches.length} match${matches.length !== 1 ? 'es' : ''} found`;
+            
+            // Update highlighted input
+            if (highlights && highlights.length > 0) {
+                highlightedInput.innerHTML = '';
+                highlights.forEach(span => {
+                    const spanElement = document.createElement('span');
+                    spanElement.textContent = span.text;
+                    
+                    if (span.type === 'match') {
+                        spanElement.className = 'px-1 rounded text-white';
+                        spanElement.style.backgroundColor = span.color;
+                    }
+                    
+                    highlightedInput.appendChild(spanElement);
+                });
+            } else {
+                highlightedInput.innerHTML = '<div class="text-gray-500">No matches found</div>';
+            }
+            
+            // Update match table
+            matchTbody.innerHTML = '';
+            
+            if (matches.length === 0) {
+                matchTbody.innerHTML = '<tr><td colspan="3" class="px-4 py-4 text-center text-gray-500">No matches to display</td></tr>';
+            } else {
+                matches.forEach((match, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-4 py-2 font-mono">${match.index}</td>
+                        <td class="px-4 py-2 font-mono">${match.length}</td>
+                        <td class="px-4 py-2 font-mono">${escapeHtml(match.text)}</td>
+                    `;
+                    matchTbody.appendChild(row);
+                });
+            }
+        }
+
+        function displayGroups(matches, groupHighlights) {
+            const groupsTbody = document.getElementById('regex-groups-tbody');
+            const groupHighlightsDiv = document.getElementById('regex-group-highlights');
+            
+            // Update group highlights
+            if (groupHighlights && groupHighlights.length > 0) {
+                groupHighlightsDiv.innerHTML = '';
+                groupHighlights.forEach(span => {
+                    const spanElement = document.createElement('span');
+                    spanElement.textContent = span.text;
+                    
+                    if (span.type === 'group') {
+                        spanElement.className = 'px-1 rounded text-white';
+                        spanElement.style.backgroundColor = span.color;
+                    }
+                    
+                    groupHighlightsDiv.appendChild(spanElement);
+                });
+            } else {
+                groupHighlightsDiv.innerHTML = '<div class="text-gray-500">No groups found</div>';
+            }
+            
+            // Update groups table
+            groupsTbody.innerHTML = '';
+            
+            let hasGroups = false;
+            matches.forEach((match, matchIndex) => {
+                match.groups.forEach((group, groupIndex) => {
+                    if (groupIndex > 0) { // Skip group 0 (full match)
+                        hasGroups = true;
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="px-4 py-2 font-mono">${matchIndex + 1}</td>
+                            <td class="px-4 py-2 font-mono">${groupIndex}</td>
+                            <td class="px-4 py-2 font-mono">${group.start}</td>
+                            <td class="px-4 py-2 font-mono">${group.end}</td>
+                            <td class="px-4 py-2 font-mono">${escapeHtml(group.text)}</td>
+                        `;
+                        groupsTbody.appendChild(row);
+                    }
+                });
+            });
+            
+            if (!hasGroups) {
+                groupsTbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">No groups to display</td></tr>';
+            }
+        }
+
+        function displayReplacement(replacement) {
+            const replacementPreview = document.getElementById('regex-replacement-preview');
+            if (replacement.success) {
+                replacementPreview.innerHTML = escapeHtml(replacement.result);
+            } else {
+                replacementPreview.innerHTML = '<div class="text-red-500">Replacement failed: ' + escapeHtml(replacement.error) + '</div>';
+            }
+        }
+
+        function displayExplanation(explanation) {
+            const explanationText = document.getElementById('regex-explanation-text');
+            if (explanation.success) {
+                explanationText.textContent = explanation.explanation;
+            } else {
+                explanationText.innerHTML = '<div class="text-red-500">Explanation failed: ' + escapeHtml(explanation.error) + '</div>';
+            }
+        }
+
+        function loadRegexTemplate() {
+            const templates = regexTester.getTemplates();
+            const templateNames = Object.keys(templates);
+            
+            // Create a simple template selector
+            const templateName = prompt('Select a template:\n' + templateNames.map((name, index) => `${index + 1}. ${name}`).join('\n'));
+            
+            if (templateName) {
+                const index = parseInt(templateName) - 1;
+                if (index >= 0 && index < templateNames.length) {
+                    const selectedTemplate = templates[templateNames[index]];
+                    
+                    document.getElementById('regex-pattern').value = selectedTemplate.pattern;
+                    
+                    // Set flags
+                    const flagCheckboxes = document.querySelectorAll('#regex-flags input[type="checkbox"]');
+                    flagCheckboxes.forEach(checkbox => {
+                        const flag = checkbox.id.replace('regex-flag-', '');
+                        checkbox.checked = selectedTemplate.flags[flag] || false;
+                    });
+                    
+                    showRegexSuccess(`Template "${templateNames[index]}" loaded!`);
+                }
+            }
+        }
+
+        function clearRegexPattern() {
+            document.getElementById('regex-pattern').value = '';
+        }
+
+        function clearRegexInput() {
+            document.getElementById('regex-pattern').value = '';
+            document.getElementById('regex-input').value = '';
+            document.getElementById('regex-replacement').value = '';
+            
+            // Clear flags
+            const flagCheckboxes = document.querySelectorAll('#regex-flags input[type="checkbox"]');
+            flagCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            // Clear results
+            document.getElementById('regex-highlighted-input').innerHTML = '<div class="text-gray-500">Enter a pattern and test input to see matches highlighted here...</div>';
+            document.getElementById('regex-group-highlights').innerHTML = '<div class="text-gray-500">Enter a pattern with groups to see group highlights here...</div>';
+            document.getElementById('regex-replacement-preview').innerHTML = '<div class="text-gray-500">Enter a replacement string to see the preview here...</div>';
+            document.getElementById('regex-explanation-text').innerHTML = '<div class="text-gray-500">Enter a pattern to see its explanation here...</div>';
+            
+            document.getElementById('regex-match-tbody').innerHTML = '<tr><td colspan="3" class="px-4 py-4 text-center text-gray-500">No matches to display</td></tr>';
+            document.getElementById('regex-groups-tbody').innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">No groups to display</td></tr>';
+            
+            document.getElementById('regex-stats').classList.add('hidden');
+            hideRegexError();
+            hideRegexSuccess();
+        }
+
+        function showRegexError(message) {
+            const errorElement = document.getElementById('regex-error');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.remove('hidden');
+            }
+        }
+
+        function hideRegexError() {
+            const errorElement = document.getElementById('regex-error');
+            if (errorElement) {
+                errorElement.classList.add('hidden');
+            }
+        }
+
+        function showRegexSuccess(message) {
+            const successElement = document.getElementById('regex-success');
+            if (successElement) {
+                successElement.textContent = message;
+                successElement.classList.remove('hidden');
+                
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    hideRegexSuccess();
+                }, 3000);
+            }
+        }
+
+        function hideRegexSuccess() {
+            const successElement = document.getElementById('regex-success');
+            if (successElement) {
+                successElement.classList.add('hidden');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize regex tester when engine changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const engineSelect = document.getElementById('regex-engine');
+            if (engineSelect) {
+                engineSelect.addEventListener('change', function() {
+                    currentEngine = this.value;
+                    setupRegexFlags();
+                });
+            }
+        });
+
         async function testQRModule() {
             console.log('Testing QR Module...');
             let output = '=== QR Module Test ===\n';
@@ -6999,8 +7581,8 @@ This text has **bold**, *italic*, and ***bold italic*** formatting.`;
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">CSS/JS Minifier</h3>
-                    <p class="text-gray-600 text-sm">Minify CSS and JavaScript code</p>
+                    <h3 class="text-xl font-semibold mb-2">Advanced CSS/JS Minifier</h3>
+                    <p class="text-gray-600 text-sm">Minify CSS and JavaScript with advanced optimization techniques</p>
                 </div>
 
                 <div class="tool-card p-6 rounded-2xl" onclick="openModal('regex')">
@@ -7009,8 +7591,8 @@ This text has **bold**, *italic*, and ***bold italic*** formatting.`;
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">Regex Tester</h3>
-                    <p class="text-gray-600 text-sm">Test regular expressions</p>
+                    <h3 class="text-xl font-semibold mb-2">Advanced Regex Tester</h3>
+                    <p class="text-gray-600 text-sm">Test regex with multiple engines, live highlighting, and capture groups</p>
                 </div>
             </div>
         </div>
@@ -10673,9 +11255,379 @@ function hello() {
         </div>
     </div>
 
-    <div id="minify" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">CSS/JS Minifier</h3><button onclick="closeModal('minify')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">🗜️</div><h4 class="text-xl font-semibold mb-2">CSS/JS Minifier</h4><p class="text-gray-600">Minify your CSS and JavaScript code.</p></div></div></div>
+    <!-- Advanced CSS/JS Minifier Modal -->
+    <div id="minify" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gradient">🗜️ Advanced CSS/JS Minifier</h3>
+                <button onclick="closeModal('minify')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
 
-    <div id="regex" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold text-gradient">Regex Tester</h3><button onclick="closeModal('regex')" class="text-gray-500 hover:text-gray-700"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="text-center py-8"><div class="text-6xl mb-4">🔍</div><h4 class="text-xl font-semibold mb-2">Regex Tester</h4><p class="text-gray-600">Test and validate regular expressions.</p></div></div></div>
+            <!-- Language Selection -->
+            <div class="mb-6">
+                <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                    <button id="minifier-css-tab" onclick="switchMinifierTab('css')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md bg-white text-gray-900 shadow-sm">
+                        CSS Minifier
+                    </button>
+                    <button id="minifier-js-tab" onclick="switchMinifierTab('js')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                        JavaScript Minifier
+                    </button>
+                </div>
+            </div>
+
+            <!-- CSS Minifier Tab -->
+            <div id="minifier-css-mode" class="minifier-mode">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">CSS Code</label>
+                    <textarea id="css-input" rows="12" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder="Enter your CSS code here..."></textarea>
+                </div>
+
+                <!-- CSS Options -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold mb-3">CSS Optimization Options</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="css-remove-comments" checked class="mr-2">
+                            <span class="text-sm">Remove Comments</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="css-remove-whitespace" checked class="mr-2">
+                            <span class="text-sm">Remove Whitespace</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="css-optimize-colors" checked class="mr-2">
+                            <span class="text-sm">Optimize Colors</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="css-optimize-values" checked class="mr-2">
+                            <span class="text-sm">Optimize Values</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="css-merge-selectors" checked class="mr-2">
+                            <span class="text-sm">Merge Selectors</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="css-remove-empty-rules" checked class="mr-2">
+                            <span class="text-sm">Remove Empty Rules</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3 mb-6">
+                    <button onclick="minifyCSS()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Minify CSS
+                    </button>
+                    <button onclick="loadCSSSample()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        Load Sample
+                    </button>
+                    <button onclick="clearCSSInput()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        Clear
+                    </button>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Minified CSS</label>
+                    <textarea id="css-output" rows="8" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm" readonly placeholder="Minified CSS will appear here..."></textarea>
+                </div>
+
+                <!-- CSS Stats -->
+                <div id="css-stats" class="hidden bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-semibold mb-2">Compression Statistics</h4>
+                    <div class="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-600">Original Size:</span>
+                            <span id="css-original-size" class="font-mono ml-1">-</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Minified Size:</span>
+                            <span id="css-minified-size" class="font-mono ml-1">-</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Compression:</span>
+                            <span id="css-compression-ratio" class="font-mono ml-1 text-green-600">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JavaScript Minifier Tab -->
+            <div id="minifier-js-mode" class="minifier-mode hidden">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">JavaScript Code</label>
+                    <textarea id="js-input" rows="12" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder="Enter your JavaScript code here..."></textarea>
+                </div>
+
+                <!-- JavaScript Options -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold mb-3">JavaScript Optimization Options</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="js-mangle-names" checked class="mr-2">
+                            <span class="text-sm">Mangle Names</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="js-remove-dead-code" checked class="mr-2">
+                            <span class="text-sm">Remove Dead Code</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="js-compress-expressions" checked class="mr-2">
+                            <span class="text-sm">Compress Expressions</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="js-remove-console" checked class="mr-2">
+                            <span class="text-sm">Remove Console</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="js-optimize-conditionals" checked class="mr-2">
+                            <span class="text-sm">Optimize Conditionals</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="js-remove-comments" checked class="mr-2">
+                            <span class="text-sm">Remove Comments</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3 mb-6">
+                    <button onclick="minifyJS()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Minify JavaScript
+                    </button>
+                    <button onclick="loadJSSample()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        Load Sample
+                    </button>
+                    <button onclick="clearJSInput()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        Clear
+                    </button>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Minified JavaScript</label>
+                    <textarea id="js-output" rows="8" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm" readonly placeholder="Minified JavaScript will appear here..."></textarea>
+                </div>
+
+                <!-- JavaScript Stats -->
+                <div id="js-stats" class="hidden bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-semibold mb-2">Compression Statistics</h4>
+                    <div class="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-600">Original Size:</span>
+                            <span id="js-original-size" class="font-mono ml-1">-</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Minified Size:</span>
+                            <span id="js-minified-size" class="font-mono ml-1">-</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Compression:</span>
+                            <span id="js-compression-ratio" class="font-mono ml-1 text-green-600">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error/Success Messages -->
+            <div id="minifier-error" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg"></div>
+            <div id="minifier-success" class="hidden mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg"></div>
+        </div>
+    </div>
+
+    <!-- Advanced Regex Tester Modal -->
+    <div id="regex" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gradient">🔍 Advanced Regex Tester</h3>
+                <button onclick="closeModal('regex')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Engine Selection -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Regex Engine</label>
+                <select id="regex-engine" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="ECMAScript">ECMAScript (JavaScript)</option>
+                    <option value="PCRE2">PCRE2</option>
+                    <option value=".NET">.NET</option>
+                </select>
+            </div>
+
+            <!-- Pattern Input -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Pattern</label>
+                <div class="relative">
+                    <input type="text" id="regex-pattern" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono" placeholder="Enter your regex pattern...">
+                    <button onclick="clearRegexPattern()" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Flags -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Flags</label>
+                <div id="regex-flags" class="flex flex-wrap gap-2">
+                    <!-- Flags will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Test Input -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Test Input</label>
+                <textarea id="regex-input" rows="6" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono" placeholder="Enter text to test against the pattern..."></textarea>
+            </div>
+
+            <!-- Replacement (Optional) -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Replacement (Optional)</label>
+                <input type="text" id="regex-replacement" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono" placeholder="Enter replacement string (use $1, $2, etc. for groups)...">
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex space-x-3 mb-6">
+                <button onclick="testRegex()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    Test Pattern
+                </button>
+                <button onclick="loadRegexTemplate()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    Load Template
+                </button>
+                <button onclick="clearRegexInput()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    Clear All
+                </button>
+            </div>
+
+            <!-- Results Tabs -->
+            <div class="mb-6">
+                <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                    <button id="regex-matches-tab" onclick="switchRegexTab('matches')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md bg-white text-gray-900 shadow-sm">
+                        Matches
+                    </button>
+                    <button id="regex-groups-tab" onclick="switchRegexTab('groups')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                        Groups
+                    </button>
+                    <button id="regex-replacement-tab" onclick="switchRegexTab('replacement')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                        Replacement
+                    </button>
+                    <button id="regex-explanation-tab" onclick="switchRegexTab('explanation')" class="flex-1 py-2 px-4 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700">
+                        Explanation
+                    </button>
+                </div>
+            </div>
+
+            <!-- Matches Tab -->
+            <div id="regex-matches-content" class="regex-tab-content">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Highlighted Input</label>
+                    <div id="regex-highlighted-input" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 font-mono min-h-20">
+                        <div class="text-gray-500">Enter a pattern and test input to see matches highlighted here...</div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h4 class="font-semibold mb-2">Match Results</h4>
+                    <div id="regex-match-count" class="text-sm text-gray-600 mb-2">No matches found</div>
+                    <div id="regex-match-table" class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Index</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Length</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Match</th>
+                                </tr>
+                            </thead>
+                            <tbody id="regex-match-tbody" class="divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="3" class="px-4 py-4 text-center text-gray-500">No matches to display</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Groups Tab -->
+            <div id="regex-groups-content" class="regex-tab-content hidden">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Group Highlights</label>
+                    <div id="regex-group-highlights" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 font-mono min-h-20">
+                        <div class="text-gray-500">Enter a pattern with groups to see group highlights here...</div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h4 class="font-semibold mb-2">Capture Groups</h4>
+                    <div id="regex-groups-table" class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Match</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Group</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Start</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">End</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="regex-groups-tbody" class="divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="5" class="px-4 py-4 text-center text-gray-500">No groups to display</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Replacement Tab -->
+            <div id="regex-replacement-content" class="regex-tab-content hidden">
+                <div class="mb-4">
+                    <h4 class="font-semibold mb-2">Replacement Preview</h4>
+                    <div id="regex-replacement-preview" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 font-mono min-h-20">
+                        <div class="text-gray-500">Enter a replacement string to see the preview here...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Explanation Tab -->
+            <div id="regex-explanation-content" class="regex-tab-content hidden">
+                <div class="mb-4">
+                    <h4 class="font-semibold mb-2">Pattern Explanation</h4>
+                    <div id="regex-explanation-text" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm whitespace-pre-wrap">
+                        <div class="text-gray-500">Enter a pattern to see its explanation here...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div id="regex-stats" class="hidden bg-gray-50 p-4 rounded-lg">
+                <h4 class="font-semibold mb-2">Statistics</h4>
+                <div class="grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <span class="text-gray-600">Execution Time:</span>
+                        <span id="regex-execution-time" class="font-mono ml-1">-</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">Matches Found:</span>
+                        <span id="regex-matches-count" class="font-mono ml-1">-</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">Engine:</span>
+                        <span id="regex-current-engine" class="font-mono ml-1">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error/Success Messages -->
+            <div id="regex-error" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg"></div>
+            <div id="regex-success" class="hidden mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg"></div>
+        </div>
+    </div>
 
     <script>
         // Modal functions removed - now defined in head section
