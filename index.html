@@ -17,6 +17,7 @@
     <script src="src/js/advanced-password-generator.js"></script>
     <script src="src/js/advanced-css-js-minifier.js"></script>
     <script src="src/js/advanced-regex-tester.js"></script>
+    <script src="src/js/advanced-background-editor.js?v=6"></script>
 
 
     
@@ -209,6 +210,13 @@
                         });
                     } else {
                         console.error('initializeAdvancedMarkdownPreview function not found');
+                    }
+                } else if (modalId === 'background') {
+                    if (typeof initializeBackgroundEditor === 'function') {
+                        console.log('Initializing Advanced Background Editor...');
+                        initializeBackgroundEditor();
+                    } else {
+                        console.error('initializeBackgroundEditor function not found');
                     }
                 }
             } else {
@@ -4260,6 +4268,334 @@ console.log("Result:", result);`;
             }
         });
 
+        // Advanced Background Editor Functions
+        let backgroundEditor = null;
+
+        function initializeBackgroundEditor() {
+            if (!backgroundEditor) {
+                backgroundEditor = new AdvancedBackgroundEditor();
+            }
+        }
+
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                initializeBackgroundEditor();
+                hideBackgroundError();
+                hideBackgroundSuccess();
+
+                const mode = document.getElementById('background-mode').value;
+                const result = await backgroundEditor.processImage(file, mode);
+
+                if (result.success) {
+                    showBackgroundSuccess('Image processed successfully!');
+                } else {
+                    showBackgroundError(result.error);
+                }
+            } catch (error) {
+                console.error('Error processing image:', error);
+                showBackgroundError('Failed to process image: ' + error.message);
+            }
+        }
+
+        function applyBackgroundTemplate(templateId) {
+            console.log('Applying template:', templateId);
+            initializeBackgroundEditor();
+            if (backgroundEditor) {
+                console.log('Background editor initialized, applying template...');
+                backgroundEditor.applyTemplate(templateId);
+                showBackgroundSuccess(`Template "${templateId}" applied!`);
+            } else {
+                console.log('Background editor not initialized');
+                showBackgroundError('Please upload an image first to apply templates.');
+            }
+        }
+
+        function updateBackgroundColor() {
+            initializeBackgroundEditor();
+            const color = document.getElementById('background-color').value;
+            if (backgroundEditor) {
+                backgroundEditor.setBackground('solid', { color: color });
+            }
+        }
+
+        function toggleOutline() {
+            const enabled = document.getElementById('outline-enabled').checked;
+            const controls = document.getElementById('outline-controls');
+            
+            if (enabled) {
+                controls.classList.remove('hidden');
+                updateOutline();
+            } else {
+                controls.classList.add('hidden');
+                if (backgroundEditor) {
+                    backgroundEditor.setEffects({ outline: { thickness: 0, color: '#000000' } });
+                }
+            }
+        }
+
+        function updateOutline() {
+            initializeBackgroundEditor();
+            const thickness = document.getElementById('outline-thickness').value;
+            const color = document.getElementById('outline-color').value;
+            
+            if (backgroundEditor) {
+                backgroundEditor.setEffects({ outline: { thickness: parseInt(thickness), color: color } });
+            }
+        }
+
+        function toggleBorder() {
+            const enabled = document.getElementById('border-enabled').checked;
+            const controls = document.getElementById('border-controls');
+            
+            if (enabled) {
+                controls.classList.remove('hidden');
+                updateBorder();
+            } else {
+                controls.classList.add('hidden');
+                if (backgroundEditor) {
+                    backgroundEditor.setEffects({ border: { thickness: 0, color: '#ffffff' } });
+                }
+            }
+        }
+
+        function updateBorder() {
+            initializeBackgroundEditor();
+            const thickness = document.getElementById('border-thickness').value;
+            const color = document.getElementById('border-color').value;
+            
+            if (backgroundEditor) {
+                backgroundEditor.setEffects({ border: { thickness: parseInt(thickness), color: color } });
+            }
+        }
+
+        function toggleShadow() {
+            const enabled = document.getElementById('shadow-enabled').checked;
+            const controls = document.getElementById('shadow-controls');
+            
+            if (enabled) {
+                controls.classList.remove('hidden');
+                updateShadow();
+            } else {
+                controls.classList.add('hidden');
+                if (backgroundEditor) {
+                    backgroundEditor.setEffects({ shadow: { offset: { x: 0, y: 0 }, blur: 0, opacity: 0 } });
+                }
+            }
+        }
+
+        function updateShadow() {
+            initializeBackgroundEditor();
+            const offsetX = document.getElementById('shadow-offset-x').value;
+            const offsetY = document.getElementById('shadow-offset-y').value;
+            const blur = document.getElementById('shadow-blur').value;
+            const opacity = document.getElementById('shadow-opacity').value;
+            
+            if (backgroundEditor) {
+                backgroundEditor.setEffects({
+                    shadow: {
+                        offset: { x: parseInt(offsetX), y: parseInt(offsetY) },
+                        blur: parseInt(blur),
+                        opacity: parseFloat(opacity)
+                    }
+                });
+            }
+        }
+
+        function undoBackgroundEdit() {
+            initializeBackgroundEditor();
+            if (backgroundEditor) {
+                backgroundEditor.undo();
+            }
+        }
+
+        function redoBackgroundEdit() {
+            initializeBackgroundEditor();
+            if (backgroundEditor) {
+                backgroundEditor.redo();
+            }
+        }
+
+        function resetBackgroundEdit() {
+            initializeBackgroundEditor();
+            if (backgroundEditor) {
+                // Reset all controls to default values
+                document.getElementById('background-color').value = '#ffffff';
+                document.getElementById('outline-enabled').checked = false;
+                document.getElementById('border-enabled').checked = false;
+                document.getElementById('shadow-enabled').checked = false;
+                
+                // Hide all effect controls
+                document.getElementById('outline-controls').classList.add('hidden');
+                document.getElementById('border-controls').classList.add('hidden');
+                document.getElementById('shadow-controls').classList.add('hidden');
+                
+                // Reset background to white
+                backgroundEditor.setBackground('solid', { color: '#ffffff' });
+                showBackgroundSuccess('Reset to default settings!');
+            }
+        }
+
+        // Enhanced AI-powered functions
+        async function enhanceImageQuality(level) {
+            initializeBackgroundEditor();
+            if (backgroundEditor) {
+                try {
+                    showBackgroundSuccess(`Enhancing image quality ${level}...`);
+                    const result = await backgroundEditor.enhanceImageQuality(level);
+                    if (result.success) {
+                        showBackgroundSuccess(`Image enhanced ${level} successfully!`);
+                    } else {
+                        showBackgroundError('Failed to enhance image: ' + result.error);
+                    }
+                } catch (error) {
+                    console.error('Error enhancing image:', error);
+                    showBackgroundError('Error enhancing image: ' + error.message);
+                }
+            } else {
+                showBackgroundError('Please upload an image first to enhance.');
+            }
+        }
+
+        async function generateAIBackground() {
+            initializeBackgroundEditor();
+            if (backgroundEditor) {
+                const prompt = document.getElementById('ai-background-prompt').value;
+                if (!prompt.trim()) {
+                    showBackgroundError('Please enter a background description.');
+                    return;
+                }
+
+                try {
+                    showBackgroundSuccess('Generating AI background...');
+                    const result = await backgroundEditor.generateAIBackground(prompt, {
+                        useDepthControl: true,
+                        usePoseControl: true,
+                        useCannyControl: false
+                    });
+                    
+                    if (result.success) {
+                        showBackgroundSuccess('AI background generated successfully!');
+                    } else {
+                        showBackgroundError('Failed to generate AI background: ' + result.error);
+                    }
+                } catch (error) {
+                    console.error('Error generating AI background:', error);
+                    showBackgroundError('Error generating AI background: ' + error.message);
+                }
+            } else {
+                showBackgroundError('Please upload and process an image first.');
+            }
+        }
+
+        async function getAISuggestions() {
+            initializeBackgroundEditor();
+            if (backgroundEditor) {
+                try {
+                    showBackgroundSuccess('Getting AI suggestions...');
+                    const suggestions = await backgroundEditor.getAISuggestions();
+                    
+                    if (suggestions.length > 0) {
+                        let suggestionText = 'AI Suggestions:\n';
+                        suggestions.forEach((suggestion, index) => {
+                            suggestionText += `${index + 1}. ${suggestion.description} (${Math.round(suggestion.confidence * 100)}% confidence)\n`;
+                        });
+                        showBackgroundSuccess(suggestionText);
+                    } else {
+                        showBackgroundSuccess('No specific suggestions at this time. Your image looks good!');
+                    }
+                } catch (error) {
+                    console.error('Error getting AI suggestions:', error);
+                    showBackgroundError('Error getting AI suggestions: ' + error.message);
+                }
+            } else {
+                showBackgroundError('Please upload an image first to get AI suggestions.');
+            }
+        }
+
+        function exportBackgroundImage(format) {
+            if (!backgroundEditor) {
+                showBackgroundError('No image to export. Please upload an image first.');
+                return;
+            }
+
+            try {
+                const exportSize = document.getElementById('export-size').value;
+                const dataUrl = backgroundEditor.exportImage(format, 0.9);
+                
+                // Create download link
+                const link = document.createElement('a');
+                link.download = `background-edited.${format}`;
+                link.href = dataUrl;
+                link.click();
+                
+                showBackgroundSuccess(`Image exported as ${format.toUpperCase()}!`);
+            } catch (error) {
+                console.error('Export error:', error);
+                showBackgroundError('Failed to export image: ' + error.message);
+            }
+        }
+
+        function showBackgroundError(message) {
+            const errorElement = document.getElementById('background-error');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.remove('hidden');
+            }
+        }
+
+        function hideBackgroundError() {
+            const errorElement = document.getElementById('background-error');
+            if (errorElement) {
+                errorElement.classList.add('hidden');
+            }
+        }
+
+        function showBackgroundSuccess(message) {
+            const successElement = document.getElementById('background-success');
+            if (successElement) {
+                successElement.textContent = message;
+                successElement.classList.remove('hidden');
+                
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    hideBackgroundSuccess();
+                }, 3000);
+            }
+        }
+
+        function hideBackgroundSuccess() {
+            const successElement = document.getElementById('background-success');
+            if (successElement) {
+                successElement.classList.add('hidden');
+            }
+        }
+
+        // Initialize background editor when modal opens
+        document.addEventListener('DOMContentLoaded', function() {
+            const backgroundType = document.getElementById('background-type');
+            if (backgroundType) {
+                backgroundType.addEventListener('change', function() {
+                    const type = this.value;
+                    const solidControl = document.getElementById('solid-color-control');
+                    const gradientControls = document.getElementById('gradient-controls');
+                    
+                    if (type === 'solid') {
+                        solidControl.classList.remove('hidden');
+                        gradientControls.classList.add('hidden');
+                    } else if (type === 'gradient') {
+                        solidControl.classList.add('hidden');
+                        gradientControls.classList.remove('hidden');
+                    } else {
+                        solidControl.classList.add('hidden');
+                        gradientControls.classList.add('hidden');
+                    }
+                });
+            }
+        });
+
         async function testQRModule() {
             console.log('Testing QR Module...');
             let output = '=== QR Module Test ===\n';
@@ -7362,8 +7698,8 @@ console.log("Result:", result);`;
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">🎨 Background Editor</h3>
-                    <p class="text-gray-600 text-sm">AI-powered background removal & replacement</p>
+                    <h3 class="text-xl font-semibold mb-2">🎨 Advanced Background Editor</h3>
+                    <p class="text-gray-600 text-sm">AI-powered background removal with layered editing and templates</p>
                 </div>
 
                 <!-- Calculator Tools -->
@@ -7715,10 +8051,11 @@ console.log("Result:", result);`;
     </footer>
 
     <!-- Modals -->
+    <!-- Advanced Background Editor Modal -->
     <div id="background" class="modal">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-gradient">🎨 Background Editor</h3>
+                <h3 class="text-2xl font-bold text-gradient">🎨 Advanced Background Editor</h3>
                 <button onclick="closeModal('background')" class="text-gray-500 hover:text-gray-700">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -7728,107 +8065,225 @@ console.log("Result:", result);`;
             
             <!-- Upload Section -->
             <div class="mb-6">
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition-colors">
-                    <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
-                    <label for="image-upload" class="cursor-pointer">
-                        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                        </svg>
-                        <p class="text-lg font-semibold text-gray-700 mb-2">Upload Your Photo</p>
-                        <p class="text-gray-500">Click to select or drag & drop an image</p>
-                    </label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Upload Image</label>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <input type="file" id="background-upload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    <button onclick="document.getElementById('background-upload').click()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Choose Image
+                    </button>
+                    <p class="text-sm text-gray-500 mt-2">JPG, PNG up to 10MB</p>
                 </div>
             </div>
 
-            <!-- Image Preview and Editor -->
-            <div id="editor-section" class="hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <!-- Original Image -->
-                    <div>
-                        <h4 class="font-semibold mb-3 text-gray-700">Original Image</h4>
-                        <div class="relative">
-                            <img id="original-image" class="w-full h-64 object-cover rounded-lg border" alt="Original">
-                            <div class="absolute top-2 right-2">
-                                <button onclick="removeBackground()" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700">
-                                    🪄 Remove Background
+            <!-- AI Processing Mode -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">🤖 AI Processing Mode</label>
+                <select id="background-mode" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="auto">Auto (Multi-Model Ensemble)</option>
+                    <option value="u2net">U²-Net (General Purpose)</option>
+                    <option value="modnet">MODNet (Portrait Matting)</option>
+                    <option value="sam">SAM (Interactive)</option>
+                    <option value="isnet">ISNet (High Accuracy)</option>
+                    <option value="rembg_new">RemBG v2 (Latest)</option>
+                </select>
+            </div>
+
+            <!-- AI Enhancement Options -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">🚀 AI Enhancement</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="enhanceImageQuality('2x')" class="px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-colors text-sm font-medium">
+                        ⚡ 2x Super-Resolution
+                    </button>
+                    <button onclick="enhanceImageQuality('4x')" class="px-4 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-colors text-sm font-medium">
+                        🚀 4x Super-Resolution
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Background Generation -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">🎨 AI Background Generation</label>
+                <div class="space-y-3">
+                    <input type="text" id="ai-background-prompt" placeholder="Describe your background (e.g., 'sunset beach, professional office, modern studio')" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent text-sm">
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="generateAIBackground()" class="px-4 py-3 bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-lg hover:from-pink-600 hover:to-rose-700 transition-colors text-sm font-medium">
+                            🎨 Generate AI Background
+                        </button>
+                        <button onclick="getAISuggestions()" class="px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-colors text-sm font-medium">
+                            💡 AI Suggestions
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Edited Image -->
+            <!-- Main Editor Area -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <!-- Canvas Area -->
+                <div class="lg:col-span-2">
+                    <div class="border border-gray-300 rounded-lg p-4">
+                        <canvas id="background-editor-canvas" class="max-w-full h-auto border border-gray-200 rounded"></canvas>
+                    </div>
+                    
+                    <!-- Canvas Controls -->
+                    <div class="flex space-x-2 mt-4">
+                        <button onclick="undoBackgroundEdit()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            ↶ Undo
+                        </button>
+                        <button onclick="redoBackgroundEdit()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            ↷ Redo
+                        </button>
+                        <button onclick="resetBackgroundEdit()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            ↻ Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Controls Panel -->
+                <div class="space-y-6">
+                    <!-- Templates -->
                     <div>
-                        <h4 class="font-semibold mb-3 text-gray-700">Edited Image</h4>
-                        <div class="relative">
-                            <canvas id="edited-canvas" class="w-full h-64 border rounded-lg bg-gray-100"></canvas>
-                            <div class="absolute top-2 right-2">
-                                <button onclick="downloadImage()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700">
-                                    💾 Download
+                        <h4 class="font-semibold mb-3">Templates</h4>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="applyBackgroundTemplate('professional')" class="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                                Professional
+                            </button>
+                            <button onclick="applyBackgroundTemplate('creative')" class="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                                Creative
+                            </button>
+                            <button onclick="applyBackgroundTemplate('minimal')" class="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                                Minimal
+                            </button>
+                            <button onclick="applyBackgroundTemplate('vibrant')" class="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                                Vibrant
                                 </button>
                             </div>
                         </div>
+
+                    <!-- Background Options -->
+                    <div>
+                        <h4 class="font-semibold mb-3">Background</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Type</label>
+                                <select id="background-type" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                                    <option value="solid">Solid Color</option>
+                                    <option value="gradient">Gradient</option>
+                                    <option value="transparent">Transparent</option>
+                                </select>
+                    </div>
+
+                            <div id="solid-color-control" class="background-control">
+                                <label class="block text-sm text-gray-600 mb-1">Color</label>
+                                <input type="color" id="background-color" value="#ffffff" class="w-full h-10 border border-gray-300 rounded" onchange="updateBackgroundColor()">
+                </div>
+
+                            <div id="gradient-controls" class="background-control hidden">
+                                <label class="block text-sm text-gray-600 mb-1">Gradient</label>
+                                <select id="gradient-type" class="w-full p-2 border border-gray-300 rounded mb-2">
+                                    <option value="linear">Linear</option>
+                                    <option value="radial">Radial</option>
+                                </select>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="color" id="gradient-color-1" value="#ff6b6b" class="h-8 border border-gray-300 rounded">
+                                    <input type="color" id="gradient-color-2" value="#4ecdc4" class="h-8 border border-gray-300 rounded">
+                                </div>
+                            </div>
                     </div>
                 </div>
 
-                <!-- Background Selection -->
-                <div class="mb-6">
-                    <h4 class="font-semibold mb-3 text-gray-700">Choose New Background</h4>
-                    <div class="grid grid-cols-4 gap-3">
-                        <div class="bg-gradient-to-br from-orange-400 to-pink-600 h-16 rounded-lg cursor-pointer hover:scale-105 transition-transform" onclick="setBackground('sunset')" title="Sunset"></div>
-                        <div class="bg-gradient-to-br from-blue-400 to-purple-600 h-16 rounded-lg cursor-pointer hover:scale-105 transition-transform" onclick="setBackground('ocean')" title="Ocean"></div>
-                        <div class="bg-gradient-to-br from-green-400 to-blue-600 h-16 rounded-lg cursor-pointer hover:scale-105 transition-transform" onclick="setBackground('forest')" title="Forest"></div>
-                        <div class="bg-gradient-to-br from-purple-400 to-pink-600 h-16 rounded-lg cursor-pointer hover:scale-105 transition-transform" onclick="setBackground('neon')" title="Neon"></div>
-                        <div class="bg-gradient-to-br from-yellow-400 to-orange-600 h-16 rounded-lg cursor-pointer hover:scale-105 transition-transform" onclick="setBackground('autumn')" title="Autumn"></div>
-                        <div class="bg-gradient-to-br from-blue-500 to-cyan-500 h-16 rounded-lg cursor-pointer hover:scale-105 transition-transform" onclick="setBackground('winter')" title="Winter"></div>
-                        <div class="bg-gradient-to-br from-pink-500 to-rose-500 h-16 rounded-lg cursor-pointer hover:scale-105 transition-transform" onclick="setBackground('spring')" title="Spring"></div>
-                        <div class="bg-gradient-to-br from-indigo-500 to-purple-500 h-16 rounded-lg cursor-pointer hover:scale-105 transition-transform" onclick="setBackground('galaxy')" title="Galaxy"></div>
+                    <!-- Effects -->
+                    <div>
+                        <h4 class="font-semibold mb-3">Effects</h4>
+                        <div class="space-y-3">
+                            <!-- Outline -->
+                            <div>
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="outline-enabled" class="mr-2" onchange="toggleOutline()">
+                                    <span class="text-sm">Outline</span>
+                                </label>
+                                <div id="outline-controls" class="ml-6 space-y-2 hidden">
+                                    <div>
+                                        <label class="block text-xs text-gray-600">Thickness</label>
+                                        <input type="range" id="outline-thickness" min="0" max="10" value="2" class="w-full" onchange="updateOutline()">
+                    </div>
+                    <div>
+                                        <label class="block text-xs text-gray-600">Color</label>
+                                        <input type="color" id="outline-color" value="#000000" class="w-full h-8 border border-gray-300 rounded" onchange="updateOutline()">
+                    </div>
                     </div>
                 </div>
 
-                <!-- Image Controls -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <!-- Border -->
                     <div>
-                        <label class="block text-sm font-medium mb-2">Size</label>
-                        <input type="range" id="size-slider" min="50" max="150" value="100" class="w-full" oninput="updateImageSize()">
-                        <span id="size-value" class="text-sm text-gray-600">100%</span>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Rotation</label>
-                        <input type="range" id="rotation-slider" min="-180" max="180" value="0" class="w-full" oninput="updateImageRotation()">
-                        <span id="rotation-value" class="text-sm text-gray-600">0°</span>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Brightness</label>
-                        <input type="range" id="brightness-slider" min="50" max="150" value="100" class="w-full" oninput="updateImageBrightness()">
-                        <span id="size-value" class="text-sm text-gray-600">100%</span>
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="border-enabled" class="mr-2" onchange="toggleBorder()">
+                                    <span class="text-sm">Border</span>
+                                </label>
+                                <div id="border-controls" class="ml-6 space-y-2 hidden">
+                                    <div>
+                                        <label class="block text-xs text-gray-600">Thickness</label>
+                                        <input type="range" id="border-thickness" min="0" max="20" value="4" class="w-full" onchange="updateBorder()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-600">Color</label>
+                                        <input type="color" id="border-color" value="#ffffff" class="w-full h-8 border border-gray-300 rounded" onchange="updateBorder()">
+                                    </div>
                     </div>
                 </div>
 
-                <!-- Quick Actions -->
-                <div class="flex flex-wrap gap-3">
-                    <button onclick="resetImage()" class="bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-600">
-                        🔄 Reset
+                            <!-- Shadow -->
+                    <div>
+                                <label class="flex items-center mb-2">
+                                    <input type="checkbox" id="shadow-enabled" class="mr-2" onchange="toggleShadow()">
+                                    <span class="text-sm">Shadow</span>
+                                </label>
+                                <div id="shadow-controls" class="ml-6 space-y-2 hidden">
+                                    <div>
+                                        <label class="block text-xs text-gray-600">Offset X</label>
+                                        <input type="range" id="shadow-offset-x" min="-20" max="20" value="2" class="w-full" onchange="updateShadow()">
+                    </div>
+                    <div>
+                                        <label class="block text-xs text-gray-600">Offset Y</label>
+                                        <input type="range" id="shadow-offset-y" min="-20" max="20" value="2" class="w-full" onchange="updateShadow()">
+                    </div>
+                    <div>
+                                        <label class="block text-xs text-gray-600">Blur</label>
+                                        <input type="range" id="shadow-blur" min="0" max="20" value="4" class="w-full" onchange="updateShadow()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-600">Opacity</label>
+                                        <input type="range" id="shadow-opacity" min="0" max="1" step="0.1" value="0.5" class="w-full" onchange="updateShadow()">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+
+            <!-- Export Section -->
+            <div class="border-t pt-6">
+                <h4 class="font-semibold mb-3">Export</h4>
+                <div class="flex space-x-3">
+                    <button onclick="exportBackgroundImage('png')" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        Export PNG
                     </button>
-                    <button onclick="flipHorizontal()" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600">
-                        ↔️ Flip Horizontal
+                    <button onclick="exportBackgroundImage('jpeg')" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Export JPEG
                     </button>
-                    <button onclick="flipVertical()" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600">
-                        ↕️ Flip Vertical
-                    </button>
+                    <select id="export-size" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="original">Original Size</option>
+                        <option value="profile">Profile (400x400)</option>
+                        <option value="cover">Cover (1200x630)</option>
+                        <option value="square">Square (1080x1080)</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Instructions -->
-            <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-                <h4 class="font-semibold text-blue-800 mb-2">💡 How to Use:</h4>
-                <ol class="text-sm text-blue-700 space-y-1">
-                    <li>1. Upload your photo</li>
-                    <li>2. Click "Remove Background" to automatically remove the background</li>
-                    <li>3. Choose a new background from the options above</li>
-                    <li>4. Adjust size, rotation, and brightness as needed</li>
-                    <li>5. Download your edited image!</li>
-                </ol>
-            </div>
+            <!-- Error/Success Messages -->
+            <div id="background-error" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg"></div>
+            <div id="background-success" class="hidden mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg"></div>
         </div>
     </div>
 
@@ -12987,183 +13442,6 @@ function hello() {
             });
         });
 
-        // Background Editor functions
-        let originalImage = null;
-        let editedCanvas = null;
-        let ctx = null;
-        let currentBackground = null;
-        let imageSettings = {
-            size: 100,
-            rotation: 0,
-            brightness: 100,
-            flipH: 1,
-            flipV: 1
-        };
-
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    originalImage = new Image();
-                    originalImage.onload = function() {
-                        document.getElementById('original-image').src = e.target.result;
-                        document.getElementById('editor-section').classList.remove('hidden');
-                        initializeCanvas();
-                        resetImage();
-                    };
-                    originalImage.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function initializeCanvas() {
-            editedCanvas = document.getElementById('edited-canvas');
-            ctx = editedCanvas.getContext('2d');
-            
-            // Set canvas size
-            editedCanvas.width = editedCanvas.offsetWidth;
-            editedCanvas.height = editedCanvas.offsetHeight;
-            
-            // Set default background
-            setBackground('sunset');
-        }
-
-        function removeBackground() {
-            if (!originalImage) return;
-            
-            // Simulate AI background removal (in a real app, you'd use a service like Remove.bg API)
-            // For now, we'll create a simple effect
-            alert('🎉 Background removed! (This is a demo - in production, this would use AI to detect and remove the background)');
-            
-            // Redraw the image
-            redrawImage();
-        }
-
-        function setBackground(type) {
-            currentBackground = type;
-            redrawImage();
-        }
-
-        function redrawImage() {
-            if (!ctx || !originalImage) return;
-            
-            // Clear canvas
-            ctx.clearRect(0, 0, editedCanvas.width, editedCanvas.height);
-            
-            // Draw background
-            drawBackground();
-            
-            // Draw image with current settings
-            drawImage();
-        }
-
-        function drawBackground() {
-            if (!currentBackground) return;
-            
-            const gradients = {
-                sunset: ['#ff6b6b', '#feca57', '#ff9ff3'],
-                ocean: ['#48dbfb', '#0abde3', '#54a0ff'],
-                forest: ['#1dd1a1', '#10ac84', '#00d2d3'],
-                neon: ['#ff9ff3', '#f368e0', '#c44569'],
-                autumn: ['#ff9f43', '#feca57', '#ff6b6b'],
-                winter: ['#54a0ff', '#5f27cd', '#341f97'],
-                spring: ['#ff9ff3', '#feca57', '#1dd1a1'],
-                galaxy: ['#5f27cd', '#341f97', '#0c2461']
-            };
-            
-            const colors = gradients[currentBackground] || gradients.sunset;
-            const gradient = ctx.createLinearGradient(0, 0, editedCanvas.width, editedCanvas.height);
-            colors.forEach((color, index) => {
-                gradient.addColorStop(index / (colors.length - 1), color);
-            });
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, editedCanvas.width, editedCanvas.height);
-        }
-
-        function drawImage() {
-            if (!ctx || !originalImage) return;
-            
-            const centerX = editedCanvas.width / 2;
-            const centerY = editedCanvas.height / 2;
-            
-            ctx.save();
-            ctx.translate(centerX, centerY);
-            ctx.scale(imageSettings.flipH, imageSettings.flipV);
-            ctx.rotate(imageSettings.rotation * Math.PI / 180);
-            
-            const scaledWidth = (originalImage.width * imageSettings.size) / 100;
-            const scaledHeight = (originalImage.height * imageSettings.size) / 100;
-            
-            ctx.drawImage(
-                originalImage,
-                -scaledWidth / 2,
-                -scaledHeight / 2,
-                scaledWidth,
-                scaledHeight
-            );
-            
-            ctx.restore();
-        }
-
-        function updateImageSize() {
-            const size = document.getElementById('size-slider').value;
-            imageSettings.size = parseInt(size);
-            document.getElementById('size-value').textContent = size + '%';
-            redrawImage();
-        }
-
-        function updateImageRotation() {
-            const rotation = document.getElementById('rotation-slider').value;
-            imageSettings.rotation = parseInt(rotation);
-            document.getElementById('rotation-value').textContent = rotation + '°';
-            redrawImage();
-        }
-
-        function updateImageBrightness() {
-            const brightness = document.getElementById('brightness-slider').value;
-            imageSettings.brightness = parseInt(brightness);
-            redrawImage();
-        }
-
-        function resetImage() {
-            imageSettings = {
-                size: 100,
-                rotation: 0,
-                brightness: 100,
-                flipH: 1,
-                flipV: 1
-            };
-            
-            document.getElementById('size-slider').value = 100;
-            document.getElementById('rotation-slider').value = 0;
-            document.getElementById('brightness-slider').value = 100;
-            document.getElementById('size-value').textContent = '100%';
-            document.getElementById('rotation-value').textContent = '0°';
-            
-            redrawImage();
-        }
-
-        function flipHorizontal() {
-            imageSettings.flipH *= -1;
-            redrawImage();
-        }
-
-        function flipVertical() {
-            imageSettings.flipV *= -1;
-            redrawImage();
-        }
-
-        function downloadImage() {
-            if (!editedCanvas) return;
-            
-            const link = document.createElement('a');
-            link.download = 'edited-image.png';
-            link.href = editedCanvas.toDataURL();
-            link.click();
-        }
     </script>
 </body>
 </html>
