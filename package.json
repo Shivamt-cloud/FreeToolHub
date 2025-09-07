@@ -23,7 +23,7 @@
     "css",
     "javascript"
   ],
-  "author": "SHIVAM",
+  "author": "FreeToolHub Community",
   "license": "MIT",
   "devDependencies": {
     "live-server": "^1.2.2",

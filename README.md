@@ -197,7 +197,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Created By
 
-**SHIVAM** - A passionate developer creating useful tools for the community.
+**FreeToolHub Community** - A passionate team of developers creating useful tools for the community.
+
+### Core Contributors
+- **SHIVAM** - Lead Developer & Project Maintainer
+- **Community Contributors** - Open source developers worldwide
 
 ---
 
