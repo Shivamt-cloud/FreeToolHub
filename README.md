@@ -65,8 +65,8 @@ A beautiful, modern website featuring 20+ free online tools for productivity and
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/freetoolhub.git
-   cd freetoolhub
+   git clone https://github.com/Shivamt-cloud/FreeToolHub.git
+   cd FreeToolHub
    ```
 
 2. **Install dependencies**
