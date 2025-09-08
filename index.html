@@ -14045,7 +14045,7 @@ function hello() {
             // Initialize EmailJS with your public key
             // Get your public key from: https://dashboard.emailjs.com/admin/integration
             // Replace 'YOUR_PUBLIC_KEY' with your actual EmailJS public key
-            emailjs.init('YOUR_PUBLIC_KEY');
+            emailjs.init('rnxxbP6orMyFkaeD8');
         })();
 
         // Contact form submission
@@ -14072,7 +14072,7 @@ function hello() {
             // Send email using EmailJS
             // Get Service ID from: https://dashboard.emailjs.com/admin
             // Get Template ID from: https://dashboard.emailjs.com/admin/templates
-            emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', formData)
+            emailjs.send('service_fd58pi5', 'template_77mwt46', formData)
                 .then(function(response) {
                     console.log('SUCCESS!', response.status, response.text);
                     showContactSuccess();
