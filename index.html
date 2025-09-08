@@ -4438,6 +4438,218 @@ console.log("Result:", result);`;
             }
         }
 
+        // Authentication System
+        let currentUser = null;
+        let authMode = 'login';
+
+        // Check if user is logged in on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+        });
+
+        function checkAuthStatus() {
+            const savedUser = localStorage.getItem('freetoolhub_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showUserDashboard();
+            }
+        }
+
+        function openAuthModal(mode = 'login') {
+            authMode = mode;
+            document.getElementById('auth-modal').classList.remove('hidden');
+            switchAuthMode(mode);
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+
+        function switchAuthMode(mode) {
+            authMode = mode;
+            
+            // Update tabs
+            document.querySelectorAll('.auth-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(mode + '-tab').classList.add('active');
+            
+            // Update forms
+            document.querySelectorAll('.auth-form').forEach(form => form.classList.add('hidden'));
+            document.getElementById(mode + '-form').classList.remove('hidden');
+            
+            // Update title
+            const title = mode === 'login' ? 'Welcome Back!' : 'Join FreeToolHub';
+            document.getElementById('auth-title').textContent = title;
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            // Simple validation (in real app, this would be server-side)
+            if (email && password) {
+                // Simulate login success
+                currentUser = {
+                    name: email.split('@')[0],
+                    email: email,
+                    avatar: 'https://via.placeholder.com/40x40/8b5cf6/ffffff?text=' + email.charAt(0).toUpperCase(),
+                    joinDate: new Date().toLocaleDateString()
+                };
+                
+                localStorage.setItem('freetoolhub_user', JSON.stringify(currentUser));
+                closeAuthModal();
+                showUserDashboard();
+                showSuccess('Welcome back! You are now logged in.');
+            } else {
+                showError('Please fill in all fields.');
+            }
+        }
+
+        function handleSignup(event) {
+            event.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            
+            // Simple validation
+            if (name && email && password) {
+                // Simulate signup success
+                currentUser = {
+                    name: name,
+                    email: email,
+                    avatar: 'https://via.placeholder.com/40x40/8b5cf6/ffffff?text=' + name.charAt(0).toUpperCase(),
+                    joinDate: new Date().toLocaleDateString()
+                };
+                
+                localStorage.setItem('freetoolhub_user', JSON.stringify(currentUser));
+                closeAuthModal();
+                showUserDashboard();
+                showSuccess('Account created successfully! Welcome to FreeToolHub!');
+            } else {
+                showError('Please fill in all fields.');
+            }
+        }
+
+        function showUserDashboard() {
+            if (currentUser) {
+                document.getElementById('get-started-btn').classList.add('hidden');
+                document.getElementById('user-dashboard-btn').classList.remove('hidden');
+                
+                // Update user info in navigation
+                document.getElementById('user-name').textContent = currentUser.name;
+                document.getElementById('user-avatar').src = currentUser.avatar;
+                
+                // Update dashboard info
+                document.getElementById('dashboard-name').value = currentUser.name;
+                document.getElementById('dashboard-email').value = currentUser.email;
+                document.getElementById('dashboard-avatar').src = currentUser.avatar;
+                document.getElementById('member-since').textContent = currentUser.joinDate;
+            }
+        }
+
+        function openUserDashboard() {
+            document.getElementById('user-dashboard').classList.remove('hidden');
+        }
+
+        function closeUserDashboard() {
+            document.getElementById('user-dashboard').classList.add('hidden');
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('freetoolhub_user');
+            document.getElementById('get-started-btn').classList.remove('hidden');
+            document.getElementById('user-dashboard-btn').classList.add('hidden');
+            closeUserDashboard();
+            showSuccess('You have been logged out successfully.');
+        }
+
+        function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const newAvatar = e.target.result;
+                    currentUser.avatar = newAvatar;
+                    localStorage.setItem('freetoolhub_user', JSON.stringify(currentUser));
+                    
+                    // Update all avatar images
+                    document.getElementById('user-avatar').src = newAvatar;
+                    document.getElementById('dashboard-avatar').src = newAvatar;
+                    
+                    showSuccess('Profile picture updated successfully!');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updateProfile() {
+            const name = document.getElementById('dashboard-name').value;
+            const email = document.getElementById('dashboard-email').value;
+            
+            if (name && email) {
+                currentUser.name = name;
+                currentUser.email = email;
+                localStorage.setItem('freetoolhub_user', JSON.stringify(currentUser));
+                
+                // Update navigation
+                document.getElementById('user-name').textContent = name;
+                
+                showSuccess('Profile updated successfully!');
+            } else {
+                showError('Please fill in all fields.');
+            }
+        }
+
+        function handlePasswordChange(event) {
+            event.preventDefault();
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            if (newPassword !== confirmPassword) {
+                showError('New passwords do not match.');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showError('Password must be at least 6 characters long.');
+                return;
+            }
+            
+            // Simulate password change
+            showSuccess('Password changed successfully!');
+            
+            // Clear form
+            document.getElementById('current-password').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('confirm-password').value = '';
+        }
+
+        function showSuccess(message) {
+            // Create a simple success notification
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function showError(message) {
+            // Create a simple error notification
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
         // Enhanced AI-powered functions
         async function enhanceImageQuality(level) {
             initializeBackgroundEditor();
@@ -7629,6 +7841,22 @@ console.log("Result:", result);`;
             border-color: #667eea;
             box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
+
+        /* Authentication Tab Styles */
+        .auth-tab {
+            background: transparent;
+            color: #6b7280;
+        }
+
+        .auth-tab.active {
+            background: white;
+            color: #8b5cf6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-tab:hover {
+            color: #8b5cf6;
+        }
     </style>
     
 
@@ -7647,9 +7875,26 @@ console.log("Result:", result);`;
                     <a href="#about" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">About</a>
                     <a href="#contact" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">Contact</a>
                 </div>
-                <button class="btn-primary text-white px-6 py-2 rounded-full font-semibold">
-                    Get Started
-                </button>
+                <!-- Get Started / User Dashboard Button -->
+                <div id="get-started-btn">
+                    <button onclick="openAuthModal()" class="btn-primary text-white px-6 py-2 rounded-full font-semibold">
+                        Get Started
+                    </button>
+                </div>
+                
+                <!-- User Dashboard Button (hidden by default) -->
+                <div id="user-dashboard-btn" class="hidden flex items-center space-x-4">
+                    <div class="flex items-center space-x-3">
+                        <img id="user-avatar" src="https://via.placeholder.com/40x40/8b5cf6/ffffff?text=U" alt="User Avatar" class="w-10 h-10 rounded-full border-2 border-purple-500">
+                        <span id="user-name" class="text-gray-700 font-medium">User</span>
+                    </div>
+                    <button onclick="openUserDashboard()" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">
+                        Dashboard
+                    </button>
+                    <button onclick="logout()" class="text-gray-500 hover:text-red-600 transition-colors text-sm">
+                        Logout
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
@@ -8134,6 +8379,166 @@ console.log("Result:", result);`;
     </footer>
 
     <!-- Modals -->
+    
+    <!-- Authentication Modal -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gradient" id="auth-title">Welcome to FreeToolHub</h3>
+                <button onclick="closeAuthModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Auth Tabs -->
+            <div class="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                <button onclick="switchAuthMode('login')" id="login-tab" class="flex-1 py-2 px-4 rounded-md font-medium transition-colors auth-tab active">Login</button>
+                <button onclick="switchAuthMode('signup')" id="signup-tab" class="flex-1 py-2 px-4 rounded-md font-medium transition-colors auth-tab">Sign Up</button>
+            </div>
+            
+            <!-- Login Form -->
+            <div id="login-form" class="auth-form">
+                <form onsubmit="handleLogin(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="login-email" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="login-password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300">
+                        Login
+                    </button>
+                </form>
+                <p class="text-center text-sm text-gray-600 mt-4">
+                    Don't have an account? 
+                    <button onclick="switchAuthMode('signup')" class="text-purple-600 hover:text-purple-700 font-medium">Sign up here</button>
+                </p>
+            </div>
+            
+            <!-- Signup Form -->
+            <div id="signup-form" class="auth-form hidden">
+                <form onsubmit="handleSignup(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                        <input type="text" id="signup-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="signup-email" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="signup-password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300">
+                        Create Account
+                    </button>
+                </form>
+                <p class="text-center text-sm text-gray-600 mt-4">
+                    Already have an account? 
+                    <button onclick="switchAuthMode('login')" class="text-purple-600 hover:text-purple-700 font-medium">Login here</button>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Dashboard Modal -->
+    <div id="user-dashboard" class="modal">
+        <div class="modal-content max-w-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gradient">👤 User Dashboard</h3>
+                <button onclick="closeUserDashboard()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Profile Section -->
+                <div class="bg-gray-50 p-6 rounded-xl">
+                    <h4 class="text-lg font-semibold mb-4 text-gray-800">Profile Information</h4>
+                    
+                    <!-- Profile Image -->
+                    <div class="text-center mb-6">
+                        <div class="relative inline-block">
+                            <img id="dashboard-avatar" src="https://via.placeholder.com/120x120/8b5cf6/ffffff?text=U" alt="Profile" class="w-24 h-24 rounded-full border-4 border-purple-500 mx-auto">
+                            <button onclick="document.getElementById('avatar-upload').click()" class="absolute bottom-0 right-0 bg-purple-600 text-white rounded-full p-2 hover:bg-purple-700 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </button>
+                            <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">Click to change profile picture</p>
+                    </div>
+                    
+                    <!-- User Info -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                            <input type="text" id="dashboard-name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="dashboard-email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        <button onclick="updateProfile()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-300">
+                            Update Profile
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Security Section -->
+                <div class="bg-gray-50 p-6 rounded-xl">
+                    <h4 class="text-lg font-semibold mb-4 text-gray-800">Security Settings</h4>
+                    
+                    <form onsubmit="handlePasswordChange(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                            <input type="password" id="current-password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                            <input type="password" id="new-password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                            <input type="password" id="confirm-password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-teal-600 text-white py-2 rounded-lg font-medium hover:from-green-700 hover:to-teal-700 transition-all duration-300">
+                            Change Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Account Stats -->
+            <div class="mt-8 bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl">
+                <h4 class="text-lg font-semibold mb-4 text-gray-800">Account Statistics</h4>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                        <div class="text-2xl font-bold text-purple-600" id="tools-used">0</div>
+                        <div class="text-sm text-gray-600">Tools Used</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-pink-600" id="sessions">1</div>
+                        <div class="text-sm text-gray-600">Sessions</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-indigo-600" id="member-since">Today</div>
+                        <div class="text-sm text-gray-600">Member Since</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Advanced Background Editor Modal -->
     <div id="background" class="modal">
         <div class="modal-content">
