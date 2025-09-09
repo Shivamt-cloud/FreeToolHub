@@ -4687,6 +4687,7 @@ console.log("Result:", result);`;
             
             const name = document.getElementById('notification-name').value;
             const email = document.getElementById('notification-email').value;
+            const message = document.getElementById('notification-message').value;
             const consent = document.getElementById('notification-consent').checked;
             
             if (!name || !email || !consent) {
@@ -4707,10 +4708,11 @@ console.log("Result:", result);`;
             submitLoading.classList.remove('hidden');
             
             // Prepare form data for EmailJS
+            const userMessage = message.trim() ? message : 'No additional message provided.';
             const formData = {
                 from_name: name,
                 from_email: email,
-                message: `New notification signup from ${name} (${email}). They want to be notified about new tools and updates.`,
+                message: `New notification signup from ${name} (${email}). They want to be notified about new tools and updates.\n\nUser's message: ${userMessage}`,
                 to_name: 'FreeToolHub Team'
             };
             
@@ -4723,6 +4725,7 @@ console.log("Result:", result);`;
                     const notificationData = {
                         name: name,
                         email: email,
+                        message: message,
                         signupDate: new Date().toISOString(),
                         consent: consent
                     };
@@ -4750,6 +4753,7 @@ console.log("Result:", result);`;
                     // Clear form
                     document.getElementById('notification-name').value = '';
                     document.getElementById('notification-email').value = '';
+                    document.getElementById('notification-message').value = '';
                     document.getElementById('notification-consent').checked = false;
                 }, function(error) {
                     console.log('FAILED...', error);
@@ -8686,6 +8690,11 @@ console.log("Result:", result);`;
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
                     <input type="email" id="notification-email" name="from_email" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Enter your email address">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Message (Optional)</label>
+                    <textarea id="notification-message" name="message" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" placeholder="Tell us what you're interested in or any questions you have..."></textarea>
                 </div>
                 
                 <div class="flex items-center">
