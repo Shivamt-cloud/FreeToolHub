@@ -4679,11 +4679,14 @@ console.log("Result:", result);`;
         }
 
         function handleNotificationSignup(event) {
+            console.log('handleNotificationSignup called');
             event.preventDefault();
             
             const submitBtn = document.getElementById('notification-submit');
             const submitText = document.getElementById('notification-submit-text');
             const submitLoading = document.getElementById('notification-submit-loading');
+            
+            console.log('Form elements found:', { submitBtn, submitText, submitLoading });
             
             const name = document.getElementById('notification-name').value;
             const email = document.getElementById('notification-email').value;
@@ -4718,6 +4721,7 @@ console.log("Result:", result);`;
             };
             
             // Send email using EmailJS
+            console.log('Sending EmailJS request with data:', formData);
             emailjs.send('service_fd58pi5', 'template_77mwt46', formData)
                 .then(function(response) {
                     console.log('SUCCESS!', response.status, response.text);
@@ -4758,6 +4762,7 @@ console.log("Result:", result);`;
                     document.getElementById('notification-consent').checked = false;
                 }, function(error) {
                     console.log('FAILED...', error);
+                    console.log('Error details:', JSON.stringify(error, null, 2));
                     showError('Failed to subscribe for notifications. Please try again or contact us directly.');
                 })
                 .finally(function() {
