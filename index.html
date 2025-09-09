@@ -4681,6 +4681,10 @@ console.log("Result:", result);`;
         function handleNotificationSignup(event) {
             event.preventDefault();
             
+            const submitBtn = document.getElementById('notification-submit');
+            const submitText = document.getElementById('notification-submit-text');
+            const submitLoading = document.getElementById('notification-submit-loading');
+            
             const name = document.getElementById('notification-name').value;
             const email = document.getElementById('notification-email').value;
             const consent = document.getElementById('notification-consent').checked;
@@ -4697,40 +4701,66 @@ console.log("Result:", result);`;
                 return;
             }
             
-            // Store notification signup data
-            const notificationData = {
-                name: name,
-                email: email,
-                signupDate: new Date().toISOString(),
-                consent: consent
+            // Show loading state
+            submitBtn.disabled = true;
+            submitText.classList.add('hidden');
+            submitLoading.classList.remove('hidden');
+            
+            // Prepare form data for EmailJS
+            const formData = {
+                from_name: name,
+                from_email: email,
+                message: `New notification signup from ${name} (${email}). They want to be notified about new tools and updates.`,
+                to_name: 'FreeToolHub Team'
             };
             
-            // Get existing notifications or create new array
-            let notifications = JSON.parse(localStorage.getItem('freetoolhub_notifications') || '[]');
-            
-            // Check if email already exists
-            const existingIndex = notifications.findIndex(n => n.email === email);
-            if (existingIndex !== -1) {
-                // Update existing entry
-                notifications[existingIndex] = notificationData;
-            } else {
-                // Add new entry
-                notifications.push(notificationData);
-            }
-            
-            // Save to localStorage
-            localStorage.setItem('freetoolhub_notifications', JSON.stringify(notifications));
-            
-            // Close modal and show success message
-            closeNotificationModal();
-            showSuccess(`Thank you ${name}! You'll be notified when our new tools are ready! 🎉`);
-            
-            // Clear form
-            document.getElementById('notification-name').value = '';
-            document.getElementById('notification-email').value = '';
-            document.getElementById('notification-consent').checked = false;
-            
-            console.log('Notification signup successful:', notificationData);
+            // Send email using EmailJS
+            emailjs.send('service_fd58pi5', 'template_77mwt46', formData)
+                .then(function(response) {
+                    console.log('SUCCESS!', response.status, response.text);
+                    
+                    // Store notification signup data in localStorage as backup
+                    const notificationData = {
+                        name: name,
+                        email: email,
+                        signupDate: new Date().toISOString(),
+                        consent: consent
+                    };
+                    
+                    // Get existing notifications or create new array
+                    let notifications = JSON.parse(localStorage.getItem('freetoolhub_notifications') || '[]');
+                    
+                    // Check if email already exists
+                    const existingIndex = notifications.findIndex(n => n.email === email);
+                    if (existingIndex !== -1) {
+                        // Update existing entry
+                        notifications[existingIndex] = notificationData;
+                    } else {
+                        // Add new entry
+                        notifications.push(notificationData);
+                    }
+                    
+                    // Save to localStorage
+                    localStorage.setItem('freetoolhub_notifications', JSON.stringify(notifications));
+                    
+                    // Close modal and show success message
+                    closeNotificationModal();
+                    showSuccess(`Thank you ${name}! You'll be notified when our new tools are ready! 🎉`);
+                    
+                    // Clear form
+                    document.getElementById('notification-name').value = '';
+                    document.getElementById('notification-email').value = '';
+                    document.getElementById('notification-consent').checked = false;
+                }, function(error) {
+                    console.log('FAILED...', error);
+                    showError('Failed to subscribe for notifications. Please try again or contact us directly.');
+                })
+                .finally(function() {
+                    // Reset button state
+                    submitBtn.disabled = false;
+                    submitText.classList.remove('hidden');
+                    submitLoading.classList.add('hidden');
+                });
         }
 
         // Enhanced AI-powered functions
@@ -8647,15 +8677,15 @@ console.log("Result:", result);`;
                 </div>
             </div>
             
-            <form onsubmit="handleNotificationSignup(event)" class="space-y-4">
+            <form onsubmit="handleNotificationSignup(event)" class="space-y-4" method="post" action="javascript:void(0);">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                    <input type="text" id="notification-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Enter your full name">
+                    <input type="text" id="notification-name" name="from_name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Enter your full name">
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                    <input type="email" id="notification-email" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Enter your email address">
+                    <input type="email" id="notification-email" name="from_email" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Enter your email address">
                 </div>
                 
                 <div class="flex items-center">
@@ -8665,8 +8695,9 @@ console.log("Result:", result);`;
                     </label>
                 </div>
                 
-                <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105">
-                    🔔 Subscribe for Updates
+                <button type="submit" id="notification-submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105">
+                    <span id="notification-submit-text">🔔 Subscribe for Updates</span>
+                    <span id="notification-submit-loading" class="hidden">Sending...</span>
                 </button>
             </form>
             
