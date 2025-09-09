@@ -4713,7 +4713,8 @@ console.log("Result:", result);`;
                 from_name: name,
                 from_email: email,
                 message: `New notification signup from ${name} (${email}). They want to be notified about new tools and updates.\n\nUser's message: ${userMessage}`,
-                to_name: 'FreeToolHub Team'
+                to_name: 'FreeToolHub Team',
+                timestamp: new Date().toLocaleString()
             };
             
             // Send email using EmailJS
@@ -14106,7 +14107,8 @@ function hello() {
                 from_name: document.getElementById('contact-name').value,
                 from_email: document.getElementById('contact-email').value,
                 message: document.getElementById('contact-message').value,
-                to_name: 'FreeToolHub Team'
+                to_name: 'FreeToolHub Team',
+                timestamp: new Date().toLocaleString()
             };
             
             // Send email using EmailJS
