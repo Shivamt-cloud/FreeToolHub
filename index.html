@@ -34,6 +34,117 @@
             scroll-behavior: smooth;
         }
         
+        /* Heartbeat Animation */
+        @keyframes heartbeat {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.3);
+                opacity: 0.8;
+            }
+        }
+        
+        /* Coffee Widget Styles */
+        .coffee-widget {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 999;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .coffee-widget-content {
+            background: linear-gradient(135deg, #d4a574 0%, #8b6f47 100%);
+            padding: 20px 15px;
+            border-radius: 15px 0 0 15px;
+            box-shadow: -4px 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            animation: coffeePulse 3s ease-in-out infinite;
+        }
+        
+        .coffee-widget:hover .coffee-widget-content {
+            transform: translateX(-10px);
+            box-shadow: -8px 8px 25px rgba(0, 0, 0, 0.4);
+            animation: none;
+        }
+        
+        .coffee-icon {
+            font-size: 32px;
+            animation: coffeeFloat 2s ease-in-out infinite;
+        }
+        
+        .coffee-text {
+            display: flex;
+            flex-direction: column;
+            color: white;
+        }
+        
+        .coffee-title {
+            font-size: 16px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .coffee-subtitle {
+            font-size: 11px;
+            opacity: 0.9;
+            white-space: nowrap;
+        }
+        
+        /* Coffee Animations */
+        @keyframes coffeePulse {
+            0%, 100% { 
+                transform: scale(1);
+            }
+            50% { 
+                transform: scale(1.05);
+            }
+        }
+        
+        @keyframes coffeeFloat {
+            0%, 100% { 
+                transform: translateY(0px);
+            }
+            50% { 
+                transform: translateY(-5px);
+            }
+        }
+        
+        /* Mobile styles - circular button */
+        @media (max-width: 768px) {
+            .coffee-widget {
+                right: 20px;
+                bottom: 20px;
+                top: auto;
+                transform: none;
+            }
+            
+            .coffee-widget-content {
+                border-radius: 50%;
+                padding: 18px;
+                width: 70px;
+                height: 70px;
+                flex-direction: column;
+                gap: 0;
+                justify-content: center;
+            }
+            
+            .coffee-icon {
+                font-size: 28px;
+            }
+            
+            .coffee-text {
+                display: none;
+            }
+        }
+        
         /* Header Animation Styles */
         @keyframes blink {
             0%, 50% { opacity: 1; }
@@ -1742,6 +1853,500 @@
     </div>
         </section>
     </main>
+
+    <!-- Professional Footer -->
+    <footer class="bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 text-white">
+        <div class="max-w-7xl mx-auto px-6 py-12">
+            <!-- Footer Main Content -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                
+                <!-- Column 1: Popular Tools -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-yellow-400">🛠️ Popular Tools</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" onclick="openModal('calculator-modal'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Smart Calculator</a></li>
+                        <li><a href="#" onclick="openModal('study-timer-modal'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Study Timer</a></li>
+                        <li><a href="#" onclick="openModal('loan-calculator-modal'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Loan Calculator</a></li>
+                        <li><a href="#" onclick="openModal('json-formatter-modal'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">JSON Formatter</a></li>
+                        <li><a href="#" onclick="openModal('hash-generator-modal'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Hash Generator</a></li>
+                        <li><a href="#tools" class="text-gray-300 hover:text-yellow-400 transition-colors font-semibold">View All Tools →</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 2: Resources -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-yellow-400">📚 Resources</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#about" class="text-gray-300 hover:text-yellow-400 transition-colors">About Us</a></li>
+                        <li><a href="#contact" class="text-gray-300 hover:text-yellow-400 transition-colors">Contact</a></li>
+                        <li><a href="#" onclick="alert('FAQ Coming Soon!'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">FAQ</a></li>
+                        <li><a href="#" onclick="alert('Blog Coming Soon!'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Blog</a></li>
+                        <li><a href="#" onclick="alert('API Coming Soon!'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Developer API</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Legal -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-yellow-400">⚖️ Legal</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" onclick="openPrivacyModal(); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" onclick="alert('Terms of Service Coming Soon!'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Terms of Service</a></li>
+                        <li><a href="#" onclick="alert('Cookie Policy Coming Soon!'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Cookie Policy</a></li>
+                        <li><a href="#" onclick="openSupportModal(); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">💛 Support Us</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 4: Connect -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-yellow-400">🔗 Connect</h3>
+                    <ul class="space-y-2">
+                        <li><a href="mailto:freetoolhubcommunity@gmail.com" class="text-gray-300 hover:text-yellow-400 transition-colors flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            Email Us
+                        </a></li>
+                        <li><a href="https://freetoolhub.in" target="_blank" class="text-gray-300 hover:text-yellow-400 transition-colors flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                            Visit Website
+                        </a></li>
+                        <li><a href="#contact" class="text-gray-300 hover:text-yellow-400 transition-colors flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                            Send Feedback
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="border-t border-gray-700 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-4 md:mb-0">
+                        <p class="text-gray-400">© 2025 <span class="text-yellow-400 font-bold">FreeToolHub</span>. All rights reserved.</p>
+                        <p class="text-gray-500 text-sm mt-1">Professional Tools, Forever Free 💛</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-gray-500 text-sm">Made with</span>
+                        <span class="text-red-500" style="animation: heartbeat 1s ease-in-out infinite;">❤️</span>
+                        <span class="text-gray-500 text-sm">for productivity</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Buy Me a Coffee Widget -->
+    <div id="coffee-widget" class="coffee-widget" onclick="openSupportModal()">
+        <div class="coffee-widget-content">
+            <div class="coffee-icon">☕</div>
+            <div class="coffee-text">
+                <span class="coffee-title">Buy Me a Coffee</span>
+                <span class="coffee-subtitle">Support Our Free Tools 💛</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacy-modal" class="modal" style="display: none;">
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold">🔒 Privacy Policy</h3>
+                        <p class="text-blue-100 mt-1">Last Updated: October 8, 2025</p>
+                    </div>
+                    <button onclick="closePrivacyModal()" class="text-white hover:text-gray-200 text-3xl font-bold">&times;</button>
+                </div>
+                
+                <!-- Modal Content -->
+                <div class="p-6 md:p-8 max-h-[calc(90vh-120px)] overflow-y-auto">
+                    
+                    <!-- Privacy Summary (Always Visible) -->
+                    <div id="privacy-summary" class="space-y-6">
+                        <!-- Introduction -->
+                        <div>
+                            <p class="text-gray-700 leading-relaxed text-lg">
+                                Welcome to FreeToolHub. We respect your privacy and are committed to protecting your personal information. This policy outlines how we handle your data when you use our free online tools.
+                            </p>
+                        </div>
+
+                        <!-- Key Points Grid -->
+                        <div class="grid md:grid-cols-2 gap-4 my-8">
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                                <h4 class="font-bold text-gray-800 mb-2 flex items-center">
+                                    <span class="mr-2">🔒</span> Local Processing
+                                </h4>
+                                <p class="text-gray-600 text-sm">
+                                    Most tools process data locally in your browser. We don't store your calculator inputs or converter data.
+                                </p>
+                            </div>
+
+                            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                                <h4 class="font-bold text-gray-800 mb-2 flex items-center">
+                                    <span class="mr-2">💰</span> Google AdSense
+                                </h4>
+                                <p class="text-gray-600 text-sm">
+                                    We use Google AdSense for ads. Google may use cookies to serve personalized advertisements based on your browsing.
+                                </p>
+                            </div>
+
+                            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                                <h4 class="font-bold text-gray-800 mb-2 flex items-center">
+                                    <span class="mr-2">🍪</span> Cookies
+                                </h4>
+                                <p class="text-gray-600 text-sm">
+                                    We use cookies for essential functionality, analytics, and advertising. You can control cookie preferences in your browser.
+                                </p>
+                            </div>
+
+                            <div class="bg-purple-50 border-l-4 border-purple-500 p-4 rounded">
+                                <h4 class="font-bold text-gray-800 mb-2 flex items-center">
+                                    <span class="mr-2">🇪🇺</span> GDPR Compliant
+                                </h4>
+                                <p class="text-gray-600 text-sm">
+                                    EU users can manage consent via our consent banner. You have rights to access, delete, and control your data.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Quick Summary -->
+                        <div class="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border border-purple-200">
+                            <h4 class="font-bold text-gray-800 mb-3">📝 In Short:</h4>
+                            <ul class="space-y-2 text-gray-700">
+                                <li class="flex items-start">
+                                    <span class="text-purple-600 mr-2 mt-1">✓</span>
+                                    <span>We collect minimal personal information</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-purple-600 mr-2 mt-1">✓</span>
+                                    <span>Most data is processed locally in your browser</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-purple-600 mr-2 mt-1">✓</span>
+                                    <span>Google AdSense displays ads using cookies</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-purple-600 mr-2 mt-1">✓</span>
+                                    <span>You can opt-out of personalized ads anytime</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-purple-600 mr-2 mt-1">✓</span>
+                                    <span>We comply with GDPR and privacy regulations</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Toggle Button -->
+                        <div class="text-center pt-4">
+                            <button onclick="togglePrivacyDetails()" id="privacy-toggle-btn" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                                📖 Read Full Privacy Policy
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Full Privacy Details (Hidden by Default) -->
+                    <div id="privacy-details" class="space-y-8 mt-8" style="display: none;">
+
+                    <!-- Information We Collect -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">📊 Information We Collect</h3>
+                        <div class="space-y-4">
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                                <h4 class="font-semibold text-gray-800 mb-2">1. Information You Provide</h4>
+                                <p class="text-gray-600">
+                                    When you use our tools or contact forms, you may provide information such as names, email addresses, or data you input into our calculators and tools. This information is processed locally in your browser and is not stored on our servers unless explicitly stated.
+                                </p>
+                            </div>
+                            
+                            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                                <h4 class="font-semibold text-gray-800 mb-2">2. Automatically Collected Information</h4>
+                                <p class="text-gray-600 mb-2">
+                                    We automatically collect certain information when you visit our website, including:
+                                </p>
+                                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-4">
+                                    <li>IP address and browser type</li>
+                                    <li>Device information and operating system</li>
+                                    <li>Pages visited and time spent on pages</li>
+                                    <li>Referring website addresses</li>
+                                    <li>Clickstream data</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Google AdSense -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">💰 Google AdSense and Advertising</h3>
+                        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded space-y-3">
+                            <p class="text-gray-600">
+                                We use Google AdSense to display advertisements on our website. Google AdSense uses cookies and web beacons to serve ads based on your prior visits to our website or other websites on the Internet.
+                            </p>
+                            <p class="text-gray-600">
+                                <strong>Third-Party Advertising:</strong> Google and other third-party vendors use cookies to serve ads based on your previous visits to this website and other websites. Google's use of advertising cookies enables it and its partners to serve ads to you based on your visit to our site and/or other sites on the Internet.
+                            </p>
+                            <p class="text-gray-600">
+                                <strong>Opt-Out Options:</strong> You may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" class="text-purple-600 hover:underline">Google Ads Settings</a> or by visiting <a href="http://www.aboutads.info/choices/" target="_blank" class="text-purple-600 hover:underline">aboutads.info</a>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Cookies -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">🍪 Cookies and Tracking Technologies</h3>
+                        <div class="space-y-3">
+                            <p class="text-gray-600">
+                                We use cookies and similar tracking technologies to track activity on our website and store certain information. Cookies are files with a small amount of data that are sent to your browser from a website and stored on your device.
+                            </p>
+                            <div class="bg-purple-50 p-4 rounded">
+                                <h4 class="font-semibold text-gray-800 mb-2">Types of Cookies We Use:</h4>
+                                <ul class="list-disc list-inside text-gray-600 space-y-1 ml-4">
+                                    <li><strong>Essential Cookies:</strong> Required for website functionality</li>
+                                    <li><strong>Analytics Cookies:</strong> Help us understand how visitors use our site</li>
+                                    <li><strong>Advertising Cookies:</strong> Used by Google AdSense to deliver relevant ads</li>
+                                    <li><strong>Preference Cookies:</strong> Remember your settings and preferences</li>
+                                </ul>
+                            </div>
+                            <p class="text-gray-600">
+                                You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our website.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- How We Use Your Information -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">⚙️ How We Use Your Information</h3>
+                        <div class="bg-indigo-50 p-4 rounded">
+                            <ul class="space-y-2 text-gray-600">
+                                <li class="flex items-start">
+                                    <span class="text-indigo-600 mr-2">✓</span>
+                                    <span>To provide and maintain our tools and services</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-indigo-600 mr-2">✓</span>
+                                    <span>To improve and personalize user experience</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-indigo-600 mr-2">✓</span>
+                                    <span>To analyze website usage and trends</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-indigo-600 mr-2">✓</span>
+                                    <span>To display relevant advertisements through Google AdSense</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-indigo-600 mr-2">✓</span>
+                                    <span>To respond to user inquiries and support requests</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-indigo-600 mr-2">✓</span>
+                                    <span>To detect, prevent, and address technical issues</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Data Storage and Security -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">🔐 Data Storage and Security</h3>
+                        <p class="text-gray-600 mb-3">
+                            Most of our tools process data locally in your browser. We do not store the data you input into calculators, converters, or other tools on our servers. However, we cannot guarantee absolute security of data transmitted over the Internet.
+                        </p>
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+                            <p class="text-gray-600">
+                                <strong>Important:</strong> While we strive to use commercially acceptable means to protect your information, no method of transmission over the Internet or electronic storage is 100% secure. We cannot guarantee absolute security.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- GDPR Compliance -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">🇪🇺 GDPR Compliance (European Users)</h3>
+                        <p class="text-gray-600 mb-3">
+                            If you are located in the European Economic Area (EEA), United Kingdom, or Switzerland, you have certain data protection rights under GDPR:
+                        </p>
+                        <div class="bg-blue-50 p-4 rounded space-y-2">
+                            <p class="text-gray-600"><strong>• Right to Access:</strong> Request copies of your personal data</p>
+                            <p class="text-gray-600"><strong>• Right to Rectification:</strong> Request correction of inaccurate data</p>
+                            <p class="text-gray-600"><strong>• Right to Erasure:</strong> Request deletion of your data</p>
+                            <p class="text-gray-600"><strong>• Right to Restrict Processing:</strong> Request limitation of data processing</p>
+                            <p class="text-gray-600"><strong>• Right to Data Portability:</strong> Request transfer of your data</p>
+                            <p class="text-gray-600"><strong>• Right to Object:</strong> Object to data processing</p>
+                        </div>
+                        <p class="text-gray-600 mt-3">
+                            We use Google's Consent Management Platform (CMP) to collect and manage consent from users in these regions for advertising cookies and personalized ads.
+                        </p>
+                    </div>
+
+                    <!-- Third-Party Services -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">🔗 Third-Party Services</h3>
+                        <p class="text-gray-600 mb-3">
+                            Our website may contain links to third-party websites and uses the following third-party services:
+                        </p>
+                        <div class="space-y-2">
+                            <div class="bg-gray-50 p-3 rounded">
+                                <p class="text-gray-600"><strong>Google AdSense:</strong> For displaying advertisements. <a href="https://policies.google.com/privacy" target="_blank" class="text-purple-600 hover:underline">Privacy Policy</a></p>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded">
+                                <p class="text-gray-600"><strong>Netlify:</strong> For website hosting. <a href="https://www.netlify.com/privacy/" target="_blank" class="text-purple-600 hover:underline">Privacy Policy</a></p>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mt-3">
+                            We are not responsible for the privacy practices of these third-party services. We encourage you to review their privacy policies.
+                        </p>
+                    </div>
+
+                    <!-- Children's Privacy -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">👶 Children's Privacy</h3>
+                        <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded">
+                            <p class="text-gray-600">
+                                Our website is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us so we can delete such information.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Changes to Privacy Policy -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">📝 Changes to This Privacy Policy</h3>
+                        <p class="text-gray-600">
+                            We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date at the top. You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.
+                        </p>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">📧 Contact Us</h3>
+                        <div class="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg">
+                            <p class="text-gray-600 mb-3">
+                                If you have any questions about this Privacy Policy or our privacy practices, please contact us:
+                            </p>
+                            <div class="space-y-2 text-gray-700">
+                                <p><strong>Website:</strong> <a href="https://freetoolhub.in" class="text-purple-600 hover:underline">freetoolhub.in</a></p>
+                                <p><strong>Contact Form:</strong> <a href="#contact" class="text-purple-600 hover:underline">Use our contact form</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Consent Notice -->
+                    <div class="border-t-2 border-gray-200 pt-6">
+                        <div class="bg-green-50 border border-green-200 p-6 rounded-lg">
+                            <h4 class="font-bold text-gray-800 mb-3 flex items-center">
+                                <span class="text-2xl mr-2">✅</span>
+                                Your Consent
+                            </h4>
+                            <p class="text-gray-600">
+                                By using our website, you consent to our Privacy Policy and agree to its terms. For users in the EEA, UK, and Switzerland, you will be presented with a consent banner to manage your cookie preferences and advertising consent.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Collapse Button -->
+                    <div class="text-center pt-6 border-t-2 border-gray-200">
+                        <button onclick="togglePrivacyDetails()" class="text-purple-600 hover:text-purple-700 font-semibold text-lg">
+                            ↑ Show Less
+                        </button>
+                    </div>
+                    
+                    </div>
+                    <!-- End of Full Privacy Details -->
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Us Modal -->
+    <div id="support-modal" class="modal" style="display: none;">
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 text-white p-6 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold flex items-center gap-2">
+                            ☕ Support FreeToolHub
+                        </h3>
+                        <p class="text-yellow-100 mt-1">Help us keep tools free forever!</p>
+                    </div>
+                    <button onclick="closeSupportModal()" class="text-white hover:text-gray-200 text-3xl font-bold">&times;</button>
+                </div>
+                
+                <!-- Modal Content -->
+                <div class="p-8 max-h-[calc(90vh-120px)] overflow-y-auto">
+                    
+                    <!-- Main Message -->
+                    <div class="text-center mb-8">
+                        <div class="text-6xl mb-4">💛</div>
+                        <h4 class="text-2xl font-bold text-gray-800 mb-3">Love Our Free Tools?</h4>
+                        <p class="text-gray-600 text-lg">
+                            Your support helps us maintain and improve FreeToolHub for everyone!
+                        </p>
+                    </div>
+
+                    <!-- Why Support Section -->
+                    <div class="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl mb-6">
+                        <h5 class="font-bold text-gray-800 mb-4 text-lg">🚀 Why Your Support Matters:</h5>
+                        <div class="grid md:grid-cols-2 gap-3">
+                            <div class="flex items-start gap-2">
+                                <span class="text-green-500 text-xl">✓</span>
+                                <span class="text-gray-700">Keep all tools completely free</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="text-green-500 text-xl">✓</span>
+                                <span class="text-gray-700">Add new powerful features</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="text-green-500 text-xl">✓</span>
+                                <span class="text-gray-700">Improve performance</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="text-green-500 text-xl">✓</span>
+                                <span class="text-gray-700">Cover hosting costs</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Support Options -->
+                    <div class="space-y-4 mb-6">
+                        <h5 class="font-bold text-gray-800 text-lg mb-4">☕ Support Options:</h5>
+                        
+                        <!-- Buy Me a Coffee - Main CTA -->
+                        <a href="https://buymeacoffee.com/freetoolhubcommunity" target="_blank" class="block bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="text-4xl">☕</div>
+                                    <div>
+                                        <div class="font-bold text-xl">Buy Me a Coffee</div>
+                                        <div class="text-sm opacity-90">One-time or monthly support</div>
+                                    </div>
+                                </div>
+                                <div class="text-2xl">→</div>
+                            </div>
+                        </a>
+
+                        <!-- Alternative Options -->
+                        <div class="flex justify-center">
+                            <div class="bg-gray-50 p-4 rounded-lg border-2 border-gray-200 hover:border-purple-400 transition-all w-full max-w-md">
+                                <div class="text-2xl mb-2">💬</div>
+                                <div class="font-semibold text-gray-800">Spread the Word</div>
+                                <div class="text-sm text-gray-600 mt-1">Share with friends!</div>
+                                <button onclick="shareWebsite()" class="text-purple-600 text-sm hover:underline mt-2 font-semibold">→ Share Website</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thank You Message -->
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                        <p class="text-gray-700 text-center">
+                            <strong>🙏 Thank you for considering!</strong><br>
+                            <span class="text-sm">Every contribution, big or small, makes a huge difference!</span>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Calculator Modal -->
     <div id="calculator-modal" class="modal">
@@ -6105,6 +6710,87 @@
         (function() {
             emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your EmailJS public key
         })();
+
+        // Privacy Policy Toggle Function
+        function togglePrivacyDetails() {
+            const detailsSection = document.getElementById('privacy-details');
+            const toggleBtn = document.getElementById('privacy-toggle-btn');
+            
+            if (detailsSection.style.display === 'none') {
+                // Show full privacy policy
+                detailsSection.style.display = 'block';
+                toggleBtn.innerHTML = '↑ Show Less';
+                toggleBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                // Hide full privacy policy
+                detailsSection.style.display = 'none';
+                toggleBtn.innerHTML = '📖 Read Full Privacy Policy';
+            }
+        }
+
+        // Privacy Modal Functions
+        function openPrivacyModal() {
+            document.getElementById('privacy-modal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePrivacyModal() {
+            document.getElementById('privacy-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            // Reset to collapsed state
+            const detailsSection = document.getElementById('privacy-details');
+            const toggleBtn = document.getElementById('privacy-toggle-btn');
+            if (detailsSection && toggleBtn) {
+                detailsSection.style.display = 'none';
+                toggleBtn.innerHTML = '📖 Read Full Privacy Policy';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const privacyModal = document.getElementById('privacy-modal');
+            if (event.target == privacyModal) {
+                closePrivacyModal();
+            }
+            const supportModal = document.getElementById('support-modal');
+            if (event.target == supportModal) {
+                closeSupportModal();
+            }
+        }
+
+        // Support Modal Functions
+        function openSupportModal() {
+            document.getElementById('support-modal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSupportModal() {
+            document.getElementById('support-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Share Website Function
+        function shareWebsite() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'FreeToolHub - Free Online Tools',
+                    text: 'Check out FreeToolHub! Amazing free tools for everyone!',
+                    url: 'https://freetoolhub.in'
+                }).then(() => {
+                    console.log('Thanks for sharing!');
+                }).catch((error) => {
+                    console.log('Share cancelled');
+                });
+            } else {
+                // Fallback: copy link
+                const url = 'https://freetoolhub.in';
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Link copied to clipboard! Share it with your friends! 🎉');
+                }).catch(() => {
+                    alert('Share this link: https://freetoolhub.in');
+                });
+            }
+        }
 
         // Initialize Calculator on page load
         document.addEventListener('DOMContentLoaded', function() {
