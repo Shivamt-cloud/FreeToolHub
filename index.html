@@ -3,13 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FreeToolHub - Free Online Tools</title>
+    <meta name="description" content="FreeToolHub - Access 50+ professional free online tools including calculators, PDF tools, image utilities, converters, and more. 100% free, secure, and client-side processing. No downloads or sign-ups required!">
+    <meta name="keywords" content="free tools, online calculator, PDF tools, image tools, converters, utilities, free online tools, 50+ tools">
+    <title>FreeToolHub - 50+ Free Online Tools | Calculators, PDF & More</title>
     
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7327960019798694"
      crossorigin="anonymous"></script>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- PDF.js for PDF decryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <!-- PDF-lib for PDF manipulation -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    
+    <!-- JSZip for creating ZIP files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <!-- Pyodide for Python-based PDF encryption -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    
     <style>
         .animation-delay-2000 {
             animation-delay: 2s;
@@ -195,6 +210,62 @@
         .calc-btn-clear {
             @apply bg-red-500 text-white font-semibold py-3 px-4 rounded-lg hover:bg-red-600 transition-all duration-200 text-lg;
         }
+
+        /* Tool Search Styles */
+        .tool-hidden {
+            display: none !important;
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        .tool-card {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .tool-card.tool-visible {
+            animation: fadeInScale 0.3s ease-in-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        #tool-search-input:focus {
+            transform: scale(1.01);
+        }
+
+        .search-highlight {
+            background-color: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        /* Unified Search Results */
+        .tool-section-hidden {
+            display: none !important;
+        }
+
+        #unified-search-grid .tool-card {
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -206,18 +277,121 @@
                 <div class="text-2xl font-bold">
                     <span class="header-animation">FreeToolHub</span>
                 </div>
-                <div class="hidden md:flex space-x-8">
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex space-x-6">
                     <a href="#home" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">Home</a>
-                    <a href="#tools" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">Tools</a>
+                    <a href="javascript:void(0)" onclick="openModal('calculator-modal')" class="text-gray-700 hover:text-purple-600 transition-colors font-medium cursor-pointer">Calculators</a>
+                    <a href="javascript:void(0)" onclick="openModal('loan-calculator-modal')" class="text-gray-700 hover:text-purple-600 transition-colors font-medium cursor-pointer">Loan Calculator</a>
+                    <a href="#pdf-tools" class="text-gray-700 hover:text-purple-600 transition-colors font-medium relative">
+                        PDF Tools
+                        <span class="absolute -top-2 -right-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">NEW</span>
+                    </a>
+                    <a href="#image-tools" class="text-gray-700 hover:text-purple-600 transition-colors font-medium relative">
+                        Image Tools
+                        <span class="absolute -top-2 -right-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">NEW</span>
+                    </a>
+                    <a href="#utilities" class="text-gray-700 hover:text-purple-600 transition-colors font-medium relative">
+                        Utilities
+                        <span class="absolute -top-2 -right-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">NEW</span>
+                    </a>
                     <a href="#about" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">About</a>
                     <a href="#contact" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">Contact</a>
                 </div>
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="lg:hidden text-gray-700 hover:text-purple-600 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+            <!-- Mobile Navigation Menu -->
+            <div id="mobile-menu" class="hidden lg:hidden mt-4 pb-4 space-y-2">
+                <a href="#home" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">Home</a>
+                <a href="javascript:void(0)" onclick="openModal('calculator-modal'); toggleMobileMenu();" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2 cursor-pointer">Calculators</a>
+                <a href="javascript:void(0)" onclick="openModal('loan-calculator-modal'); toggleMobileMenu();" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2 cursor-pointer">Loan Calculator</a>
+                <a href="#pdf-tools" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">
+                    PDF Tools <span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold ml-2">NEW</span>
+                </a>
+                <a href="#image-tools" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">
+                    Image Tools <span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold ml-2">NEW</span>
+                </a>
+                <a href="#utilities" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">
+                    Utilities <span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold ml-2">NEW</span>
+                </a>
+                <a href="#about" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">About</a>
+                <a href="#contact" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">Contact</a>
             </div>
         </div>
     </nav>
 
+    <!-- Congratulations Popup for New Tools -->
+    <div id="congrats-popup" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 scale-95 opacity-0" id="congrats-popup-content">
+            <!-- Close Button -->
+            <button onclick="closeCongratsPopup()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+
+            <!-- Popup Content -->
+            <div class="p-8 text-center">
+                <!-- Celebration Icon -->
+                <div class="mb-4">
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full animate-bounce">
+                        <span class="text-4xl">🎉</span>
+                    </div>
+                </div>
+
+                <!-- Title -->
+                <h3 class="text-3xl font-bold text-gray-800 mb-2">
+                    Exciting News!
+                </h3>
+                <p class="text-lg text-gray-600 mb-6">
+                    We've added awesome new tools!
+                </p>
+
+                <!-- Featured Tool (Dynamic) -->
+                <div id="featured-tool-content" class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 mb-6 border-2 border-purple-200">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+
+                <!-- CTA Button -->
+                <button onclick="closeCongratsPopup()" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 px-8 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    Check it out! →
+                </button>
+
+                <!-- Auto-close indicator -->
+                <p class="text-xs text-gray-400 mt-4">
+                    Auto-closing in <span id="popup-countdown">7</span>s...
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <main class="pt-20">
+    
+    <!-- 50+ Tools Milestone Banner -->
+    <div id="milestone-banner" class="fixed top-[73px] left-0 right-0 z-[60] bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 text-white py-3 px-4 shadow-lg transform transition-transform duration-500">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3 flex-1">
+                <span class="text-2xl animate-bounce">🎉</span>
+                <p class="text-sm md:text-base font-semibold">
+                    <span class="hidden sm:inline">MILESTONE ACHIEVED! </span>
+                    <span class="font-bold">50+ Professional Tools Now Available!</span>
+                    <span class="hidden md:inline"> 🎊 All free, secure, and client-side!</span>
+                </p>
+                <span class="text-2xl animate-bounce animation-delay-2000">✨</span>
+            </div>
+            <button onclick="dismissMilestoneBanner()" class="ml-4 text-white hover:text-yellow-200 transition-colors flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    
     <!-- Hero Section -->
         <section id="home" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 relative overflow-hidden">
             <!-- Background Animation Elements -->
@@ -229,22 +403,42 @@
             
             <div class="text-center text-white px-6 relative z-10">
                 <div class="mb-6">
-                    <span class="inline-block bg-yellow-400 text-purple-900 px-4 py-2 rounded-full text-sm font-semibold mb-4 animate-bounce">
-                        🚀 Free Forever • No Sign-ups Required
-                </span>
-            </div>
+                    <span class="inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-3 rounded-full text-base md:text-lg font-bold mb-4 shadow-lg animate-pulse">
+                        🎊 50+ PROFESSIONAL TOOLS 🎊
+                    </span>
+                </div>
                 
                 <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
                     Welcome to <span class="header-animation text-6xl md:text-8xl">FreeToolHub</span>
                 </h1>
                 
                 <h2 class="text-2xl md:text-3xl font-semibold mb-8 text-yellow-100">
-                    Your Free Tools in One Place
+                    Your Complete Free Tool Hub – 50+ Tools & Growing!
                 </h2>
                 
                 <p class="text-lg md:text-xl mb-8 max-w-4xl mx-auto leading-relaxed text-blue-100">
                     Transform your productivity with our powerful suite of free tools. From advanced calculations to essential utilities, we've crafted intuitive solutions that work seamlessly across all devices. <span class="text-yellow-300 font-semibold">No downloads, no sign-ups – just pure functionality at your fingertips.</span>
                 </p>
+
+                <!-- Stats Counter -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-8">
+                    <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-4 transform hover:scale-105 transition-all duration-300">
+                        <div class="text-3xl md:text-4xl font-bold text-yellow-300 mb-1">50+</div>
+                        <div class="text-sm md:text-base text-blue-100">Free Tools</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-4 transform hover:scale-105 transition-all duration-300">
+                        <div class="text-3xl md:text-4xl font-bold text-yellow-300 mb-1">100%</div>
+                        <div class="text-sm md:text-base text-blue-100">Free Forever</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-4 transform hover:scale-105 transition-all duration-300">
+                        <div class="text-3xl md:text-4xl font-bold text-yellow-300 mb-1">🔒</div>
+                        <div class="text-sm md:text-base text-blue-100">Client-Side</div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-4 transform hover:scale-105 transition-all duration-300">
+                        <div class="text-3xl md:text-4xl font-bold text-yellow-300 mb-1">⚡</div>
+                        <div class="text-sm md:text-base text-blue-100">Lightning Fast</div>
+                    </div>
+                </div>
                 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
                     <a href="#tools" class="bg-yellow-400 text-purple-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
@@ -261,10 +455,66 @@
         <section id="tools" class="py-20 bg-gray-50">
             <div class="max-w-7xl mx-auto px-6">
             <div class="text-center mb-16">
-                    <h2 class="text-4xl md:text-5xl font-bold mb-4 text-gray-800">🛠️ Our <span class="text-purple-600">Smart Tools</span></h2>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4 text-gray-800">🛠️ Our <span class="text-purple-600">Smart Tools</span> <span class="text-orange-600 text-3xl md:text-4xl">(50+)</span></h2>
                     <p class="text-xl text-gray-600 max-w-3xl mx-auto">
                         Professional-grade tools organized by category for students, professionals, and developers
                     </p>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="max-w-2xl mx-auto mb-8">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <input 
+                            type="text" 
+                            id="tool-search-input" 
+                            placeholder="🔍 Search from 50+ professional tools... (e.g., calculator, pdf, converter)" 
+                            class="w-full pl-12 pr-12 py-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all duration-300 shadow-lg hover:shadow-xl"
+                            autocomplete="off"
+                        >
+                        <button 
+                            id="clear-search-btn" 
+                            onclick="clearToolSearch()" 
+                            class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors hidden"
+                        >
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Search Helper Text -->
+                    <div id="search-helper-text" class="text-center mt-3 text-sm text-gray-500">
+                        💡 Try: "calculator", "pdf", "converter", "image", "age", "json", etc.
+                    </div>
+                    
+                    <!-- Search Results Counter -->
+                    <div id="search-results-counter" class="text-center mt-3 text-sm font-semibold text-purple-600 hidden">
+                        <!-- Will show: "Showing X of Y tools" -->
+                    </div>
+                    
+                    <!-- No Results Message -->
+                    <div id="no-results-message" class="hidden mt-6 text-center">
+                        <div class="inline-block bg-yellow-50 border-2 border-yellow-200 rounded-xl p-6 max-w-md">
+                            <div class="text-4xl mb-3">😕</div>
+                            <p class="text-lg font-semibold text-gray-800 mb-2">No tools found</p>
+                            <p class="text-gray-600 mb-4">Try searching for something else</p>
+                            <div class="text-left text-sm text-gray-600">
+                                <p class="font-semibold mb-2">💡 Popular searches:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="bg-white px-3 py-1 rounded-full border border-gray-300">calculator</span>
+                                    <span class="bg-white px-3 py-1 rounded-full border border-gray-300">pdf</span>
+                                    <span class="bg-white px-3 py-1 rounded-full border border-gray-300">converter</span>
+                                    <span class="bg-white px-3 py-1 rounded-full border border-gray-300">image</span>
+                                    <span class="bg-white px-3 py-1 rounded-full border border-gray-300">age</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Filter Buttons -->
@@ -283,8 +533,19 @@
                     </button>
                 </div>
 
+                <!-- Unified Search Results Section (Hidden by default) -->
+                <div id="unified-search-results" class="hidden mb-16">
+                    <div class="text-center mb-8">
+                        <h3 class="text-3xl font-bold text-purple-600 mb-2">🔍 Search Results</h3>
+                        <p class="text-gray-600" id="unified-search-subtitle">Found matching tools</p>
+                    </div>
+                    <div id="unified-search-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                        <!-- Matching tools will appear here dynamically -->
+                    </div>
+                </div>
+
                 <!-- Student Tools Category -->
-                <div class="mb-16">
+                <div class="mb-16 tool-section">
                     <h3 class="text-3xl font-bold text-center mb-8 text-blue-600">🎓 For Students</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto" id="student-tools">
                         
@@ -644,7 +905,7 @@
                 </div>
 
                 <!-- Professional Tools Category -->
-                <div class="mb-16">
+                <div class="mb-16 tool-section">
                     <h3 class="text-3xl font-bold text-center mb-8 text-green-600">💼 For Professionals</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto" id="professional-tools">
                         
@@ -976,7 +1237,7 @@
                 </div>
 
                 <!-- Developer Tools Category -->
-                <div class="mb-16">
+                <div class="mb-16 tool-section">
                     <h3 class="text-3xl font-bold text-center mb-8 text-purple-600">👨‍💻 For Developers</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto" id="developer-tools">
                         
@@ -1329,6 +1590,421 @@
                         </div>
 
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- PDF TOOLS SECTION (NEW) -->
+        <!-- ============================================ -->
+        <section id="pdf-tools" class="tool-section py-20 bg-gradient-to-br from-red-50 to-orange-50">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center mb-16">
+                    <div class="inline-block bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+                        🆕 NEW TOOLS
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4 text-gray-800">📄 PDF <span class="text-red-600">Tools</span></h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Powerful PDF manipulation tools - all processing happens locally in your browser for maximum privacy
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    
+                    <!-- PDF Password Remover -->
+                    <div class="tool-card pdf-tool bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-red-500 to-pink-600 p-6 text-white">
+                            <div class="text-4xl mb-4">🔓</div>
+                            <h4 class="text-2xl font-bold mb-2">PDF Password Remover</h4>
+                            <p class="text-red-100">Remove password protection from your PDFs instantly</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3 mb-6">
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Client-side processing</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Complete privacy</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Fast & secure</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>No file size limits</span>
+                                </div>
+                            </div>
+                            <button onclick="openModal('pdf-password-remover-modal')" class="w-full bg-gradient-to-r from-red-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                Remove Password
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PDF Merger -->
+                    <div class="tool-card pdf-tool bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
+                            <div class="text-4xl mb-4">📄</div>
+                            <h4 class="text-2xl font-bold mb-2">PDF Merger</h4>
+                            <p class="text-blue-100">Combine multiple PDFs into one document</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3 mb-6">
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Merge unlimited PDFs</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Drag & drop interface</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Reorder pages</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Preview before merge</span>
+                                </div>
+                            </div>
+                            <button onclick="openModal('pdf-merger-modal')" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                Merge PDFs
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PDF Splitter -->
+                    <div class="tool-card pdf-tool bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-green-500 to-teal-600 p-6 text-white">
+                            <div class="text-4xl mb-4">✂️</div>
+                            <h4 class="text-2xl font-bold mb-2">PDF Splitter</h4>
+                            <p class="text-green-100">Split PDFs into separate pages or ranges</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3 mb-6">
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Extract specific pages</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Split by page ranges</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Preview pages</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Bulk download</span>
+                                </div>
+                            </div>
+                            <button onclick="openModal('pdf-splitter-modal')" class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                Split PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PDF Encryptor -->
+                    <div class="tool-card pdf-tool bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-purple-500 to-pink-600 p-6 text-white">
+                            <div class="text-4xl mb-4">🔒</div>
+                            <h4 class="text-2xl font-bold mb-2">PDF Encryptor</h4>
+                            <p class="text-purple-100">Add password protection to your PDFs</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3 mb-6">
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Strong encryption</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Custom passwords</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Secure processing</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>No data upload</span>
+                                </div>
+                            </div>
+                            <button onclick="openModal('pdf-encryptor-modal')" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                Encrypt PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PDF to Images -->
+                    <div class="tool-card pdf-tool bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-orange-500 to-yellow-600 p-6 text-white">
+                            <div class="text-4xl mb-4">🖼️</div>
+                            <h4 class="text-2xl font-bold mb-2">PDF to Images</h4>
+                            <p class="text-orange-100">Convert PDF pages to JPG or PNG images</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3 mb-6">
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>High-quality output</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>JPG or PNG format</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Adjustable quality</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Download as ZIP</span>
+                                </div>
+                            </div>
+                            <button onclick="openModal('pdf-to-images-modal')" class="w-full bg-gradient-to-r from-orange-500 to-yellow-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                Convert to Images
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- IMAGE TOOLS SECTION (NEW) -->
+        <!-- ============================================ -->
+        <section id="image-tools" class="tool-section py-20 bg-gradient-to-br from-blue-50 to-purple-50">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center mb-16">
+                    <div class="inline-block bg-gradient-to-r from-blue-500 to-purple-500 text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+                        🆕 NEW TOOLS
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4 text-gray-800">🖼️ Image <span class="text-blue-600">Tools</span></h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Professional image manipulation tools - fast, secure, and completely client-side
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    
+                    <!-- Image to PDF -->
+                    <div class="tool-card image-tool bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white">
+                            <div class="text-4xl mb-4">📸</div>
+                            <h4 class="text-2xl font-bold mb-2">Image to PDF</h4>
+                            <p class="text-indigo-100">Convert images to PDF documents</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3 mb-6">
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Multiple images support</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Custom page size</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Drag & drop</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Maintain quality</span>
+                                </div>
+                            </div>
+                            <button onclick="openModal('image-to-pdf-modal')" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                Convert to PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Image Compressor -->
+                    <div class="tool-card image-tool bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
+                            <div class="text-4xl mb-4">📏</div>
+                            <h4 class="text-2xl font-bold mb-2">Image Compressor</h4>
+                            <p class="text-green-100">Reduce image file size while maintaining quality</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3 mb-6">
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Smart compression</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Adjustable quality</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Batch processing</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Preview comparison</span>
+                                </div>
+                            </div>
+                            <button onclick="openModal('image-compressor-modal')" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                Compress Images
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Image Format Converter -->
+                    <div class="tool-card image-tool bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-pink-500 to-rose-600 p-6 text-white">
+                            <div class="text-4xl mb-4">🎨</div>
+                            <h4 class="text-2xl font-bold mb-2">Image Format Converter</h4>
+                            <p class="text-pink-100">Convert between JPG, PNG, WebP formats</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3 mb-6">
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Multiple formats</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Batch conversion</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Quality control</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Fast processing</span>
+                                </div>
+                            </div>
+                            <button onclick="openModal('image-converter-modal')" class="w-full bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold py-3 px-6 rounded-xl hover:from-pink-600 hover:to-rose-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                Convert Format
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Image Resizer -->
+                    <div class="tool-card image-tool bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-cyan-500 to-blue-600 p-6 text-white">
+                            <div class="text-4xl mb-4">📐</div>
+                            <h4 class="text-2xl font-bold mb-2">Image Resizer</h4>
+                            <p class="text-cyan-100">Resize images to any dimensions</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3 mb-6">
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Custom dimensions</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Maintain aspect ratio</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Percentage or pixels</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Batch resize</span>
+                                </div>
+                            </div>
+                            <button onclick="openModal('image-resizer-modal')" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                Resize Images
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- UTILITIES SECTION (NEW) -->
+        <!-- ============================================ -->
+        <section id="utilities" class="tool-section py-20 bg-gradient-to-br from-green-50 to-teal-50">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center mb-16">
+                    <div class="inline-block bg-gradient-to-r from-green-500 to-teal-500 text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+                        🆕 NEW TOOLS
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4 text-gray-800">🛠️ Utility <span class="text-green-600">Tools</span></h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Powerful utility tools for everyday tasks - simple, fast, and efficient
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    
+                    <!-- Digital Signature Generator -->
+                    <div class="tool-card utility-tool bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 text-white">
+                            <div class="text-4xl mb-4">✍️</div>
+                            <h4 class="text-2xl font-bold mb-2">Digital Signature Generator</h4>
+                            <p class="text-purple-100">Create professional digital signatures</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3 mb-6">
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Draw or type signature</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Multiple styles</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Transparent PNG</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Instant download</span>
+                                </div>
+                            </div>
+                            <button onclick="openModal('signature-generator-modal')" class="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                Create Signature
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- CSV to JSON Converter -->
+                    <div class="tool-card utility-tool bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-orange-500 to-amber-600 p-6 text-white">
+                            <div class="text-4xl mb-4">📊</div>
+                            <h4 class="text-2xl font-bold mb-2">CSV to JSON Converter</h4>
+                            <p class="text-orange-100">Convert between CSV and JSON formats</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3 mb-6">
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Bi-directional conversion</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Data preview</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Format validation</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Copy or download</span>
+                                </div>
+                            </div>
+                            <button onclick="openModal('csv-json-converter-modal')" class="w-full bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-amber-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                Convert Data
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </section>
@@ -1940,6 +2616,829 @@
             <div class="coffee-text">
                 <span class="coffee-title">Buy Me a Coffee</span>
                 <span class="coffee-subtitle">Support Our Free Tools 💛</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PDF PASSWORD REMOVER MODAL -->
+    <!-- ============================================ -->
+    <div id="pdf-password-remover-modal" class="modal" style="display: none;">
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-red-500 to-pink-600 text-white p-6 flex justify-between items-center sticky top-0 z-10">
+                    <div class="flex items-center gap-3">
+                        <div class="text-4xl">🔓</div>
+                        <div>
+                            <h3 class="text-2xl font-bold">PDF Password Remover</h3>
+                            <p class="text-red-100 text-sm">Remove password protection from your PDFs</p>
+                        </div>
+                    </div>
+                    <button onclick="closeModal('pdf-password-remover-modal')" class="text-white hover:text-red-200 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Content -->
+                <div class="p-6">
+                    
+                    <!-- Privacy Notice -->
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">🔒</span>
+                            <div>
+                                <p class="font-semibold text-green-800 mb-1">100% Private & Secure</p>
+                                <p class="text-sm text-green-700">All processing happens locally in your browser. Your PDF never leaves your device!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compatibility Notice -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">ℹ️</span>
+                            <div>
+                                <p class="font-semibold text-blue-800 mb-1">How It Works</p>
+                                <p class="text-sm text-blue-700">This tool supports most password-protected PDFs including RC4 and AES encryption. Pages are rendered as high-quality images in the new unprotected PDF to ensure compatibility.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Upload PDF -->
+                    <div class="mb-6">
+                        <label class="block text-lg font-semibold text-gray-700 mb-3">
+                            <span class="text-red-600">Step 1:</span> Upload Password-Protected PDF
+                        </label>
+                        
+                        <!-- Drop Zone -->
+                        <div id="pdf-password-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-red-500 transition-all cursor-pointer bg-gray-50 hover:bg-red-50">
+                            <input type="file" id="pdf-password-file-input" accept=".pdf" class="hidden">
+                            <div class="text-5xl mb-3">📁</div>
+                            <p class="text-lg font-semibold text-gray-700 mb-2">Drop PDF here or click to browse</p>
+                            <p class="text-sm text-gray-500">Supports password-protected PDF files</p>
+                        </div>
+
+                        <!-- File Info -->
+                        <div id="pdf-password-file-info" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-3xl">📄</span>
+                                    <div>
+                                        <p id="pdf-password-filename" class="font-semibold text-gray-800"></p>
+                                        <p id="pdf-password-filesize" class="text-sm text-gray-600"></p>
+                                    </div>
+                                </div>
+                                <button onclick="clearPdfPasswordFile()" class="text-red-600 hover:text-red-700 font-semibold">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Enter Password -->
+                    <div id="pdf-password-input-section" class="mb-6 hidden">
+                        <label class="block text-lg font-semibold text-gray-700 mb-3">
+                            <span class="text-red-600">Step 2:</span> Enter PDF Password
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="pdf-password-input" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-lg" placeholder="Enter password...">
+                            <button onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                <svg id="password-eye-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Process Button -->
+                    <div id="pdf-password-process-section" class="mb-6 hidden">
+                        <button onclick="removePdfPassword()" id="pdf-password-remove-btn" class="w-full bg-gradient-to-r from-red-500 to-pink-600 text-white font-bold py-4 px-6 rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+                            🔓 Remove Password & Process
+                        </button>
+                    </div>
+
+                    <!-- Progress Indicator -->
+                    <div id="pdf-password-progress" class="hidden mb-6">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                                <span class="font-semibold text-blue-800">Processing your PDF...</span>
+                            </div>
+                            <div class="w-full bg-blue-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full animate-pulse" style="width: 70%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Success Message -->
+                    <div id="pdf-password-success" class="hidden mb-6">
+                        <div class="bg-green-50 border-2 border-green-500 rounded-xl p-6 text-center">
+                            <div class="text-6xl mb-4">✅</div>
+                            <h4 class="text-2xl font-bold text-green-800 mb-2">Success!</h4>
+                            <p class="text-green-700 mb-4">Your PDF has been unlocked successfully</p>
+                            <button onclick="downloadUnprotectedPdf()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-8 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                📥 Download Unprotected PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="pdf-password-error" class="hidden mb-6">
+                        <div class="bg-red-50 border-2 border-red-500 rounded-xl p-4">
+                            <div class="flex items-start gap-3">
+                                <span class="text-3xl">⚠️</span>
+                                <div>
+                                    <h4 class="text-lg font-bold text-red-800 mb-1">Error</h4>
+                                    <p id="pdf-password-error-message" class="text-red-700"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Legal Notice -->
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                        <p class="text-sm text-yellow-800">
+                            <strong>⚖️ Legal Notice:</strong> Only remove passwords from PDFs you own or have permission to modify. Unauthorized access to protected documents may be illegal.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PDF MERGER MODAL -->
+    <!-- ============================================ -->
+    <div id="pdf-merger-modal" class="modal" style="display: none;">
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-6 flex justify-between items-center sticky top-0 z-10">
+                    <div class="flex items-center gap-3">
+                        <div class="text-4xl">📄</div>
+                        <div>
+                            <h3 class="text-2xl font-bold">PDF Merger</h3>
+                            <p class="text-blue-100 text-sm">Combine multiple PDFs into one document</p>
+                        </div>
+                    </div>
+                    <button onclick="closeModal('pdf-merger-modal')" class="text-white hover:text-blue-200 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Content -->
+                <div class="p-6">
+                    
+                    <!-- Privacy Notice -->
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">🔒</span>
+                            <div>
+                                <p class="font-semibold text-green-800 mb-1">100% Private & Secure</p>
+                                <p class="text-sm text-green-700">All merging happens locally in your browser. Your PDFs never leave your device!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Upload PDFs -->
+                    <div class="mb-6">
+                        <label class="block text-lg font-semibold text-gray-700 mb-3">
+                            <span class="text-blue-600">Step 1:</span> Upload PDFs to Merge
+                        </label>
+                        
+                        <!-- Drop Zone -->
+                        <div id="pdf-merger-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-500 transition-all cursor-pointer bg-gray-50 hover:bg-blue-50">
+                            <input type="file" id="pdf-merger-file-input" accept=".pdf" multiple class="hidden">
+                            <div class="text-5xl mb-3">📁</div>
+                            <p class="text-lg font-semibold text-gray-700 mb-2">Drop PDFs here or click to browse</p>
+                            <p class="text-sm text-gray-500">You can select multiple PDF files at once</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: File List -->
+                    <div id="pdf-merger-files-section" class="mb-6 hidden">
+                        <label class="block text-lg font-semibold text-gray-700 mb-3">
+                            <span class="text-blue-600">Step 2:</span> Reorder PDFs (Drag to rearrange)
+                        </label>
+                        
+                        <div id="pdf-merger-file-list" class="space-y-2 mb-4">
+                            <!-- Files will be listed here -->
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button onclick="document.getElementById('pdf-merger-file-input').click()" class="flex-1 bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-200 transition-all">
+                                ➕ Add More PDFs
+                            </button>
+                            <button onclick="clearAllPdfMergerFiles()" class="bg-red-100 text-red-700 font-semibold py-3 px-6 rounded-xl hover:bg-red-200 transition-all">
+                                🗑️ Clear All
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Merge Button -->
+                    <div id="pdf-merger-merge-section" class="mb-6 hidden">
+                        <button onclick="mergePdfs()" id="pdf-merger-merge-btn" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+                            🔗 Merge PDFs
+                        </button>
+                    </div>
+
+                    <!-- Progress Indicator -->
+                    <div id="pdf-merger-progress" class="hidden mb-6">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                                <span class="font-semibold text-blue-800">Merging PDFs...</span>
+                            </div>
+                            <div class="w-full bg-blue-200 rounded-full h-2">
+                                <div id="pdf-merger-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                            </div>
+                            <p id="pdf-merger-progress-text" class="text-sm text-blue-700 mt-2"></p>
+                        </div>
+                    </div>
+
+                    <!-- Success Message -->
+                    <div id="pdf-merger-success" class="hidden mb-6">
+                        <div class="bg-green-50 border-2 border-green-500 rounded-xl p-6 text-center">
+                            <div class="text-6xl mb-4">✅</div>
+                            <h4 class="text-2xl font-bold text-green-800 mb-2">Success!</h4>
+                            <p class="text-green-700 mb-4">Your PDFs have been merged successfully</p>
+                            <button onclick="downloadMergedPdf()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-8 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                📥 Download Merged PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="pdf-merger-error" class="hidden mb-6">
+                        <div class="bg-red-50 border-2 border-red-500 rounded-xl p-4">
+                            <div class="flex items-start gap-3">
+                                <span class="text-3xl">⚠️</span>
+                                <div>
+                                    <h4 class="text-lg font-bold text-red-800 mb-1">Error</h4>
+                                    <p id="pdf-merger-error-message" class="text-red-700"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                        <p class="text-sm text-blue-800">
+                            <strong>💡 Tip:</strong> PDFs will be merged in the order shown above. Drag and drop to reorder them before merging.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PDF SPLITTER MODAL -->
+    <!-- ============================================ -->
+    <div id="pdf-splitter-modal" class="modal" style="display: none;">
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-green-500 to-teal-600 text-white p-6 flex justify-between items-center sticky top-0 z-10">
+                    <div class="flex items-center gap-3">
+                        <div class="text-4xl">✂️</div>
+                        <div>
+                            <h3 class="text-2xl font-bold">PDF Splitter</h3>
+                            <p class="text-green-100 text-sm">Split PDFs into separate pages or ranges</p>
+                        </div>
+                    </div>
+                    <button onclick="closeModal('pdf-splitter-modal')" class="text-white hover:text-green-200 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Content -->
+                <div class="p-6">
+                    
+                    <!-- Privacy Notice -->
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">🔒</span>
+                            <div>
+                                <p class="font-semibold text-green-800 mb-1">100% Private & Secure</p>
+                                <p class="text-sm text-green-700">All splitting happens locally in your browser. Your PDF never leaves your device!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Upload PDF -->
+                    <div class="mb-6">
+                        <label class="block text-lg font-semibold text-gray-700 mb-3">
+                            <span class="text-green-600">Step 1:</span> Upload PDF to Split
+                        </label>
+                        
+                        <!-- Drop Zone -->
+                        <div id="pdf-splitter-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-green-500 transition-all cursor-pointer bg-gray-50 hover:bg-green-50">
+                            <input type="file" id="pdf-splitter-file-input" accept=".pdf" class="hidden">
+                            <div class="text-5xl mb-3">📁</div>
+                            <p class="text-lg font-semibold text-gray-700 mb-2">Drop PDF here or click to browse</p>
+                            <p class="text-sm text-gray-500">Upload a PDF file to split</p>
+                        </div>
+
+                        <!-- File Info -->
+                        <div id="pdf-splitter-file-info" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-3xl">📄</span>
+                                    <div>
+                                        <p id="pdf-splitter-filename" class="font-semibold text-gray-800"></p>
+                                        <p id="pdf-splitter-fileinfo" class="text-sm text-gray-600"></p>
+                                    </div>
+                                </div>
+                                <button onclick="clearPdfSplitterFile()" class="text-red-600 hover:text-red-700 font-semibold">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Split Options -->
+                    <div id="pdf-splitter-options-section" class="mb-6 hidden">
+                        <label class="block text-lg font-semibold text-gray-700 mb-3">
+                            <span class="text-green-600">Step 2:</span> Choose Split Method
+                        </label>
+
+                        <div class="space-y-3">
+                            <!-- Option 1: All Pages -->
+                            <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 hover:bg-green-50 transition-all">
+                                <input type="radio" name="split-method" value="all" class="mt-1 mr-3" checked onchange="updateSplitMethod()">
+                                <div>
+                                    <p class="font-semibold text-gray-800">Extract All Pages Separately</p>
+                                    <p class="text-sm text-gray-600">Each page becomes a separate PDF file</p>
+                                </div>
+                            </label>
+
+                            <!-- Option 2: Specific Pages -->
+                            <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 hover:bg-green-50 transition-all">
+                                <input type="radio" name="split-method" value="specific" class="mt-1 mr-3" onchange="updateSplitMethod()">
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-800">Extract Specific Pages</p>
+                                    <p class="text-sm text-gray-600 mb-2">Enter page numbers separated by commas</p>
+                                    <input type="text" id="pdf-splitter-specific-pages" placeholder="e.g., 1, 3, 5, 7" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" disabled>
+                                </div>
+                            </label>
+
+                            <!-- Option 3: Page Range -->
+                            <label class="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 hover:bg-green-50 transition-all">
+                                <input type="radio" name="split-method" value="range" class="mt-1 mr-3" onchange="updateSplitMethod()">
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-800">Extract Page Range</p>
+                                    <p class="text-sm text-gray-600 mb-2">Enter start and end page numbers</p>
+                                    <div class="flex gap-3">
+                                        <input type="number" id="pdf-splitter-range-start" placeholder="From" min="1" class="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" disabled>
+                                        <input type="number" id="pdf-splitter-range-end" placeholder="To" min="1" class="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" disabled>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Split Button -->
+                    <div id="pdf-splitter-split-section" class="mb-6 hidden">
+                        <button onclick="splitPdf()" id="pdf-splitter-split-btn" class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white font-bold py-4 px-6 rounded-xl hover:from-green-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+                            ✂️ Split PDF
+                        </button>
+                    </div>
+
+                    <!-- Progress Indicator -->
+                    <div id="pdf-splitter-progress" class="hidden mb-6">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                                <span class="font-semibold text-green-800">Splitting PDF...</span>
+                            </div>
+                            <div class="w-full bg-green-200 rounded-full h-2">
+                                <div id="pdf-splitter-progress-bar" class="bg-green-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                            </div>
+                            <p id="pdf-splitter-progress-text" class="text-sm text-green-700 mt-2"></p>
+                        </div>
+                    </div>
+
+                    <!-- Success Message -->
+                    <div id="pdf-splitter-success" class="hidden mb-6">
+                        <div class="bg-green-50 border-2 border-green-500 rounded-xl p-6 text-center">
+                            <div class="text-6xl mb-4">✅</div>
+                            <h4 class="text-2xl font-bold text-green-800 mb-2">Success!</h4>
+                            <p id="pdf-splitter-success-text" class="text-green-700 mb-4">Your PDF has been split successfully</p>
+                            <button onclick="downloadSplitPdfs()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-8 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                📥 Download Pages as ZIP
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="pdf-splitter-error" class="hidden mb-6">
+                        <div class="bg-red-50 border-2 border-red-500 rounded-xl p-4">
+                            <div class="flex items-start gap-3">
+                                <span class="text-3xl">⚠️</span>
+                                <div>
+                                    <h4 class="text-lg font-bold text-red-800 mb-1">Error</h4>
+                                    <p id="pdf-splitter-error-message" class="text-red-700"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                        <p class="text-sm text-blue-800">
+                            <strong>💡 Tip:</strong> All extracted pages will be downloaded as a ZIP file. Each page will be saved as a separate PDF.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PDF ENCRYPTOR MODAL -->
+    <!-- ============================================ -->
+    <div id="pdf-encryptor-modal" class="modal" style="display: none;">
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-purple-500 to-pink-600 text-white p-6 flex justify-between items-center sticky top-0 z-10">
+                    <div class="flex items-center gap-3">
+                        <div class="text-4xl">🔒</div>
+                        <div>
+                            <h3 class="text-2xl font-bold">PDF Encryptor</h3>
+                            <p class="text-purple-100 text-sm">Add password protection to your PDFs</p>
+                        </div>
+                    </div>
+                    <button onclick="closeModal('pdf-encryptor-modal')" class="text-white hover:text-purple-200 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Content -->
+                <div class="p-6">
+                    
+                    <!-- Privacy Notice -->
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">🔒</span>
+                            <div>
+                                <p class="font-semibold text-green-800 mb-1">100% Private & Secure</p>
+                                <p class="text-sm text-green-700">All encryption happens locally in your browser. Your PDF and password never leave your device!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Upload PDF -->
+                    <div class="mb-6">
+                        <label class="block text-lg font-semibold text-gray-700 mb-3">
+                            <span class="text-purple-600">Step 1:</span> Upload PDF to Protect
+                        </label>
+                        
+                        <!-- Drop Zone -->
+                        <div id="pdf-encryptor-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-purple-500 transition-all cursor-pointer bg-gray-50 hover:bg-purple-50">
+                            <input type="file" id="pdf-encryptor-file-input" accept=".pdf" class="hidden">
+                            <div class="text-5xl mb-3">📁</div>
+                            <p class="text-lg font-semibold text-gray-700 mb-2">Drop PDF here or click to browse</p>
+                            <p class="text-sm text-gray-500">Upload a PDF file to encrypt</p>
+                        </div>
+
+                        <!-- File Info -->
+                        <div id="pdf-encryptor-file-info" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-3xl">📄</span>
+                                    <div>
+                                        <p id="pdf-encryptor-filename" class="font-semibold text-gray-800"></p>
+                                        <p id="pdf-encryptor-filesize" class="text-sm text-gray-600"></p>
+                                    </div>
+                                </div>
+                                <button onclick="clearPdfEncryptorFile()" class="text-red-600 hover:text-red-700 font-semibold">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Set Password -->
+                    <div id="pdf-encryptor-password-section" class="mb-6 hidden">
+                        <label class="block text-lg font-semibold text-gray-700 mb-3">
+                            <span class="text-purple-600">Step 2:</span> Set Password
+                        </label>
+                        
+                        <!-- Password Input -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-600 mb-2">Password</label>
+                            <div class="relative">
+                                <input type="password" id="pdf-encryptor-password" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter password..." oninput="checkEncryptPasswordStrength()">
+                                <button type="button" onclick="toggleEncryptPasswordVisibility('pdf-encryptor-password')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-600 mb-2">Confirm Password</label>
+                            <div class="relative">
+                                <input type="password" id="pdf-encryptor-password-confirm" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Re-enter password..." oninput="checkPasswordMatch()">
+                                <button type="button" onclick="toggleEncryptPasswordVisibility('pdf-encryptor-password-confirm')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <p id="pdf-encryptor-password-match" class="text-sm mt-1 hidden"></p>
+                        </div>
+
+                        <!-- Password Strength Indicator -->
+                        <div id="pdf-encryptor-strength-section" class="hidden mb-4">
+                            <label class="block text-sm font-medium text-gray-600 mb-2">Password Strength</label>
+                            <div class="flex items-center gap-3">
+                                <div class="flex-1 bg-gray-200 rounded-full h-2">
+                                    <div id="pdf-encryptor-strength-bar" class="h-2 rounded-full transition-all" style="width: 0%"></div>
+                                </div>
+                                <span id="pdf-encryptor-strength-text" class="text-sm font-semibold"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Encrypt Button -->
+                    <div id="pdf-encryptor-encrypt-section" class="mb-6 hidden">
+                        <button onclick="encryptPdf()" id="pdf-encryptor-encrypt-btn" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+                            🔒 Encrypt PDF
+                        </button>
+                    </div>
+
+                    <!-- Progress Indicator -->
+                    <div id="pdf-encryptor-progress" class="hidden mb-6">
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                                <span class="font-semibold text-purple-800">Encrypting your PDF...</span>
+                            </div>
+                            <div class="w-full bg-purple-200 rounded-full h-2">
+                                <div class="bg-purple-600 h-2 rounded-full animate-pulse" style="width: 70%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Success Message -->
+                    <div id="pdf-encryptor-success" class="hidden mb-6">
+                        <div class="bg-green-50 border-2 border-green-500 rounded-xl p-6 text-center">
+                            <div class="text-6xl mb-4">✅</div>
+                            <h4 class="text-2xl font-bold text-green-800 mb-2">Success!</h4>
+                            <p class="text-green-700 mb-4">Your PDF has been encrypted successfully</p>
+                            <button onclick="downloadEncryptedPdf()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-8 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                📥 Download Protected PDF
+                            </button>
+                            <p class="text-sm text-gray-600 mt-4">⚠️ Make sure to remember your password!</p>
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="pdf-encryptor-error" class="hidden mb-6">
+                        <div class="bg-red-50 border-2 border-red-500 rounded-xl p-4">
+                            <div class="flex items-start gap-3">
+                                <span class="text-3xl">⚠️</span>
+                                <div>
+                                    <h4 class="text-lg font-bold text-red-800 mb-1">Error</h4>
+                                    <p id="pdf-encryptor-error-message" class="text-red-700"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Info -->
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                        <p class="text-sm text-yellow-800">
+                            <strong>🔐 Security Note:</strong> Uses PyPDF2 (Python library) for industry-standard AES-128 encryption. First use may take 10-20 seconds to load the encryption engine. Make sure to use a strong password and keep it safe!
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PDF TO IMAGES MODAL -->
+    <!-- ============================================ -->
+    <div id="pdf-to-images-modal" class="modal" style="display: none;">
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-orange-500 to-yellow-600 text-white p-6 flex justify-between items-center sticky top-0 z-10">
+                    <div class="flex items-center gap-3">
+                        <div class="text-4xl">🖼️</div>
+                        <div>
+                            <h3 class="text-2xl font-bold">PDF to Images</h3>
+                            <p class="text-orange-100 text-sm">Convert PDF pages to JPG or PNG images</p>
+                        </div>
+                    </div>
+                    <button onclick="closeModal('pdf-to-images-modal')" class="text-white hover:text-orange-200 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Content -->
+                <div class="p-6">
+                    
+                    <!-- Privacy Notice -->
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-3">🔒</span>
+                            <div>
+                                <p class="font-semibold text-green-800 mb-1">100% Private & Secure</p>
+                                <p class="text-sm text-green-700">All processing happens locally in your browser. Your PDF never leaves your device!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Upload PDF -->
+                    <div class="mb-6">
+                        <label class="block text-lg font-semibold text-gray-700 mb-3">
+                            <span class="text-orange-600">Step 1:</span> Upload PDF
+                        </label>
+                        
+                        <!-- Drop Zone -->
+                        <div id="pdf-to-images-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-orange-500 transition-all cursor-pointer bg-gray-50 hover:bg-orange-50">
+                            <input type="file" id="pdf-to-images-file-input" accept=".pdf" class="hidden">
+                            <div class="text-5xl mb-3">📄</div>
+                            <p class="text-lg font-semibold text-gray-700 mb-2">Drop PDF here or click to browse</p>
+                            <p class="text-sm text-gray-500">Supports all PDF files</p>
+                        </div>
+
+                        <!-- File Info -->
+                        <div id="pdf-to-images-file-info" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-3xl">📄</span>
+                                    <div>
+                                        <p id="pdf-to-images-filename" class="font-semibold text-gray-800"></p>
+                                        <p id="pdf-to-images-filesize" class="text-sm text-gray-600"></p>
+                                    </div>
+                                </div>
+                                <button onclick="clearPdfToImagesFile()" class="text-red-600 hover:text-red-700 font-semibold">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Configure Options -->
+                    <div id="pdf-to-images-options-section" class="hidden mb-6">
+                        <label class="block text-lg font-semibold text-gray-700 mb-3">
+                            <span class="text-orange-600">Step 2:</span> Configure Options
+                        </label>
+
+                        <!-- Output Format -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Output Format</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="border-2 border-orange-300 rounded-lg p-4 cursor-pointer hover:bg-orange-50 transition-all">
+                                    <input type="radio" name="pdf-to-images-format" value="jpeg" checked class="mr-2">
+                                    <span class="font-semibold">JPG</span>
+                                    <p class="text-xs text-gray-600 mt-1">Smaller file size</p>
+                                </label>
+                                <label class="border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-orange-50 transition-all">
+                                    <input type="radio" name="pdf-to-images-format" value="png" class="mr-2">
+                                    <span class="font-semibold">PNG</span>
+                                    <p class="text-xs text-gray-600 mt-1">Lossless quality</p>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Image Quality -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Image Quality: <span id="pdf-to-images-quality-value" class="text-orange-600">90%</span>
+                            </label>
+                            <input type="range" id="pdf-to-images-quality" min="50" max="100" value="90" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>50%</span>
+                                <span>65%</span>
+                                <span>80%</span>
+                                <span>95%</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+
+                        <!-- Resolution Scale -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Resolution Scale: <span id="pdf-to-images-scale-value" class="text-orange-600">2x (High Quality)</span>
+                            </label>
+                            <input type="range" id="pdf-to-images-scale" min="1" max="3" step="0.5" value="2" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>1x</span>
+                                <span>1.5x</span>
+                                <span>2x</span>
+                                <span>2.5x</span>
+                                <span>3x</span>
+                            </div>
+                        </div>
+
+                        <!-- Page Selection -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Pages to Convert</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="radio" name="pdf-to-images-pages" value="all" checked class="mr-2">
+                                    <span>All pages (<span id="pdf-to-images-total-pages">0</span> pages)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="pdf-to-images-pages" value="specific" class="mr-2">
+                                    <span>Specific pages</span>
+                                </label>
+                                <input type="text" id="pdf-to-images-page-range" placeholder="e.g., 1,3-5,7" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100" disabled>
+                                <p class="text-xs text-gray-500">Enter page numbers separated by commas. Use hyphen for ranges.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Convert -->
+                    <div id="pdf-to-images-convert-section" class="hidden mb-6">
+                        <button onclick="convertPdfToImages()" id="pdf-to-images-convert-btn" class="w-full bg-gradient-to-r from-orange-500 to-yellow-600 text-white font-bold py-4 px-6 rounded-xl hover:from-orange-600 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+                            🖼️ Convert PDF to Images
+                        </button>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div id="pdf-to-images-progress" class="hidden mb-6">
+                        <div class="bg-blue-50 border-2 border-blue-500 rounded-xl p-4">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="animate-spin">⏳</div>
+                                <span class="font-semibold text-blue-800" id="pdf-to-images-progress-text">Processing your PDF...</span>
+                            </div>
+                            <div class="w-full bg-blue-200 rounded-full h-4 overflow-hidden">
+                                <div id="pdf-to-images-progress-bar" class="bg-gradient-to-r from-orange-500 to-yellow-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <p class="text-sm text-blue-700 mt-2" id="pdf-to-images-progress-percent">0%</p>
+                        </div>
+                    </div>
+
+                    <!-- Success Message -->
+                    <div id="pdf-to-images-success" class="hidden mb-6">
+                        <div class="bg-green-50 border-2 border-green-500 rounded-xl p-4">
+                            <div class="flex items-start gap-3 mb-4">
+                                <span class="text-3xl">✅</span>
+                                <div class="flex-1">
+                                    <h4 class="text-lg font-bold text-green-800 mb-1">Success!</h4>
+                                    <p class="text-green-700 mb-2"><span id="pdf-to-images-success-count">0</span> images ready</p>
+                                    
+                                    <!-- Preview Thumbnails -->
+                                    <div class="mb-3">
+                                        <p class="text-sm font-semibold text-gray-700 mb-2">Preview:</p>
+                                        <div id="pdf-to-images-preview" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto"></div>
+                                    </div>
+                                    
+                                    <p class="text-sm text-gray-600">Total size: <span id="pdf-to-images-total-size">~0 MB</span></p>
+                                </div>
+                            </div>
+                            <button onclick="downloadImagesAsZip()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-8 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                📥 Download All Images as ZIP
+                            </button>
+                        </div>
+                        
+                        <p class="text-xs text-gray-500 mt-3 text-center">
+                            ℹ️ Images will be named: <span id="pdf-to-images-naming-example"></span>
+                        </p>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="pdf-to-images-error" class="hidden mb-6">
+                        <div class="bg-red-50 border-2 border-red-500 rounded-xl p-4">
+                            <div class="flex items-start gap-3">
+                                <span class="text-3xl">⚠️</span>
+                                <div>
+                                    <h4 class="text-lg font-bold text-red-800 mb-1">Error</h4>
+                                    <p id="pdf-to-images-error-message" class="text-red-700"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
@@ -6710,6 +8209,1302 @@
         (function() {
             emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your EmailJS public key
         })();
+
+        // ============================================
+        // CONGRATULATIONS POPUP FOR NEW TOOLS
+        // ============================================
+
+        // List of new tools for random selection
+        const newTools = [
+            {
+                icon: '🔓',
+                name: 'PDF Password Remover',
+                description: 'Remove password protection from your PDFs instantly',
+                sectionId: 'pdf-tools'
+            },
+            {
+                icon: '📄',
+                name: 'PDF Merger',
+                description: 'Combine multiple PDFs into one document',
+                sectionId: 'pdf-tools'
+            },
+            {
+                icon: '✂️',
+                name: 'PDF Splitter',
+                description: 'Split PDFs into separate pages or ranges',
+                sectionId: 'pdf-tools'
+            },
+            {
+                icon: '🔒',
+                name: 'PDF Encryptor',
+                description: 'Add password protection to your PDFs',
+                sectionId: 'pdf-tools'
+            },
+            {
+                icon: '🖼️',
+                name: 'PDF to Images',
+                description: 'Convert PDF pages to JPG or PNG images',
+                sectionId: 'pdf-tools'
+            },
+            {
+                icon: '📸',
+                name: 'Image to PDF',
+                description: 'Convert images to PDF documents',
+                sectionId: 'image-tools'
+            },
+            {
+                icon: '📏',
+                name: 'Image Compressor',
+                description: 'Reduce image file size while maintaining quality',
+                sectionId: 'image-tools'
+            },
+            {
+                icon: '🎨',
+                name: 'Image Format Converter',
+                description: 'Convert between JPG, PNG, WebP formats',
+                sectionId: 'image-tools'
+            },
+            {
+                icon: '📐',
+                name: 'Image Resizer',
+                description: 'Resize images to any dimensions',
+                sectionId: 'image-tools'
+            },
+            {
+                icon: '✍️',
+                name: 'Digital Signature Generator',
+                description: 'Create professional digital signatures',
+                sectionId: 'utilities'
+            },
+            {
+                icon: '📊',
+                name: 'CSV to JSON Converter',
+                description: 'Convert between CSV and JSON formats',
+                sectionId: 'utilities'
+            }
+        ];
+
+        // Show congratulations popup on page load (once per session)
+        function showCongratsPopup() {
+            // Check if popup was already shown in this session
+            if (sessionStorage.getItem('congratsPopupShown')) {
+                return;
+            }
+
+            // Select a random tool
+            const randomTool = newTools[Math.floor(Math.random() * newTools.length)];
+
+            // Populate the featured tool content
+            const featuredToolContent = document.getElementById('featured-tool-content');
+            featuredToolContent.innerHTML = `
+                <div class="text-5xl mb-3">${randomTool.icon}</div>
+                <h4 class="text-xl font-bold text-gray-800 mb-2">${randomTool.name}</h4>
+                <p class="text-gray-600 text-sm">${randomTool.description}</p>
+            `;
+
+            // Show the popup
+            const popup = document.getElementById('congrats-popup');
+            const popupContent = document.getElementById('congrats-popup-content');
+            
+            popup.classList.remove('hidden');
+            
+            // Animate in
+            setTimeout(() => {
+                popupContent.style.transform = 'scale(1)';
+                popupContent.style.opacity = '1';
+            }, 50);
+
+            // Auto-close countdown
+            let countdown = 7;
+            const countdownElement = document.getElementById('popup-countdown');
+            
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdownElement) {
+                    countdownElement.textContent = countdown;
+                }
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                    closeCongratsPopup();
+                }
+            }, 1000);
+
+            // Store interval ID for manual close
+            popup.dataset.countdownInterval = countdownInterval;
+
+            // Mark as shown in session
+            sessionStorage.setItem('congratsPopupShown', 'true');
+        }
+
+        // Close congratulations popup
+        function closeCongratsPopup() {
+            const popup = document.getElementById('congrats-popup');
+            const popupContent = document.getElementById('congrats-popup-content');
+            
+            // Clear countdown if exists
+            if (popup.dataset.countdownInterval) {
+                clearInterval(parseInt(popup.dataset.countdownInterval));
+            }
+            
+            // Animate out
+            popupContent.style.transform = 'scale(0.95)';
+            popupContent.style.opacity = '0';
+            
+            setTimeout(() => {
+                popup.classList.add('hidden');
+            }, 300);
+        }
+
+        // Show popup on page load (after a short delay for better UX)
+        window.addEventListener('load', function() {
+            setTimeout(showCongratsPopup, 1000);
+        });
+
+        // ============================================
+        // END OF CONGRATULATIONS POPUP
+        // ============================================
+
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.remove('hidden');
+            } else {
+                mobileMenu.classList.add('hidden');
+            }
+        }
+
+        // ============================================
+        // PDF PASSWORD REMOVER FUNCTIONALITY
+        // ============================================
+
+        let pdfPasswordFile = null;
+        let unprotectedPdfBytes = null;
+
+        // Initialize PDF Password Remover
+        function initPdfPasswordRemover() {
+            const dropZone = document.getElementById('pdf-password-drop-zone');
+            const fileInput = document.getElementById('pdf-password-file-input');
+
+            // Click to browse
+            dropZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file && file.type === 'application/pdf') {
+                    handlePdfPasswordFile(file);
+                }
+            });
+
+            // Drag and drop
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-red-500', 'bg-red-50');
+            });
+
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-red-500', 'bg-red-50');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-red-500', 'bg-red-50');
+                
+                const file = e.dataTransfer.files[0];
+                if (file && file.type === 'application/pdf') {
+                    handlePdfPasswordFile(file);
+                } else {
+                    showPdfPasswordError('Please upload a valid PDF file.');
+                }
+            });
+
+            // Enter key to process
+            document.getElementById('pdf-password-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    removePdfPassword();
+                }
+            });
+        }
+
+        // Handle PDF file upload
+        function handlePdfPasswordFile(file) {
+            pdfPasswordFile = file;
+            
+            // Show file info
+            document.getElementById('pdf-password-filename').textContent = file.name;
+            document.getElementById('pdf-password-filesize').textContent = formatFileSize(file.size);
+            document.getElementById('pdf-password-file-info').classList.remove('hidden');
+            
+            // Show password input and process button
+            document.getElementById('pdf-password-input-section').classList.remove('hidden');
+            document.getElementById('pdf-password-process-section').classList.remove('hidden');
+            
+            // Hide error if any
+            document.getElementById('pdf-password-error').classList.add('hidden');
+            document.getElementById('pdf-password-success').classList.add('hidden');
+        }
+
+        // Clear uploaded file
+        function clearPdfPasswordFile() {
+            pdfPasswordFile = null;
+            unprotectedPdfBytes = null;
+            
+            // Reset file input
+            document.getElementById('pdf-password-file-input').value = '';
+            
+            // Hide all sections
+            document.getElementById('pdf-password-file-info').classList.add('hidden');
+            document.getElementById('pdf-password-input-section').classList.add('hidden');
+            document.getElementById('pdf-password-process-section').classList.add('hidden');
+            document.getElementById('pdf-password-success').classList.add('hidden');
+            document.getElementById('pdf-password-error').classList.add('hidden');
+            
+            // Clear password input
+            document.getElementById('pdf-password-input').value = '';
+        }
+
+        // Toggle password visibility
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('pdf-password-input');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        }
+
+        // Remove PDF password
+        async function removePdfPassword() {
+            if (!pdfPasswordFile) {
+                showPdfPasswordError('Please upload a PDF file first.');
+                return;
+            }
+
+            const password = document.getElementById('pdf-password-input').value;
+            if (!password) {
+                showPdfPasswordError('Please enter the PDF password.');
+                return;
+            }
+
+            try {
+                // Show progress
+                document.getElementById('pdf-password-progress').classList.remove('hidden');
+                document.getElementById('pdf-password-error').classList.add('hidden');
+                document.getElementById('pdf-password-success').classList.add('hidden');
+                document.getElementById('pdf-password-remove-btn').disabled = true;
+
+                // Read PDF file
+                const fileBytes = await pdfPasswordFile.arrayBuffer();
+                const uint8Array = new Uint8Array(fileBytes);
+
+                // Configure PDF.js worker
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+                // Load PDF with PDF.js (handles decryption)
+                const loadingTask = pdfjsLib.getDocument({
+                    data: uint8Array,
+                    password: password
+                });
+
+                const pdfDocument = await loadingTask.promise;
+                const numPages = pdfDocument.numPages;
+
+                // Create new PDF with pdf-lib
+                const { PDFDocument, rgb } = PDFLib;
+                const newPdfDoc = await PDFDocument.create();
+
+                // Process each page
+                for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+                    const page = await pdfDocument.getPage(pageNum);
+                    const viewport = page.getViewport({ scale: 2.0 });
+
+                    // Create canvas for rendering
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+
+                    // Render page to canvas
+                    await page.render({
+                        canvasContext: context,
+                        viewport: viewport
+                    }).promise;
+
+                    // Convert canvas to image
+                    const imageData = canvas.toDataURL('image/jpeg', 0.95);
+                    const imageBytes = await fetch(imageData).then(res => res.arrayBuffer());
+
+                    // Embed image in new PDF
+                    const jpgImage = await newPdfDoc.embedJpg(imageBytes);
+                    const pdfPage = newPdfDoc.addPage([viewport.width, viewport.height]);
+                    pdfPage.drawImage(jpgImage, {
+                        x: 0,
+                        y: 0,
+                        width: viewport.width,
+                        height: viewport.height,
+                    });
+
+                    // Update progress (optional visual feedback)
+                    console.log(`Processed page ${pageNum}/${numPages}`);
+                }
+
+                // Save PDF without password
+                unprotectedPdfBytes = await newPdfDoc.save();
+
+                // Hide progress, show success
+                document.getElementById('pdf-password-progress').classList.add('hidden');
+                document.getElementById('pdf-password-success').classList.remove('hidden');
+                document.getElementById('pdf-password-remove-btn').disabled = false;
+
+            } catch (error) {
+                console.error('PDF password removal error:', error);
+                document.getElementById('pdf-password-progress').classList.add('hidden');
+                document.getElementById('pdf-password-remove-btn').disabled = false;
+
+                // Check for specific error types
+                if (error.name === 'PasswordException' || 
+                    (error.message && (error.message.includes('password') || 
+                    error.message.includes('encrypted') || 
+                    error.message.includes('decrypt')))) {
+                    showPdfPasswordError('Incorrect password. Please verify and try again.');
+                } else if (error.message && error.message.includes('Invalid PDF')) {
+                    showPdfPasswordError('Invalid or corrupted PDF file. Please ensure the file is a valid PDF.');
+                } else {
+                    showPdfPasswordError('Failed to process PDF: ' + error.message);
+                }
+            }
+        }
+
+        // Download unprotected PDF
+        function downloadUnprotectedPdf() {
+            if (!unprotectedPdfBytes) {
+                showPdfPasswordError('No unprotected PDF available. Please process a PDF first.');
+                return;
+            }
+
+            try {
+                const blob = new Blob([unprotectedPdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = pdfPasswordFile.name.replace('.pdf', '_unlocked.pdf');
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Download error:', error);
+                showPdfPasswordError('Failed to download PDF: ' + error.message);
+            }
+        }
+
+        // Show error message
+        function showPdfPasswordError(message) {
+            document.getElementById('pdf-password-error-message').textContent = message;
+            document.getElementById('pdf-password-error').classList.remove('hidden');
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initPdfPasswordRemover();
+        });
+
+        // ============================================
+        // END OF PDF PASSWORD REMOVER
+        // ============================================
+
+        // ============================================
+        // PDF MERGER FUNCTIONALITY
+        // ============================================
+
+        let pdfMergerFiles = [];
+        let mergedPdfBytes = null;
+        let draggedIndex = null;
+
+        // Initialize PDF Merger
+        function initPdfMerger() {
+            const dropZone = document.getElementById('pdf-merger-drop-zone');
+            const fileInput = document.getElementById('pdf-merger-file-input');
+
+            // Click to browse
+            dropZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                handlePdfMergerFiles(Array.from(e.target.files));
+            });
+
+            // Drag and drop
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-blue-500', 'bg-blue-50');
+            });
+
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+                
+                const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+                if (files.length > 0) {
+                    handlePdfMergerFiles(files);
+                } else {
+                    showPdfMergerError('Please upload valid PDF files.');
+                }
+            });
+        }
+
+        // Handle PDF files upload
+        function handlePdfMergerFiles(files) {
+            // Add new files to the array
+            pdfMergerFiles.push(...files);
+            
+            // Update the display
+            updatePdfMergerFileList();
+            
+            // Show file list and merge button
+            document.getElementById('pdf-merger-files-section').classList.remove('hidden');
+            document.getElementById('pdf-merger-merge-section').classList.remove('hidden');
+            
+            // Hide error and success
+            document.getElementById('pdf-merger-error').classList.add('hidden');
+            document.getElementById('pdf-merger-success').classList.add('hidden');
+        }
+
+        // Update file list display
+        function updatePdfMergerFileList() {
+            const fileList = document.getElementById('pdf-merger-file-list');
+            fileList.innerHTML = '';
+
+            pdfMergerFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'bg-blue-50 p-4 rounded-lg border border-blue-200 flex items-center justify-between cursor-move hover:bg-blue-100 transition-all';
+                fileItem.draggable = true;
+                fileItem.dataset.index = index;
+
+                fileItem.innerHTML = `
+                    <div class="flex items-center gap-3 flex-1">
+                        <div class="cursor-grab active:cursor-grabbing">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+                            </svg>
+                        </div>
+                        <span class="text-2xl">📄</span>
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-800">${index + 1}. ${file.name}</p>
+                            <p class="text-sm text-gray-600">${formatFileSize(file.size)}</p>
+                        </div>
+                    </div>
+                    <button onclick="removePdfMergerFile(${index})" class="text-red-600 hover:text-red-700 font-semibold ml-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                `;
+
+                // Drag events
+                fileItem.addEventListener('dragstart', (e) => {
+                    draggedIndex = index;
+                    fileItem.style.opacity = '0.5';
+                });
+
+                fileItem.addEventListener('dragend', (e) => {
+                    fileItem.style.opacity = '1';
+                });
+
+                fileItem.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    fileItem.style.borderColor = '#3b82f6';
+                });
+
+                fileItem.addEventListener('dragleave', (e) => {
+                    fileItem.style.borderColor = '#93c5fd';
+                });
+
+                fileItem.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    fileItem.style.borderColor = '#93c5fd';
+                    
+                    if (draggedIndex !== null && draggedIndex !== index) {
+                        // Reorder array
+                        const draggedFile = pdfMergerFiles[draggedIndex];
+                        pdfMergerFiles.splice(draggedIndex, 1);
+                        pdfMergerFiles.splice(index, 0, draggedFile);
+                        updatePdfMergerFileList();
+                    }
+                });
+
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        // Remove a file from the list
+        function removePdfMergerFile(index) {
+            pdfMergerFiles.splice(index, 1);
+            
+            if (pdfMergerFiles.length === 0) {
+                document.getElementById('pdf-merger-files-section').classList.add('hidden');
+                document.getElementById('pdf-merger-merge-section').classList.add('hidden');
+            } else {
+                updatePdfMergerFileList();
+            }
+        }
+
+        // Clear all files
+        function clearAllPdfMergerFiles() {
+            pdfMergerFiles = [];
+            mergedPdfBytes = null;
+            document.getElementById('pdf-merger-file-input').value = '';
+            document.getElementById('pdf-merger-files-section').classList.add('hidden');
+            document.getElementById('pdf-merger-merge-section').classList.add('hidden');
+            document.getElementById('pdf-merger-success').classList.add('hidden');
+            document.getElementById('pdf-merger-error').classList.add('hidden');
+        }
+
+        // Merge PDFs
+        async function mergePdfs() {
+            if (pdfMergerFiles.length < 2) {
+                showPdfMergerError('Please upload at least 2 PDF files to merge.');
+                return;
+            }
+
+            try {
+                // Show progress
+                document.getElementById('pdf-merger-progress').classList.remove('hidden');
+                document.getElementById('pdf-merger-error').classList.add('hidden');
+                document.getElementById('pdf-merger-success').classList.add('hidden');
+                document.getElementById('pdf-merger-merge-btn').disabled = true;
+
+                const progressBar = document.getElementById('pdf-merger-progress-bar');
+                const progressText = document.getElementById('pdf-merger-progress-text');
+
+                // Create new PDF document
+                const { PDFDocument } = PDFLib;
+                const mergedPdf = await PDFDocument.create();
+
+                // Process each PDF
+                for (let i = 0; i < pdfMergerFiles.length; i++) {
+                    const file = pdfMergerFiles[i];
+                    
+                    // Update progress
+                    const progress = ((i / pdfMergerFiles.length) * 100).toFixed(0);
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `Processing ${i + 1} of ${pdfMergerFiles.length}: ${file.name}`;
+
+                    // Read PDF file
+                    const fileBytes = await file.arrayBuffer();
+                    
+                    // Load the PDF
+                    const pdf = await PDFDocument.load(fileBytes);
+                    
+                    // Copy all pages from this PDF
+                    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                    copiedPages.forEach((page) => {
+                        mergedPdf.addPage(page);
+                    });
+                }
+
+                // Update progress to 100%
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Finalizing merged PDF...';
+
+                // Save the merged PDF
+                mergedPdfBytes = await mergedPdf.save();
+
+                // Hide progress, show success
+                document.getElementById('pdf-merger-progress').classList.add('hidden');
+                document.getElementById('pdf-merger-success').classList.remove('hidden');
+                document.getElementById('pdf-merger-merge-btn').disabled = false;
+
+            } catch (error) {
+                console.error('PDF merger error:', error);
+                document.getElementById('pdf-merger-progress').classList.add('hidden');
+                document.getElementById('pdf-merger-merge-btn').disabled = false;
+                
+                if (error.message && error.message.includes('password')) {
+                    showPdfMergerError('One or more PDFs are password-protected. Please remove passwords first using the PDF Password Remover tool.');
+                } else if (error.message && error.message.includes('Invalid PDF')) {
+                    showPdfMergerError('One or more files are invalid or corrupted PDF files.');
+                } else {
+                    showPdfMergerError('Failed to merge PDFs: ' + error.message);
+                }
+            }
+        }
+
+        // Download merged PDF
+        function downloadMergedPdf() {
+            if (!mergedPdfBytes) {
+                showPdfMergerError('No merged PDF available. Please merge PDFs first.');
+                return;
+            }
+
+            try {
+                const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'merged_document.pdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Download error:', error);
+                showPdfMergerError('Failed to download merged PDF: ' + error.message);
+            }
+        }
+
+        // Show error message
+        function showPdfMergerError(message) {
+            document.getElementById('pdf-merger-error-message').textContent = message;
+            document.getElementById('pdf-merger-error').classList.remove('hidden');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initPdfMerger();
+        });
+
+        // ============================================
+        // END OF PDF MERGER
+        // ============================================
+
+        // ============================================
+        // PDF SPLITTER FUNCTIONALITY
+        // ============================================
+
+        let pdfSplitterFile = null;
+        let pdfSplitterDocument = null;
+        let splitPdfPages = [];
+
+        // Initialize PDF Splitter
+        function initPdfSplitter() {
+            const dropZone = document.getElementById('pdf-splitter-drop-zone');
+            const fileInput = document.getElementById('pdf-splitter-file-input');
+
+            // Click to browse
+            dropZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // File input change
+            fileInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (file && file.type === 'application/pdf') {
+                    await handlePdfSplitterFile(file);
+                }
+            });
+
+            // Drag and drop
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-green-500', 'bg-green-50');
+            });
+
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-green-500', 'bg-green-50');
+            });
+
+            dropZone.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-green-500', 'bg-green-50');
+                
+                const file = e.dataTransfer.files[0];
+                if (file && file.type === 'application/pdf') {
+                    await handlePdfSplitterFile(file);
+                } else {
+                    showPdfSplitterError('Please upload a valid PDF file.');
+                }
+            });
+        }
+
+        // Handle PDF file upload
+        async function handlePdfSplitterFile(file) {
+            try {
+                pdfSplitterFile = file;
+                
+                // Read PDF file
+                const fileBytes = await file.arrayBuffer();
+                
+                // Load PDF
+                const { PDFDocument } = PDFLib;
+                pdfSplitterDocument = await PDFDocument.load(fileBytes);
+                
+                const pageCount = pdfSplitterDocument.getPageCount();
+                
+                // Show file info
+                document.getElementById('pdf-splitter-filename').textContent = file.name;
+                document.getElementById('pdf-splitter-fileinfo').textContent = `${formatFileSize(file.size)} • ${pageCount} pages`;
+                document.getElementById('pdf-splitter-file-info').classList.remove('hidden');
+                
+                // Show options and split button
+                document.getElementById('pdf-splitter-options-section').classList.remove('hidden');
+                document.getElementById('pdf-splitter-split-section').classList.remove('hidden');
+                
+                // Set max values for range inputs
+                document.getElementById('pdf-splitter-range-start').max = pageCount;
+                document.getElementById('pdf-splitter-range-end').max = pageCount;
+                
+                // Hide error and success
+                document.getElementById('pdf-splitter-error').classList.add('hidden');
+                document.getElementById('pdf-splitter-success').classList.add('hidden');
+                
+            } catch (error) {
+                console.error('PDF loading error:', error);
+                showPdfSplitterError('Failed to load PDF: ' + error.message);
+            }
+        }
+
+        // Clear uploaded file
+        function clearPdfSplitterFile() {
+            pdfSplitterFile = null;
+            pdfSplitterDocument = null;
+            splitPdfPages = [];
+            
+            // Reset file input
+            document.getElementById('pdf-splitter-file-input').value = '';
+            
+            // Hide all sections
+            document.getElementById('pdf-splitter-file-info').classList.add('hidden');
+            document.getElementById('pdf-splitter-options-section').classList.add('hidden');
+            document.getElementById('pdf-splitter-split-section').classList.add('hidden');
+            document.getElementById('pdf-splitter-success').classList.add('hidden');
+            document.getElementById('pdf-splitter-error').classList.add('hidden');
+            
+            // Reset inputs
+            document.getElementById('pdf-splitter-specific-pages').value = '';
+            document.getElementById('pdf-splitter-range-start').value = '';
+            document.getElementById('pdf-splitter-range-end').value = '';
+        }
+
+        // Update split method (enable/disable inputs)
+        function updateSplitMethod() {
+            const method = document.querySelector('input[name="split-method"]:checked').value;
+            
+            // Disable all inputs first
+            document.getElementById('pdf-splitter-specific-pages').disabled = true;
+            document.getElementById('pdf-splitter-range-start').disabled = true;
+            document.getElementById('pdf-splitter-range-end').disabled = true;
+            
+            // Enable relevant inputs
+            if (method === 'specific') {
+                document.getElementById('pdf-splitter-specific-pages').disabled = false;
+            } else if (method === 'range') {
+                document.getElementById('pdf-splitter-range-start').disabled = false;
+                document.getElementById('pdf-splitter-range-end').disabled = false;
+            }
+        }
+
+        // Split PDF
+        async function splitPdf() {
+            if (!pdfSplitterDocument) {
+                showPdfSplitterError('Please upload a PDF file first.');
+                return;
+            }
+
+            const method = document.querySelector('input[name="split-method"]:checked').value;
+            const totalPages = pdfSplitterDocument.getPageCount();
+            let pagesToExtract = [];
+
+            try {
+                // Determine which pages to extract
+                if (method === 'all') {
+                    // All pages
+                    pagesToExtract = Array.from({ length: totalPages }, (_, i) => i);
+                } else if (method === 'specific') {
+                    // Specific pages
+                    const input = document.getElementById('pdf-splitter-specific-pages').value;
+                    if (!input.trim()) {
+                        showPdfSplitterError('Please enter page numbers (e.g., 1, 3, 5)');
+                        return;
+                    }
+                    
+                    const pageNumbers = input.split(',').map(p => parseInt(p.trim())).filter(p => !isNaN(p) && p > 0 && p <= totalPages);
+                    if (pageNumbers.length === 0) {
+                        showPdfSplitterError('Please enter valid page numbers between 1 and ' + totalPages);
+                        return;
+                    }
+                    pagesToExtract = pageNumbers.map(p => p - 1); // Convert to 0-indexed
+                    
+                } else if (method === 'range') {
+                    // Page range
+                    const start = parseInt(document.getElementById('pdf-splitter-range-start').value);
+                    const end = parseInt(document.getElementById('pdf-splitter-range-end').value);
+                    
+                    if (isNaN(start) || isNaN(end)) {
+                        showPdfSplitterError('Please enter valid start and end page numbers');
+                        return;
+                    }
+                    
+                    if (start < 1 || end > totalPages || start > end) {
+                        showPdfSplitterError(`Please enter valid page range (1-${totalPages})`);
+                        return;
+                    }
+                    
+                    pagesToExtract = Array.from({ length: end - start + 1 }, (_, i) => start - 1 + i);
+                }
+
+                // Show progress
+                document.getElementById('pdf-splitter-progress').classList.remove('hidden');
+                document.getElementById('pdf-splitter-error').classList.add('hidden');
+                document.getElementById('pdf-splitter-success').classList.add('hidden');
+                document.getElementById('pdf-splitter-split-btn').disabled = true;
+
+                const progressBar = document.getElementById('pdf-splitter-progress-bar');
+                const progressText = document.getElementById('pdf-splitter-progress-text');
+
+                splitPdfPages = [];
+                const { PDFDocument } = PDFLib;
+
+                // Create separate PDF for each page
+                for (let i = 0; i < pagesToExtract.length; i++) {
+                    const pageIndex = pagesToExtract[i];
+                    
+                    // Update progress
+                    const progress = ((i / pagesToExtract.length) * 100).toFixed(0);
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `Extracting page ${i + 1} of ${pagesToExtract.length}...`;
+
+                    // Create new PDF with single page
+                    const newPdf = await PDFDocument.create();
+                    const [copiedPage] = await newPdf.copyPages(pdfSplitterDocument, [pageIndex]);
+                    newPdf.addPage(copiedPage);
+
+                    // Save as bytes
+                    const pdfBytes = await newPdf.save();
+                    splitPdfPages.push({
+                        pageNumber: pageIndex + 1,
+                        bytes: pdfBytes
+                    });
+                }
+
+                // Update progress to 100%
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Preparing download...';
+
+                // Hide progress, show success
+                document.getElementById('pdf-splitter-progress').classList.add('hidden');
+                document.getElementById('pdf-splitter-success-text').textContent = `Successfully extracted ${splitPdfPages.length} page(s)`;
+                document.getElementById('pdf-splitter-success').classList.remove('hidden');
+                document.getElementById('pdf-splitter-split-btn').disabled = false;
+
+            } catch (error) {
+                console.error('PDF splitter error:', error);
+                document.getElementById('pdf-splitter-progress').classList.add('hidden');
+                document.getElementById('pdf-splitter-split-btn').disabled = false;
+                
+                if (error.message && error.message.includes('password')) {
+                    showPdfSplitterError('This PDF is password-protected. Please remove the password first.');
+                } else {
+                    showPdfSplitterError('Failed to split PDF: ' + error.message);
+                }
+            }
+        }
+
+        // Download split PDFs as ZIP
+        async function downloadSplitPdfs() {
+            if (splitPdfPages.length === 0) {
+                showPdfSplitterError('No pages to download. Please split the PDF first.');
+                return;
+            }
+
+            try {
+                const zip = new JSZip();
+                const baseFilename = pdfSplitterFile.name.replace('.pdf', '');
+
+                // Add each page to ZIP
+                splitPdfPages.forEach((page) => {
+                    const filename = `${baseFilename}_page_${page.pageNumber}.pdf`;
+                    zip.file(filename, page.bytes);
+                });
+
+                // Generate ZIP
+                const zipBlob = await zip.generateAsync({ 
+                    type: 'blob',
+                    compression: 'DEFLATE',
+                    compressionOptions: { level: 6 }
+                });
+
+                // Download ZIP
+                const url = URL.createObjectURL(zipBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${baseFilename}_split.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error('Download error:', error);
+                showPdfSplitterError('Failed to download ZIP: ' + error.message);
+            }
+        }
+
+        // Show error message
+        function showPdfSplitterError(message) {
+            document.getElementById('pdf-splitter-error-message').textContent = message;
+            document.getElementById('pdf-splitter-error').classList.remove('hidden');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initPdfSplitter();
+        });
+
+        // ============================================
+        // END OF PDF SPLITTER
+        // ============================================
+
+        // ============================================
+        // PDF ENCRYPTOR FUNCTIONALITY (Using Pyodide + PyPDF2)
+        // ============================================
+
+        let pdfEncryptorFile = null;
+        let encryptedPdfBytes = null;
+        let pyodideInstance = null;
+        let pyodideLoaded = false;
+
+        // Initialize PDF Encryptor
+        function initPdfEncryptor() {
+            const dropZone = document.getElementById('pdf-encryptor-drop-zone');
+            const fileInput = document.getElementById('pdf-encryptor-file-input');
+
+            // Click to browse
+            dropZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file && file.type === 'application/pdf') {
+                    handlePdfEncryptorFile(file);
+                }
+            });
+
+            // Drag and drop
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-purple-500', 'bg-purple-50');
+            });
+
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-purple-500', 'bg-purple-50');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-purple-500', 'bg-purple-50');
+                
+                const file = e.dataTransfer.files[0];
+                if (file && file.type === 'application/pdf') {
+                    handlePdfEncryptorFile(file);
+                } else {
+                    showPdfEncryptorError('Please upload a valid PDF file.');
+                }
+            });
+        }
+
+        // Load Pyodide and PyPDF2
+        async function initializePyodideEncryption() {
+            if (pyodideLoaded) return pyodideInstance;
+
+            try {
+                console.log('Loading Pyodide...');
+                pyodideInstance = await loadPyodide(); // Global function from Pyodide CDN
+                
+                console.log('Installing PyPDF2...');
+                await pyodideInstance.loadPackage('micropip');
+                await pyodideInstance.runPythonAsync(`
+                    import micropip
+                    await micropip.install('pypdf2')
+                `);
+                
+                pyodideLoaded = true;
+                console.log('Pyodide and PyPDF2 loaded successfully!');
+                return pyodideInstance;
+            } catch (error) {
+                console.error('Pyodide loading error:', error);
+                throw new Error('Failed to initialize PDF encryption engine.');
+            }
+        }
+
+        // Handle PDF file upload
+        function handlePdfEncryptorFile(file) {
+            pdfEncryptorFile = file;
+            
+            // Show file info
+            document.getElementById('pdf-encryptor-filename').textContent = file.name;
+            document.getElementById('pdf-encryptor-filesize').textContent = formatFileSize(file.size);
+            document.getElementById('pdf-encryptor-file-info').classList.remove('hidden');
+            
+            // Show password section and encrypt button
+            document.getElementById('pdf-encryptor-password-section').classList.remove('hidden');
+            document.getElementById('pdf-encryptor-encrypt-section').classList.remove('hidden');
+            
+            // Hide error and success
+            document.getElementById('pdf-encryptor-error').classList.add('hidden');
+            document.getElementById('pdf-encryptor-success').classList.add('hidden');
+        }
+
+        // Clear uploaded file
+        function clearPdfEncryptorFile() {
+            pdfEncryptorFile = null;
+            encryptedPdfBytes = null;
+            
+            // Reset file input
+            document.getElementById('pdf-encryptor-file-input').value = '';
+            
+            // Hide all sections
+            document.getElementById('pdf-encryptor-file-info').classList.add('hidden');
+            document.getElementById('pdf-encryptor-password-section').classList.add('hidden');
+            document.getElementById('pdf-encryptor-encrypt-section').classList.add('hidden');
+            document.getElementById('pdf-encryptor-success').classList.add('hidden');
+            document.getElementById('pdf-encryptor-error').classList.add('hidden');
+            document.getElementById('pdf-encryptor-strength-section').classList.add('hidden');
+            
+            // Clear password inputs
+            document.getElementById('pdf-encryptor-password').value = '';
+            document.getElementById('pdf-encryptor-password-confirm').value = '';
+        }
+
+        // Toggle password visibility
+        function toggleEncryptPasswordVisibility(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        }
+
+        // Check password strength
+        function checkEncryptPasswordStrength() {
+            const password = document.getElementById('pdf-encryptor-password').value;
+            const strengthSection = document.getElementById('pdf-encryptor-strength-section');
+            const strengthBar = document.getElementById('pdf-encryptor-strength-bar');
+            const strengthText = document.getElementById('pdf-encryptor-strength-text');
+
+            if (!password) {
+                strengthSection.classList.add('hidden');
+                return;
+            }
+
+            strengthSection.classList.remove('hidden');
+
+            let strength = 0;
+            let label = '';
+            let color = '';
+
+            // Check password criteria
+            if (password.length >= 8) strength += 25;
+            if (password.length >= 12) strength += 25;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 25;
+            if (/\d/.test(password)) strength += 15;
+            if (/[^a-zA-Z0-9]/.test(password)) strength += 10;
+
+            // Determine label and color
+            if (strength < 40) {
+                label = 'Weak';
+                color = '#ef4444';
+            } else if (strength < 60) {
+                label = 'Fair';
+                color = '#f59e0b';
+            } else if (strength < 80) {
+                label = 'Good';
+                color = '#3b82f6';
+            } else {
+                label = 'Strong';
+                color = '#10b981';
+            }
+
+            strengthBar.style.width = `${strength}%`;
+            strengthBar.style.backgroundColor = color;
+            strengthText.textContent = label;
+            strengthText.style.color = color;
+
+            // Also check match
+            checkPasswordMatch();
+        }
+
+        // Check password match
+        function checkPasswordMatch() {
+            const password = document.getElementById('pdf-encryptor-password').value;
+            const confirm = document.getElementById('pdf-encryptor-password-confirm').value;
+            const matchText = document.getElementById('pdf-encryptor-password-match');
+
+            if (!confirm) {
+                matchText.classList.add('hidden');
+                return;
+            }
+
+            matchText.classList.remove('hidden');
+
+            if (password === confirm) {
+                matchText.textContent = '✓ Passwords match';
+                matchText.className = 'text-sm mt-1 text-green-600';
+            } else {
+                matchText.textContent = '✗ Passwords do not match';
+                matchText.className = 'text-sm mt-1 text-red-600';
+            }
+        }
+
+        // Encrypt PDF
+        async function encryptPdf() {
+            if (!pdfEncryptorFile) {
+                showPdfEncryptorError('Please upload a PDF file first.');
+                return;
+            }
+
+            const password = document.getElementById('pdf-encryptor-password').value;
+            const confirmPassword = document.getElementById('pdf-encryptor-password-confirm').value;
+
+            if (!password) {
+                showPdfEncryptorError('Please enter a password.');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showPdfEncryptorError('Passwords do not match. Please re-enter.');
+                return;
+            }
+
+            if (password.length < 6) {
+                showPdfEncryptorError('Password must be at least 6 characters long.');
+                return;
+            }
+
+            try {
+                // Show progress
+                const progressDiv = document.getElementById('pdf-encryptor-progress');
+                progressDiv.classList.remove('hidden');
+                progressDiv.querySelector('.font-semibold').textContent = 'Initializing encryption engine...';
+                document.getElementById('pdf-encryptor-error').classList.add('hidden');
+                document.getElementById('pdf-encryptor-success').classList.add('hidden');
+                document.getElementById('pdf-encryptor-encrypt-btn').disabled = true;
+
+                // Load Pyodide (first time only)
+                if (!pyodideLoaded) {
+                    progressDiv.querySelector('.font-semibold').textContent = 'Loading encryption engine (this may take a moment on first use)...';
+                    await initializePyodideEncryption();
+                }
+
+                progressDiv.querySelector('.font-semibold').textContent = 'Encrypting your PDF...';
+
+                // Read PDF file
+                const fileBytes = await pdfEncryptorFile.arrayBuffer();
+                const uint8Array = new Uint8Array(fileBytes);
+
+                // Store PDF in Pyodide's file system
+                pyodideInstance.FS.writeFile('input.pdf', uint8Array);
+
+                // Run Python encryption code
+                await pyodideInstance.runPythonAsync(`
+from PyPDF2 import PdfReader, PdfWriter
+import js
+
+# Read the input PDF
+reader = PdfReader('input.pdf')
+writer = PdfWriter()
+
+# Copy all pages
+for page in reader.pages:
+    writer.add_page(page)
+
+# Encrypt with password
+writer.encrypt('${password.replace(/'/g, "\\'")}')
+
+# Write to output
+with open('output.pdf', 'wb') as output_file:
+    writer.write(output_file)
+                `);
+
+                // Read encrypted PDF from Pyodide's file system
+                const encryptedBytes = pyodideInstance.FS.readFile('output.pdf');
+                encryptedPdfBytes = encryptedBytes.buffer;
+
+                // Clean up files from Pyodide FS
+                try {
+                    pyodideInstance.FS.unlink('input.pdf');
+                    pyodideInstance.FS.unlink('output.pdf');
+                } catch (e) {
+                    // Ignore cleanup errors
+                }
+
+                // Hide progress, show success
+                progressDiv.classList.add('hidden');
+                document.getElementById('pdf-encryptor-success').classList.remove('hidden');
+                document.getElementById('pdf-encryptor-encrypt-btn').disabled = false;
+
+            } catch (error) {
+                console.error('PDF encryption error:', error);
+                document.getElementById('pdf-encryptor-progress').classList.add('hidden');
+                document.getElementById('pdf-encryptor-encrypt-btn').disabled = false;
+
+                if (error.message.includes('Failed to initialize')) {
+                    showPdfEncryptorError('Failed to load encryption engine. Please try again or refresh the page.');
+                } else {
+                    showPdfEncryptorError('Failed to encrypt PDF: ' + error.message);
+                }
+            }
+        }
+
+        // Download encrypted PDF
+        function downloadEncryptedPdf() {
+            if (!encryptedPdfBytes) {
+                showPdfEncryptorError('No encrypted PDF available. Please encrypt a PDF first.');
+                return;
+            }
+
+            try {
+                const blob = new Blob([encryptedPdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = pdfEncryptorFile.name.replace('.pdf', '_protected.pdf');
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Download error:', error);
+                showPdfEncryptorError('Failed to download encrypted PDF: ' + error.message);
+            }
+        }
+
+        // Show error message
+        function showPdfEncryptorError(message) {
+            document.getElementById('pdf-encryptor-error-message').textContent = message;
+            document.getElementById('pdf-encryptor-error').classList.remove('hidden');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initPdfEncryptor();
+        });
+
+        // ============================================
+        // END OF PDF ENCRYPTOR
+        // ============================================
+
+
 
         // Privacy Policy Toggle Function
         function togglePrivacyDetails() {
@@ -17405,6 +20200,541 @@ Tips:
                 initializeBMICalculator();
             }, 200);
         });
+
+        // ============================================
+        // PDF TO IMAGES FUNCTIONS
+        // ============================================
+        
+        let pdfToImagesFile = null;
+        let pdfToImagesDocument = null;
+        let convertedImages = [];
+        let pdfToImagesFilename = '';
+
+        // Initialize PDF to Images functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('pdf-to-images-drop-zone');
+            const fileInput = document.getElementById('pdf-to-images-file-input');
+            const qualitySlider = document.getElementById('pdf-to-images-quality');
+            const qualityValue = document.getElementById('pdf-to-images-quality-value');
+            const scaleSlider = document.getElementById('pdf-to-images-scale');
+            const scaleValue = document.getElementById('pdf-to-images-scale-value');
+            const pageRangeInput = document.getElementById('pdf-to-images-page-range');
+            const pageRadios = document.querySelectorAll('input[name="pdf-to-images-pages"]');
+
+            if (!dropZone || !fileInput) return;
+
+            // Click to browse
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handlePdfToImagesFile(e.target.files[0]);
+                }
+            });
+
+            // Drag and drop
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-orange-500', 'bg-orange-50');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('border-orange-500', 'bg-orange-50');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-orange-500', 'bg-orange-50');
+                if (e.dataTransfer.files.length > 0) {
+                    handlePdfToImagesFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            // Quality slider
+            if (qualitySlider && qualityValue) {
+                qualitySlider.addEventListener('input', (e) => {
+                    qualityValue.textContent = e.target.value + '%';
+                });
+            }
+
+            // Scale slider
+            if (scaleSlider && scaleValue) {
+                scaleSlider.addEventListener('input', (e) => {
+                    const scale = parseFloat(e.target.value);
+                    scaleValue.textContent = scale + 'x' + (scale >= 2 ? ' (High Quality)' : '');
+                });
+            }
+
+            // Page selection radio
+            pageRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    if (pageRangeInput) {
+                        pageRangeInput.disabled = radio.value === 'all';
+                    }
+                });
+            });
+        });
+
+        function handlePdfToImagesFile(file) {
+            if (file.type !== 'application/pdf') {
+                showPdfToImagesError('Please select a valid PDF file.');
+                return;
+            }
+
+            pdfToImagesFile = file;
+            pdfToImagesFilename = file.name.replace('.pdf', '');
+
+            // Update UI
+            document.getElementById('pdf-to-images-filename').textContent = file.name;
+            document.getElementById('pdf-to-images-filesize').textContent = 
+                'Size: ' + (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+            document.getElementById('pdf-to-images-file-info').classList.remove('hidden');
+
+            // Hide previous results
+            document.getElementById('pdf-to-images-success').classList.add('hidden');
+            document.getElementById('pdf-to-images-error').classList.add('hidden');
+
+            // Load PDF to get page count
+            loadPdfForImages(file);
+        }
+
+        async function loadPdfForImages(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
+                pdfToImagesDocument = await loadingTask.promise;
+
+                const numPages = pdfToImagesDocument.numPages;
+                
+                // Update UI
+                document.getElementById('pdf-to-images-total-pages').textContent = numPages;
+                document.getElementById('pdf-to-images-options-section').classList.remove('hidden');
+                document.getElementById('pdf-to-images-convert-section').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                showPdfToImagesError('Failed to load PDF. Please try another file.');
+            }
+        }
+
+        function clearPdfToImagesFile() {
+            pdfToImagesFile = null;
+            pdfToImagesDocument = null;
+            convertedImages = [];
+            pdfToImagesFilename = '';
+            
+            document.getElementById('pdf-to-images-file-input').value = '';
+            document.getElementById('pdf-to-images-file-info').classList.add('hidden');
+            document.getElementById('pdf-to-images-options-section').classList.add('hidden');
+            document.getElementById('pdf-to-images-convert-section').classList.add('hidden');
+            document.getElementById('pdf-to-images-success').classList.add('hidden');
+            document.getElementById('pdf-to-images-error').classList.add('hidden');
+            document.getElementById('pdf-to-images-progress').classList.add('hidden');
+        }
+
+        async function convertPdfToImages() {
+            if (!pdfToImagesDocument) {
+                showPdfToImagesError('Please upload a PDF file first.');
+                return;
+            }
+
+            // Get options
+            const format = document.querySelector('input[name="pdf-to-images-format"]:checked').value;
+            const quality = parseInt(document.getElementById('pdf-to-images-quality').value) / 100;
+            const scale = parseFloat(document.getElementById('pdf-to-images-scale').value);
+            const pageSelection = document.querySelector('input[name="pdf-to-images-pages"]:checked').value;
+            
+            // Get page numbers to convert
+            let pagesToConvert = [];
+            const totalPages = pdfToImagesDocument.numPages;
+
+            if (pageSelection === 'all') {
+                for (let i = 1; i <= totalPages; i++) {
+                    pagesToConvert.push(i);
+                }
+            } else {
+                const pageRange = document.getElementById('pdf-to-images-page-range').value;
+                pagesToConvert = parsePageRange(pageRange, totalPages);
+                
+                if (pagesToConvert.length === 0) {
+                    showPdfToImagesError('Please enter valid page numbers. Example: 1,3-5,7');
+                    return;
+                }
+            }
+
+            // Show progress
+            document.getElementById('pdf-to-images-convert-section').classList.add('hidden');
+            document.getElementById('pdf-to-images-progress').classList.remove('hidden');
+            document.getElementById('pdf-to-images-error').classList.add('hidden');
+
+            convertedImages = [];
+
+            try {
+                for (let i = 0; i < pagesToConvert.length; i++) {
+                    const pageNum = pagesToConvert[i];
+                    
+                    // Update progress
+                    const progress = ((i + 1) / pagesToConvert.length) * 100;
+                    document.getElementById('pdf-to-images-progress-bar').style.width = progress + '%';
+                    document.getElementById('pdf-to-images-progress-percent').textContent = Math.round(progress) + '%';
+                    document.getElementById('pdf-to-images-progress-text').textContent = 
+                        `Converting page ${pageNum} of ${totalPages}...`;
+
+                    // Render page to canvas
+                    const page = await pdfToImagesDocument.getPage(pageNum);
+                    const viewport = page.getViewport({ scale: scale });
+                    
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    await page.render({
+                        canvasContext: context,
+                        viewport: viewport
+                    }).promise;
+
+                    // Convert to image
+                    const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+                    const imageBlob = await new Promise(resolve => {
+                        canvas.toBlob(resolve, mimeType, quality);
+                    });
+
+                    convertedImages.push({
+                        pageNum: pageNum,
+                        blob: imageBlob,
+                        format: format
+                    });
+
+                    // Small delay to prevent browser freeze
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                }
+
+                // Show success
+                showPdfToImagesSuccess();
+
+            } catch (error) {
+                console.error('Error converting PDF to images:', error);
+                showPdfToImagesError('Failed to convert PDF. Please try again.');
+                document.getElementById('pdf-to-images-convert-section').classList.remove('hidden');
+            } finally {
+                document.getElementById('pdf-to-images-progress').classList.add('hidden');
+            }
+        }
+
+        function parsePageRange(rangeStr, maxPages) {
+            const pages = new Set();
+            const parts = rangeStr.split(',');
+
+            for (let part of parts) {
+                part = part.trim();
+                
+                if (part.includes('-')) {
+                    const [start, end] = part.split('-').map(n => parseInt(n.trim()));
+                    if (isNaN(start) || isNaN(end) || start < 1 || end > maxPages || start > end) {
+                        return [];
+                    }
+                    for (let i = start; i <= end; i++) {
+                        pages.add(i);
+                    }
+                } else {
+                    const num = parseInt(part);
+                    if (isNaN(num) || num < 1 || num > maxPages) {
+                        return [];
+                    }
+                    pages.add(num);
+                }
+            }
+
+            return Array.from(pages).sort((a, b) => a - b);
+        }
+
+        function showPdfToImagesSuccess() {
+            // Calculate total size
+            let totalSize = 0;
+            convertedImages.forEach(img => {
+                totalSize += img.blob.size;
+            });
+
+            // Update UI
+            document.getElementById('pdf-to-images-success-count').textContent = convertedImages.length;
+            document.getElementById('pdf-to-images-total-size').textContent = 
+                '~' + (totalSize / (1024 * 1024)).toFixed(2) + ' MB';
+            document.getElementById('pdf-to-images-naming-example').textContent = 
+                `${pdfToImagesFilename}-page-1.${convertedImages[0].format}, ${pdfToImagesFilename}-page-2.${convertedImages[0].format}, ...`;
+
+            // Create preview thumbnails
+            const previewContainer = document.getElementById('pdf-to-images-preview');
+            previewContainer.innerHTML = '';
+
+            convertedImages.slice(0, 10).forEach((img, index) => {
+                const thumbnail = document.createElement('div');
+                thumbnail.className = 'w-12 h-16 border-2 border-gray-300 rounded flex items-center justify-center text-xs font-semibold bg-gray-100';
+                thumbnail.textContent = img.pageNum;
+                previewContainer.appendChild(thumbnail);
+            });
+
+            if (convertedImages.length > 10) {
+                const more = document.createElement('div');
+                more.className = 'w-12 h-16 border-2 border-gray-300 rounded flex items-center justify-center text-xs font-semibold bg-gray-100';
+                more.textContent = `+${convertedImages.length - 10}`;
+                previewContainer.appendChild(more);
+            }
+
+            document.getElementById('pdf-to-images-success').classList.remove('hidden');
+        }
+
+        async function downloadImagesAsZip() {
+            if (convertedImages.length === 0) {
+                alert('No images to download!');
+                return;
+            }
+
+            try {
+                // Create ZIP file
+                const zip = new JSZip();
+
+                convertedImages.forEach((img, index) => {
+                    const filename = `${pdfToImagesFilename}-page-${img.pageNum}.${img.format}`;
+                    zip.file(filename, img.blob);
+                });
+
+                // Generate ZIP
+                const zipBlob = await zip.generateAsync({
+                    type: 'blob',
+                    compression: 'DEFLATE',
+                    compressionOptions: { level: 6 }
+                });
+
+                // Download
+                const url = URL.createObjectURL(zipBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${pdfToImagesFilename}-images.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error('Error creating ZIP:', error);
+                alert('Failed to create ZIP file. Please try again.');
+            }
+        }
+
+        function showPdfToImagesError(message) {
+            document.getElementById('pdf-to-images-error-message').textContent = message;
+            document.getElementById('pdf-to-images-error').classList.remove('hidden');
+            document.getElementById('pdf-to-images-success').classList.add('hidden');
+        }
+
+        // ============================================
+        // TOOL SEARCH FUNCTIONALITY
+        // ============================================
+
+        let allToolCards = [];
+        let totalToolCount = 0;
+
+        // Initialize tool search on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('tool-search-input');
+            const clearBtn = document.getElementById('clear-search-btn');
+            
+            if (!searchInput) return;
+
+            // Get all tool cards
+            allToolCards = document.querySelectorAll('.tool-card');
+            totalToolCount = allToolCards.length;
+
+            // Real-time search as user types
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.trim();
+                
+                // Show/hide clear button
+                if (searchTerm.length > 0) {
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    clearBtn.classList.add('hidden');
+                }
+
+                // Perform search
+                performToolSearch(searchTerm);
+            });
+
+            // Clear search on Escape key
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    clearToolSearch();
+                }
+            });
+
+            // Focus search input on Ctrl+K or Cmd+K
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+        });
+
+        function performToolSearch(searchTerm) {
+            const searchLower = searchTerm.toLowerCase();
+            const unifiedResults = document.getElementById('unified-search-results');
+            const unifiedGrid = document.getElementById('unified-search-grid');
+            const toolSections = document.querySelectorAll('.tool-section');
+            
+            // If search is empty, restore original layout
+            if (searchTerm === '') {
+                // Hide unified results
+                unifiedResults.classList.add('hidden');
+                unifiedGrid.innerHTML = '';
+                
+                // Show all original sections
+                toolSections.forEach(section => {
+                    section.classList.remove('tool-section-hidden');
+                });
+                
+                // Show all tools in their original sections
+                allToolCards.forEach(card => {
+                    card.classList.remove('tool-hidden');
+                });
+                
+                return;
+            }
+            
+            // Search is active - use unified layout
+            let matchingTools = [];
+            
+            allToolCards.forEach(card => {
+                // Get tool information
+                const toolName = card.querySelector('h4')?.textContent.toLowerCase() || '';
+                const toolDescription = card.querySelector('p')?.textContent.toLowerCase() || '';
+                const toolFeatures = Array.from(card.querySelectorAll('.flex.items-center span'))
+                    .map(span => span.textContent.toLowerCase())
+                    .join(' ');
+
+                // Check if search term matches
+                const matches = 
+                    toolName.includes(searchLower) || 
+                    toolDescription.includes(searchLower) || 
+                    toolFeatures.includes(searchLower);
+
+                if (matches) {
+                    matchingTools.push(card);
+                }
+            });
+            
+            // Hide all original sections
+            toolSections.forEach(section => {
+                section.classList.add('tool-section-hidden');
+            });
+            
+            // Show unified results section
+            unifiedResults.classList.remove('hidden');
+            
+            // Clear and populate unified grid
+            unifiedGrid.innerHTML = '';
+            
+            if (matchingTools.length > 0) {
+                matchingTools.forEach(card => {
+                    // Clone the tool card and add to unified grid
+                    const clone = card.cloneNode(true);
+                    clone.classList.remove('tool-hidden');
+                    unifiedGrid.appendChild(clone);
+                });
+            }
+            
+            // Update UI based on results
+            updateSearchUI(searchTerm, matchingTools.length);
+        }
+
+        function updateSearchUI(searchTerm, visibleCount) {
+            const helperText = document.getElementById('search-helper-text');
+            const resultsCounter = document.getElementById('search-results-counter');
+            const noResultsMsg = document.getElementById('no-results-message');
+            const unifiedSubtitle = document.getElementById('unified-search-subtitle');
+
+            if (searchTerm === '') {
+                // No search - show helper text
+                helperText.classList.remove('hidden');
+                resultsCounter.classList.add('hidden');
+                noResultsMsg.classList.add('hidden');
+            } else if (visibleCount === 0) {
+                // No results found
+                helperText.classList.add('hidden');
+                resultsCounter.classList.add('hidden');
+                noResultsMsg.classList.remove('hidden');
+                
+                // Hide unified results section
+                document.getElementById('unified-search-results').classList.add('hidden');
+                
+                // Show no results in main area
+                noResultsMsg.classList.remove('hidden');
+            } else {
+                // Show results counter
+                helperText.classList.add('hidden');
+                resultsCounter.classList.remove('hidden');
+                noResultsMsg.classList.add('hidden');
+                
+                if (visibleCount === totalToolCount) {
+                    resultsCounter.textContent = `Showing all ${totalToolCount} tools`;
+                    if (unifiedSubtitle) {
+                        unifiedSubtitle.textContent = `All ${totalToolCount} tools match your search`;
+                    }
+                } else {
+                    resultsCounter.textContent = `Showing ${visibleCount} of ${totalToolCount} tools`;
+                    if (unifiedSubtitle) {
+                        unifiedSubtitle.textContent = `Found ${visibleCount} matching tools`;
+                    }
+                }
+            }
+        }
+
+        function clearToolSearch() {
+            const searchInput = document.getElementById('tool-search-input');
+            const clearBtn = document.getElementById('clear-search-btn');
+            
+            // Clear input
+            searchInput.value = '';
+            
+            // Hide clear button
+            clearBtn.classList.add('hidden');
+            
+            // Show all tools
+            performToolSearch('');
+            
+            // Focus back on input
+            searchInput.focus();
+        }
+
+        // ============================================
+        // MILESTONE BANNER FUNCTIONS
+        // ============================================
+        
+        function dismissMilestoneBanner() {
+            const banner = document.getElementById('milestone-banner');
+            if (banner) {
+                banner.style.transform = 'translateY(-100%)';
+                setTimeout(() => {
+                    banner.style.display = 'none';
+                    // Store in localStorage so it doesn't show again
+                    localStorage.setItem('milestoneBannerDismissed', 'true');
+                }, 500);
+            }
+        }
+
+        // Check if banner was previously dismissed
+        document.addEventListener('DOMContentLoaded', function() {
+            const bannerDismissed = localStorage.getItem('milestoneBannerDismissed');
+            if (bannerDismissed === 'true') {
+                const banner = document.getElementById('milestone-banner');
+                if (banner) {
+                    banner.style.display = 'none';
+                }
+            }
+        });
+
     </script>
 </body>
 </html>
