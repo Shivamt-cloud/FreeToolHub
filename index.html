@@ -11,6 +11,14 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7327960019798694"
      crossorigin="anonymous"></script>
     
+    <!-- Automated Ads -->
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-7327960019798694",
+        enable_page_level_ads: true
+    });
+    </script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Google Fonts for Signature Styles -->
@@ -350,10 +358,10 @@
 
                 <!-- Title -->
                 <h3 class="text-3xl font-bold text-gray-800 mb-2">
-                    Exciting News!
+                    Discover Amazing Tools!
                 </h3>
                 <p class="text-lg text-gray-600 mb-6">
-                    We've added awesome new tools!
+                    Explore our collection of 50+ professional tools
                 </p>
 
                 <!-- Featured Tool (Dynamic) -->
@@ -362,7 +370,7 @@
                 </div>
 
                 <!-- CTA Button -->
-                <button onclick="closeCongratsPopup()" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 px-8 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                <button onclick="openFeaturedTool()" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 px-8 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
                     Check it out! →
                 </button>
 
@@ -9606,8 +9614,189 @@
         // CONGRATULATIONS POPUP FOR NEW TOOLS
         // ============================================
 
-        // List of new tools for random selection
-        const newTools = [
+        // Complete list of all tools for random selection
+        const allTools = [
+            // Student Tools
+            {
+                icon: '🧮',
+                name: 'Scientific Calculator',
+                description: 'Advanced calculator with scientific functions, variables, and expression evaluation',
+                sectionId: 'student-tools'
+            },
+            {
+                icon: '⏰',
+                name: 'Study Timer & Pomodoro',
+                description: 'Advanced study timer with Pomodoro technique, focus sessions, and productivity analytics',
+                sectionId: 'student-tools'
+            },
+            {
+                icon: '🧠',
+                name: 'Math Solver',
+                description: 'Solve complex mathematical equations and problems step by step',
+                sectionId: 'student-tools'
+            },
+            {
+                icon: '📊',
+                name: 'Grade Calculator',
+                description: 'Calculate your GPA and track academic performance',
+                sectionId: 'student-tools'
+            },
+            {
+                icon: '📚',
+                name: 'Citation Generator',
+                description: 'Generate citations in APA, MLA, Chicago, and other formats',
+                sectionId: 'student-tools'
+            },
+            {
+                icon: '📅',
+                name: 'Study Planner & Schedule',
+                description: 'Create personalized study schedules and track your progress',
+                sectionId: 'student-tools'
+            },
+            {
+                icon: '🎴',
+                name: 'Flashcard Generator',
+                description: 'Create and study with digital flashcards for better retention',
+                sectionId: 'student-tools'
+            },
+            {
+                icon: '📈',
+                name: 'Progress Tracker & Analytics',
+                description: 'Track your learning progress with detailed analytics and insights',
+                sectionId: 'student-tools'
+            },
+            {
+                icon: '🎂',
+                name: 'Age Calculator',
+                description: 'Calculate your exact age in years, months, days, and more',
+                sectionId: 'student-tools'
+            },
+            {
+                icon: '⚖️',
+                name: 'BMI Calculator',
+                description: 'Calculate your Body Mass Index and health metrics',
+                sectionId: 'student-tools'
+            },
+            
+            // Professional Tools
+            {
+                icon: '🏦',
+                name: 'Professional Loan Calculator',
+                description: 'Calculate loan payments, interest, and amortization schedules',
+                sectionId: 'professional-tools'
+            },
+            {
+                icon: '📈',
+                name: 'Investment Calculator',
+                description: 'Plan your investments with compound interest calculations',
+                sectionId: 'professional-tools'
+            },
+            {
+                icon: '🧾',
+                name: 'Tax Calculator',
+                description: 'Calculate income tax, deductions, and tax planning',
+                sectionId: 'professional-tools'
+            },
+            {
+                icon: '📊',
+                name: 'Business Metrics Calculator',
+                description: 'Calculate key business metrics and financial ratios',
+                sectionId: 'professional-tools'
+            },
+            {
+                icon: '💱',
+                name: 'Currency Converter',
+                description: 'Convert between different currencies with real-time rates',
+                sectionId: 'professional-tools'
+            },
+            {
+                icon: '🏠',
+                name: 'Mortgage Calculator',
+                description: 'Calculate mortgage payments, interest, and loan terms',
+                sectionId: 'professional-tools'
+            },
+            {
+                icon: '💰',
+                name: 'Retirement Calculator',
+                description: 'Plan your retirement savings and investment goals',
+                sectionId: 'professional-tools'
+            },
+            {
+                icon: '📊',
+                name: 'Budget Planner',
+                description: 'Create and manage your personal or business budget',
+                sectionId: 'professional-tools'
+            },
+            {
+                icon: '💼',
+                name: 'Salary Calculator',
+                description: 'Calculate salary, benefits, and compensation packages',
+                sectionId: 'professional-tools'
+            },
+            
+            // Developer Tools
+            {
+                icon: '📄',
+                name: 'JSON Formatter & Validator',
+                description: 'Format, validate, and beautify JSON data',
+                sectionId: 'developer-tools'
+            },
+            {
+                icon: '📄',
+                name: 'XML Formatter & Validator',
+                description: 'Format, validate, and beautify XML data',
+                sectionId: 'developer-tools'
+            },
+            {
+                icon: '🔐',
+                name: 'Base64 Encoder/Decoder',
+                description: 'Encode and decode Base64 strings',
+                sectionId: 'developer-tools'
+            },
+            {
+                icon: '🔑',
+                name: 'Hash Generator',
+                description: 'Generate MD5, SHA-1, SHA-256, and other hash values',
+                sectionId: 'developer-tools'
+            },
+            {
+                icon: '🔗',
+                name: 'URL Encoder/Decoder',
+                description: 'Encode and decode URL strings and parameters',
+                sectionId: 'developer-tools'
+            },
+            {
+                icon: '🔍',
+                name: 'Regex Tester',
+                description: 'Test and debug regular expressions with live preview',
+                sectionId: 'developer-tools'
+            },
+            {
+                icon: '🎨',
+                name: 'Color Palette Generator',
+                description: 'Generate beautiful color palettes for your projects',
+                sectionId: 'developer-tools'
+            },
+            {
+                icon: '⚡',
+                name: 'CSS/JS Minifier',
+                description: 'Minify CSS and JavaScript code for better performance',
+                sectionId: 'developer-tools'
+            },
+            {
+                icon: '📝',
+                name: 'Lorem Ipsum Generator',
+                description: 'Generate placeholder text for your designs and prototypes',
+                sectionId: 'developer-tools'
+            },
+            {
+                icon: '⏰',
+                name: 'Timestamp Converter',
+                description: 'Convert between different timestamp formats and timezones',
+                sectionId: 'developer-tools'
+            },
+            
+            // PDF Tools
             {
                 icon: '🔓',
                 name: 'PDF Password Remover',
@@ -9638,10 +9827,12 @@
                 description: 'Convert PDF pages to JPG or PNG images',
                 sectionId: 'pdf-tools'
             },
+            
+            // Image Tools
             {
                 icon: '📸',
-                name: 'Image to PDF',
-                description: 'Convert images to PDF documents',
+                name: 'Image to PDF Converter',
+                description: 'Convert multiple images to a single PDF document',
                 sectionId: 'image-tools'
             },
             {
@@ -9662,6 +9853,8 @@
                 description: 'Resize images to any dimensions',
                 sectionId: 'image-tools'
             },
+            
+            // Utility Tools
             {
                 icon: '✍️',
                 name: 'Digital Signature Generator',
@@ -9676,6 +9869,9 @@
             }
         ];
 
+        // Store current featured tool globally
+        let currentFeaturedTool = null;
+
         // Show congratulations popup on page load (once per session)
         function showCongratsPopup() {
             // Check if popup was already shown in this session
@@ -9683,8 +9879,11 @@
                 return;
             }
 
-            // Select a random tool
-            const randomTool = newTools[Math.floor(Math.random() * newTools.length)];
+            // Select a random tool from all available tools
+            const randomTool = allTools[Math.floor(Math.random() * allTools.length)];
+            
+            // Store the current tool globally
+            currentFeaturedTool = randomTool;
 
             // Populate the featured tool content
             const featuredToolContent = document.getElementById('featured-tool-content');
@@ -9746,6 +9945,79 @@
             setTimeout(() => {
                 popup.classList.add('hidden');
             }, 300);
+        }
+
+        // Open the featured tool and close popup
+        function openFeaturedTool() {
+            if (!currentFeaturedTool) {
+                closeCongratsPopup();
+                return;
+            }
+
+            // Close the popup first
+            closeCongratsPopup();
+
+            // Scroll to the tool section and open the specific tool
+            setTimeout(() => {
+                // Scroll to the appropriate section
+                const sectionId = currentFeaturedTool.sectionId;
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.scrollIntoView({ behavior: 'smooth' });
+                }
+
+                // Open the specific tool modal based on the tool name
+                const toolName = currentFeaturedTool.name.toLowerCase();
+                
+                // Map tool names to their modal IDs
+                const toolModalMap = {
+                    'scientific calculator': 'scientific-calculator-modal',
+                    'study timer & pomodoro': 'study-timer-modal',
+                    'math solver': 'math-solver-modal',
+                    'grade calculator': 'grade-calculator-modal',
+                    'citation generator': 'citation-generator-modal',
+                    'study planner & schedule': 'study-planner-modal',
+                    'flashcard generator': 'flashcard-generator-modal',
+                    'progress tracker & analytics': 'progress-tracker-modal',
+                    'age calculator': 'age-calculator-modal',
+                    'bmi calculator': 'bmi-calculator-modal',
+                    'professional loan calculator': 'loan-calculator-modal',
+                    'investment calculator': 'investment-calculator-modal',
+                    'tax calculator': 'tax-calculator-modal',
+                    'business metrics calculator': 'business-metrics-calculator-modal',
+                    'currency converter': 'currency-converter-modal',
+                    'mortgage calculator': 'mortgage-calculator-modal',
+                    'retirement calculator': 'retirement-calculator-modal',
+                    'budget planner': 'budget-planner-modal',
+                    'salary calculator': 'salary-calculator-modal',
+                    'json formatter & validator': 'json-formatter-modal',
+                    'xml formatter & validator': 'xml-formatter-modal',
+                    'base64 encoder/decoder': 'base64-encoder-modal',
+                    'hash generator': 'hash-generator-modal',
+                    'url encoder/decoder': 'url-encoder-modal',
+                    'regex tester': 'regex-tester-modal',
+                    'color palette generator': 'color-palette-generator-modal',
+                    'css/js minifier': 'css-js-minifier-modal',
+                    'lorem ipsum generator': 'lorem-ipsum-generator-modal',
+                    'timestamp converter': 'timestamp-converter-modal',
+                    'pdf password remover': 'pdf-password-remover-modal',
+                    'pdf merger': 'pdf-merger-modal',
+                    'pdf splitter': 'pdf-splitter-modal',
+                    'pdf encryptor': 'pdf-encryptor-modal',
+                    'pdf to images': 'pdf-to-images-modal',
+                    'image to pdf converter': 'image-to-pdf-modal',
+                    'image compressor': 'image-compressor-modal',
+                    'image format converter': 'image-format-converter-modal',
+                    'image resizer': 'image-resizer-modal',
+                    'digital signature generator': 'digital-signature-generator-modal',
+                    'csv to json converter': 'csv-to-json-converter-modal'
+                };
+
+                const modalId = toolModalMap[toolName];
+                if (modalId && typeof openModal === 'function') {
+                    openModal(modalId);
+                }
+            }, 350); // Wait for popup close animation
         }
 
         // Show popup on page load (after a short delay for better UX)
