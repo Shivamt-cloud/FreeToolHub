@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeToolHub Icon Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .icon-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .icon-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 10px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        .icon-72 { width: 72px; height: 72px; font-size: 28px; }
+        .icon-96 { width: 96px; height: 96px; font-size: 36px; }
+        .icon-128 { width: 128px; height: 128px; font-size: 48px; }
+        .icon-144 { width: 144px; height: 144px; font-size: 54px; }
+        .icon-152 { width: 152px; height: 152px; font-size: 56px; }
+        .icon-192 { width: 192px; height: 192px; font-size: 72px; }
+        .icon-384 { width: 384px; height: 384px; font-size: 144px; }
+        .icon-512 { width: 512px; height: 512px; font-size: 192px; }
+        
+        button {
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ FreeToolHub Icon Generator</h1>
+        <p>This tool will generate all required PWA icons for your FreeToolHub app.</p>
+        
+        <div class="icon-preview">
+            <div class="icon-item">
+                <div class="icon icon-72">🛠️</div>
+                <div>72x72px</div>
+            </div>
+            <div class="icon-item">
+                <div class="icon icon-96">🛠️</div>
+                <div>96x96px</div>
+            </div>
+            <div class="icon-item">
+                <div class="icon icon-128">🛠️</div>
+                <div>128x128px</div>
+            </div>
+            <div class="icon-item">
+                <div class="icon icon-144">🛠️</div>
+                <div>144x144px</div>
+            </div>
+            <div class="icon-item">
+                <div class="icon icon-152">🛠️</div>
+                <div>152x152px</div>
+            </div>
+            <div class="icon-item">
+                <div class="icon icon-192">🛠️</div>
+                <div>192x192px</div>
+            </div>
+            <div class="icon-item">
+                <div class="icon icon-384">🛠️</div>
+                <div>384x384px</div>
+            </div>
+            <div class="icon-item">
+                <div class="icon icon-512">🛠️</div>
+                <div>512x512px</div>
+            </div>
+        </div>
+        
+        <button onclick="generateIcons()">Generate All Icons</button>
+        <button onclick="downloadAll()">Download All Icons</button>
+        
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        
+        function generateIcons() {
+            sizes.forEach(size => {
+                generateIcon(size);
+            });
+        }
+        
+        function generateIcon(size) {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#3b82f6');
+            gradient.addColorStop(1, '#8b5cf6');
+            
+            // Draw background
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Add rounded corners
+            ctx.globalCompositeOperation = 'destination-in';
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, size * 0.15);
+            ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+            
+            // Draw tool icon
+            ctx.fillStyle = 'white';
+            ctx.font = `${size * 0.4}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🛠️', size / 2, size / 2);
+            
+            // Convert to blob and download
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `icon-${size}x${size}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+        
+        function downloadAll() {
+            generateIcons();
+        }
+        
+        // Add roundRect method if not available
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+    </script>
+</body>
+</html>

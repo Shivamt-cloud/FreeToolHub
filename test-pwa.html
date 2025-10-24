@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeToolHub PWA Test</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .test-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        .success { border-left-color: #10b981; }
+        .error { border-left-color: #ef4444; }
+        .warning { border-left-color: #f59e0b; }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #2563eb; }
+        .install-prompt {
+            background: #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ FreeToolHub PWA Test</h1>
+        <p>This page tests the Progressive Web App functionality of FreeToolHub.</p>
+        
+        <div class="test-item" id="manifest-test">
+            <h3>📋 Manifest Test</h3>
+            <p id="manifest-status">Checking manifest...</p>
+        </div>
+        
+        <div class="test-item" id="service-worker-test">
+            <h3>⚙️ Service Worker Test</h3>
+            <p id="sw-status">Checking service worker...</p>
+        </div>
+        
+        <div class="test-item" id="install-test">
+            <h3>📱 Installation Test</h3>
+            <p id="install-status">Checking installation capability...</p>
+            <div id="install-prompt" class="install-prompt" style="display: none;">
+                <h4>🎉 PWA Installation Available!</h4>
+                <p>You can install FreeToolHub as an app on your device.</p>
+                <button id="install-btn">Install FreeToolHub</button>
+            </div>
+        </div>
+        
+        <div class="test-item" id="analytics-test">
+            <h3>📊 Analytics Test</h3>
+            <p id="analytics-status">Checking analytics...</p>
+            <button onclick="testAnalytics()">Test Analytics</button>
+            <button onclick="showAdminPanel()">Show Admin Panel</button>
+        </div>
+        
+        <div class="test-item">
+            <h3>🔗 Navigation</h3>
+            <button onclick="window.location.href='/'">Go to Main Site</button>
+            <button onclick="window.location.href='/?admin=freetoolhub2024'">Open Admin Panel</button>
+        </div>
+    </div>
+
+    <script>
+        let deferredPrompt;
+        
+        // Test manifest
+        function testManifest() {
+            fetch('/manifest.json')
+                .then(response => response.json())
+                .then(manifest => {
+                    document.getElementById('manifest-status').innerHTML = 
+                        `✅ Manifest loaded successfully<br>
+                         Name: ${manifest.name}<br>
+                         Short Name: ${manifest.short_name}<br>
+                         Icons: ${manifest.icons.length} icons found`;
+                    document.getElementById('manifest-test').classList.add('success');
+                })
+                .catch(error => {
+                    document.getElementById('manifest-status').innerHTML = 
+                        `❌ Manifest failed to load: ${error.message}`;
+                    document.getElementById('manifest-test').classList.add('error');
+                });
+        }
+        
+        // Test service worker
+        function testServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        document.getElementById('sw-status').innerHTML = 
+                            `✅ Service Worker registered successfully<br>
+                             Scope: ${registration.scope}`;
+                        document.getElementById('service-worker-test').classList.add('success');
+                    })
+                    .catch(error => {
+                        document.getElementById('sw-status').innerHTML = 
+                            `❌ Service Worker registration failed: ${error.message}`;
+                        document.getElementById('service-worker-test').classList.add('error');
+                    });
+            } else {
+                document.getElementById('sw-status').innerHTML = 
+                    `❌ Service Worker not supported in this browser`;
+                document.getElementById('service-worker-test').classList.add('error');
+            }
+        }
+        
+        // Test installation
+        function testInstallation() {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                document.getElementById('install-status').innerHTML = 
+                    `✅ Installation prompt available!`;
+                document.getElementById('install-prompt').style.display = 'block';
+                document.getElementById('install-test').classList.add('success');
+                
+                document.getElementById('install-btn').addEventListener('click', () => {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            alert('FreeToolHub will be installed!');
+                        }
+                        deferredPrompt = null;
+                    });
+                });
+            });
+            
+            window.addEventListener('appinstalled', () => {
+                document.getElementById('install-status').innerHTML = 
+                    `🎉 FreeToolHub has been installed successfully!`;
+                document.getElementById('install-prompt').style.display = 'none';
+            });
+            
+            // Check if already installed
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                document.getElementById('install-status').innerHTML = 
+                    `✅ FreeToolHub is already running as an app!`;
+                document.getElementById('install-test').classList.add('success');
+            } else {
+                document.getElementById('install-status').innerHTML = 
+                    `⏳ Waiting for installation prompt...`;
+            }
+        }
+        
+        // Test analytics
+        function testAnalytics() {
+            // Simulate analytics tracking
+            if (typeof trackWebsiteEvent === 'function') {
+                trackWebsiteEvent('pwa_test_page_view', { test: true });
+                document.getElementById('analytics-status').innerHTML = 
+                    `✅ Analytics tracking working!`;
+                document.getElementById('analytics-test').classList.add('success');
+            } else {
+                document.getElementById('analytics-status').innerHTML = 
+                    `❌ Analytics not available (need to load main site)`;
+                document.getElementById('analytics-test').classList.add('error');
+            }
+        }
+        
+        function showAdminPanel() {
+            window.location.href = '/?admin=freetoolhub2024';
+        }
+        
+        // Run tests on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            testManifest();
+            testServiceWorker();
+            testInstallation();
+        });
+    </script>
+</body>
+</html>

@@ -6,6 +6,26 @@
     <meta name="description" content="FreeToolHub - Access 50+ professional free online tools including calculators, PDF tools, image utilities, converters, and more. 100% free, secure, and client-side processing. No downloads or sign-ups required!">
     <meta name="keywords" content="free tools, online calculator, PDF tools, image tools, converters, utilities, free online tools, 50+ tools">
     <title>FreeToolHub - 50+ Free Online Tools | Calculators, PDF & More</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="FreeToolHub">
+    <meta name="msapplication-TileColor" content="#3b82f6">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-192x192.png">
     
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7327960019798694"
@@ -341,9 +361,157 @@
                 transform: translateY(0);
             }
         }
+
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
+    
+    
+    <!-- Admin Password Modal -->
+    <div id="admin-password-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 15px; padding: 40px; max-width: 400px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align: center;">
+            <h2 style="color: #3b82f6; margin-top: 0; margin-bottom: 20px;">🔒 Admin Access</h2>
+            <p style="color: #64748b; margin-bottom: 30px;">Enter the admin password to access the analytics dashboard.</p>
+            
+            <div style="margin-bottom: 20px;">
+                <input 
+                    type="password" 
+                    id="admin-password-input" 
+                    placeholder="Enter admin password"
+                    style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; box-sizing: border-box;"
+                    onkeypress="handlePasswordKeyPress(event)"
+                    autocomplete="off"
+                >
+                <div id="admin-password-error" style="color: #ef4444; font-size: 14px; margin-top: 10px; display: none;"></div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button onclick="authenticateAdmin()" style="background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold;">Login</button>
+                <button onclick="closePasswordModal()" style="background: #64748b; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold;">Cancel</button>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; font-size: 12px; color: #64748b;">
+                <strong>Security Note:</strong> This session will expire after 24 hours for security.
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hidden Admin Analytics Panel -->
+    <div id="admin-panel" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; overflow-y: auto; padding: 20px;">
+        <div style="background: white; border-radius: 15px; padding: 30px; max-width: 1200px; margin: 0 auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h2 style="color: #3b82f6; margin: 0;">🔒 FreeToolHub Analytics Dashboard</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="logoutAdmin()" style="background: #f59e0b; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">Logout</button>
+                    <button onclick="document.getElementById('admin-panel').style.display='none'" style="background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Close</button>
+                </div>
+            </div>
+            
+            
+            <!-- Website Analytics -->
+            <div style="background: #f8fafc; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="color: #1e293b; margin-top: 0;">🌐 Website Analytics</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h4 style="margin: 0 0 10px 0; color: #64748b;">Total Page Views</h4>
+                        <span id="website-page-views" style="font-size: 24px; font-weight: bold; color: #3b82f6;">0</span>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h4 style="margin: 0 0 10px 0; color: #64748b;">Unique Visitors</h4>
+                        <span id="website-unique-visitors" style="font-size: 24px; font-weight: bold; color: #10b981;">0</span>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h4 style="margin: 0 0 10px 0; color: #64748b;">Most Popular Tool</h4>
+                        <span id="website-popular-tool" style="font-size: 18px; font-weight: bold; color: #8b5cf6;">-</span>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h4 style="margin: 0 0 10px 0; color: #64748b;">Device Breakdown</h4>
+                        <div id="website-device-breakdown" style="font-size: 14px; color: #64748b;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PWA Analytics -->
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="color: #1e293b; margin-top: 0;">📱 PWA App Analytics</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h4 style="margin: 0 0 10px 0; color: #64748b;">Install Prompts</h4>
+                        <span id="pwa-install-prompts" style="font-size: 24px; font-weight: bold; color: #3b82f6;">0</span>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h4 style="margin: 0 0 10px 0; color: #64748b;">Successful Installs</h4>
+                        <span id="pwa-successful-installs" style="font-size: 24px; font-weight: bold; color: #10b981;">0</span>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h4 style="margin: 0 0 10px 0; color: #64748b;">Install Rate</h4>
+                        <span id="pwa-install-rate" style="font-size: 24px; font-weight: bold; color: #f59e0b;">0%</span>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h4 style="margin: 0 0 10px 0; color: #64748b;">App Usage</h4>
+                        <span id="pwa-app-usage" style="font-size: 24px; font-weight: bold; color: #8b5cf6;">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Combined Insights -->
+            <div style="background: #fef3c7; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="color: #1e293b; margin-top: 0;">📈 Combined Insights</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h4 style="margin: 0 0 10px 0; color: #64748b;">Total Users</h4>
+                        <span id="total-users" style="font-size: 24px; font-weight: bold; color: #3b82f6;">0</span>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h4 style="margin: 0 0 10px 0; color: #64748b;">App Adoption Rate</h4>
+                        <span id="app-adoption-rate" style="font-size: 24px; font-weight: bold; color: #10b981;">0%</span>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h4 style="margin: 0 0 10px 0; color: #64748b;">Popular Platform</h4>
+                        <span id="popular-platform" style="font-size: 18px; font-weight: bold; color: #8b5cf6;">-</span>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h4 style="margin: 0 0 10px 0; color: #64748b;">User Engagement</h4>
+                        <span id="user-engagement" style="font-size: 18px; font-weight: bold; color: #f59e0b;">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            
+            <!-- Recent Activity -->
+            <div style="background: #f1f5f9; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="color: #1e293b; margin-top: 0;">🕒 Recent Activity</h3>
+                <div id="recent-activity-list" style="max-height: 300px; overflow-y: auto; background: white; border-radius: 8px; padding: 15px;">
+                    <!-- Recent events will be populated here -->
+                </div>
+            </div>
+            
+            <!-- Password Management -->
+            <div style="background: #fef2f2; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="color: #1e293b; margin-top: 0;">🔐 Password Management</h3>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="showPasswordInfo()" style="background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold;">Show Current Password</button>
+                    <button onclick="changeAdminPassword()" style="background: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold;">Change Password</button>
+                </div>
+                <div style="margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 8px; font-size: 14px; color: #64748b;">
+                    <strong>Security Note:</strong> The default password is "FreeToolHub2024!". 
+                    Change it to something secure before going live. 
+                    Session expires after 24 hours for security.
+                </div>
+            </div>
+            
+            <!-- Export Options -->
+            <div style="text-align: center; padding: 20px; background: #f8fafc; border-radius: 10px;">
+                <h3 style="color: #1e293b; margin-top: 0;">📊 Export Data</h3>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="exportWebsiteAnalytics()" style="background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold;">Export Website Data</button>
+                    <button onclick="exportPWAAnalytics()" style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold;">Export PWA Data</button>
+                    <button onclick="exportCombinedAnalytics()" style="background: #8b5cf6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold;">Export All Data</button>
+                    <button onclick="clearAllAnalytics()" style="background: #ef4444; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold;">Clear All Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Navigation -->
     <nav class="fixed w-full z-40 bg-white/90 backdrop-blur-lg border-b border-gray-200">
@@ -571,6 +739,9 @@
             </div>
         </div>
     </section>
+
+
+
 
         <!-- Tools Section - Clean Structure with Categories -->
         <section id="tools" class="py-20 bg-gray-50">
@@ -2676,6 +2847,8 @@
                     <ul class="space-y-2">
                         <li><a href="#about" class="text-gray-300 hover:text-yellow-400 transition-colors">About Us</a></li>
                         <li><a href="#contact" class="text-gray-300 hover:text-yellow-400 transition-colors">Contact</a></li>
+                        <li><a href="?admin=freetoolhub2024" class="text-gray-300 hover:text-yellow-400 transition-colors font-semibold">📊 Analytics Dashboard</a></li>
+                        <li><a href="?admin=freetoolhub2024&logout=true" class="text-gray-300 hover:text-red-400 transition-colors text-sm">🔓 Force Logout</a></li>
                         <li><a href="#" onclick="alert('FAQ Coming Soon!'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">FAQ</a></li>
                         <li><a href="#" onclick="alert('Blog Coming Soon!'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Blog</a></li>
                         <li><a href="#" onclick="alert('API Coming Soon!'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Developer API</a></li>
@@ -10116,7 +10289,598 @@
         // Initialize weather widget when page loads
         document.addEventListener('DOMContentLoaded', function() {
             initWeatherWidget();
+            initAnalytics();
+            registerServiceWorker();
         });
+        
+        // Register Service Worker for PWA functionality
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration);
+                        
+                        // Track PWA registration
+                        trackPWAEvent('service_worker_registered', {
+                            scope: registration.scope,
+                            timestamp: new Date().toISOString()
+                        });
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New version available
+                                    trackPWAEvent('app_update_available');
+                                    
+                                    // Show update notification
+                                    if (confirm('A new version of FreeToolHub is available! Would you like to update?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                        trackPWAEvent('service_worker_failed', { error: error.message });
+                    });
+            } else {
+                console.log('Service Worker not supported');
+                trackPWAEvent('service_worker_not_supported');
+            }
+        }
+
+        // ============================================
+        // COMPREHENSIVE ANALYTICS SYSTEM
+        // ============================================
+        
+        // Analytics state
+        let analyticsData = {
+            website: JSON.parse(localStorage.getItem('website_analytics') || '{"events": [], "counters": {}}'),
+            pwa: JSON.parse(localStorage.getItem('pwa_analytics') || '{"events": [], "counters": {}}')
+        };
+        
+        // Initialize analytics system
+        function initAnalytics() {
+            // Track page view
+            trackWebsiteEvent('page_view', {
+                url: window.location.href,
+                title: document.title,
+                referrer: document.referrer,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Track device and browser info
+            trackWebsiteEvent('device_info', {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                screenSize: `${screen.width}x${screen.height}`,
+                language: navigator.language,
+                online: navigator.onLine
+            });
+            
+            // Track session start
+            trackWebsiteEvent('session_start', {
+                timestamp: new Date().toISOString()
+            });
+            
+            // Track tool usage
+            trackToolUsage();
+            
+            // Initialize PWA analytics
+            initPWAAnalytics();
+            
+            // Check for admin access
+            checkAdminAccess();
+        }
+        
+        // Track website events
+        function trackWebsiteEvent(eventName, data = {}) {
+            const event = {
+                event: eventName,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                screenSize: `${screen.width}x${screen.height}`,
+                data: data
+            };
+            
+            analyticsData.website.events.push(event);
+            
+            // Update counters
+            if (!analyticsData.website.counters[eventName]) {
+                analyticsData.website.counters[eventName] = 0;
+            }
+            analyticsData.website.counters[eventName]++;
+            
+            // Keep only last 200 events
+            if (analyticsData.website.events.length > 200) {
+                analyticsData.website.events = analyticsData.website.events.slice(-200);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('website_analytics', JSON.stringify(analyticsData.website));
+            
+            console.log('Analytics: Website event tracked', eventName, data);
+        }
+        
+        // Track PWA events
+        function trackPWAEvent(eventName, data = {}) {
+            const event = {
+                event: eventName,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                data: data
+            };
+            
+            analyticsData.pwa.events.push(event);
+            
+            // Update counters
+            if (!analyticsData.pwa.counters[eventName]) {
+                analyticsData.pwa.counters[eventName] = 0;
+            }
+            analyticsData.pwa.counters[eventName]++;
+            
+            // Keep only last 200 events
+            if (analyticsData.pwa.events.length > 200) {
+                analyticsData.pwa.events = analyticsData.pwa.events.slice(-200);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('pwa_analytics', JSON.stringify(analyticsData.pwa));
+            
+            console.log('Analytics: PWA event tracked', eventName, data);
+        }
+        
+        // Track tool usage
+        function trackToolUsage() {
+            // Track calculator usage
+            const calculatorButtons = document.querySelectorAll('[onclick*="openModal"]');
+            calculatorButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const toolName = this.textContent.trim() || 'Unknown Tool';
+                    trackWebsiteEvent('tool_used', { tool: toolName });
+                });
+            });
+            
+            // Track navigation clicks
+            const navLinks = document.querySelectorAll('a[href^="#"]');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    const section = this.getAttribute('href').substring(1);
+                    trackWebsiteEvent('navigation_click', { section: section });
+                });
+            });
+        }
+        
+        // Initialize PWA analytics
+        function initPWAAnalytics() {
+            // Track install prompts
+            window.addEventListener('beforeinstallprompt', (e) => {
+                trackPWAEvent('install_prompt_shown');
+                
+                e.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        trackPWAEvent('install_prompt_accepted');
+                    } else {
+                        trackPWAEvent('install_prompt_dismissed');
+                    }
+                });
+            });
+            
+            // Track successful installs
+            window.addEventListener('appinstalled', (e) => {
+                trackPWAEvent('app_installed', {
+                    timestamp: new Date().toISOString()
+                });
+            });
+            
+            // Track app usage (if running as PWA)
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                trackPWAEvent('app_usage', {
+                    displayMode: 'standalone',
+                    timestamp: new Date().toISOString()
+                });
+            }
+        }
+        
+        // Admin password configuration
+        const ADMIN_PASSWORD = 'FreeToolHub2024!'; // Change this to your desired password
+        const ADMIN_SESSION_KEY = 'admin_authenticated';
+        const ADMIN_SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        
+        // Check for admin access
+        function checkAdminAccess() {
+            const urlParams = new URLSearchParams(window.location.search);
+            console.log('Checking admin access, URL params:', urlParams.get('admin'));
+            
+            // Check for logout parameter
+            if (urlParams.get('logout') === 'true') {
+                console.log('Logout parameter found, clearing session');
+                localStorage.removeItem(ADMIN_SESSION_KEY);
+                // Remove logout parameter from URL
+                const newUrl = window.location.pathname + '?admin=freetoolhub2024';
+                window.history.replaceState({}, document.title, newUrl);
+            }
+            
+            if (urlParams.get('admin') === 'freetoolhub2024') {
+                console.log('Admin parameter found, checking authentication...');
+                // Check if already authenticated
+                if (isAdminAuthenticated()) {
+                    console.log('Admin already authenticated, showing panel');
+                    showAdminPanel();
+                } else {
+                    console.log('Admin not authenticated, showing password prompt');
+                    showPasswordPrompt();
+                }
+            } else {
+                console.log('No admin parameter found');
+            }
+        }
+        
+        // Check if admin is authenticated
+        function isAdminAuthenticated() {
+            const authData = localStorage.getItem(ADMIN_SESSION_KEY);
+            if (!authData) return false;
+            
+            try {
+                const { timestamp, authenticated } = JSON.parse(authData);
+                const now = Date.now();
+                
+                // Check if session is still valid
+                if (now - timestamp > ADMIN_SESSION_DURATION) {
+                    localStorage.removeItem(ADMIN_SESSION_KEY);
+                    return false;
+                }
+                
+                return authenticated === true;
+            } catch (error) {
+                localStorage.removeItem(ADMIN_SESSION_KEY);
+                return false;
+            }
+        }
+        
+        // Show password prompt
+        function showPasswordPrompt() {
+            console.log('showPasswordPrompt called');
+            const passwordModal = document.getElementById('admin-password-modal');
+            console.log('Password modal element:', passwordModal);
+            
+            if (passwordModal) {
+                console.log('Showing password modal');
+                passwordModal.style.display = 'flex';
+                // Focus on password input
+                setTimeout(() => {
+                    const passwordInput = document.getElementById('admin-password-input');
+                    if (passwordInput) {
+                        passwordInput.focus();
+                    }
+                }, 100);
+            } else {
+                console.error('Password modal element not found!');
+            }
+        }
+        
+        // Authenticate admin
+        function authenticateAdmin() {
+            const passwordInput = document.getElementById('admin-password-input');
+            const enteredPassword = passwordInput.value;
+            const currentPassword = getCurrentPassword();
+            
+            if (enteredPassword === currentPassword) {
+                // Store authentication with timestamp
+                const authData = {
+                    timestamp: Date.now(),
+                    authenticated: true
+                };
+                localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(authData));
+                
+                // Hide password modal
+                const passwordModal = document.getElementById('admin-password-modal');
+                if (passwordModal) {
+                    passwordModal.style.display = 'none';
+                }
+                
+                // Show admin panel
+                showAdminPanel();
+                
+                // Clear password input
+                passwordInput.value = '';
+                
+                // Track admin access
+                trackWebsiteEvent('admin_access_granted', {
+                    timestamp: new Date().toISOString()
+                });
+                
+            } else {
+                // Show error message
+                const errorMsg = document.getElementById('admin-password-error');
+                if (errorMsg) {
+                    errorMsg.textContent = 'Incorrect password. Please try again.';
+                    errorMsg.style.display = 'block';
+                }
+                
+                // Track failed attempt
+                trackWebsiteEvent('admin_access_denied', {
+                    timestamp: new Date().toISOString(),
+                    reason: 'incorrect_password'
+                });
+                
+                // Clear password input
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        }
+        
+        // Logout admin
+        function logoutAdmin() {
+            localStorage.removeItem(ADMIN_SESSION_KEY);
+            const adminPanel = document.getElementById('admin-panel');
+            if (adminPanel) {
+                adminPanel.style.display = 'none';
+            }
+            
+            // Track logout
+            trackWebsiteEvent('admin_logout', {
+                timestamp: new Date().toISOString()
+            });
+            
+            // Redirect to main page
+            window.location.href = window.location.pathname;
+        }
+        
+        // Handle Enter key in password input
+        function handlePasswordKeyPress(event) {
+            if (event.key === 'Enter') {
+                authenticateAdmin();
+            }
+        }
+        
+        // Close password modal
+        function closePasswordModal() {
+            const passwordModal = document.getElementById('admin-password-modal');
+            if (passwordModal) {
+                passwordModal.style.display = 'none';
+            }
+            // Redirect to main page
+            window.location.href = window.location.pathname;
+        }
+        
+        // Show admin panel
+        function showAdminPanel() {
+            const adminPanel = document.getElementById('admin-panel');
+            if (adminPanel) {
+                adminPanel.style.display = 'block';
+                loadAnalyticsData();
+            }
+        }
+        
+        // Load analytics data for admin panel
+        function loadAnalyticsData() {
+            // Website analytics
+            const websiteEvents = analyticsData.website.events;
+            const websiteCounters = analyticsData.website.counters;
+            
+            // PWA analytics
+            const pwaEvents = analyticsData.pwa.events;
+            const pwaCounters = analyticsData.pwa.counters;
+            
+            // Update admin panel
+            updateAdminPanel(websiteEvents, websiteCounters, pwaEvents, pwaCounters);
+        }
+        
+        // Update admin panel with data
+        function updateAdminPanel(websiteEvents, websiteCounters, pwaEvents, pwaCounters) {
+            // Website metrics
+            document.getElementById('website-page-views').textContent = websiteCounters.page_view || 0;
+            document.getElementById('website-unique-visitors').textContent = getUniqueVisitors(websiteEvents);
+            document.getElementById('website-popular-tool').textContent = getMostPopularTool(websiteEvents);
+            document.getElementById('website-device-breakdown').innerHTML = getDeviceBreakdown(websiteEvents);
+            
+            // PWA metrics
+            document.getElementById('pwa-install-prompts').textContent = pwaCounters.install_prompt_shown || 0;
+            document.getElementById('pwa-successful-installs').textContent = pwaCounters.app_installed || 0;
+            document.getElementById('pwa-install-rate').textContent = calculateInstallRate(pwaCounters);
+            document.getElementById('pwa-app-usage').textContent = pwaCounters.app_usage || 0;
+            
+            // Combined insights
+            document.getElementById('total-users').textContent = websiteEvents.length;
+            document.getElementById('app-adoption-rate').textContent = calculateAppAdoptionRate(websiteCounters, pwaCounters);
+            document.getElementById('popular-platform').textContent = getPopularPlatform(websiteEvents);
+            document.getElementById('user-engagement').textContent = calculateUserEngagement(websiteEvents);
+            
+            // Recent activity
+            updateRecentActivity(websiteEvents, pwaEvents);
+        }
+        
+        // Helper functions for analytics
+        function getUniqueVisitors(events) {
+            const uniqueSessions = new Set();
+            events.forEach(event => {
+                if (event.event === 'session_start') {
+                    uniqueSessions.add(event.timestamp.split('T')[0]);
+                }
+            });
+            return uniqueSessions.size;
+        }
+        
+        
+        function getMostPopularTool(events) {
+            const toolUsage = {};
+            events.forEach(event => {
+                if (event.event === 'tool_used' && event.data.tool) {
+                    toolUsage[event.data.tool] = (toolUsage[event.data.tool] || 0) + 1;
+                }
+            });
+            
+            let mostPopular = 'None';
+            let maxUsage = 0;
+            for (const [tool, usage] of Object.entries(toolUsage)) {
+                if (usage > maxUsage) {
+                    maxUsage = usage;
+                    mostPopular = tool;
+                }
+            }
+            return mostPopular;
+        }
+        
+        function getDeviceBreakdown(events) {
+            const devices = { mobile: 0, desktop: 0, tablet: 0 };
+            events.forEach(event => {
+                if (event.event === 'device_info') {
+                    const userAgent = event.userAgent.toLowerCase();
+                    if (userAgent.includes('mobile')) {
+                        devices.mobile++;
+                    } else if (userAgent.includes('tablet') || userAgent.includes('ipad')) {
+                        devices.tablet++;
+                    } else {
+                        devices.desktop++;
+                    }
+                }
+            });
+            
+            const total = devices.mobile + devices.desktop + devices.tablet;
+            if (total === 0) return 'No data';
+            
+            return `
+                <div>Mobile: ${Math.round((devices.mobile / total) * 100)}%</div>
+                <div>Desktop: ${Math.round((devices.desktop / total) * 100)}%</div>
+                <div>Tablet: ${Math.round((devices.tablet / total) * 100)}%</div>
+            `;
+        }
+        
+        function calculateInstallRate(counters) {
+            const prompts = counters.install_prompt_shown || 0;
+            const installs = counters.app_installed || 0;
+            if (prompts === 0) return '0%';
+            return Math.round((installs / prompts) * 100) + '%';
+        }
+        
+        function calculateAppAdoptionRate(websiteCounters, pwaCounters) {
+            const totalUsers = websiteCounters.page_view || 0;
+            const appUsers = pwaCounters.app_installed || 0;
+            if (totalUsers === 0) return '0%';
+            return Math.round((appUsers / totalUsers) * 100) + '%';
+        }
+        
+        function getPopularPlatform(events) {
+            const platforms = {};
+            events.forEach(event => {
+                if (event.event === 'device_info') {
+                    const platform = event.platform || 'Unknown';
+                    platforms[platform] = (platforms[platform] || 0) + 1;
+                }
+            });
+            
+            let mostPopular = 'Unknown';
+            let maxCount = 0;
+            for (const [platform, count] of Object.entries(platforms)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    mostPopular = platform;
+                }
+            }
+            return mostPopular;
+        }
+        
+        function calculateUserEngagement(events) {
+            const sessionStarts = events.filter(e => e.event === 'session_start').length;
+            const toolUsage = events.filter(e => e.event === 'tool_used').length;
+            
+            if (sessionStarts === 0) return 'Low';
+            const engagement = toolUsage / sessionStarts;
+            
+            if (engagement > 5) return 'High';
+            if (engagement > 2) return 'Medium';
+            return 'Low';
+        }
+        
+        function updateRecentActivity(websiteEvents, pwaEvents) {
+            const recentEvents = [...websiteEvents, ...pwaEvents]
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                .slice(0, 10);
+            
+            const activityList = document.getElementById('recent-activity-list');
+            if (activityList) {
+                activityList.innerHTML = recentEvents.map(event => `
+                    <div style="padding: 8px; border-bottom: 1px solid #eee; font-size: 12px;">
+                        <strong>${event.event}</strong> - ${new Date(event.timestamp).toLocaleString()}
+                        ${event.data.tool ? ` (${event.data.tool})` : ''}
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Export functions
+        function exportWebsiteAnalytics() {
+            const data = JSON.stringify(analyticsData.website, null, 2);
+            downloadData(data, 'website-analytics.json');
+        }
+        
+        function exportPWAAnalytics() {
+            const data = JSON.stringify(analyticsData.pwa, null, 2);
+            downloadData(data, 'pwa-analytics.json');
+        }
+        
+        function exportCombinedAnalytics() {
+            const data = JSON.stringify(analyticsData, null, 2);
+            downloadData(data, 'combined-analytics.json');
+        }
+        
+        function downloadData(data, filename) {
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function clearAllAnalytics() {
+            if (confirm('Are you sure you want to clear all analytics data?')) {
+                localStorage.removeItem('website_analytics');
+                localStorage.removeItem('pwa_analytics');
+                analyticsData = {
+                    website: { events: [], counters: {} },
+                    pwa: { events: [], counters: {} }
+                };
+                loadAnalyticsData();
+            }
+        }
+        
+        // Password management functions
+        function changeAdminPassword() {
+            const newPassword = prompt('Enter new admin password (minimum 8 characters):');
+            if (newPassword && newPassword.length >= 8) {
+                // In a real application, you would hash this password
+                // For now, we'll store it in localStorage (not secure for production)
+                localStorage.setItem('admin_password', newPassword);
+                alert('Admin password updated successfully!');
+                
+                // Track password change
+                trackWebsiteEvent('admin_password_changed', {
+                    timestamp: new Date().toISOString()
+                });
+            } else if (newPassword) {
+                alert('Password must be at least 8 characters long.');
+            }
+        }
+        
+        // Get current admin password (for display purposes)
+        function getCurrentPassword() {
+            return localStorage.getItem('admin_password') || ADMIN_PASSWORD;
+        }
+        
+        // Show password info
+        function showPasswordInfo() {
+            const currentPassword = getCurrentPassword();
+            alert(`Current admin password: ${currentPassword}\n\nTo change the password, use the changeAdminPassword() function in the browser console.`);
+        }
 
         // ============================================
         // CONGRATULATIONS POPUP FOR NEW TOOLS
@@ -25559,6 +26323,7 @@ Charlie Brown,42,Phoenix,USA`;
                 }
             }
         });
+
 
     </script>
 </body>
