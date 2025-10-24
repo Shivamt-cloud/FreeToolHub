@@ -103,6 +103,68 @@
             animation: none;
         }
         
+        /* Weather Widget Styles */
+        #weather-widget {
+            animation: weatherPulse 2s ease-in-out infinite;
+            transition: all 0.3s ease;
+        }
+        
+        #weather-widget:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        @keyframes weatherPulse {
+            0%, 100% { 
+                box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+            }
+            50% { 
+                box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            }
+        }
+        
+        .weather-loading {
+            animation: weatherLoading 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes weatherLoading {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        /* Location Display Animations */
+        #weather-location, #mobile-weather-location {
+            transition: all 0.3s ease;
+        }
+        
+        .location-slide-in {
+            animation: locationSlideIn 0.5s ease-out;
+        }
+        
+        @keyframes locationSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .location-pulse {
+            animation: locationPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes locationPulse {
+            0%, 100% { 
+                opacity: 0.8;
+            }
+            50% { 
+                opacity: 1;
+            }
+        }
+        
         .coffee-icon {
             font-size: 32px;
             animation: coffeeFloat 2s ease-in-out infinite;
@@ -290,6 +352,28 @@
                 <div class="text-2xl font-bold">
                     <span class="header-animation">FreeToolHub</span>
                 </div>
+                <!-- Weather Widget -->
+                <div id="weather-widget" class="hidden lg:flex items-center bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg mr-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="text-center">
+                            <div id="current-time" class="text-sm font-bold"></div>
+                            <div id="current-date" class="text-xs opacity-90"></div>
+                        </div>
+                        <div class="w-px h-8 bg-white/30"></div>
+                        <div class="flex items-center space-x-2">
+                            <div id="weather-icon" class="text-2xl">🌤️</div>
+                            <div>
+                                <div id="weather-temp" class="text-sm font-bold">--°C</div>
+                                <div id="weather-desc" class="text-xs opacity-90">Loading...</div>
+                                <div id="weather-location" class="text-xs opacity-80 flex items-center mt-1">
+                                    <span class="mr-1">📍</span>
+                                    <span id="location-name">Getting location...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Desktop Navigation -->
                 <div class="hidden lg:flex space-x-6">
                     <a href="#home" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">Home</a>
@@ -319,6 +403,30 @@
             </div>
             <!-- Mobile Navigation Menu -->
             <div id="mobile-menu" class="hidden lg:hidden mt-4 pb-4 space-y-2">
+                <!-- Mobile Weather Widget -->
+                <div id="mobile-weather-widget" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 rounded-lg mb-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="text-center">
+                                <div id="mobile-current-time" class="text-sm font-bold"></div>
+                                <div id="mobile-current-date" class="text-xs opacity-90"></div>
+                            </div>
+                            <div class="w-px h-6 bg-white/30"></div>
+                            <div class="flex items-center space-x-2">
+                                <div id="mobile-weather-icon" class="text-xl">🌤️</div>
+                                <div>
+                                    <div id="mobile-weather-temp" class="text-sm font-bold">--°C</div>
+                                    <div id="mobile-weather-desc" class="text-xs opacity-90">Loading...</div>
+                                    <div id="mobile-weather-location" class="text-xs opacity-80 flex items-center mt-1">
+                                        <span class="mr-1">📍</span>
+                                        <span id="mobile-location-name">Getting location...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <a href="#home" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">Home</a>
                 <a href="javascript:void(0)" onclick="openModal('calculator-modal'); toggleMobileMenu();" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2 cursor-pointer">Calculators</a>
                 <a href="javascript:void(0)" onclick="openModal('loan-calculator-modal'); toggleMobileMenu();" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2 cursor-pointer">Loan Calculator</a>
@@ -9609,6 +9717,406 @@
         (function() {
             emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your EmailJS public key
         })();
+
+        // ============================================
+        // WEATHER WIDGET FUNCTIONALITY
+        // ============================================
+        
+        // Weather widget state
+        let weatherData = null;
+        let userLocation = null;
+        let locationName = null;
+        let permissionAsked = false;
+        
+        // Initialize weather widget
+        function initWeatherWidget() {
+            updateTimeAndDate();
+            getLocationAndWeather();
+            
+            // Update time every second
+            setInterval(updateTimeAndDate, 1000);
+            
+            // Update weather every 10 minutes
+            setInterval(getLocationAndWeather, 600000);
+        }
+        
+        // Update time and date display
+        function updateTimeAndDate() {
+            const now = new Date();
+            
+            // Desktop elements
+            const timeElement = document.getElementById('current-time');
+            const dateElement = document.getElementById('current-date');
+            
+            // Mobile elements
+            const mobileTimeElement = document.getElementById('mobile-current-time');
+            const mobileDateElement = document.getElementById('mobile-current-date');
+            
+            // Format time (12-hour format with AM/PM)
+            const timeOptions = { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            };
+            const timeString = now.toLocaleTimeString('en-US', timeOptions);
+            
+            // Format date
+            const dateOptions = { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+            };
+            const dateString = now.toLocaleDateString('en-US', dateOptions);
+            
+            // Update desktop elements
+            if (timeElement && dateElement) {
+                timeElement.textContent = timeString;
+                dateElement.textContent = dateString;
+            }
+            
+            // Update mobile elements
+            if (mobileTimeElement && mobileDateElement) {
+                mobileTimeElement.textContent = timeString;
+                mobileDateElement.textContent = dateString;
+            }
+        }
+        
+        // Get user location and fetch weather
+        async function getLocationAndWeather() {
+            try {
+                // Check if permission was already asked in this session
+                const sessionPermission = sessionStorage.getItem('weatherPermissionAsked');
+                if (sessionPermission === 'true') {
+                    permissionAsked = true;
+                }
+                
+                // Show loading state for desktop
+                const weatherDesc = document.getElementById('weather-desc');
+                if (weatherDesc) {
+                    weatherDesc.textContent = 'Getting location...';
+                    weatherDesc.classList.add('weather-loading');
+                }
+                
+                // Show loading state for mobile
+                const mobileWeatherDesc = document.getElementById('mobile-weather-desc');
+                if (mobileWeatherDesc) {
+                    mobileWeatherDesc.textContent = 'Getting location...';
+                    mobileWeatherDesc.classList.add('weather-loading');
+                }
+                
+                // Get user's location with smart permission handling
+                const position = await getCurrentPosition();
+                userLocation = {
+                    lat: position.coords.latitude,
+                    lon: position.coords.longitude
+                };
+                
+                // Get location name using reverse geocoding
+                await getLocationName(userLocation.lat, userLocation.lon);
+                
+                // Fetch weather data
+                await fetchWeatherData(userLocation.lat, userLocation.lon);
+                
+            } catch (error) {
+                console.error('Weather widget error:', error);
+                showWeatherError();
+            }
+        }
+        
+        // Get current position with fallback
+        function getCurrentPosition() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error('Geolocation not supported'));
+                    return;
+                }
+                
+                // Mark that we've asked for permission in this session
+                if (!permissionAsked) {
+                    sessionStorage.setItem('weatherPermissionAsked', 'true');
+                    permissionAsked = true;
+                }
+                
+                navigator.geolocation.getCurrentPosition(
+                    resolve,
+                    (error) => {
+                        // Fallback to a default location (New York) if user denies location
+                        console.warn('Location access denied, using default location');
+                        resolve({
+                            coords: {
+                                latitude: 40.7128,
+                                longitude: -74.0060
+                            }
+                        });
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 300000 // 5 minutes
+                    }
+                );
+            });
+        }
+        
+        // Get location name using reverse geocoding
+        async function getLocationName(lat, lon) {
+            try {
+                // Try browser timezone first (fastest, free)
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const cityFromTimezone = timezone.split('/').pop().replace('_', ' ');
+                
+                // Update location display with timezone-based name
+                updateLocationDisplay(cityFromTimezone);
+                
+                // Try reverse geocoding for more accurate location name
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.address) {
+                        const city = data.address.city || data.address.town || data.address.village;
+                        const country = data.address.country;
+                        const state = data.address.state;
+                        
+                        let locationString = '';
+                        if (city && country) {
+                            if (state && (country === 'United States' || country === 'Canada')) {
+                                locationString = `${city}, ${state}`;
+                            } else {
+                                locationString = `${city}, ${country}`;
+                            }
+                        } else if (city) {
+                            locationString = city;
+                        } else {
+                            locationString = cityFromTimezone;
+                        }
+                        
+                        locationName = locationString;
+                        updateLocationDisplay(locationString);
+                    }
+                }
+            } catch (error) {
+                console.warn('Reverse geocoding failed, using timezone-based location');
+                // Fallback to timezone-based location name
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const cityFromTimezone = timezone.split('/').pop().replace('_', ' ');
+                updateLocationDisplay(cityFromTimezone);
+            }
+        }
+        
+        // Update location display in both desktop and mobile widgets
+        function updateLocationDisplay(locationText) {
+            // Desktop elements
+            const locationNameElement = document.getElementById('location-name');
+            const weatherLocationElement = document.getElementById('weather-location');
+            
+            if (locationNameElement) {
+                locationNameElement.textContent = locationText;
+                // Add slide-in animation
+                if (weatherLocationElement) {
+                    weatherLocationElement.classList.add('location-slide-in');
+                    setTimeout(() => {
+                        weatherLocationElement.classList.remove('location-slide-in');
+                    }, 500);
+                }
+            }
+            
+            // Mobile elements
+            const mobileLocationNameElement = document.getElementById('mobile-location-name');
+            const mobileWeatherLocationElement = document.getElementById('mobile-weather-location');
+            
+            if (mobileLocationNameElement) {
+                mobileLocationNameElement.textContent = locationText;
+                // Add slide-in animation
+                if (mobileWeatherLocationElement) {
+                    mobileWeatherLocationElement.classList.add('location-slide-in');
+                    setTimeout(() => {
+                        mobileWeatherLocationElement.classList.remove('location-slide-in');
+                    }, 500);
+                }
+            }
+        }
+        
+        // Fetch weather data from OpenWeatherMap API
+        async function fetchWeatherData(lat, lon) {
+            try {
+                // Using a free weather API (OpenWeatherMap)
+                const API_KEY = 'demo'; // You can get a free API key from OpenWeatherMap
+                const API_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
+                
+                // For demo purposes, we'll use a mock weather service
+                // In production, replace with actual API call
+                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`);
+                
+                if (!response.ok) {
+                    throw new Error('Weather API error');
+                }
+                
+                const data = await response.json();
+                updateWeatherDisplay(data);
+                
+            } catch (error) {
+                console.error('Weather fetch error:', error);
+                // Fallback to mock data for demo
+                updateWeatherDisplay(getMockWeatherData());
+            }
+        }
+        
+        // Update weather display
+        function updateWeatherDisplay(data) {
+            // Desktop elements
+            const weatherIcon = document.getElementById('weather-icon');
+            const weatherTemp = document.getElementById('weather-temp');
+            const weatherDesc = document.getElementById('weather-desc');
+            
+            // Mobile elements
+            const mobileWeatherIcon = document.getElementById('mobile-weather-icon');
+            const mobileWeatherTemp = document.getElementById('mobile-weather-temp');
+            const mobileWeatherDesc = document.getElementById('mobile-weather-desc');
+            
+            // Get weather data
+            const temp = data.current_weather ? data.current_weather.temperature : 22;
+            const weatherCode = data.current_weather ? data.current_weather.weathercode : 0;
+            const description = getWeatherDescription(weatherCode);
+            const icon = getWeatherIcon(weatherCode);
+            const tempString = `${Math.round(temp)}°C`;
+            
+            // Update desktop elements
+            if (weatherIcon && weatherTemp && weatherDesc) {
+                weatherDesc.classList.remove('weather-loading');
+                weatherTemp.textContent = tempString;
+                weatherDesc.textContent = description;
+                weatherIcon.textContent = icon;
+            }
+            
+            // Update mobile elements
+            if (mobileWeatherIcon && mobileWeatherTemp && mobileWeatherDesc) {
+                mobileWeatherDesc.classList.remove('weather-loading');
+                mobileWeatherTemp.textContent = tempString;
+                mobileWeatherDesc.textContent = description;
+                mobileWeatherIcon.textContent = icon;
+            }
+        }
+        
+        // Get weather description from weather code
+        function getWeatherDescription(code) {
+            const descriptions = {
+                0: 'Clear sky',
+                1: 'Mainly clear',
+                2: 'Partly cloudy',
+                3: 'Overcast',
+                45: 'Fog',
+                48: 'Depositing rime fog',
+                51: 'Light drizzle',
+                53: 'Moderate drizzle',
+                55: 'Dense drizzle',
+                61: 'Slight rain',
+                63: 'Moderate rain',
+                65: 'Heavy rain',
+                71: 'Slight snow',
+                73: 'Moderate snow',
+                75: 'Heavy snow',
+                80: 'Rain showers',
+                81: 'Moderate rain showers',
+                82: 'Violent rain showers',
+                95: 'Thunderstorm',
+                96: 'Thunderstorm with hail',
+                99: 'Heavy thunderstorm with hail'
+            };
+            return descriptions[code] || 'Unknown';
+        }
+        
+        // Get weather icon from weather code
+        function getWeatherIcon(code) {
+            const icons = {
+                0: '☀️', // Clear sky
+                1: '🌤️', // Mainly clear
+                2: '⛅', // Partly cloudy
+                3: '☁️', // Overcast
+                45: '🌫️', // Fog
+                48: '🌫️', // Fog
+                51: '🌦️', // Light drizzle
+                53: '🌦️', // Moderate drizzle
+                55: '🌧️', // Dense drizzle
+                61: '🌦️', // Slight rain
+                63: '🌧️', // Moderate rain
+                65: '🌧️', // Heavy rain
+                71: '🌨️', // Slight snow
+                73: '🌨️', // Moderate snow
+                75: '🌨️', // Heavy snow
+                80: '🌦️', // Rain showers
+                81: '🌧️', // Moderate rain showers
+                82: '🌧️', // Violent rain showers
+                95: '⛈️', // Thunderstorm
+                96: '⛈️', // Thunderstorm with hail
+                99: '⛈️' // Heavy thunderstorm with hail
+            };
+            return icons[code] || '🌤️';
+        }
+        
+        // Show weather error state
+        function showWeatherError() {
+            // Desktop elements
+            const weatherDesc = document.getElementById('weather-desc');
+            const weatherTemp = document.getElementById('weather-temp');
+            const weatherIcon = document.getElementById('weather-icon');
+            const locationNameElement = document.getElementById('location-name');
+            
+            // Mobile elements
+            const mobileWeatherDesc = document.getElementById('mobile-weather-desc');
+            const mobileWeatherTemp = document.getElementById('mobile-weather-temp');
+            const mobileWeatherIcon = document.getElementById('mobile-weather-icon');
+            const mobileLocationNameElement = document.getElementById('mobile-location-name');
+            
+            // Update desktop elements
+            if (weatherDesc) {
+                weatherDesc.textContent = 'Location unavailable';
+                weatherDesc.classList.remove('weather-loading');
+            }
+            if (weatherTemp) {
+                weatherTemp.textContent = '--°C';
+            }
+            if (weatherIcon) {
+                weatherIcon.textContent = '❓';
+            }
+            if (locationNameElement) {
+                locationNameElement.textContent = 'Location unavailable';
+            }
+            
+            // Update mobile elements
+            if (mobileWeatherDesc) {
+                mobileWeatherDesc.textContent = 'Location unavailable';
+                mobileWeatherDesc.classList.remove('weather-loading');
+            }
+            if (mobileWeatherTemp) {
+                mobileWeatherTemp.textContent = '--°C';
+            }
+            if (mobileWeatherIcon) {
+                mobileWeatherIcon.textContent = '❓';
+            }
+            if (mobileLocationNameElement) {
+                mobileLocationNameElement.textContent = 'Location unavailable';
+            }
+        }
+        
+        // Mock weather data for demo purposes
+        function getMockWeatherData() {
+            const weatherCodes = [0, 1, 2, 3, 45, 61, 63, 65, 71, 73, 80, 95];
+            const randomCode = weatherCodes[Math.floor(Math.random() * weatherCodes.length)];
+            const randomTemp = Math.floor(Math.random() * 30) + 5; // 5-35°C
+            
+            return {
+                current_weather: {
+                    temperature: randomTemp,
+                    weathercode: randomCode
+                }
+            };
+        }
+        
+        // Initialize weather widget when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initWeatherWidget();
+        });
 
         // ============================================
         // CONGRATULATIONS POPUP FOR NEW TOOLS
