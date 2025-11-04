@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Color Palette Generator - FreeToolHub</title>
+    <meta name="description" content="Generate beautiful color palettes with accessibility checks, formats, and copy/download support.">
+    <meta property="og:title" content="Color Palette Generator - FreeToolHub">
+    <meta property="og:description" content="Generate beautiful color palettes with accessibility features">
+    <meta property="og:url" content="https://freetoolhub.in/tools/color-palette.html">
+    <meta property="og:type" content="website">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div id="app-header"></div>
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>@media (min-width:1024px){main{padding-top:8.5rem!important}}</style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🎨 Color Palette Generator</h1>
+                    <p class="text-gray-600 text-lg">Generate beautiful color palettes with accessibility features</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-purple-500 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                    Share Tool
+                </button>
+            </div>
+            <nav class="mb-6 text-sm"><a href="/" class="text-blue-600 hover:text-blue-800">Home</a><span class="mx-2 text-gray-400">/</span><a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a><span class="mx-2 text-gray-400">/</span><span class="text-gray-600">Color Palette</span></nav>
+
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div class="lg:col-span-3">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Base Color</label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="color" id="base-color-picker" value="#6b46c1" class="w-12 h-12 rounded cursor-pointer border border-gray-300">
+                                        <input type="text" id="base-color" value="#6b46c1" placeholder="#6b46c1" class="flex-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Palette Type</label>
+                                    <select id="palette-type" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                        <option value="complementary">Complementary</option>
+                                        <option value="analogous">Analogous</option>
+                                        <option value="triadic">Triadic</option>
+                                        <option value="tetradic">Tetradic</option>
+                                        <option value="monochromatic">Monochromatic</option>
+                                        <option value="split-complementary">Split Complementary</option>
+                                        <option value="random">Random</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Number of Colors</label>
+                                    <input type="number" id="color-count" value="5" min="2" max="12" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button onclick="generatePalette()" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">Generate</button>
+                                    <button onclick="copyPalette()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">Copy Palette</button>
+                                    <button onclick="downloadPalette()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">Download</button>
+                                    <button onclick="clearPalette()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">Clear</button>
+                                </div>
+                            </div>
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Palette</label>
+                                    <div id="palette-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
+                                </div>
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Formats</label>
+                                    <div id="palette-formats" class="space-y-3">
+                                        <div class="bg-gray-50 p-3 rounded-lg border">
+                                            <div class="text-xs text-gray-500 mb-1">HEX</div>
+                                            <div id="format-hex" class="font-mono text-sm break-all">-</div>
+                                        </div>
+                                        <div class="bg-gray-50 p-3 rounded-lg border">
+                                            <div class="text-xs text-gray-500 mb-1">RGB</div>
+                                            <div id="format-rgb" class="font-mono text-sm break-all">-</div>
+                                        </div>
+                                        <div class="bg-gray-50 p-3 rounded-lg border">
+                                            <div class="text-xs text-gray-500 mb-1">HSL</div>
+                                            <div id="format-hsl" class="font-mono text-sm break-all">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Accessibility</label>
+                                    <div id="accessibility-results" class="space-y-2 text-sm text-gray-700">
+                                        <div class="text-gray-500">Generate a palette to see WCAG contrast checks.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-8 space-y-6">
+                            <div id="palette-error" class="hidden"><div class="bg-red-50 rounded-xl p-6 border border-red-200 text-red-700">Invalid input or error generating palette.</div></div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5"><h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4><div class="flex items-center space-x-1"><div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div><span class="text-xs text-gray-500 font-medium">Live</span></div></div>
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in"><div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div><h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5><p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p><button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg"><span>Check it out</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div id="app-footer"></div>
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    <script src="/src/js/ColorPaletteGenerator.js?v=1&t=1726745000"></script>
+    <script>
+        let paletteGen=null;
+        function initializePalette(){ try{ if(typeof ColorPaletteGenerator!=='undefined'){ paletteGen=new ColorPaletteGenerator(); console.log('✅ Palette Generator initialized'); generatePalette(); } }catch(e){ console.error('❌ init failed',e);} }
+        function syncPickerToInput(){ const picker=document.getElementById('base-color-picker'); const input=document.getElementById('base-color'); input.value=picker.value; }
+        function syncInputToPicker(){ const picker=document.getElementById('base-color-picker'); const input=document.getElementById('base-color'); if(/^#?[0-9A-Fa-f]{6}$/.test(input.value)){ picker.value=input.value.startsWith('#')?input.value:'#'+input.value; } }
+        document.addEventListener('input', (e)=>{ if(e.target.id==='base-color-picker') syncPickerToInput(); if(e.target.id==='base-color') syncInputToPicker(); });
+        function generatePalette(){ if(!paletteGen){ alert('Tool not initialized.'); return; } const base=document.getElementById('base-color').value.trim(); const type=document.getElementById('palette-type').value; const count=parseInt(document.getElementById('color-count').value)||5; const res=paletteGen.generatePalette(base.startsWith('#')?base:'#'+base, type, count); if(res.success){ renderPalette(res); } else { showPaletteError(res); } }
+        function renderPalette(res){ const grid=document.getElementById('palette-grid'); const hexDiv=document.getElementById('format-hex'); const rgbDiv=document.getElementById('format-rgb'); const hslDiv=document.getElementById('format-hsl'); const accDiv=document.getElementById('accessibility-results'); document.getElementById('palette-error').classList.add('hidden'); grid.innerHTML=''; const hexes=[]; const rgbs=[]; const hsls=[]; res.palette.forEach((c)=>{ hexes.push(c.hex); rgbs.push(`rgb(${c.rgb.r}, ${c.rgb.g}, ${c.rgb.b})`); hsls.push(`hsl(${Math.round(c.hsl.h)}, ${Math.round(c.hsl.s)}%, ${Math.round(c.hsl.l)}%)`); const card=document.createElement('div'); card.className='rounded-xl overflow-hidden border'; card.innerHTML=`<div class=\"h-24\" style=\"background:${c.hex}\"></div><div class=\"p-3 text-sm\"><div class=\"font-bold\">${c.name}</div><div class=\"font-mono\">${c.hex}</div></div>`; grid.appendChild(card); }); hexDiv.textContent=hexes.join(', '); rgbDiv.textContent=rgbs.join(', '); hslDiv.textContent=hsls.join(', '); accDiv.innerHTML = res.accessibility && res.accessibility.results ? res.accessibility.results.map(r=>`<div class=\"bg-gray-50 p-2 rounded border\"><div class=\"text-xs text-gray-500\">${r.pair}</div><div class=\"text-sm\">${r.level} - ${r.pass?'✅ Pass':'❌ Fail'}</div></div>`).join('') : '<div class="text-gray-500">No accessibility data.</div>'; }
+        function showPaletteError(err){ document.getElementById('palette-error').classList.remove('hidden'); }
+        function copyPalette(){ const hex=document.getElementById('format-hex').textContent.trim(); if(!hex) return alert('No palette to copy.'); navigator.clipboard.writeText(hex).then(()=>alert('Palette copied to clipboard!')).catch(()=>alert('Failed to copy.')); }
+        function downloadPalette(){ const hex=document.getElementById('format-hex').textContent.trim(); if(!hex) return alert('No palette to download.'); const blob=new Blob([hex],{type:'text/plain'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='palette-hex.txt'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
+        function clearPalette(){ document.getElementById('palette-grid').innerHTML=''; document.getElementById('format-hex').textContent='-'; document.getElementById('format-rgb').textContent='-'; document.getElementById('format-hsl').textContent='-'; document.getElementById('accessibility-results').innerHTML='<div class="text-gray-500">Generate a palette to see WCAG contrast checks.</div>'; }
+        document.addEventListener('DOMContentLoaded',()=>{ setTimeout(initializePalette,500); });
+    </script>
+    <script>
+        const availableTools=[
+            {icon:'🧮',name:'Smart Calculator',description:'Advanced calculator with scientific functions',pageUrl:'/tools/calculator.html'},
+            {icon:'⏰',name:'Study Timer',description:'Pomodoro technique with focus sessions',pageUrl:'/tools/study-timer.html'},
+            {icon:'📝',name:'Note Taker',description:'Advanced text summarization & notes',pageUrl:'/tools/note-taker.html'},
+            {icon:'🧮',name:'Math Solver',description:'Step-by-step math problem solving',pageUrl:'/tools/math-solver.html'},
+            {icon:'📊',name:'Grade Calculator',description:'GPA tracking & academic analysis',pageUrl:'/tools/grade-calculator.html'},
+            {icon:'📖',name:'Citation Generator',description:'Multiple citation formats & styles',pageUrl:'/tools/citation-generator.html'},
+            {icon:'🎯',name:'Study Planner',description:'Study scheduling & time management',pageUrl:'/tools/study-planner.html'},
+            {icon:'📚',name:'Flashcard Generator',description:'Spaced repetition learning cards',pageUrl:'/tools/flashcard-generator.html'},
+            {icon:'📈',name:'Progress Tracker',description:'Academic progress & analytics',pageUrl:'/tools/progress-tracker.html'},
+            {icon:'🎂',name:'Age Calculator',description:'Precise age & date calculations',pageUrl:'/tools/age-calculator.html'},
+            {icon:'⚖️',name:'BMI Calculator',description:'Health analysis & recommendations',pageUrl:'/tools/bmi-calculator.html'},
+            {icon:'🏦',name:'Loan Calculator',description:'Professional loan calculation & analysis',pageUrl:'/tools/loan-calculator.html'},
+            {icon:'💼',name:'Investment Calculator',description:'Investment returns & projections',pageUrl:'/tools/investment-calculator.html'},
+            {icon:'💰',name:'Tax Calculator',description:'Tax calculation & planning',pageUrl:'/tools/tax-calculator.html'},
+            {icon:'💱',name:'Currency Converter',description:'Real-time currency conversion',pageUrl:'/tools/currency-converter.html'},
+            {icon:'🏠',name:'Retirement Planner',description:'Retirement savings calculator',pageUrl:'/tools/retirement-calculator.html'},
+            {icon:'🏡',name:'Mortgage Calculator',description:'Mortgage payment calculations',pageUrl:'/tools/mortgage-calculator.html'},
+            {icon:'💳',name:'Budget Planner',description:'Personal budget planning tool',pageUrl:'/tools/budget-planner.html'},
+            {icon:'💵',name:'Salary Calculator',description:'Salary & tax calculations',pageUrl:'/tools/salary-calculator.html'},
+            {icon:'🔧',name:'JSON Formatter',description:'Format & validate JSON data',pageUrl:'/tools/json-formatter.html'},
+            {icon:'📄',name:'XML Formatter',description:'Format & validate XML data',pageUrl:'/tools/xml-formatter.html'},
+            {icon:'🔐',name:'Base64 Encoder',description:'Encode & decode Base64 data',pageUrl:'/tools/base64-encoder.html'},
+            {icon:'🔐',name:'Hash Generator',description:'Generate multiple hash types',pageUrl:'/tools/hash-generator.html'},
+            {icon:'🌐',name:'URL Encoder',description:'Encode & decode URLs',pageUrl:'/tools/url-encoder.html'},
+            {icon:'🔍',name:'Regex Tester',description:'Test & debug regex patterns',pageUrl:'/tools/regex-tester.html'}
+        ];
+        let currentToolIndex=-1, refreshInterval=null;
+        function getRandomTool(){ let i; do { i=Math.floor(Math.random()*availableTools.length);} while(i===currentToolIndex&&availableTools.length>1); currentToolIndex=i; return availableTools[i]; }
+        function updateToolSuggestion(){ const t=getRandomTool(); const card=document.getElementById('tool-suggestion-card'); const i=document.getElementById('tool-icon'); const n=document.getElementById('tool-name'); const d=document.getElementById('tool-description'); const b=document.getElementById('tool-checkout-btn'); if(!card||!i||!n||!d||!b) return; b.dataset.modalId=t.modalId||''; b.dataset.pageUrl=t.pageUrl||''; card.style.opacity='0'; card.style.transform='translateY(-10px)'; setTimeout(()=>{ i.textContent=t.icon; n.textContent=t.name; d.textContent=t.description; card.style.opacity='1'; card.style.transform='translateY(0)'; },300); }
+        function launchSuggestedTool(){ const b=document.getElementById('tool-checkout-btn'); if(!b) return; const m=b.dataset.modalId, p=b.dataset.pageUrl; if(p){ window.location.href=p; } else if(m&&typeof openModal==='function'){ window.location.href=`/#${m}`; } else { window.location.href='/#tools'; } }
+        function initToolSuggestions(){ updateToolSuggestion(); refreshInterval=setInterval(updateToolSuggestion,10000); }
+        document.addEventListener('DOMContentLoaded',()=>{ setTimeout(initToolSuggestions,1000); });
+        window.addEventListener('beforeunload',()=>{ if(refreshInterval) clearInterval(refreshInterval); });
+    </script>
+    <style>@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeIn .5s ease-in-out}#tool-suggestion-card{transition:opacity .3s ease,transform .3s ease}</style>
+</body>
+</html>
+

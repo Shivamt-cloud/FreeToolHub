@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Grade Calculator - FreeToolHub</title>
+    <meta name="description" content="Advanced grade calculation, GPA tracking, and academic performance analysis. Free online GPA calculator.">
+    <meta property="og:title" content="Grade Calculator - FreeToolHub">
+    <meta property="og:description" content="Advanced grade calculation, GPA tracking, and academic performance analysis">
+    <meta property="og:url" content="https://freetoolhub.in/tools/grade-calculator.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">📊 Grade Calculator</h1>
+                    <p class="text-gray-600 text-lg">Advanced grade calculation, GPA tracking, and academic performance analysis</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-purple-500 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Grade Calculator</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Input Section -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Course Input -->
+                        <div>
+                            <label class="block text-lg font-semibold text-gray-700 mb-3">Add Course</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Course Name</label>
+                                    <input type="text" id="course-name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="e.g., Mathematics 101">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Course Code</label>
+                                    <input type="text" id="course-code" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="e.g., MATH101">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Credits</label>
+                                    <input type="number" id="course-credits" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="3" min="1" max="6">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Grade</label>
+                                    <input type="text" id="course-grade" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="A, 85, 3.5">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Semester</label>
+                                    <input type="text" id="course-semester" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="Fall 2024">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Grade Scale</label>
+                                    <select id="grade-scale" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                        <option value="4.0">4.0 Scale</option>
+                                        <option value="100">100 Point Scale</option>
+                                        <option value="percentage">Percentage Scale</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="addCourse()" class="w-full mt-4 bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                ➕ Add Course
+                            </button>
+                        </div>
+                        
+                        <!-- Weighted Grade Calculator -->
+                        <div>
+                            <label class="block text-lg font-semibold text-gray-700 mb-3">Weighted Grade Calculator</label>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Current Grade (%)</label>
+                                    <input type="number" id="current-grade" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="85" min="0" max="100">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Target Grade (%)</label>
+                                    <input type="number" id="target-grade" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="90" min="0" max="100">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Remaining Weight (%)</label>
+                                    <input type="number" id="remaining-weight" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="30" min="0" max="100">
+                                </div>
+                                <button onclick="calculateGradeNeeded()" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                    🎯 Calculate Grade Needed
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Quick Actions</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="calculateGPA()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    📊 Calculate GPA
+                                </button>
+                                <button onclick="clearCourses()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    🗑️ Clear All
+                                </button>
+                                <button onclick="exportData()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    📤 Export Data
+                                </button>
+                                <button onclick="loadSampleData()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    📋 Load Sample
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <!-- GPA Results -->
+                        <div id="gpa-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📊 GPA Results</h4>
+                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                <div id="gpa-display" class="text-3xl font-bold text-purple-600 mb-2"></div>
+                                <div id="gpa-details" class="text-sm text-gray-600 mb-3"></div>
+                                <div id="academic-standing" class="text-sm font-semibold text-gray-700"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Grade Needed Results -->
+                        <div id="grade-needed-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">🎯 Grade Needed</h4>
+                            <div class="bg-pink-50 p-4 rounded-lg border border-pink-200">
+                                <div id="grade-needed-display" class="text-2xl font-bold text-pink-600 mb-2"></div>
+                                <div id="grade-needed-details" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Course List -->
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📚 Courses</h4>
+                            <div id="courses-list" class="space-y-2 max-h-64 overflow-y-auto bg-gray-50 rounded-lg p-3">
+                                <div class="text-gray-500 text-center py-4">No courses added yet</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Statistics -->
+                        <div id="statistics-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📈 Statistics</h4>
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <div id="statistics-content" class="grid grid-cols-2 gap-4"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Grade Calculator Dependencies -->
+    <script src="/src/js/GradeCalculator.js?v=1&t=1726745000"></script>
+    
+    <!-- Grade Calculator JavaScript -->
+    <script>
+        // Grade Calculator Functions
+        let gradeCalculator = null;
+
+        // Initialize Grade Calculator
+        function initializeGradeCalculator() {
+            try {
+                if (typeof GradeCalculator !== 'undefined') {
+                    gradeCalculator = new GradeCalculator();
+                    console.log('✅ Grade Calculator initialized successfully');
+                    updateCoursesList();
+                } else {
+                    console.error('❌ GradeCalculator class not found');
+                }
+            } catch (error) {
+                console.error('❌ Error initializing Grade Calculator:', error);
+            }
+        }
+
+        // Add Course
+        function addCourse() {
+            if (!gradeCalculator) {
+                alert('Grade Calculator not initialized. Please refresh the page.');
+                return;
+            }
+
+            const courseData = {
+                name: document.getElementById('course-name').value.trim(),
+                code: document.getElementById('course-code').value.trim(),
+                credits: document.getElementById('course-credits').value,
+                grade: document.getElementById('course-grade').value.trim(),
+                semester: document.getElementById('course-semester').value.trim() || 'Current Semester'
+            };
+
+            if (!courseData.name || !courseData.grade) {
+                alert('Please fill in course name and grade.');
+                return;
+            }
+
+            const result = gradeCalculator.addCourse(courseData);
+            if (result.success) {
+                clearCourseForm();
+                updateCoursesList();
+                alert('Course added successfully!');
+            } else {
+                alert('Error adding course: ' + result.error);
+            }
+        }
+
+        // Calculate GPA
+        function calculateGPA() {
+            if (!gradeCalculator) {
+                alert('Grade Calculator not initialized. Please refresh the page.');
+                return;
+            }
+
+            const scale = document.getElementById('grade-scale').value;
+            const result = gradeCalculator.calculateGPA(null, scale);
+
+            if (result.success) {
+                showGPAResults(result);
+            } else {
+                alert('Error calculating GPA: ' + result.error);
+            }
+        }
+
+        // Calculate Grade Needed
+        function calculateGradeNeeded() {
+            if (!gradeCalculator) {
+                alert('Grade Calculator not initialized. Please refresh the page.');
+                return;
+            }
+
+            const currentGrade = document.getElementById('current-grade').value;
+            const targetGrade = document.getElementById('target-grade').value;
+            const remainingWeight = document.getElementById('remaining-weight').value;
+
+            if (!currentGrade || !targetGrade || !remainingWeight) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            const result = gradeCalculator.calculateGradeNeeded(currentGrade, targetGrade, remainingWeight / 100);
+            if (result.success) {
+                showGradeNeededResults(result);
+            } else {
+                alert('Error calculating grade needed: ' + result.error);
+            }
+        }
+
+        // Show GPA Results
+        function showGPAResults(result) {
+            hideAllGradeResults();
+            
+            document.getElementById('gpa-display').textContent = `${result.gpa} (${result.letterGrade})`;
+            document.getElementById('gpa-details').innerHTML = `
+                <div>Total Points: ${result.totalPoints.toFixed(2)}</div>
+                <div>Total Credits: ${result.totalCredits}</div>
+                <div>Valid Courses: ${result.validCourses}/${result.totalCourses}</div>
+                <div>Scale: ${result.scale}</div>
+            `;
+            
+            const standing = gradeCalculator.getAcademicStanding(result.gpa);
+            document.getElementById('academic-standing').textContent = `Academic Standing: ${standing}`;
+            
+            document.getElementById('gpa-results').classList.remove('hidden');
+        }
+
+        // Show Grade Needed Results
+        function showGradeNeededResults(result) {
+            hideAllGradeResults();
+            
+            document.getElementById('grade-needed-display').textContent = `${result.neededGrade}% (${result.letterGrade})`;
+            document.getElementById('grade-needed-details').innerHTML = `
+                <div>Current Grade: ${result.currentGrade}%</div>
+                <div>Target Grade: ${result.targetGrade}%</div>
+                <div>Remaining Weight: ${(result.remainingWeight * 100).toFixed(1)}%</div>
+            `;
+            
+            document.getElementById('grade-needed-results').classList.remove('hidden');
+        }
+
+        // Hide All Grade Results
+        function hideAllGradeResults() {
+            document.getElementById('gpa-results').classList.add('hidden');
+            document.getElementById('grade-needed-results').classList.add('hidden');
+            document.getElementById('statistics-results').classList.add('hidden');
+        }
+
+        // Clear Course Form
+        function clearCourseForm() {
+            document.getElementById('course-name').value = '';
+            document.getElementById('course-code').value = '';
+            document.getElementById('course-credits').value = '';
+            document.getElementById('course-grade').value = '';
+            document.getElementById('course-semester').value = '';
+        }
+
+        // Clear All Courses
+        function clearCourses() {
+            if (!gradeCalculator) return;
+            
+            if (confirm('Are you sure you want to clear all courses?')) {
+                gradeCalculator.clearHistory();
+                updateCoursesList();
+                hideAllGradeResults();
+                alert('All courses cleared!');
+            }
+        }
+
+        // Export Data
+        function exportData() {
+            if (!gradeCalculator) {
+                alert('Grade Calculator not initialized. Please refresh the page.');
+                return;
+            }
+
+            const result = gradeCalculator.exportData('json');
+            if (result.success) {
+                const dataStr = JSON.stringify(result.data, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'grade-data.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                alert('Data exported successfully!');
+            } else {
+                alert('Error exporting data: ' + result.error);
+            }
+        }
+
+        // Load Sample Data
+        function loadSampleData() {
+            if (!gradeCalculator) return;
+            
+            const sampleCourses = [
+                { name: 'Mathematics 101', code: 'MATH101', credits: 3, grade: 'A', semester: 'Fall 2024' },
+                { name: 'English Literature', code: 'ENG201', credits: 3, grade: 'B+', semester: 'Fall 2024' },
+                { name: 'Physics 101', code: 'PHYS101', credits: 4, grade: 'A-', semester: 'Fall 2024' },
+                { name: 'History 101', code: 'HIST101', credits: 3, grade: 'B', semester: 'Fall 2024' },
+                { name: 'Computer Science 101', code: 'CS101', credits: 3, grade: 'A', semester: 'Fall 2024' }
+            ];
+            
+            sampleCourses.forEach(course => {
+                gradeCalculator.addCourse(course);
+            });
+            
+            updateCoursesList();
+            alert('Sample data loaded successfully!');
+        }
+
+        // Update Courses List
+        function updateCoursesList() {
+            if (!gradeCalculator) return;
+            
+            const courses = gradeCalculator.courses;
+            const container = document.getElementById('courses-list');
+            
+            if (courses.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-4">No courses added yet</div>';
+                return;
+            }
+            
+            let html = '';
+            courses.forEach(course => {
+                const gradeValue = gradeCalculator.getGradeValue(course.grade, '4.0');
+                const letterGrade = gradeCalculator.getLetterGrade(gradeValue, '4.0');
+                
+                html += `
+                    <div class="bg-white p-3 rounded-lg border border-gray-200 mb-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="font-semibold text-gray-800">${course.name}</div>
+                                <div class="text-sm text-gray-600">${course.code} • ${course.credits} credits</div>
+                                <div class="text-sm text-gray-500">${course.semester}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-gray-800">${course.grade}</div>
+                                <div class="text-sm text-gray-600">${letterGrade}</div>
+                                <button onclick="deleteCourse(${course.id})" class="text-red-500 hover:text-red-700 text-sm">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Delete Course
+        function deleteCourse(courseId) {
+            if (!gradeCalculator) return;
+            
+            if (confirm('Are you sure you want to delete this course?')) {
+                const result = gradeCalculator.deleteCourse(courseId);
+                if (result.success) {
+                    updateCoursesList();
+                    alert('Course deleted successfully!');
+                } else {
+                    alert('Error deleting course: ' + result.error);
+                }
+            }
+        }
+
+        // Initialize Grade Calculator on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeGradeCalculator();
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        const availableTools = [
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', modalId: 'calculator-modal' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', modalId: 'study-timer-modal' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', modalId: 'note-taker-modal' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', modalId: 'math-solver-modal' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', modalId: 'citation-generator-modal' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', modalId: 'study-planner-modal' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', modalId: 'flashcard-generator-modal' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', modalId: 'progress-tracker-modal' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', modalId: 'age-calculator-modal' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', modalId: 'bmi-modal' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', modalId: 'loan-calculator-modal' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', modalId: 'investment-calculator-modal' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', modalId: 'tax-calculator-modal' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', modalId: 'business-metrics-modal' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', modalId: 'currency-converter-modal' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', modalId: 'retirement-calculator-modal' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', modalId: 'mortgage-calculator-modal' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', modalId: 'budget-planner-modal' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', modalId: 'salary-calculator-modal' },
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', modalId: 'json-formatter-modal' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', modalId: 'xml-formatter-modal' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', modalId: 'base64-encoder-modal' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', modalId: 'hash-generator-modal' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', modalId: 'url-encoder-modal' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', modalId: 'regex-tester-modal' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', modalId: 'css-js-minifier-modal' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', modalId: 'color-palette-modal' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', modalId: 'lorem-ipsum-modal' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            btnEl.dataset.modalId = tool.modalId;
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            const modalId = btnEl.dataset.modalId;
+            
+            if (modalId && typeof openModal === 'function') {
+                if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+                    openModal(modalId);
+                } else {
+                    window.location.href = `/#${modalId}`;
+                }
+            } else {
+                window.location.href = '/#tools';
+            }
+        }
+        
+        function initToolSuggestions() {
+            updateToolSuggestion();
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        #tool-suggestion-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+    </style>
+</body>
+</html>
+
+

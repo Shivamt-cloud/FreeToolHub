@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Math Problem Solver - FreeToolHub</title>
+    <meta name="description" content="Advanced mathematical problem solver with step-by-step solutions and graphing capabilities. Free online math solver.">
+    <meta property="og:title" content="Math Problem Solver - FreeToolHub">
+    <meta property="og:description" content="Advanced mathematical problem solver with step-by-step solutions">
+    <meta property="og:url" content="https://freetoolhub.in/tools/math-solver.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🧮 Math Problem Solver</h1>
+                    <p class="text-gray-600 text-lg">Advanced mathematical problem solver with step-by-step solutions and graphing capabilities</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-green-500 to-teal-600 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-teal-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Math Solver</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Input Section -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Problem Input -->
+                        <div class="bg-gradient-to-r from-green-50 to-teal-50 p-6 rounded-xl border-2 border-green-200">
+                            <label class="block text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                <span>📝</span>
+                                <span>Enter Your Math Problem</span>
+                            </label>
+                            <textarea 
+                                id="math-problem" 
+                                rows="3" 
+                                class="w-full p-4 text-lg border-2 border-green-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none transition-all duration-300" 
+                                placeholder="Type your problem here... (e.g., 2x + 5 = 13)"
+                                onkeypress="if(event.key === 'Enter' && event.ctrlKey) solveMathProblem()"
+                            ></textarea>
+                            <div class="mt-2 text-xs text-gray-600 flex items-center gap-1">
+                                <span>💡</span>
+                                <span>Press <kbd class="px-2 py-1 bg-gray-200 rounded font-semibold">Ctrl + Enter</kbd> to solve quickly</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Math Symbol Keyboard -->
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">🔢 Math Symbols Keyboard</label>
+                            <div class="grid grid-cols-8 gap-2">
+                                <button onclick="insertSymbol('+')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110 text-lg">+</button>
+                                <button onclick="insertSymbol('-')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110 text-lg">−</button>
+                                <button onclick="insertSymbol('×')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110 text-lg">×</button>
+                                <button onclick="insertSymbol('÷')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110 text-lg">÷</button>
+                                <button onclick="insertSymbol('=')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110 text-lg">=</button>
+                                <button onclick="insertSymbol('²')" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110 text-xs">x²</button>
+                                <button onclick="insertSymbol('√')" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110">√</button>
+                                <button onclick="insertSymbol('π')" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110">π</button>
+                                <button onclick="insertSymbol('(')" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110">(</button>
+                                <button onclick="insertSymbol(')')" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110">)</button>
+                                <button onclick="insertSymbol('^')" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110">^</button>
+                                <button onclick="insertSymbol('%')" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110">%</button>
+                                <button onclick="insertSymbol('/')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110">/</button>
+                                <button onclick="insertSymbol('x')" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110">x</button>
+                                <button onclick="insertSymbol('y')" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110">y</button>
+                                <button onclick="insertSymbol('°')" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-110 text-xs">°</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Popular Examples -->
+                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">⭐ Popular Examples (Click to Use)</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <button onclick="loadExample('2x + 5 = 13')" class="text-left bg-white hover:bg-blue-100 p-3 rounded-lg border border-blue-300 transition-all duration-200 transform hover:scale-105">
+                                    <div class="font-semibold text-gray-800">Linear Equation</div>
+                                    <div class="text-sm text-gray-600">2x + 5 = 13</div>
+                                </button>
+                                <button onclick="loadExample('x² + 3x - 4 = 0')" class="text-left bg-white hover:bg-blue-100 p-3 rounded-lg border border-blue-300 transition-all duration-200 transform hover:scale-105">
+                                    <div class="font-semibold text-gray-800">Quadratic</div>
+                                    <div class="text-sm text-gray-600">x² + 3x - 4 = 0</div>
+                                </button>
+                                <button onclick="loadExample('25% of 80')" class="text-left bg-white hover:bg-blue-100 p-3 rounded-lg border border-blue-300 transition-all duration-200 transform hover:scale-105">
+                                    <div class="font-semibold text-gray-800">Percentage</div>
+                                    <div class="text-sm text-gray-600">25% of 80</div>
+                                </button>
+                                <button onclick="loadExample('3/4 + 1/2')" class="text-left bg-white hover:bg-blue-100 p-3 rounded-lg border border-blue-300 transition-all duration-200 transform hover:scale-105">
+                                    <div class="font-semibold text-gray-800">Fractions</div>
+                                    <div class="text-sm text-gray-600">3/4 + 1/2</div>
+                                </button>
+                                <button onclick="loadExample('Area of circle radius 5')" class="text-left bg-white hover:bg-blue-100 p-3 rounded-lg border border-blue-300 transition-all duration-200 transform hover:scale-105">
+                                    <div class="font-semibold text-gray-800">Geometry</div>
+                                    <div class="text-sm text-gray-600">Area of circle radius 5</div>
+                                </button>
+                                <button onclick="loadExample('sin(30°)')" class="text-left bg-white hover:bg-blue-100 p-3 rounded-lg border border-blue-300 transition-all duration-200 transform hover:scale-105">
+                                    <div class="font-semibold text-gray-800">Trigonometry</div>
+                                    <div class="text-sm text-gray-600">sin(30°)</div>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Math Category -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">📚 Math Category (Optional)</label>
+                            <select id="math-category" class="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300">
+                                <option value="auto">Auto-detect</option>
+                                <option value="algebra">Algebra</option>
+                                <option value="calculus">Calculus</option>
+                                <option value="geometry">Geometry</option>
+                                <option value="statistics">Statistics</option>
+                                <option value="trigonometry">Trigonometry</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Main Action Buttons -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="solveMathProblem()" class="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg text-lg flex items-center justify-center gap-2">
+                                <span>🧮</span>
+                                <span>Solve Problem</span>
+                            </button>
+                            <button onclick="clearMathProblem()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+                                🗑️ Clear All
+                            </button>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 p-4 rounded-xl border border-purple-200">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">⚡ Quick Actions</label>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="loadSampleProblem()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105">
+                                    🎲 Random Example
+                                </button>
+                                <button onclick="copyMathProblem()" class="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105">
+                                    📋 Copy Problem
+                                </button>
+                                <button onclick="showMathHelp()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105">
+                                    ❓ Help Guide
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <!-- Solution Results -->
+                        <div id="solution-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📊 Solution</h4>
+                            <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                <div id="solution-answer" class="text-2xl font-bold text-green-600 mb-3"></div>
+                                <div id="solution-explanation" class="text-gray-700 mb-4"></div>
+                                <div id="solution-steps" class="space-y-2 mb-4"></div>
+                                <div class="flex space-x-2">
+                                    <button onclick="copySolution()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                        Copy Solution
+                                    </button>
+                                    <button onclick="downloadSolution()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                        Download
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Graph Results -->
+                        <div id="graph-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📈 Graph</h4>
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <div id="graph-container" class="bg-white p-4 rounded-lg border">
+                                    <div class="text-center text-gray-500">Graph will be displayed here</div>
+                                </div>
+                                <div id="graph-equation" class="text-sm text-gray-600 mt-2"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Problem Analysis -->
+                        <div id="analysis-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">🔍 Problem Analysis</h4>
+                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                <div id="problem-type" class="text-sm text-gray-600 mb-2"></div>
+                                <div id="problem-difficulty" class="text-sm text-gray-600 mb-2"></div>
+                                <div id="problem-category" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Solution History -->
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📚 Solution History</h4>
+                            <div id="solution-history" class="space-y-2 max-h-64 overflow-y-auto bg-gray-50 rounded-lg p-3">
+                                <div class="text-gray-500 text-center py-4">No solutions yet</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Tool Suggestion Card -->
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Math Solver Dependencies -->
+    <script src="/src/js/MathSolver.js?v=1&t=1726745000"></script>
+    
+    <!-- Math Solver JavaScript -->
+    <script>
+        // Math Problem Solver Functions
+        let mathSolver = null;
+
+        // Initialize Math Solver
+        function initializeMathSolver() {
+            try {
+                if (typeof MathSolver !== 'undefined') {
+                    mathSolver = new MathSolver();
+                    console.log('✅ Math Solver initialized successfully');
+                    updateSolutionHistory();
+                } else {
+                    console.error('❌ MathSolver class not found');
+                }
+            } catch (error) {
+                console.error('❌ Error initializing Math Solver:', error);
+            }
+        }
+
+        // Solve Math Problem
+        function solveMathProblem() {
+            if (!mathSolver) {
+                showError('Math Solver not initialized. Please refresh the page.');
+                return;
+            }
+
+            const problem = document.getElementById('math-problem').value.trim();
+            if (!problem) {
+                showError('Please enter a math problem to solve.');
+                document.getElementById('math-problem').focus();
+                return;
+            }
+
+            // Show loading state
+            const solveBtn = event?.target || document.querySelector('button[onclick*="solveMathProblem"]');
+            const originalHTML = solveBtn ? solveBtn.innerHTML : '';
+            if (solveBtn) {
+                solveBtn.disabled = true;
+                solveBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Solving...</span>';
+            }
+
+            const category = document.getElementById('math-category').value;
+            
+            setTimeout(() => {
+                try {
+                    const result = mathSolver.solveProblem(problem, category);
+                    
+                    if (result.success) {
+                        showSolutionResults(result);
+                    } else {
+                        showError('Error solving problem: ' + result.error);
+                    }
+                } catch (error) {
+                    showError('An error occurred: ' + error.message);
+                } finally {
+                    if (solveBtn) {
+                        solveBtn.disabled = false;
+                        solveBtn.innerHTML = originalHTML;
+                    }
+                }
+            }, 100);
+        }
+
+        // Show Error Message
+        function showError(message) {
+            // Remove existing error
+            const existingError = document.getElementById('math-error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            // Create error message
+            const errorDiv = document.createElement('div');
+            errorDiv.id = 'math-error-message';
+            errorDiv.className = 'fixed top-20 right-4 bg-red-500 text-white px-6 py-4 rounded-lg shadow-xl z-50 animate-slide-in';
+            errorDiv.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">⚠️</span>
+                    <div>
+                        <div class="font-bold">Error</div>
+                        <div class="text-sm">${message}</div>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                        ✕
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(errorDiv);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentElement) {
+                    errorDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Show Solution Results
+        function showSolutionResults(result) {
+            hideAllMathResults();
+            
+            // Format answer nicely
+            const answerEl = document.getElementById('solution-answer');
+            answerEl.innerHTML = `
+                <div class="text-center mb-2">
+                    <div class="text-xs text-gray-500 mb-1">Answer</div>
+                    <div class="text-3xl font-bold text-green-600">${result.answer}</div>
+                </div>
+            `;
+            
+            // Format explanation
+            const explanationEl = document.getElementById('solution-explanation');
+            explanationEl.innerHTML = result.explanation 
+                ? `<div class="bg-white p-3 rounded-lg border border-green-200"><p class="text-gray-700">${result.explanation}</p></div>`
+                : '<div class="text-gray-500 italic">Solution provided</div>';
+            
+            // Format steps
+            const stepsContainer = document.getElementById('solution-steps');
+            stepsContainer.innerHTML = '';
+            
+            if (result.steps && result.steps.length > 0) {
+                const stepsHeader = document.createElement('div');
+                stepsHeader.className = 'font-bold text-gray-700 mb-2 text-sm';
+                stepsHeader.textContent = `Step-by-Step Solution (${result.steps.length} steps):`;
+                stepsContainer.appendChild(stepsHeader);
+                
+                result.steps.forEach((step, index) => {
+                    const stepDiv = document.createElement('div');
+                    stepDiv.className = 'bg-white p-3 rounded-lg border-l-4 border-green-500 mb-2 shadow-sm transition-all hover:shadow-md';
+                    stepDiv.innerHTML = `
+                        <div class="flex items-start gap-2">
+                            <div class="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0">${index + 1}</div>
+                            <div class="text-gray-700 flex-1">${step}</div>
+                        </div>
+                    `;
+                    stepsContainer.appendChild(stepDiv);
+                });
+            }
+            
+            // Show success animation
+            document.getElementById('solution-results').classList.remove('hidden');
+            document.getElementById('solution-results').classList.add('animate-fade-in');
+            
+            // Scroll to results
+            document.getElementById('solution-results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            updateSolutionHistory();
+        }
+
+        // Hide All Math Results
+        function hideAllMathResults() {
+            document.getElementById('solution-results').classList.add('hidden');
+            document.getElementById('graph-results').classList.add('hidden');
+            document.getElementById('analysis-results').classList.add('hidden');
+        }
+
+        // Clear Math Problem
+        function clearMathProblem() {
+            document.getElementById('math-problem').value = '';
+            hideAllMathResults();
+        }
+
+        // Insert Symbol into Input
+        function insertSymbol(symbol) {
+            const textarea = document.getElementById('math-problem');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            
+            textarea.value = text.substring(0, start) + symbol + text.substring(end);
+            textarea.focus();
+            textarea.setSelectionRange(start + symbol.length, start + symbol.length);
+        }
+
+        // Load Example
+        function loadExample(example) {
+            document.getElementById('math-problem').value = example;
+            document.getElementById('math-problem').focus();
+            // Auto-solve if enabled
+            if (document.getElementById('auto-solve-checkbox')?.checked) {
+                setTimeout(() => solveMathProblem(), 300);
+            }
+        }
+
+        // Load Template (kept for backward compatibility)
+        function loadTemplate(type) {
+            const templates = {
+                linear: '2x + 5 = 13',
+                quadratic: 'x² + 3x - 4 = 0',
+                percentage: '25% of 80',
+                fraction: '3/4 + 1/2'
+            };
+            
+            loadExample(templates[type] || '');
+        }
+
+        // Copy Math Problem
+        function copyMathProblem() {
+            const problem = document.getElementById('math-problem').value;
+            navigator.clipboard.writeText(problem).then(() => {
+                alert('Problem copied to clipboard!');
+            });
+        }
+
+        // Load Sample Problem
+        function loadSampleProblem() {
+            const samples = [
+                '2x + 5 = 13',
+                'x² + 3x - 4 = 0',
+                '25% of 80',
+                '3/4 + 1/2',
+                'Area of circle with radius 5'
+            ];
+            
+            const randomSample = samples[Math.floor(Math.random() * samples.length)];
+            document.getElementById('math-problem').value = randomSample;
+        }
+
+        // Show Math Help
+        function showMathHelp() {
+            const helpModal = document.getElementById('math-help-modal');
+            if (helpModal) {
+                helpModal.classList.remove('hidden');
+                return;
+            }
+
+            const modal = document.createElement('div');
+            modal.id = 'math-help-modal';
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="sticky top-0 bg-gradient-to-r from-green-500 to-teal-600 text-white p-6 rounded-t-2xl flex justify-between items-center">
+                        <h3 class="text-2xl font-bold">📚 Math Solver Help Guide</h3>
+                        <button onclick="document.getElementById('math-help-modal').remove()" class="text-white hover:text-gray-200 text-2xl font-bold">×</button>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <h4 class="font-bold text-lg text-gray-800 mb-2">✨ How to Use</h4>
+                            <p class="text-gray-600">Enter your math problem in natural language or mathematical notation. The solver will automatically detect the problem type and provide step-by-step solutions.</p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-lg text-gray-800 mb-2">📝 Supported Formats</h4>
+                            <ul class="list-disc list-inside space-y-2 text-gray-600">
+                                <li><strong>Equations:</strong> 2x + 5 = 13, x² + 3x - 4 = 0</li>
+                                <li><strong>Percentages:</strong> 25% of 80, what is 15% of 200?</li>
+                                <li><strong>Fractions:</strong> 3/4 + 1/2, (2/3) × (4/5)</li>
+                                <li><strong>Geometry:</strong> Area of circle radius 5, perimeter of rectangle 10x8</li>
+                                <li><strong>Trigonometry:</strong> sin(30°), cos(45°), tan(60°)</li>
+                                <li><strong>Algebra:</strong> Factor x² - 4, simplify 2(x+3)</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-lg text-gray-800 mb-2">🎯 Tips</h4>
+                            <ul class="list-disc list-inside space-y-2 text-gray-600">
+                                <li>Use the symbol keyboard for quick input</li>
+                                <li>Click on popular examples to get started</li>
+                                <li>Press Ctrl+Enter to solve quickly</li>
+                                <li>Select a category for better accuracy (optional)</li>
+                                <li>View solution history for previous problems</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                            <h4 class="font-bold text-lg text-green-800 mb-2">💡 Pro Tip</h4>
+                            <p class="text-green-700">You can describe problems in plain English! For example: "What is 25 percent of 80?" or "Solve for x: 2x plus 5 equals 13"</p>
+                        </div>
+                    </div>
+                    <div class="p-6 border-t bg-gray-50 rounded-b-2xl">
+                        <button onclick="document.getElementById('math-help-modal').remove()" class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-teal-700 transition-all duration-300">
+                            Got it! 👍
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Close on outside click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        // Copy Solution
+        function copySolution() {
+            const answer = document.getElementById('solution-answer').textContent;
+            const explanation = document.getElementById('solution-explanation').textContent;
+            const content = `${answer}\n${explanation}`;
+            
+            navigator.clipboard.writeText(content).then(() => {
+                alert('Solution copied to clipboard!');
+            });
+        }
+
+        // Download Solution
+        function downloadSolution() {
+            const answer = document.getElementById('solution-answer').textContent;
+            const explanation = document.getElementById('solution-explanation').textContent;
+            const steps = Array.from(document.querySelectorAll('#solution-steps div'))
+                .map(step => step.textContent)
+                .join('\n');
+            
+            const content = `Math Solution\n\n${answer}\n${explanation}\n\nSteps:\n${steps}`;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'math-solution.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Update Solution History
+        function updateSolutionHistory() {
+            if (!mathSolver) return;
+            
+            const history = mathSolver.getHistory();
+            const container = document.getElementById('solution-history');
+            
+            if (history.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-4">No solutions yet</div>';
+                return;
+            }
+            
+            let html = '';
+            history.slice(0, 10).forEach((item, index) => {
+                html += `
+                    <div class="bg-white p-3 rounded-lg border border-gray-200 mb-2">
+                        <div class="text-sm font-semibold text-gray-800">${item.operation}</div>
+                        <div class="text-xs text-gray-600">${item.input}</div>
+                        <div class="text-xs text-green-600 mt-1">${item.output}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Initialize Math Solver on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeMathSolver();
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script (Same as other tools) -->
+    <script>
+        const availableTools = [
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', modalId: 'calculator-modal' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', modalId: 'study-timer-modal' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', modalId: 'note-taker-modal' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', modalId: 'grade-calculator-modal' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', modalId: 'citation-generator-modal' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', modalId: 'study-planner-modal' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', modalId: 'flashcard-generator-modal' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', modalId: 'progress-tracker-modal' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', modalId: 'age-calculator-modal' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', modalId: 'bmi-modal' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', modalId: 'loan-calculator-modal' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', modalId: 'investment-calculator-modal' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', modalId: 'tax-calculator-modal' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', modalId: 'business-metrics-modal' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', modalId: 'currency-converter-modal' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', modalId: 'retirement-calculator-modal' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', modalId: 'mortgage-calculator-modal' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', modalId: 'budget-planner-modal' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', modalId: 'salary-calculator-modal' },
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', modalId: 'json-formatter-modal' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', modalId: 'xml-formatter-modal' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', modalId: 'base64-encoder-modal' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', modalId: 'hash-generator-modal' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', modalId: 'url-encoder-modal' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', modalId: 'regex-tester-modal' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', modalId: 'css-js-minifier-modal' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', modalId: 'color-palette-modal' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', modalId: 'lorem-ipsum-modal' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            btnEl.dataset.modalId = tool.modalId;
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            const modalId = btnEl.dataset.modalId;
+            
+            if (modalId && typeof openModal === 'function') {
+                if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+                    openModal(modalId);
+                } else {
+                    window.location.href = `/#${modalId}`;
+                }
+            } else {
+                window.location.href = '/#tools';
+            }
+        }
+        
+        function initToolSuggestions() {
+            updateToolSuggestion();
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        #tool-suggestion-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+        
+        @keyframes slide-in {
+            from { 
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to { 
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .animate-slide-in {
+            animation: slide-in 0.3s ease-out;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        /* Smooth transitions for result display */
+        #solution-results {
+            transition: all 0.3s ease;
+        }
+        
+        /* Symbol button hover effects */
+        button[onclick^="insertSymbol"] {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        button[onclick^="insertSymbol"]:active {
+            transform: scale(0.95);
+        }
+        
+        /* Example button hover */
+        button[onclick^="loadExample"] {
+            transition: all 0.2s ease;
+        }
+    </style>
+</body>
+</html>
+
+

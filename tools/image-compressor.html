@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Image Compressor - FreeToolHub</title>
+    <meta name="description" content="Reduce image file size while maintaining quality. Compress JPG, PNG, and WebP images with customizable quality settings, all in your browser.">
+    <meta property="og:title" content="Image Compressor - FreeToolHub">
+    <meta property="og:description" content="Reduce image file size while maintaining quality">
+    <meta property="og:url" content="https://freetoolhub.in/tools/image-compressor.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- JSZip for creating ZIP files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">📏 Image Compressor</h1>
+                    <p class="text-gray-600 text-lg">Reduce image file size while maintaining quality</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Image Compressor</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Main Image Compressor Section -->
+                    <div class="lg:col-span-3">
+                        <!-- Privacy Notice -->
+                        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
+                            <div class="flex items-start">
+                                <span class="text-2xl mr-3">🔒</span>
+                                <div>
+                                    <p class="font-semibold text-green-800 mb-1">100% Private & Secure</p>
+                                    <p class="text-sm text-green-700">All processing happens locally in your browser. Your images never leave your device!</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 1: Upload Images -->
+                        <div class="mb-6">
+                            <label class="block text-lg font-semibold text-gray-700 mb-3">
+                                <span class="text-green-600">Step 1:</span> Upload Images
+                            </label>
+                            
+                            <!-- Drop Zone -->
+                            <div id="compressor-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-green-500 transition-all cursor-pointer bg-gray-50 hover:bg-green-50">
+                                <input type="file" id="compressor-file-input" accept="image/*" multiple class="hidden">
+                                <div class="text-5xl mb-3">📁</div>
+                                <p class="text-lg font-semibold text-gray-700 mb-2">Drop images here or click to browse</p>
+                                <p class="text-sm text-gray-500">Supports: JPG, PNG, WebP, GIF - Select multiple files</p>
+                            </div>
+
+                            <!-- Image Preview Grid -->
+                            <div id="compressor-preview-section" class="hidden mt-4">
+                                <div class="flex items-center justify-between mb-3 p-3 bg-green-50 rounded-lg">
+                                    <p class="font-semibold text-gray-700">
+                                        Uploaded: <span id="compressor-count" class="text-green-600 text-xl">0</span> images
+                                    </p>
+                                    <button onclick="clearAllCompressorImages()" class="text-red-600 hover:text-red-700 text-sm font-semibold px-3 py-1 bg-white rounded-lg hover:bg-red-50 transition-all">
+                                        Clear All
+                                    </button>
+                                </div>
+                                <div id="compressor-preview-grid" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 p-3 bg-gray-50 rounded-lg max-h-96 overflow-y-auto">
+                                    <!-- Image previews will be added here -->
+                                </div>
+                                <p class="text-xs text-gray-500 text-center mt-2">💡 Tip: Images will be compressed individually</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Compression Settings -->
+                        <div id="compressor-settings-section" class="hidden mb-6">
+                            <label class="block text-lg font-semibold text-gray-700 mb-3">
+                                <span class="text-green-600">Step 2:</span> Compression Settings
+                            </label>
+
+                            <div class="space-y-4">
+                                <!-- Quality Slider -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Quality Level</label>
+                                    <div class="flex items-center gap-4">
+                                        <span class="text-xs text-gray-600">Low</span>
+                                        <input type="range" id="compressor-quality-slider" min="10" max="100" value="80" class="flex-1 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer">
+                                        <span class="text-xs text-gray-600">High</span>
+                                    </div>
+                                    <div class="mt-2 text-center">
+                                        <span class="text-lg font-bold text-green-600" id="compressor-quality-value">80%</span>
+                                        <span class="text-sm text-gray-600 ml-2">(Recommended)</span>
+                                    </div>
+                                </div>
+
+                                <!-- Output Format -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Output Format</label>
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <label class="border-2 border-green-300 rounded-lg p-3 cursor-pointer hover:bg-green-50 transition-all text-center">
+                                            <input type="radio" name="compressor-format" value="jpeg" checked class="mb-2">
+                                            <div class="font-semibold text-sm">JPEG</div>
+                                            <div class="text-xs text-gray-600">Best compression</div>
+                                        </label>
+                                        <label class="border-2 border-gray-300 rounded-lg p-3 cursor-pointer hover:bg-green-50 transition-all text-center">
+                                            <input type="radio" name="compressor-format" value="png" class="mb-2">
+                                            <div class="font-semibold text-sm">PNG</div>
+                                            <div class="text-xs text-gray-600">Lossless</div>
+                                        </label>
+                                        <label class="border-2 border-gray-300 rounded-lg p-3 cursor-pointer hover:bg-green-50 transition-all text-center">
+                                            <input type="radio" name="compressor-format" value="webp" class="mb-2">
+                                            <div class="font-semibold text-sm">WebP</div>
+                                            <div class="text-xs text-gray-600">Modern</div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Resize Options -->
+                                <div>
+                                    <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                        <input type="checkbox" id="compressor-resize-checkbox" class="mr-2">
+                                        Resize Images (Optional)
+                                    </label>
+                                    <div id="compressor-resize-options" class="grid grid-cols-2 gap-3 hidden">
+                                        <div>
+                                            <label class="block text-xs text-gray-600 mb-1">Max Width (px)</label>
+                                            <input type="number" id="compressor-max-width" value="1920" min="100" max="10000" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs text-gray-600 mb-1">Max Height (px)</label>
+                                            <input type="number" id="compressor-max-height" value="1080" min="100" max="10000" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Compress Button -->
+                        <div id="compressor-compress-section" class="hidden mb-6">
+                            <button onclick="compressAllImages()" id="compressor-compress-btn" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 px-6 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+                                🗜️ Compress Images
+                            </button>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div id="compressor-progress" class="hidden mb-6">
+                            <div class="bg-green-50 border-2 border-green-500 rounded-xl p-4">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="animate-spin">⏳</div>
+                                    <span class="font-semibold text-green-800" id="compressor-progress-text">Compressing images...</span>
+                                </div>
+                                <div class="w-full bg-green-200 rounded-full h-4 overflow-hidden">
+                                    <div id="compressor-progress-bar" class="bg-gradient-to-r from-green-500 to-emerald-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                                <p class="text-sm text-green-700 mt-2" id="compressor-progress-percent">0%</p>
+                            </div>
+                        </div>
+
+                        <!-- Success Message with Results -->
+                        <div id="compressor-success" class="hidden mb-6">
+                            <div class="bg-green-50 border-2 border-green-500 rounded-xl p-4 mb-4">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-4xl">✅</span>
+                                    <div class="flex-1">
+                                        <h4 class="text-lg font-bold text-green-800 mb-1">Success!</h4>
+                                        <p class="text-green-700">All images compressed successfully</p>
+                                        <p class="text-sm text-gray-600 mt-1">
+                                            📊 Total savings: <span id="compressor-total-before">0 MB</span> → 
+                                            <span id="compressor-total-after">0 MB</span> 
+                                            (<span id="compressor-total-savings" class="font-bold text-green-600">0%</span> reduction)
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Results Grid -->
+                            <div id="compressor-results-grid" class="space-y-3 mb-4 max-h-96 overflow-y-auto">
+                                <!-- Results will be added here -->
+                            </div>
+
+                            <!-- Download All Button -->
+                            <button onclick="downloadAllCompressedAsZip()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-8 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg mb-3">
+                                📥 Download All as ZIP
+                            </button>
+
+                            <!-- Compress More Button -->
+                            <button onclick="resetCompressor()" class="w-full bg-white border-2 border-gray-300 text-gray-700 font-bold py-3 px-8 rounded-xl hover:bg-gray-50 transition-all duration-300">
+                                🔄 Compress More Images
+                            </button>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div id="compressor-error" class="hidden mb-6">
+                            <div class="bg-red-50 border-2 border-red-500 rounded-xl p-4">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-3xl">⚠️</span>
+                                    <div>
+                                        <h4 class="text-lg font-bold text-red-800 mb-1">Error</h4>
+                                        <p id="compressor-error-message" class="text-red-700"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Tool Suggestion Card -->
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        // Available tools for suggestions (excluding current tool)
+        const availableTools = [
+            // Student Tools
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', pageUrl: '/tools/age-calculator.html' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', pageUrl: '/tools/bmi-calculator.html' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', pageUrl: '/tools/loan-calculator.html' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', pageUrl: '/tools/investment-calculator.html' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', pageUrl: '/tools/tax-calculator.html' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', pageUrl: '/tools/business-metrics.html' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', pageUrl: '/tools/currency-converter.html' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', pageUrl: '/tools/retirement-calculator.html' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', pageUrl: '/tools/mortgage-calculator.html' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', pageUrl: '/tools/budget-planner.html' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', pageUrl: '/tools/salary-calculator.html' },
+            // Developer Tools
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', pageUrl: '/tools/json-formatter.html' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', pageUrl: '/tools/xml-formatter.html' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', pageUrl: '/tools/base64-encoder.html' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', pageUrl: '/tools/hash-generator.html' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', pageUrl: '/tools/url-encoder.html' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', pageUrl: '/tools/regex-tester.html' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', pageUrl: '/tools/css-js-minifier.html' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', pageUrl: '/tools/color-palette.html' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', pageUrl: '/tools/lorem-ipsum.html' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', pageUrl: '/tools/timestamp-converter.html' },
+            // PDF Tools
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', pageUrl: '/tools/pdf-password-remover.html' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', pageUrl: '/tools/pdf-merger.html' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', pageUrl: '/tools/pdf-splitter.html' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', pageUrl: '/tools/pdf-encryptor.html' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', pageUrl: '/tools/pdf-to-images.html' },
+            // Image Tools
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', pageUrl: '/tools/image-to-pdf.html' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            // Utility Tools
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        // Get random tool (excluding current one)
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        // Update tool suggestion card
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            if (tool) {
+                document.getElementById('tool-icon').textContent = tool.icon;
+                document.getElementById('tool-name').textContent = tool.name;
+                document.getElementById('tool-description').textContent = tool.description;
+                
+                const checkoutBtn = document.getElementById('tool-checkout-btn');
+                checkoutBtn.onclick = () => {
+                    if (tool.modalId) {
+                        // If it's a modal, open it
+                        if (typeof openModal === 'function') {
+                            openModal(tool.modalId);
+                        } else {
+                            console.error('openModal function not available for modal tool:', tool.name);
+                            alert(`Tool "${tool.name}" is not yet available as a dedicated page.`);
+                        }
+                    } else if (tool.pageUrl) {
+                        // If it's a page, navigate to it
+                        window.location.href = tool.pageUrl;
+                    } else {
+                        // Fallback to homepage if no specific action
+                        window.location.href = '/#tools';
+                    }
+                };
+            }
+        }
+        
+        // Launch suggested tool (updated to handle both modals and pages)
+        function launchSuggestedTool() {
+            const tool = availableTools[currentToolIndex];
+            if (tool) {
+                if (tool.modalId) {
+                    if (typeof openModal === 'function') {
+                        openModal(tool.modalId);
+                    } else {
+                        console.error('openModal function not available for modal tool:', tool.name);
+                        alert(`Tool "${tool.name}" is not yet available as a dedicated page.`);
+                    }
+                } else if (tool.pageUrl) {
+                    window.location.href = tool.pageUrl;
+                } else {
+                    window.location.href = '/#tools';
+                }
+            }
+        }
+        
+        // Start auto-refreshing suggestions
+        function startSuggestionRefresh() {
+            // Clear any existing interval to prevent duplicates
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            // Refresh every 10 seconds
+            refreshInterval = setInterval(updateToolSuggestion, 10000);
+        }
+        
+        // Initial load and start refresh
+        document.addEventListener('DOMContentLoaded', () => {
+            updateToolSuggestion();
+            startSuggestionRefresh();
+        });
+    </script>
+    
+    <!-- Image Compressor Script -->
+    <script>
+        // Image Compressor functionality
+        let compressorFiles = [];
+        let compressedImages = [];
+
+        // Initialize Image Compressor
+        function initImageCompressor() {
+            const dropZone = document.getElementById('compressor-drop-zone');
+            const fileInput = document.getElementById('compressor-file-input');
+            const qualitySlider = document.getElementById('compressor-quality-slider');
+            const qualityValue = document.getElementById('compressor-quality-value');
+            const resizeCheckbox = document.getElementById('compressor-resize-checkbox');
+            const resizeOptions = document.getElementById('compressor-resize-options');
+
+            if (!dropZone || !fileInput) return;
+
+            // Click to browse
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleCompressorUpload(Array.from(e.target.files));
+                }
+            });
+
+            // Drag and drop
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-green-500', 'bg-green-50');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('border-green-500', 'bg-green-50');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-green-500', 'bg-green-50');
+                if (e.dataTransfer.files.length > 0) {
+                    handleCompressorUpload(Array.from(e.dataTransfer.files));
+                }
+            });
+
+            // Quality slider
+            if (qualitySlider && qualityValue) {
+                qualitySlider.addEventListener('input', (e) => {
+                    qualityValue.textContent = e.target.value + '%';
+                });
+            }
+
+            // Resize checkbox
+            if (resizeCheckbox && resizeOptions) {
+                resizeCheckbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        resizeOptions.classList.remove('hidden');
+                    } else {
+                        resizeOptions.classList.add('hidden');
+                    }
+                });
+            }
+        }
+
+        function handleCompressorUpload(files) {
+            // Filter only image files
+            const imageFiles = files.filter(file => file.type.startsWith('image/'));
+            
+            if (imageFiles.length === 0) {
+                showCompressorError('Please select valid image files (JPG, PNG, WebP, GIF).');
+                return;
+            }
+
+            // Add to array
+            compressorFiles.push(...imageFiles);
+
+            // Update UI
+            displayCompressorPreviews();
+            
+            // Show settings and compress sections
+            document.getElementById('compressor-settings-section').classList.remove('hidden');
+            document.getElementById('compressor-compress-section').classList.remove('hidden');
+            document.getElementById('compressor-success').classList.add('hidden');
+            document.getElementById('compressor-error').classList.add('hidden');
+        }
+
+        function displayCompressorPreviews() {
+            const previewSection = document.getElementById('compressor-preview-section');
+            const previewGrid = document.getElementById('compressor-preview-grid');
+            const countSpan = document.getElementById('compressor-count');
+
+            previewSection.classList.remove('hidden');
+            countSpan.textContent = compressorFiles.length;
+            previewGrid.innerHTML = '';
+
+            compressorFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const preview = document.createElement('div');
+                    preview.className = 'relative group';
+                    
+                    preview.innerHTML = `
+                        <img src="${e.target.result}" class="w-full h-24 object-cover rounded-lg border-2 border-gray-300 group-hover:border-green-500 transition-all">
+                        <div class="absolute top-1 right-1 bg-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="removeCompressorImage(${index})" class="text-red-600 hover:text-red-700">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="absolute bottom-1 left-1 bg-green-600 text-white text-xs px-2 py-1 rounded font-semibold">
+                            ${index + 1}
+                        </div>
+                        <div class="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                            ${(file.size / (1024 * 1024)).toFixed(2)}MB
+                        </div>
+                    `;
+
+                    previewGrid.appendChild(preview);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeCompressorImage(index) {
+            compressorFiles.splice(index, 1);
+            
+            if (compressorFiles.length === 0) {
+                document.getElementById('compressor-preview-section').classList.add('hidden');
+                document.getElementById('compressor-settings-section').classList.add('hidden');
+                document.getElementById('compressor-compress-section').classList.add('hidden');
+            } else {
+                displayCompressorPreviews();
+            }
+        }
+
+        function clearAllCompressorImages() {
+            compressorFiles = [];
+            compressedImages = [];
+            document.getElementById('compressor-preview-section').classList.add('hidden');
+            document.getElementById('compressor-settings-section').classList.add('hidden');
+            document.getElementById('compressor-compress-section').classList.add('hidden');
+            document.getElementById('compressor-file-input').value = '';
+            document.getElementById('compressor-success').classList.add('hidden');
+            document.getElementById('compressor-error').classList.add('hidden');
+        }
+
+        async function compressAllImages() {
+            if (compressorFiles.length === 0) {
+                showCompressorError('Please upload at least one image.');
+                return;
+            }
+
+            // Get settings
+            const quality = parseInt(document.getElementById('compressor-quality-slider').value) / 100;
+            const format = document.querySelector('input[name="compressor-format"]:checked').value;
+            const shouldResize = document.getElementById('compressor-resize-checkbox').checked;
+            const maxWidth = shouldResize ? parseInt(document.getElementById('compressor-max-width').value) : null;
+            const maxHeight = shouldResize ? parseInt(document.getElementById('compressor-max-height').value) : null;
+
+            // Show progress
+            document.getElementById('compressor-compress-section').classList.add('hidden');
+            document.getElementById('compressor-progress').classList.remove('hidden');
+            document.getElementById('compressor-error').classList.add('hidden');
+            document.getElementById('compressor-success').classList.add('hidden');
+            document.getElementById('compressor-compress-btn').disabled = true;
+
+            compressedImages = [];
+            let totalOriginalSize = 0;
+            let totalCompressedSize = 0;
+
+            try {
+                for (let i = 0; i < compressorFiles.length; i++) {
+                    const file = compressorFiles[i];
+                    
+                    // Update progress
+                    const progress = ((i + 1) / compressorFiles.length) * 100;
+                    document.getElementById('compressor-progress-bar').style.width = progress + '%';
+                    document.getElementById('compressor-progress-percent').textContent = Math.round(progress) + '%';
+                    document.getElementById('compressor-progress-text').textContent = 
+                        `Compressing image ${i + 1} of ${compressorFiles.length}...`;
+
+                    // Compress the image
+                    const result = await compressSingleImage(file, quality, format, maxWidth, maxHeight);
+                    
+                    compressedImages.push(result);
+                    totalOriginalSize += result.originalSize;
+                    totalCompressedSize += result.compressedSize;
+
+                    // Small delay to prevent browser freeze
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+
+                // Calculate savings
+                const savingsPercent = Math.round(((totalOriginalSize - totalCompressedSize) / totalOriginalSize) * 100);
+                
+                // Display results
+                document.getElementById('compressor-total-before').textContent = (totalOriginalSize / (1024 * 1024)).toFixed(2) + ' MB';
+                document.getElementById('compressor-total-after').textContent = (totalCompressedSize / (1024 * 1024)).toFixed(2) + ' MB';
+                document.getElementById('compressor-total-savings').textContent = savingsPercent + '%';
+
+                displayCompressionResults();
+
+                document.getElementById('compressor-progress').classList.add('hidden');
+                document.getElementById('compressor-success').classList.remove('hidden');
+                document.getElementById('compressor-compress-btn').disabled = false;
+
+            } catch (error) {
+                console.error('Error compressing images:', error);
+                showCompressorError('Failed to compress images: ' + error.message);
+                document.getElementById('compressor-compress-section').classList.remove('hidden');
+                document.getElementById('compressor-progress').classList.add('hidden');
+                document.getElementById('compressor-compress-btn').disabled = false;
+            }
+        }
+
+        async function compressSingleImage(file, quality, format, maxWidth, maxHeight) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    const img = new Image();
+                    
+                    img.onload = () => {
+                        try {
+                            // Calculate dimensions
+                            let width = img.width;
+                            let height = img.height;
+
+                            if (maxWidth && maxHeight) {
+                                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                                if (ratio < 1) {
+                                    width = Math.round(width * ratio);
+                                    height = Math.round(height * ratio);
+                                }
+                            }
+
+                            // Create canvas
+                            const canvas = document.createElement('canvas');
+                            canvas.width = width;
+                            canvas.height = height;
+
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+
+                            // Determine MIME type
+                            let mimeType = 'image/jpeg';
+                            if (format === 'png') {
+                                mimeType = 'image/png';
+                            } else if (format === 'webp') {
+                                mimeType = 'image/webp';
+                            }
+
+                            // Convert to blob
+                            canvas.toBlob((blob) => {
+                                if (blob) {
+                                    // Create object URL for preview
+                                    const url = URL.createObjectURL(blob);
+                                    
+                                    resolve({
+                                        originalFile: file,
+                                        originalSize: file.size,
+                                        compressedBlob: blob,
+                                        compressedSize: blob.size,
+                                        compressedUrl: url,
+                                        originalUrl: e.target.result,
+                                        filename: file.name.replace(/\.[^/.]+$/, '') + '.' + format,
+                                        savingsPercent: Math.round(((file.size - blob.size) / file.size) * 100)
+                                    });
+                                } else {
+                                    reject(new Error('Failed to create blob'));
+                                }
+                            }, mimeType, quality);
+
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+
+                    img.onerror = () => reject(new Error('Failed to load image'));
+                    img.src = e.target.result;
+                };
+
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function displayCompressionResults() {
+            const resultsGrid = document.getElementById('compressor-results-grid');
+            resultsGrid.innerHTML = '';
+
+            compressedImages.forEach((result, index) => {
+                const resultCard = document.createElement('div');
+                resultCard.className = 'bg-gray-50 border-2 border-gray-300 rounded-xl p-4 hover:border-green-500 transition-all';
+                
+                resultCard.innerHTML = `
+                    <div class="flex items-center justify-between mb-3">
+                        <h5 class="font-semibold text-gray-800 truncate flex-1">${result.filename}</h5>
+                        <button onclick="downloadCompressedImage(${index})" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg text-sm font-semibold ml-2">
+                            📥 Download
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div class="text-center">
+                            <img src="${result.originalUrl}" class="w-full h-32 object-cover rounded-lg border border-gray-300 mb-2">
+                            <p class="text-xs font-semibold text-gray-600">BEFORE</p>
+                            <p class="text-sm font-bold text-gray-800">${(result.originalSize / (1024 * 1024)).toFixed(2)} MB</p>
+                        </div>
+                        <div class="text-center">
+                            <img src="${result.compressedUrl}" class="w-full h-32 object-cover rounded-lg border border-gray-300 mb-2">
+                            <p class="text-xs font-semibold text-gray-600">AFTER</p>
+                            <p class="text-sm font-bold text-green-600">${(result.compressedSize / (1024 * 1024)).toFixed(2)} MB</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-100 border border-green-500 rounded-lg p-2 text-center">
+                        <p class="text-sm font-bold text-green-800">
+                            💾 Saved: ${((result.originalSize - result.compressedSize) / (1024 * 1024)).toFixed(2)} MB 
+                            (${result.savingsPercent}% smaller)
+                        </p>
+                    </div>
+                `;
+
+                resultsGrid.appendChild(resultCard);
+            });
+        }
+
+        function downloadCompressedImage(index) {
+            if (!compressedImages[index]) {
+                alert('Image not found!');
+                return;
+            }
+
+            const result = compressedImages[index];
+            const url = result.compressedUrl;
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = result.filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        async function downloadAllCompressedAsZip() {
+            if (compressedImages.length === 0) {
+                alert('No compressed images to download!');
+                return;
+            }
+
+            try {
+                const zip = new JSZip();
+
+                // Add all compressed images to ZIP
+                for (let i = 0; i < compressedImages.length; i++) {
+                    const result = compressedImages[i];
+                    zip.file(result.filename, result.compressedBlob);
+                }
+
+                // Generate ZIP
+                const zipBlob = await zip.generateAsync({ 
+                    type: 'blob',
+                    compression: 'DEFLATE',
+                    compressionOptions: { level: 6 }
+                });
+
+                // Download ZIP
+                const url = URL.createObjectURL(zipBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                const timestamp = new Date().toISOString().split('T')[0];
+                a.download = `compressed-images-${timestamp}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error('Error creating ZIP:', error);
+                alert('Failed to create ZIP file. Please try again.');
+            }
+        }
+
+        function resetCompressor() {
+            compressorFiles = [];
+            compressedImages = [];
+            
+            // Clear file input
+            document.getElementById('compressor-file-input').value = '';
+            
+            // Reset quality slider
+            document.getElementById('compressor-quality-slider').value = 80;
+            document.getElementById('compressor-quality-value').textContent = '80%';
+            
+            // Reset format
+            document.querySelector('input[name="compressor-format"][value="jpeg"]').checked = true;
+            
+            // Reset resize
+            document.getElementById('compressor-resize-checkbox').checked = false;
+            document.getElementById('compressor-resize-options').classList.add('hidden');
+            
+            // Hide sections
+            document.getElementById('compressor-preview-section').classList.add('hidden');
+            document.getElementById('compressor-settings-section').classList.add('hidden');
+            document.getElementById('compressor-compress-section').classList.add('hidden');
+            document.getElementById('compressor-success').classList.add('hidden');
+            document.getElementById('compressor-error').classList.add('hidden');
+        }
+
+        function showCompressorError(message) {
+            document.getElementById('compressor-error-message').textContent = message;
+            document.getElementById('compressor-error').classList.remove('hidden');
+            document.getElementById('compressor-success').classList.add('hidden');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initImageCompressor();
+            }, 200);
+        });
+    </script>
+</body>
+</html>
+
+

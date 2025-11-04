@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Retirement Planning Calculator - FreeToolHub</title>
+    <meta name="description" content="Plan your retirement with comprehensive savings and income analysis. Calculate retirement goals, 401k/IRA limits, and readiness scores.">
+    <meta property="og:title" content="Retirement Planning Calculator - FreeToolHub">
+    <meta property="og:description" content="Plan your retirement with comprehensive savings and income analysis">
+    <meta property="og:url" content="https://freetoolhub.in/tools/retirement-calculator.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🏦 Retirement Planning Calculator</h1>
+                    <p class="text-gray-600 text-lg">Plan your retirement with comprehensive savings and income analysis</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Retirement Planning Calculator</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <!-- Toast Notification Container -->
+                <div id="toast-container" class="fixed top-24 right-4 z-50 space-y-2"></div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Input Section -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Quick Retirement Templates -->
+                        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 border-2 border-purple-200">
+                            <h4 class="text-lg font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>⚡</span> Quick Retirement Templates
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <button onclick="loadRetirementTemplate('early')" class="bg-white hover:bg-purple-100 text-gray-800 font-semibold py-3 px-4 rounded-lg border-2 border-purple-300 hover:border-purple-400 transition-all duration-200 transform hover:scale-105 shadow-sm">
+                                    <div class="text-2xl mb-1">🚀</div>
+                                    <div class="text-sm">Early Retirement</div>
+                                    <div class="text-xs text-gray-500">Age 55</div>
+                                </button>
+                                <button onclick="loadRetirementTemplate('standard')" class="bg-white hover:bg-purple-100 text-gray-800 font-semibold py-3 px-4 rounded-lg border-2 border-purple-300 hover:border-purple-400 transition-all duration-200 transform hover:scale-105 shadow-sm">
+                                    <div class="text-2xl mb-1">🎯</div>
+                                    <div class="text-sm">Standard Retirement</div>
+                                    <div class="text-xs text-gray-500">Age 65</div>
+                                </button>
+                                <button onclick="loadRetirementTemplate('late')" class="bg-white hover:bg-purple-100 text-gray-800 font-semibold py-3 px-4 rounded-lg border-2 border-purple-300 hover:border-purple-400 transition-all duration-200 transform hover:scale-105 shadow-sm">
+                                    <div class="text-2xl mb-1">⏰</div>
+                                    <div class="text-sm">Late Retirement</div>
+                                    <div class="text-xs text-gray-500">Age 70</div>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Basic Retirement Planning -->
+                        <div class="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-xl font-bold text-gray-700 flex items-center gap-2">
+                                    <span>🏦</span> Retirement Planning
+                                </h4>
+                                <button onclick="resetRetirementForm()" class="text-sm text-gray-600 hover:text-gray-800 font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                    Reset
+                                </button>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>💱</span> Currency
+                                    </label>
+                                    <select id="retirement-currency" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" onchange="updateRetirementCurrencyDisplay()">
+                                        <option value="USD">🇺🇸 US Dollar ($)</option>
+                                        <option value="EUR">🇪🇺 Euro (€)</option>
+                                        <option value="GBP">🇬🇧 British Pound (£)</option>
+                                        <option value="JPY">🇯🇵 Japanese Yen (¥)</option>
+                                        <option value="CAD">🇨🇦 Canadian Dollar (C$)</option>
+                                        <option value="AUD">🇦🇺 Australian Dollar (A$)</option>
+                                        <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
+                                        <option value="CNY">🇨🇳 Chinese Yuan (¥)</option>
+                                        <option value="INR">🇮🇳 Indian Rupee (₹)</option>
+                                        <option value="BRL">🇧🇷 Brazilian Real (R$)</option>
+                                        <option value="SGD">🇸🇬 Singapore Dollar (S$)</option>
+                                        <option value="AED">🇦🇪 UAE Dirham (د.إ)</option>
+                                        <option value="SAR">🇸🇦 Saudi Riyal (﷼)</option>
+                                        <option value="ZAR">🇿🇦 South African Rand (R)</option>
+                                        <option value="MXN">🇲🇽 Mexican Peso ($)</option>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">Currency for display purposes</p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>🎂</span> Current Age
+                                        </label>
+                                        <input type="number" id="current-age" min="18" max="100" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" placeholder="30" value="30">
+                                        <p class="text-xs text-gray-500 mt-1">Your current age</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>🎯</span> Retirement Age
+                                        </label>
+                                        <input type="number" id="retirement-age" min="50" max="100" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" placeholder="65" value="65">
+                                        <p class="text-xs text-gray-500 mt-1">Target retirement age</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>💵</span> Current Salary
+                                        </label>
+                                        <div class="relative">
+                                            <span id="salary-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                            <input type="number" id="current-salary" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" placeholder="75000" value="75000" oninput="formatRetirementCurrency()">
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Annual salary</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>💰</span> Current Savings
+                                        </label>
+                                        <div class="relative">
+                                            <span id="savings-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                            <input type="number" id="current-savings" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" placeholder="50000" value="50000" oninput="formatRetirementCurrency()">
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Current retirement savings</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>📊</span> Monthly Contribution
+                                        </label>
+                                        <div class="relative">
+                                            <span id="contribution-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                            <input type="number" id="monthly-contribution" min="0" step="0.01" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" placeholder="1000" value="1000" oninput="formatRetirementCurrency()">
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Monthly savings amount</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>📈</span> Annual Return (%)
+                                        </label>
+                                        <input type="number" id="annual-return" min="0" max="20" step="0.1" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" placeholder="7" value="7" step="0.1">
+                                        <p class="text-xs text-gray-500 mt-1">Expected annual return</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="calculateRetirementPlan()" id="calculate-retirement-btn" class="w-full mt-6 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                <span>Calculate Retirement Plan</span>
+                            </button>
+                        </div>
+
+                        <!-- 401k/IRA Calculator -->
+                        <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>💼</span> 401k/IRA Contribution Limits
+                            </h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>📋</span> Account Type
+                                    </label>
+                                    <select id="account-type" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                                        <option value="401k">401(k)</option>
+                                        <option value="IRA">IRA</option>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">Select retirement account type</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>🎂</span> Current Age
+                                    </label>
+                                    <input type="number" id="contribution-age" min="18" max="100" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="30" value="30">
+                                    <p class="text-xs text-gray-500 mt-1">Your current age (50+ eligible for catch-up)</p>
+                                </div>
+                            </div>
+                            <button onclick="calculateContributionLimits()" id="calculate-limits-btn" class="w-full mt-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-5m-6 5h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span>Calculate Limits</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <!-- Retirement Plan Results -->
+                        <div class="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>🏦</span> Retirement Plan
+                            </h4>
+                            <div id="retirement-results" class="space-y-3">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">💡</div>
+                                    <p class="text-sm">Enter details and click "Calculate Retirement Plan"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Readiness Score -->
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>✅</span> Retirement Readiness
+                            </h4>
+                            <div id="readiness-results" class="space-y-3">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">📊</div>
+                                    <p class="text-sm">Calculate retirement plan to see readiness score</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contribution Limits -->
+                        <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>💼</span> Contribution Limits
+                            </h4>
+                            <div id="contribution-results" class="space-y-3">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">📋</div>
+                                    <p class="text-sm">Enter age and account type to see limits</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Retirement Calculator Dependencies -->
+    <script src="/src/js/RetirementCalculator.js?v=1&t=1726745000"></script>
+    
+    <!-- Retirement Calculator JavaScript -->
+    <script>
+        let retirementCalculator = null;
+
+        function initializeRetirementCalculator() {
+            try {
+                if (typeof RetirementCalculator !== 'undefined') {
+                    retirementCalculator = new RetirementCalculator();
+                    console.log('✅ Retirement Calculator initialized successfully');
+                    updateRetirementCurrencyDisplay();
+                } else {
+                    console.error('❌ RetirementCalculator class not found');
+                }
+            } catch (error) {
+                console.error('❌ Error initializing Retirement Calculator:', error);
+            }
+        }
+
+        // Toast notification function
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            toast.className = `${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] max-w-md animate-slide-in`;
+            toast.innerHTML = `
+                <span class="text-xl">${icon}</span>
+                <span class="flex-1">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-white hover:text-gray-200 font-bold">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, type === 'error' ? 5000 : 3000);
+        }
+
+        // Format currency display
+        function formatRetirementCurrency() {
+            if (!retirementCalculator) return;
+            const currency = retirementCalculator.currencies[retirementCalculator.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            document.getElementById('salary-currency-prefix').textContent = symbol;
+            document.getElementById('savings-currency-prefix').textContent = symbol;
+            document.getElementById('contribution-currency-prefix').textContent = symbol;
+        }
+
+        function updateRetirementCurrencyDisplay() {
+            if (!retirementCalculator) return;
+            const currency = document.getElementById('retirement-currency').value;
+            retirementCalculator.selectedCurrency = currency;
+            formatRetirementCurrency();
+        }
+
+        // Load quick templates
+        function loadRetirementTemplate(type) {
+            const templates = {
+                early: { currentAge: 30, retirementAge: 55, currentSalary: 80000, currentSavings: 50000, monthlyContribution: 1500, annualReturn: 7 },
+                standard: { currentAge: 30, retirementAge: 65, currentSalary: 75000, currentSavings: 50000, monthlyContribution: 1000, annualReturn: 7 },
+                late: { currentAge: 30, retirementAge: 70, currentSalary: 75000, currentSavings: 50000, monthlyContribution: 800, annualReturn: 7 }
+            };
+            
+            const template = templates[type];
+            if (!template) return;
+            
+            document.getElementById('current-age').value = template.currentAge;
+            document.getElementById('retirement-age').value = template.retirementAge;
+            document.getElementById('current-salary').value = template.currentSalary;
+            document.getElementById('current-savings').value = template.currentSavings;
+            document.getElementById('monthly-contribution').value = template.monthlyContribution;
+            document.getElementById('annual-return').value = template.annualReturn;
+            
+            formatRetirementCurrency();
+            showNotification(`Loaded ${type.charAt(0).toUpperCase() + type.slice(1)} retirement template`, 'success');
+        }
+
+        // Reset form
+        function resetRetirementForm() {
+            document.getElementById('current-age').value = '';
+            document.getElementById('retirement-age').value = '';
+            document.getElementById('current-salary').value = '';
+            document.getElementById('current-savings').value = '';
+            document.getElementById('monthly-contribution').value = '';
+            document.getElementById('annual-return').value = '';
+            
+            document.getElementById('retirement-results').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">💡</div>
+                    <p class="text-sm">Enter details and click "Calculate Retirement Plan"</p>
+                </div>
+            `;
+            document.getElementById('readiness-results').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">📊</div>
+                    <p class="text-sm">Calculate retirement plan to see readiness score</p>
+                </div>
+            `;
+            document.getElementById('contribution-results').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">📋</div>
+                    <p class="text-sm">Enter age and account type to see limits</p>
+                </div>
+            `;
+            showNotification('Form reset successfully', 'info');
+        }
+
+        function calculateRetirementPlan() {
+            if (!retirementCalculator) {
+                showNotification('Retirement Calculator not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const currentAge = parseInt(document.getElementById('current-age').value);
+            const retirementAge = parseInt(document.getElementById('retirement-age').value);
+            const currentSalary = parseFloat(document.getElementById('current-salary').value);
+            const currentSavings = parseFloat(document.getElementById('current-savings').value);
+            const monthlyContribution = parseFloat(document.getElementById('monthly-contribution').value);
+            const annualReturn = parseFloat(document.getElementById('annual-return').value);
+
+            if (!currentAge || currentAge < 18 || currentAge > 100) {
+                showNotification('Please enter a valid current age (18-100).', 'warning');
+                document.getElementById('current-age').focus();
+                return;
+            }
+
+            if (!retirementAge || retirementAge < 50 || retirementAge > 100) {
+                showNotification('Please enter a valid retirement age (50-100).', 'warning');
+                document.getElementById('retirement-age').focus();
+                return;
+            }
+
+            if (retirementAge <= currentAge) {
+                showNotification('Retirement age must be greater than current age.', 'warning');
+                document.getElementById('retirement-age').focus();
+                return;
+            }
+
+            if (!currentSalary || currentSalary <= 0) {
+                showNotification('Please enter a valid current salary.', 'warning');
+                document.getElementById('current-salary').focus();
+                return;
+            }
+
+            if (currentSavings === undefined || currentSavings < 0) {
+                showNotification('Please enter valid current savings (can be 0).', 'warning');
+                document.getElementById('current-savings').focus();
+                return;
+            }
+
+            if (!monthlyContribution || monthlyContribution < 0) {
+                showNotification('Please enter a valid monthly contribution (can be 0).', 'warning');
+                document.getElementById('monthly-contribution').focus();
+                return;
+            }
+
+            if (!annualReturn || annualReturn < 0 || annualReturn > 20) {
+                showNotification('Please enter a valid annual return (0-20%).', 'warning');
+                document.getElementById('annual-return').focus();
+                return;
+            }
+
+            const calculateBtn = document.getElementById('calculate-retirement-btn');
+            const originalHTML = calculateBtn.innerHTML;
+            calculateBtn.disabled = true;
+            calculateBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Calculating...</span>';
+
+            setTimeout(() => {
+                const goalResult = retirementCalculator.calculateRetirementGoal(
+                    currentAge, retirementAge, currentSalary, 80, 3, annualReturn
+                );
+                const projectionResult = retirementCalculator.calculateRetirementProjection(
+                    currentSavings, monthlyContribution, retirementAge - currentAge, annualReturn, 3
+                );
+                
+                let readinessResult = { success: true, score: 50, status: 'Moderate' };
+                if (typeof retirementCalculator.calculateReadinessScore === 'function') {
+                    readinessResult = retirementCalculator.calculateReadinessScore(
+                        currentSavings, monthlyContribution, currentAge, retirementAge, currentSalary
+                    );
+                }
+
+                if (goalResult.success && projectionResult.success) {
+                    showRetirementResults(goalResult, projectionResult);
+                    showReadinessResults(readinessResult);
+                    showNotification('Retirement plan calculated successfully!', 'success');
+                } else {
+                    showNotification('Error calculating retirement plan: ' + (goalResult.error || projectionResult.error), 'error');
+                }
+                calculateBtn.disabled = false;
+                calculateBtn.innerHTML = originalHTML;
+            }, 300);
+        }
+
+        function showRetirementResults(goalResult, projectionResult) {
+            const currency = retirementCalculator.currencies[retirementCalculator.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            
+            // Calculate gap and percentage
+            const goal = goalResult.presentValueGoal;
+            const projected = projectionResult.finalProjectedSavings;
+            const gap = goal - projected;
+            const goalPercent = ((projected / goal) * 100).toFixed(1);
+            const isOnTrack = projected >= goal * 0.9; // 90% or more is considered on track
+            
+            document.getElementById('retirement-results').innerHTML = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 border-purple-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">🎯 Retirement Goal</span>
+                            <span class="text-2xl font-bold text-purple-600">${symbol}${goalResult.presentValueGoal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Target savings needed</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-5 border-2 ${isOnTrack ? 'border-green-300' : 'border-orange-300'} shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💰 Projected Savings</span>
+                            <span class="text-2xl font-bold ${isOnTrack ? 'text-green-600' : 'text-orange-600'}">${symbol}${projectionResult.finalProjectedSavings.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="${isOnTrack ? 'bg-green-500' : 'bg-orange-500'} h-2 rounded-full" style="width: ${Math.min(goalPercent, 100)}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">${goalPercent}% of goal • ${isOnTrack ? '✅ On Track' : '⚠️ Needs Improvement'}</div>
+                    </div>
+                    
+                    ${gap > 0 ? `
+                        <div class="bg-white rounded-lg p-4 border-2 border-orange-300 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-gray-600">📊 Savings Gap</span>
+                                <span class="text-xl font-bold text-orange-600">${symbol}${Math.abs(gap).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">Additional savings needed</div>
+                        </div>
+                    ` : `
+                        <div class="bg-white rounded-lg p-4 border-2 border-green-300 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-gray-600">✅ Surplus</span>
+                                <span class="text-xl font-bold text-green-600">${symbol}${Math.abs(gap).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">Exceeding goal</div>
+                        </div>
+                    `}
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💵 Monthly Contribution Needed</span>
+                            <span class="text-xl font-bold text-blue-600">${symbol}${goalResult.monthlyContribution.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">To reach retirement goal</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-indigo-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">⏰ Years to Retirement</span>
+                            <span class="text-xl font-bold text-indigo-600">${goalResult.yearsToRetirement} years</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Time remaining</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-cyan-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📈 Total Contributions</span>
+                            <span class="text-lg font-bold text-cyan-600">${symbol}${projectionResult.totalContributions.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Total amount you'll contribute</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-teal-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💹 Investment Growth</span>
+                            <span class="text-lg font-bold text-teal-600">${symbol}${projectionResult.totalGrowth.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Growth from investments</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showReadinessResults(readinessResult) {
+            if (!readinessResult || !readinessResult.success) return;
+            
+            const score = readinessResult.score || 50;
+            const status = readinessResult.status || readinessResult.readinessLevel || 'Moderate';
+            
+            // Determine color and border classes
+            let scoreColor, borderColor, bgColor, label;
+            if (score >= 80) {
+                scoreColor = 'text-green-600';
+                borderColor = 'border-green-300';
+                bgColor = 'bg-green-500';
+                label = 'Excellent';
+            } else if (score >= 60) {
+                scoreColor = 'text-blue-600';
+                borderColor = 'border-blue-300';
+                bgColor = 'bg-blue-500';
+                label = 'Good';
+            } else if (score >= 40) {
+                scoreColor = 'text-yellow-600';
+                borderColor = 'border-yellow-300';
+                bgColor = 'bg-yellow-500';
+                label = 'Fair';
+            } else if (score >= 20) {
+                scoreColor = 'text-orange-600';
+                borderColor = 'border-orange-300';
+                bgColor = 'bg-orange-500';
+                label = 'Poor';
+            } else {
+                scoreColor = 'text-red-600';
+                borderColor = 'border-red-300';
+                bgColor = 'bg-red-500';
+                label = 'Critical';
+            }
+            
+            document.getElementById('readiness-results').innerHTML = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 ${borderColor} shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📊 Readiness Score</span>
+                            <span class="text-3xl font-bold ${scoreColor}">${Math.round(score)}/100</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3 mt-3">
+                            <div class="${bgColor} h-3 rounded-full transition-all duration-500" style="width: ${score}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-2">${label} • ${score.toFixed(1)}% ready</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 ${borderColor} shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">✅ Status</span>
+                            <span class="text-lg font-semibold ${scoreColor}">${status}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Retirement readiness level</div>
+                    </div>
+                    
+                    ${readinessResult.savingsRate !== undefined ? `
+                        <div class="bg-white rounded-lg p-4 border-2 border-gray-300 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-gray-600">💵 Savings Rate</span>
+                                <span class="text-lg font-bold text-gray-700">${readinessResult.savingsRate.toFixed(1)}%</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">Of annual salary</div>
+                        </div>
+                    ` : ''}
+                    
+                    ${readinessResult.yearsToRetirement !== undefined ? `
+                        <div class="bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg p-3 border border-green-200">
+                            <div class="text-xs font-semibold text-gray-700 mb-2">💡 Quick Insights</div>
+                            <div class="text-xs text-gray-600 space-y-1">
+                                ${score >= 80 ? '✅ Excellent preparation for retirement' : ''}
+                                ${score >= 60 && score < 80 ? '✅ Good progress, keep saving consistently' : ''}
+                                ${score >= 40 && score < 60 ? '⚠️ Consider increasing monthly contributions' : ''}
+                                ${score < 40 ? '⚠️ Need to significantly increase savings rate' : ''}
+                            </div>
+                            <div class="text-xs text-gray-600 mt-2">
+                                ${readinessResult.yearsToRetirement} years until retirement
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function calculateContributionLimits() {
+            if (!retirementCalculator) {
+                showNotification('Retirement Calculator not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const age = parseInt(document.getElementById('contribution-age').value);
+            const accountType = document.getElementById('account-type').value;
+            const income = parseFloat(document.getElementById('current-salary').value) || 100000;
+
+            if (!age || age < 18 || age > 100) {
+                showNotification('Please enter a valid age (18-100).', 'warning');
+                document.getElementById('contribution-age').focus();
+                return;
+            }
+
+            const limitsBtn = document.getElementById('calculate-limits-btn');
+            if (!limitsBtn) {
+                showNotification('Button element not found.', 'error');
+                return;
+            }
+            
+            // Store original button HTML
+            const originalHTML = limitsBtn.innerHTML;
+            limitsBtn.disabled = true;
+            limitsBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Calculating...</span>';
+
+            // Use setTimeout to allow UI to update, then calculate
+            setTimeout(() => {
+                try {
+                    if (!retirementCalculator) {
+                        throw new Error('Retirement Calculator not initialized');
+                    }
+                    
+                    const result = retirementCalculator.calculateContributionLimits(age, income, accountType);
+                    
+                    if (result && result.success) {
+                        showContributionResults(result);
+                        showNotification('Contribution limits calculated!', 'success');
+                    } else {
+                        const errorMsg = (result && result.error) ? result.error : 'Unknown error occurred';
+                        showNotification('Error calculating contribution limits: ' + errorMsg, 'error');
+                        console.error('Contribution limits calculation failed:', result);
+                    }
+                } catch (error) {
+                    console.error('Error in calculateContributionLimits:', error);
+                    showNotification('Error calculating contribution limits: ' + (error.message || 'Unknown error'), 'error');
+                } finally {
+                    // Always reset button state
+                    limitsBtn.disabled = false;
+                    limitsBtn.innerHTML = originalHTML;
+                }
+            }, 300);
+        }
+
+        function showContributionResults(result) {
+            if (!result) {
+                console.error('No result provided to showContributionResults');
+                showNotification('No results to display', 'error');
+                return;
+            }
+            
+            const currency = retirementCalculator.currencies[retirementCalculator.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            
+            // Handle both accountType and contributionType (method returns contributionType)
+            const accountType = result.accountType || result.contributionType || '401k';
+            const accountIcon = accountType === '401k' ? '💼' : '🏦';
+            const isEligible = result.isEligibleForCatchUp;
+            
+            document.getElementById('contribution-results').innerHTML = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 border-blue-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">${accountIcon} Annual Limit</span>
+                            <span class="text-2xl font-bold text-blue-600">${symbol}${result.annualLimit.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">2024 standard limit</div>
+                    </div>
+                    
+                    ${isEligible ? `
+                        <div class="bg-white rounded-lg p-4 border-2 border-purple-300 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-gray-600">🎯 Catch-Up Limit (50+)</span>
+                                <span class="text-xl font-bold text-purple-600">${symbol}${result.catchUpLimit.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">Additional for age 50+</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg p-4 border-2 border-green-300 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-gray-600">✅ Maximum Annual</span>
+                                <span class="text-xl font-bold text-green-600">${symbol}${result.maxAnnualContribution.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">Total you can contribute</div>
+                        </div>
+                    ` : `
+                        <div class="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-lg p-3 border border-purple-200">
+                            <div class="text-xs font-semibold text-gray-700 mb-1">💡 Catch-Up Eligibility</div>
+                            <div class="text-xs text-gray-600">You'll be eligible for catch-up contributions at age 50</div>
+                        </div>
+                    `}
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-gray-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📅 Account Type</span>
+                            <span class="text-lg font-semibold text-gray-700">${accountType.toUpperCase()}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Retirement account type</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-cyan-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💵 Max Monthly</span>
+                            <span class="text-lg font-bold text-cyan-600">${symbol}${result.maxMonthlyContribution.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Maximum monthly contribution</div>
+                    </div>
+                    
+                    ${result.recommendedContribution ? `
+                        <div class="bg-gradient-to-r from-blue-100 to-cyan-100 rounded-lg p-3 border border-blue-200">
+                            <div class="text-xs font-semibold text-gray-700 mb-2">💡 Recommended</div>
+                            <div class="text-sm font-bold text-blue-700">${symbol}${result.recommendedContribution.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}/year</div>
+                            <div class="text-xs text-gray-600 mt-1">15% of income or limit, whichever is lower</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeRetirementCalculator();
+                formatRetirementCurrency();
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        const availableTools = [
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', pageUrl: '/tools/age-calculator.html' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', pageUrl: '/tools/bmi-calculator.html' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', pageUrl: '/tools/loan-calculator.html' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', pageUrl: '/tools/investment-calculator.html' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', pageUrl: '/tools/tax-calculator.html' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', pageUrl: '/tools/business-metrics.html' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', pageUrl: '/tools/currency-converter.html' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', modalId: 'mortgage-calculator-modal' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', modalId: 'budget-planner-modal' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', modalId: 'salary-calculator-modal' },
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', modalId: 'json-formatter-modal' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', modalId: 'xml-formatter-modal' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', modalId: 'base64-encoder-modal' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', modalId: 'hash-generator-modal' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', modalId: 'url-encoder-modal' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', modalId: 'regex-tester-modal' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', modalId: 'css-js-minifier-modal' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', modalId: 'color-palette-modal' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', modalId: 'lorem-ipsum-modal' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            btnEl.dataset.modalId = tool.modalId || '';
+            btnEl.dataset.pageUrl = tool.pageUrl || '';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            const modalId = btnEl.dataset.modalId;
+            const pageUrl = btnEl.dataset.pageUrl;
+            
+            if (pageUrl) {
+                window.location.href = pageUrl;
+            } else if (modalId && typeof openModal === 'function') {
+                window.location.href = `/#${modalId}`;
+            } else {
+                window.location.href = '/#tools';
+            }
+        }
+        
+        function initToolSuggestions() {
+            updateToolSuggestion();
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(100%); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .animate-slide-in { animation: slideIn 0.3s ease-out; }
+        #tool-suggestion-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+        
+        /* Input focus effects */
+        input:focus, select:focus {
+            transform: scale(1.01);
+            box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+        }
+        
+        /* Button hover effects */
+        button:not(:disabled):hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</body>
+</html>
+
+

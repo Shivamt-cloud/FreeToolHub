@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Loan Calculator - FreeToolHub</title>
+    <meta name="description" content="Professional loan calculator with amortization schedules, extra payment analysis, and loan comparison. Calculate monthly payments and save money.">
+    <meta property="og:title" content="Loan Calculator - FreeToolHub">
+    <meta property="og:description" content="Calculate loan payments, amortization schedules, and loan analysis">
+    <meta property="og:url" content="https://freetoolhub.in/tools/loan-calculator.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🏦 Professional Loan Calculator</h1>
+                    <p class="text-gray-600 text-lg">Calculate loan payments, amortization schedules, and loan analysis</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Loan Calculator</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <!-- Toast Notification Container -->
+                <div id="toast-container" class="fixed top-24 right-4 z-50 space-y-2"></div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Input Section -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Quick Templates -->
+                        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border-2 border-indigo-200">
+                            <h4 class="text-lg font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>⚡</span> Quick Loan Templates
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <button onclick="loadTemplate('mortgage')" class="bg-white hover:bg-indigo-100 text-gray-800 font-semibold py-3 px-4 rounded-lg border-2 border-indigo-300 hover:border-indigo-400 transition-all duration-200 transform hover:scale-105 shadow-sm">
+                                    <div class="text-2xl mb-1">🏠</div>
+                                    <div class="text-sm">Mortgage</div>
+                                    <div class="text-xs text-gray-500">30yr @ 3.5%</div>
+                                </button>
+                                <button onclick="loadTemplate('auto')" class="bg-white hover:bg-indigo-100 text-gray-800 font-semibold py-3 px-4 rounded-lg border-2 border-indigo-300 hover:border-indigo-400 transition-all duration-200 transform hover:scale-105 shadow-sm">
+                                    <div class="text-2xl mb-1">🚗</div>
+                                    <div class="text-sm">Auto Loan</div>
+                                    <div class="text-xs text-gray-500">5yr @ 4.5%</div>
+                                </button>
+                                <button onclick="loadTemplate('personal')" class="bg-white hover:bg-indigo-100 text-gray-800 font-semibold py-3 px-4 rounded-lg border-2 border-indigo-300 hover:border-indigo-400 transition-all duration-200 transform hover:scale-105 shadow-sm">
+                                    <div class="text-2xl mb-1">💼</div>
+                                    <div class="text-sm">Personal</div>
+                                    <div class="text-xs text-gray-500">3yr @ 8.0%</div>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200 shadow-lg">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-xl font-bold text-gray-700 flex items-center gap-2">
+                                    <span>💰</span> Loan Details
+                                </h4>
+                                <button onclick="resetLoanForm()" class="text-sm text-gray-600 hover:text-gray-800 font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                    Reset
+                                </button>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600 mb-2">Currency</label>
+                                    <select id="loan-currency" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" onchange="updateCurrencyDisplay()">
+                                        <option value="USD">🇺🇸 US Dollar ($)</option>
+                                        <option value="EUR">🇪🇺 Euro (€)</option>
+                                        <option value="GBP">🇬🇧 British Pound (£)</option>
+                                        <option value="JPY">🇯🇵 Japanese Yen (¥)</option>
+                                        <option value="CAD">🇨🇦 Canadian Dollar (C$)</option>
+                                        <option value="AUD">🇦🇺 Australian Dollar (A$)</option>
+                                        <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
+                                        <option value="CNY">🇨🇳 Chinese Yuan (¥)</option>
+                                        <option value="INR">🇮🇳 Indian Rupee (₹)</option>
+                                        <option value="BRL">🇧🇷 Brazilian Real (R$)</option>
+                                        <option value="SGD">🇸🇬 Singapore Dollar (S$)</option>
+                                        <option value="AED">🇦🇪 UAE Dirham (د.إ)</option>
+                                        <option value="SAR">🇸🇦 Saudi Riyal (﷼)</option>
+                                        <option value="ZAR">🇿🇦 South African Rand (R)</option>
+                                        <option value="MXN">🇲🇽 Mexican Peso ($)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>💵</span> Loan Amount
+                                    </label>
+                                    <div class="relative">
+                                        <span id="currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                        <input type="number" id="loan-amount" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all" placeholder="250000" value="250000" oninput="formatLoanAmount()">
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Enter the total loan amount</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>📊</span> Annual Interest Rate (%)
+                                    </label>
+                                    <input type="number" id="interest-rate" step="0.01" min="0" max="100" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all" placeholder="3.5" value="3.5">
+                                    <p class="text-xs text-gray-500 mt-1">Annual percentage rate (APR)</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>⏰</span> Loan Term (Years)
+                                    </label>
+                                    <input type="number" id="loan-term" min="1" max="50" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all" placeholder="30" value="30">
+                                    <p class="text-xs text-gray-500 mt-1">Loan duration in years</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600 mb-2">Payment Frequency</label>
+                                    <select id="payment-frequency" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                        <option value="12">Monthly (12/year)</option>
+                                        <option value="26">Bi-weekly (26/year)</option>
+                                        <option value="52">Weekly (52/year)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="calculateLoan()" id="calculate-btn" class="w-full mt-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 px-6 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-5m-6 5h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span>Calculate Loan</span>
+                            </button>
+                        </div>
+
+                        <!-- Extra Payment Section -->
+                        <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>⚡</span> Extra Payment Analysis
+                            </h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>💸</span> Extra Monthly Payment
+                                    </label>
+                                    <div class="relative">
+                                        <span id="extra-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                        <input type="number" id="extra-payment" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="200" value="200">
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Additional payment to reduce loan term</p>
+                                </div>
+                                <button onclick="calculateExtraPayment()" id="extra-payment-btn" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                    <span>Analyze Extra Payments</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <!-- Basic Results -->
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>📊</span> Loan Summary
+                            </h4>
+                            <div id="loan-results" class="space-y-3">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">💡</div>
+                                    <p class="text-sm">Enter loan details and click "Calculate Loan"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Extra Payment Results -->
+                        <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>⚡</span> Extra Payment Analysis
+                            </h4>
+                            <div id="extra-payment-results" class="space-y-3">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">💰</div>
+                                    <p class="text-sm">Enter extra payment amount and click "Analyze Extra Payments"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Amortization Schedule -->
+                        <div class="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-6 border-2 border-gray-200 shadow-lg">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-xl font-bold text-gray-700 flex items-center gap-2">
+                                    <span>📅</span> Amortization Schedule
+                                </h4>
+                                <button onclick="toggleFullSchedule()" id="schedule-toggle" class="text-xs text-blue-600 hover:text-blue-800 font-medium hidden">
+                                    Show All
+                                </button>
+                            </div>
+                            <div id="amortization-schedule" class="max-h-96 overflow-y-auto">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">📋</div>
+                                    <p class="text-sm">Calculate loan to see amortization schedule</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Loan Calculator Dependencies -->
+    <script src="/src/js/LoanCalculator.js?v=1&t=1726745000"></script>
+    
+    <!-- Loan Calculator JavaScript -->
+    <script>
+        let loanCalculator = null;
+
+        function initializeLoanCalculator() {
+            try {
+                if (typeof LoanCalculator !== 'undefined') {
+                    loanCalculator = new LoanCalculator();
+                    console.log('✅ Loan Calculator initialized successfully');
+                    updateCurrencyDisplay();
+                } else {
+                    console.error('❌ LoanCalculator class not found');
+                }
+            } catch (error) {
+                console.error('❌ Error initializing Loan Calculator:', error);
+            }
+        }
+
+        function updateCurrencyDisplay() {
+            if (!loanCalculator) return;
+            const currency = document.getElementById('loan-currency').value;
+            loanCalculator.selectedCurrency = currency;
+            formatLoanAmount();
+        }
+
+        // Toast notification function
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            toast.className = `${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] max-w-md animate-slide-in`;
+            toast.innerHTML = `
+                <span class="text-xl">${icon}</span>
+                <span class="flex-1">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-white hover:text-gray-200 font-bold">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, type === 'error' ? 5000 : 3000);
+        }
+
+        // Format loan amount with currency
+        function formatLoanAmount() {
+            const amountInput = document.getElementById('loan-amount');
+            const currency = loanCalculator ? loanCalculator.currencies[loanCalculator.selectedCurrency] : null;
+            const symbol = currency ? currency.symbol : '$';
+            document.getElementById('currency-prefix').textContent = symbol;
+            document.getElementById('extra-currency-prefix').textContent = symbol;
+        }
+
+        // Load quick templates
+        function loadTemplate(type) {
+            const templates = {
+                mortgage: { amount: 300000, rate: 3.5, years: 30, frequency: 12 },
+                auto: { amount: 25000, rate: 4.5, years: 5, frequency: 12 },
+                personal: { amount: 10000, rate: 8.0, years: 3, frequency: 12 }
+            };
+            
+            const template = templates[type];
+            if (!template) return;
+            
+            document.getElementById('loan-amount').value = template.amount;
+            document.getElementById('interest-rate').value = template.rate;
+            document.getElementById('loan-term').value = template.years;
+            document.getElementById('payment-frequency').value = template.frequency;
+            
+            formatLoanAmount();
+            showNotification(`Loaded ${type.charAt(0).toUpperCase() + type.slice(1)} loan template`, 'success');
+        }
+
+        // Reset form
+        function resetLoanForm() {
+            document.getElementById('loan-amount').value = '';
+            document.getElementById('interest-rate').value = '';
+            document.getElementById('loan-term').value = '';
+            document.getElementById('extra-payment').value = '';
+            document.getElementById('loan-results').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">💡</div>
+                    <p class="text-sm">Enter loan details and click "Calculate Loan"</p>
+                </div>
+            `;
+            document.getElementById('extra-payment-results').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">💰</div>
+                    <p class="text-sm">Enter extra payment amount and click "Analyze Extra Payments"</p>
+                </div>
+            `;
+            document.getElementById('amortization-schedule').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">📋</div>
+                    <p class="text-sm">Calculate loan to see amortization schedule</p>
+                </div>
+            `;
+            document.getElementById('schedule-toggle').classList.add('hidden');
+            showNotification('Form reset successfully', 'info');
+        }
+
+        // Toggle full schedule
+        let showingFullSchedule = false;
+        let fullScheduleHtml = '';
+        
+        function toggleFullSchedule() {
+            const scheduleDiv = document.getElementById('amortization-schedule');
+            const toggleBtn = document.getElementById('schedule-toggle');
+            
+            if (!showingFullSchedule) {
+                scheduleDiv.innerHTML = fullScheduleHtml;
+                toggleBtn.textContent = 'Show First 12';
+                showingFullSchedule = true;
+            } else {
+                const result = loanCalculator ? loanCalculator.lastResult : null;
+                if (result && result.amortizationSchedule) {
+                    showAmortizationSchedule(result.amortizationSchedule, 12);
+                    toggleBtn.textContent = 'Show All';
+                    showingFullSchedule = false;
+                }
+            }
+        }
+
+        function calculateLoan() {
+            if (!loanCalculator) {
+                showNotification('Loan Calculator not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const amount = parseFloat(document.getElementById('loan-amount').value);
+            const rate = parseFloat(document.getElementById('interest-rate').value);
+            const years = parseFloat(document.getElementById('loan-term').value);
+            const frequency = parseInt(document.getElementById('payment-frequency').value);
+
+            if (!amount || amount <= 0) {
+                showNotification('Please enter a valid loan amount.', 'warning');
+                document.getElementById('loan-amount').focus();
+                return;
+            }
+
+            if (!rate || rate <= 0 || rate > 100) {
+                showNotification('Please enter a valid interest rate (0-100%).', 'warning');
+                document.getElementById('interest-rate').focus();
+                return;
+            }
+
+            if (!years || years <= 0 || years > 50) {
+                showNotification('Please enter a valid loan term (1-50 years).', 'warning');
+                document.getElementById('loan-term').focus();
+                return;
+            }
+
+            const calculateBtn = document.getElementById('calculate-btn');
+            const originalHTML = calculateBtn.innerHTML;
+            calculateBtn.disabled = true;
+            calculateBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Calculating...</span>';
+
+            setTimeout(() => {
+                const result = loanCalculator.calculateLoan(amount, rate, years, frequency);
+                if (result.success) {
+                    loanCalculator.lastResult = result;
+                    showLoanResults(result);
+                    showNotification('Loan calculated successfully!', 'success');
+                } else {
+                    showNotification('Error calculating loan: ' + result.error, 'error');
+                }
+                calculateBtn.disabled = false;
+                calculateBtn.innerHTML = originalHTML;
+            }, 300);
+        }
+
+        function showLoanResults(result) {
+            const currency = loanCalculator.currencies[loanCalculator.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            
+            // Calculate percentage breakdown
+            const principalPercent = ((result.totalAmount - result.totalInterest) / result.totalAmount * 100).toFixed(1);
+            const interestPercent = (result.totalInterest / result.totalAmount * 100).toFixed(1);
+            
+            document.getElementById('loan-results').innerHTML = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-4 border-2 border-green-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">Monthly Payment</span>
+                            <span class="text-2xl font-bold text-green-600">${symbol}${result.monthlyPayment.toFixed(2)}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Per payment period</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">Total Payments</span>
+                            <span class="text-xl font-bold text-blue-600">${result.totalPayments}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Over the loan term</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-orange-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">Total Interest</span>
+                            <span class="text-xl font-bold text-orange-600">${symbol}${result.totalInterest.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-orange-500 h-2 rounded-full" style="width: ${interestPercent}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">${interestPercent}% of total amount</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-purple-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">Total Amount</span>
+                            <span class="text-xl font-bold text-purple-600">${symbol}${result.totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Principal + Interest</div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-green-100 to-blue-100 rounded-lg p-3 border border-green-200">
+                        <div class="text-xs font-semibold text-gray-700 mb-1">Payment Breakdown</div>
+                        <div class="flex items-center gap-2">
+                            <div class="flex-1 bg-green-500 rounded h-2" style="width: ${principalPercent}%"></div>
+                            <span class="text-xs text-gray-600">${principalPercent}% Principal</span>
+                        </div>
+                        <div class="flex items-center gap-2 mt-1">
+                            <div class="flex-1 bg-orange-500 rounded h-2" style="width: ${interestPercent}%"></div>
+                            <span class="text-xs text-gray-600">${interestPercent}% Interest</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Show amortization schedule
+            if (result.amortizationSchedule && result.amortizationSchedule.length > 0) {
+                showAmortizationSchedule(result.amortizationSchedule, 12);
+            }
+        }
+
+        function showAmortizationSchedule(schedule, limit = 12) {
+            const currency = loanCalculator.currencies[loanCalculator.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            
+            let scheduleHtml = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="bg-gray-100 border-b-2 border-gray-300"><th class="text-left p-2 font-semibold">#</th><th class="text-right p-2 font-semibold">Principal</th><th class="text-right p-2 font-semibold">Interest</th><th class="text-right p-2 font-semibold">Balance</th></tr></thead><tbody>';
+            
+            // Reset full schedule HTML
+            fullScheduleHtml = '';
+            
+            const paymentsToShow = limit ? schedule.slice(0, limit) : schedule;
+            paymentsToShow.forEach((payment, index) => {
+                scheduleHtml += `
+                    <tr class="border-b hover:bg-gray-50 transition-colors">
+                        <td class="p-2 font-medium">${payment.payment}</td>
+                        <td class="text-right p-2 text-green-600">${symbol}${payment.principalPayment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="text-right p-2 text-orange-600">${symbol}${payment.interestPayment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="text-right p-2 font-medium">${symbol}${payment.remainingBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+            });
+            
+            scheduleHtml += '</tbody></table></div>';
+            
+            if (schedule.length > limit) {
+                scheduleHtml += `<div class="text-xs text-gray-500 mt-3 text-center bg-gray-100 p-2 rounded">Showing first ${limit} of ${schedule.length} payments</div>`;
+                document.getElementById('schedule-toggle').classList.remove('hidden');
+                
+                // Store full schedule HTML for toggle
+                fullScheduleHtml = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="bg-gray-100 border-b-2 border-gray-300"><th class="text-left p-2 font-semibold">#</th><th class="text-right p-2 font-semibold">Principal</th><th class="text-right p-2 font-semibold">Interest</th><th class="text-right p-2 font-semibold">Balance</th></tr></thead><tbody>';
+                schedule.forEach(payment => {
+                    fullScheduleHtml += `
+                        <tr class="border-b hover:bg-gray-50 transition-colors">
+                            <td class="p-2 font-medium">${payment.payment}</td>
+                            <td class="text-right p-2 text-green-600">${symbol}${payment.principalPayment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="text-right p-2 text-orange-600">${symbol}${payment.interestPayment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="text-right p-2 font-medium">${symbol}${payment.remainingBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        </tr>
+                    `;
+                });
+                fullScheduleHtml += '</tbody></table></div>';
+            } else {
+                document.getElementById('schedule-toggle').classList.add('hidden');
+            }
+            
+            document.getElementById('amortization-schedule').innerHTML = scheduleHtml;
+        }
+
+        function calculateExtraPayment() {
+            if (!loanCalculator) {
+                showNotification('Loan Calculator not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const amount = parseFloat(document.getElementById('loan-amount').value);
+            const rate = parseFloat(document.getElementById('interest-rate').value);
+            const years = parseFloat(document.getElementById('loan-term').value);
+            const extraPayment = parseFloat(document.getElementById('extra-payment').value) || 0;
+            const frequency = parseInt(document.getElementById('payment-frequency').value);
+
+            if (!amount || !rate || !years) {
+                showNotification('Please calculate the loan first.', 'warning');
+                return;
+            }
+
+            if (extraPayment <= 0) {
+                showNotification('Please enter an extra payment amount greater than 0.', 'warning');
+                document.getElementById('extra-payment').focus();
+                return;
+            }
+
+            const extraBtn = document.getElementById('extra-payment-btn');
+            const originalHTML = extraBtn.innerHTML;
+            extraBtn.disabled = true;
+            extraBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Analyzing...</span>';
+
+            setTimeout(() => {
+                const result = loanCalculator.calculateExtraPayment(amount, rate, years, extraPayment, frequency);
+                if (result.success) {
+                    showExtraPaymentResults(result);
+                    showNotification('Extra payment analysis completed!', 'success');
+                } else {
+                    showNotification('Error calculating extra payment: ' + result.error, 'error');
+                }
+                extraBtn.disabled = false;
+                extraBtn.innerHTML = originalHTML;
+            }, 300);
+        }
+
+        function showExtraPaymentResults(result) {
+            const currency = loanCalculator.currencies[loanCalculator.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            const frequency = parseInt(document.getElementById('payment-frequency').value);
+            
+            // Convert timeSaved from payment count to months/years
+            const paymentsSaved = result.timeSaved;
+            const monthsSaved = Math.round(paymentsSaved * (12 / frequency));
+            const yearsSaved = Math.floor(monthsSaved / 12);
+            const remainingMonths = monthsSaved % 12;
+            
+            let timeSavedDisplay = '';
+            if (yearsSaved > 0 && remainingMonths > 0) {
+                timeSavedDisplay = `${yearsSaved} year${yearsSaved > 1 ? 's' : ''} ${remainingMonths} month${remainingMonths > 1 ? 's' : ''}`;
+            } else if (yearsSaved > 0) {
+                timeSavedDisplay = `${yearsSaved} year${yearsSaved > 1 ? 's' : ''}`;
+            } else {
+                timeSavedDisplay = `${monthsSaved} month${monthsSaved > 1 ? 's' : ''}`;
+            }
+            
+            // Calculate total amount paid with extra payments
+            const newTotalAmount = result.newPayment * result.newTotalPayments;
+            const originalTotal = loanCalculator.lastResult ? loanCalculator.lastResult.totalAmount : 0;
+            const totalSavings = originalTotal - newTotalAmount;
+            
+            document.getElementById('extra-payment-results').innerHTML = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-4 border-2 border-green-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-semibold text-gray-600">⏰ Time Saved</span>
+                            <span class="text-xl font-bold text-green-600">${timeSavedDisplay}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Loan paid off faster!</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-semibold text-gray-600">💰 Interest Saved</span>
+                            <span class="text-xl font-bold text-blue-600">${symbol}${result.interestSaved.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Money you keep!</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-purple-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-semibold text-gray-600">💵 Total Savings</span>
+                            <span class="text-xl font-bold text-purple-600">${symbol}${totalSavings.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Combined savings</div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-4 border border-blue-200">
+                        <div class="text-xs font-semibold text-gray-700 mb-3">New Payment Details</div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600">New Payment Amount:</span>
+                                <span class="font-semibold text-gray-800">${symbol}${result.newPayment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600">Payments Saved:</span>
+                                <span class="text-sm font-medium text-gray-700">${paymentsSaved} payment${paymentsSaved !== 1 ? 's' : ''}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600">New Total Payments:</span>
+                                <span class="font-semibold text-gray-800">${result.newTotalPayments} payment${result.newTotalPayments !== 1 ? 's' : ''}</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-blue-200">
+                                <span class="text-sm font-semibold text-gray-700">New Total Amount:</span>
+                                <span class="text-lg font-bold text-purple-600">${symbol}${newTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeLoanCalculator();
+                formatLoanAmount();
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        const availableTools = [
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', pageUrl: '/tools/age-calculator.html' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', pageUrl: '/tools/bmi-calculator.html' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', modalId: 'investment-calculator-modal' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', modalId: 'tax-calculator-modal' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', modalId: 'business-metrics-modal' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', modalId: 'currency-converter-modal' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', modalId: 'retirement-calculator-modal' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', modalId: 'mortgage-calculator-modal' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', modalId: 'budget-planner-modal' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', modalId: 'salary-calculator-modal' },
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', modalId: 'json-formatter-modal' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', modalId: 'xml-formatter-modal' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', modalId: 'base64-encoder-modal' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', modalId: 'hash-generator-modal' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', modalId: 'url-encoder-modal' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', modalId: 'regex-tester-modal' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', modalId: 'css-js-minifier-modal' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', modalId: 'color-palette-modal' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', modalId: 'lorem-ipsum-modal' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            btnEl.dataset.modalId = tool.modalId || '';
+            btnEl.dataset.pageUrl = tool.pageUrl || '';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            const modalId = btnEl.dataset.modalId;
+            const pageUrl = btnEl.dataset.pageUrl;
+            
+            if (pageUrl) {
+                window.location.href = pageUrl;
+            } else if (modalId && typeof openModal === 'function') {
+                window.location.href = `/#${modalId}`;
+            } else {
+                window.location.href = '/#tools';
+            }
+        }
+        
+        function initToolSuggestions() {
+            updateToolSuggestion();
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(100%); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .animate-slide-in { animation: slideIn 0.3s ease-out; }
+        #tool-suggestion-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+        
+        /* Input focus effects */
+        input:focus, select:focus {
+            transform: scale(1.01);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+        
+        /* Button hover effects */
+        button:not(:disabled):hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</body>
+</html>
+
+

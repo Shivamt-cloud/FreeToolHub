@@ -75,7 +75,7 @@ class BMICalculator {
     /**
      * Calculate BMI
      */
-    calculateBMI(weight, height, unit = 'metric') {
+    calculateBMI(weight, height, unit = 'metric', age = 25, gender = 'male') {
         try {
             let weightKg, heightM;
             
@@ -94,9 +94,17 @@ class BMICalculator {
                 throw new Error('Weight and height must be positive values');
             }
             
+            // Convert age to number if provided
+            if (age !== null && age !== undefined && age !== '') {
+                age = parseInt(age);
+            } else {
+                age = 25;
+            }
+            
             const bmi = weightKg / (heightM * heightM);
             const category = this.getBMICategory(bmi);
-            const bodyFatEstimate = this.estimateBodyFat(bmi, heightM, weightKg);
+            
+            const bodyFatEstimate = this.estimateBodyFat(bmi, heightM, weightKg, gender, age);
             const idealWeight = this.calculateIdealWeight(heightM, unit);
             const weightToLose = Math.max(0, weightKg - idealWeight.max);
             const weightToGain = Math.max(0, idealWeight.min - weightKg);
@@ -142,8 +150,17 @@ class BMICalculator {
                     risk: category.risk,
                     range: `${category.min}-${category.max === Infinity ? '∞' : category.max}`
                 };
+            }
         }
-        return this.bmiCategories.obese3;
+        // Return obese3 category if BMI is extremely high
+        const obese3 = this.bmiCategories.obese3;
+        return {
+            key: 'obese3',
+            label: obese3.label,
+            color: obese3.color,
+            risk: obese3.risk,
+            range: `${obese3.min}+`
+        };
     }
 
     /**
@@ -270,15 +287,23 @@ class BMICalculator {
      * Calculate weight change needed
      */
     calculateWeightChange(currentWeight, targetBMI, height, unit = 'metric') {
+        // Convert height to meters
         const heightM = unit === 'metric' ? height / 100 : height * 0.0254;
-        const targetWeight = targetBMI * heightM * heightM;
-        const weightChange = targetWeight - currentWeight;
+        
+        // Calculate target weight in kg
+        const targetWeightKg = targetBMI * heightM * heightM;
+        
+        // Convert current weight to kg for calculation
+        const currentWeightKg = unit === 'metric' ? currentWeight : currentWeight * 0.453592;
+        
+        // Calculate weight change in kg
+        const weightChangeKg = targetWeightKg - currentWeightKg;
         
         return {
-            targetWeight: parseFloat(targetWeight.toFixed(1)),
-            weightChange: parseFloat(weightChange.toFixed(1)),
-            action: weightChange > 0 ? 'gain' : 'lose',
-            amount: Math.abs(parseFloat(weightChange.toFixed(1)))
+            targetWeight: parseFloat(targetWeightKg.toFixed(1)), // Always in kg
+            weightChange: parseFloat(weightChangeKg.toFixed(1)), // Always in kg
+            action: weightChangeKg > 0 ? 'gain' : 'lose',
+            amount: Math.abs(parseFloat(weightChangeKg.toFixed(1))) // Always in kg
         };
     }
 

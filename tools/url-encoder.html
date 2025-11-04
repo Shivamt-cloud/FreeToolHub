@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>URL Encoder/Decoder - FreeToolHub</title>
+    <meta name="description" content="Encode and decode URLs with query parameter support and validation. Professional URL encoder/decoder with beautification.">
+    <meta property="og:title" content="URL Encoder/Decoder - FreeToolHub">
+    <meta property="og:description" content="Encode and decode URLs with query parameter support and validation">
+    <meta property="og:url" content="https://freetoolhub.in/tools/url-encoder.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🌐 URL Encoder/Decoder</h1>
+                    <p class="text-gray-600 text-lg">Encode and decode URLs with query parameter support and validation</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-teal-500 to-cyan-600 text-white px-6 py-3 rounded-lg hover:from-teal-600 hover:to-cyan-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">URL Encoder</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Main URL Encoder Section -->
+                    <div class="lg:col-span-3">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Input Section -->
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Input</label>
+                                    <div class="relative">
+                                        <div class="absolute left-0 top-0 bottom-0 w-8 bg-gray-100 border border-gray-300 rounded-l-xl flex flex-col items-center text-xs text-gray-500 font-mono overflow-hidden" id="url-input-lines" style="z-index: 1;"></div>
+                                        <textarea id="url-input" placeholder="Enter URL to encode or decode..." class="w-full h-64 pl-10 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent font-mono text-sm resize-none" style="font-family: 'Courier New', monospace; line-height: 1.5;" oninput="updateUrlInputLineNumbers()" onscroll="syncUrlInputScroll()" onpaste="setTimeout(updateUrlInputLineNumbers, 10)"></textarea>
+                                    </div>
+                                </div>
+                                
+                                <!-- Query Parameters -->
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Query Parameters</label>
+                                    <div class="space-y-3">
+                                        <div class="flex space-x-2">
+                                            <input type="text" id="query-key" placeholder="Parameter name" class="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                                            <input type="text" id="query-value" placeholder="Parameter value" class="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                                            <button onclick="addQueryParam()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                                Add
+                                            </button>
+                                        </div>
+                                        <div id="query-params-list" class="space-y-2 max-h-32 overflow-y-auto"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Options -->
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Options</label>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="url-encode-reserved" class="mr-2">
+                                            <label for="url-encode-reserved" class="text-gray-700">Encode Reserved Characters</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="url-encode-spaces" class="mr-2" checked>
+                                            <label for="url-encode-spaces" class="text-gray-700">Encode Spaces</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="url-preserve-protocol" class="mr-2" checked>
+                                            <label for="url-preserve-protocol" class="text-gray-700">Preserve Protocol</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="url-strict-decode" class="mr-2">
+                                            <label for="url-strict-decode" class="text-gray-700">Strict Decoding</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button onclick="encodeUrl()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                        Encode URL
+                                    </button>
+                                    <button onclick="decodeUrl()" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                        Decode URL
+                                    </button>
+                                    <button onclick="validateUrl()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                        Validate URL
+                                    </button>
+                                    <button onclick="beautifyUrl()" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                        Beautify URL
+                                    </button>
+                                    <button onclick="clearUrl()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                        Clear All
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Output Section -->
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Output</label>
+                                    <div class="relative">
+                                        <div class="absolute left-0 top-0 bottom-0 w-8 bg-gray-100 border border-gray-300 rounded-l-xl flex flex-col items-center text-xs text-gray-500 font-mono overflow-hidden" id="url-output-lines" style="z-index: 1;"></div>
+                                        <textarea id="url-output" placeholder="Encoded or decoded URL will appear here..." class="w-full h-64 pl-10 pr-4 py-4 border border-gray-300 rounded-xl bg-gray-50 font-mono text-sm resize-none" style="font-family: 'Courier New', monospace; line-height: 1.5;" readonly onscroll="syncUrlOutputScroll()"></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex space-x-3">
+                                    <button onclick="copyUrlOutput()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                        Copy URL
+                                    </button>
+                                    <button onclick="downloadUrlOutput()" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                        Download
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Results Section -->
+                        <div class="mt-8 space-y-6">
+                            <!-- URL Analysis -->
+                            <div id="url-analysis-results" class="hidden">
+                                <div class="bg-blue-50 rounded-xl p-6 border border-blue-200">
+                                    <h4 class="text-lg font-bold mb-4 text-blue-800">URL Analysis</h4>
+                                    <div id="url-analysis-content" class="space-y-3"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Validation Results -->
+                            <div id="url-validation-results" class="hidden">
+                                <div class="bg-green-50 rounded-xl p-6 border border-green-200">
+                                    <h4 class="text-lg font-bold mb-4 text-green-800">URL Validation</h4>
+                                    <div id="url-validation-content" class="space-y-3"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Beautification Results -->
+                            <div id="url-beautification-results" class="hidden">
+                                <div class="bg-purple-50 rounded-xl p-6 border border-purple-200">
+                                    <h4 class="text-lg font-bold mb-4 text-purple-800">URL Beautification</h4>
+                                    <div id="url-beautification-content" class="space-y-3"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Error Display -->
+                            <div id="url-error-display" class="hidden">
+                                <div class="bg-red-50 rounded-xl p-6 border border-red-200">
+                                    <h4 class="text-lg font-bold mb-4 text-red-800">Error Details</h4>
+                                    <div id="url-error-content" class="space-y-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- URL Encoder Dependencies -->
+    <script src="/src/js/UrlEncoder.js?v=1&t=1726745000"></script>
+    
+    <!-- URL Encoder JavaScript -->
+    <script>
+        let urlEncoder = null;
+        let queryParams = {};
+
+        function initializeUrlEncoder() {
+            try {
+                if (typeof UrlEncoder !== 'undefined') {
+                    urlEncoder = new UrlEncoder();
+                    console.log('✅ URL Encoder initialized successfully');
+                    updateUrlInputLineNumbers();
+                    updateUrlOutputLineNumbers();
+                } else {
+                    console.error('❌ UrlEncoder class not found');
+                }
+            } catch (error) {
+                console.error('❌ URL Encoder initialization failed:', error);
+            }
+        }
+
+        function updateUrlInputLineNumbers() {
+            const textarea = document.getElementById('url-input');
+            const linesDiv = document.getElementById('url-input-lines');
+            
+            const content = textarea.value;
+            const lines = content.split('\n');
+            let lineCount = lines.length;
+            
+            if (content.trim() === '') {
+                lineCount = 1;
+            }
+            
+            let lineNumbers = '';
+            for (let i = 1; i <= lineCount; i++) {
+                lineNumbers += `<div class="text-center text-xs" style="height: 24px; line-height: 24px; display: flex; align-items: center; justify-content: center;">${i}</div>`;
+            }
+            
+            linesDiv.innerHTML = lineNumbers;
+        }
+
+        function updateUrlOutputLineNumbers() {
+            const textarea = document.getElementById('url-output');
+            const linesDiv = document.getElementById('url-output-lines');
+            
+            const content = textarea.value;
+            const lines = content.split('\n');
+            let lineCount = lines.length;
+            
+            if (content.trim() === '') {
+                lineCount = 1;
+            }
+            
+            let lineNumbers = '';
+            for (let i = 1; i <= lineCount; i++) {
+                lineNumbers += `<div class="text-center text-xs" style="height: 24px; line-height: 24px; display: flex; align-items: center; justify-content: center;">${i}</div>`;
+            }
+            
+            linesDiv.innerHTML = lineNumbers;
+        }
+
+        function syncUrlInputScroll() {
+            const textarea = document.getElementById('url-input');
+            const linesDiv = document.getElementById('url-input-lines');
+            linesDiv.scrollTop = textarea.scrollTop;
+        }
+
+        function syncUrlOutputScroll() {
+            const textarea = document.getElementById('url-output');
+            const linesDiv = document.getElementById('url-output-lines');
+            linesDiv.scrollTop = textarea.scrollTop;
+        }
+
+        function addQueryParam() {
+            const key = document.getElementById('query-key').value.trim();
+            const value = document.getElementById('query-value').value.trim();
+            
+            if (!key) {
+                alert('Please enter a parameter name.');
+                return;
+            }
+            
+            queryParams[key] = value;
+            updateQueryParamsList();
+            
+            document.getElementById('query-key').value = '';
+            document.getElementById('query-value').value = '';
+        }
+
+        function updateQueryParamsList() {
+            const listDiv = document.getElementById('query-params-list');
+            listDiv.innerHTML = '';
+            
+            for (const [key, value] of Object.entries(queryParams)) {
+                const paramDiv = document.createElement('div');
+                paramDiv.className = 'flex items-center justify-between bg-gray-50 p-2 rounded border';
+                paramDiv.innerHTML = `
+                    <span class="text-sm font-mono">${key} = ${value}</span>
+                    <button onclick="removeQueryParam('${key}')" class="text-red-500 hover:text-red-700 text-sm font-bold">×</button>
+                `;
+                listDiv.appendChild(paramDiv);
+            }
+        }
+
+        function removeQueryParam(key) {
+            delete queryParams[key];
+            updateQueryParamsList();
+        }
+
+        function encodeUrl() {
+            if (!urlEncoder) {
+                alert('URL Encoder not initialized. Please refresh the page.');
+                return;
+            }
+
+            let input = document.getElementById('url-input').value.trim();
+            if (!input) {
+                alert('Please enter a URL to encode.');
+                return;
+            }
+
+            // Add query parameters if any
+            if (Object.keys(queryParams).length > 0) {
+                const baseUrl = input.split('?')[0];
+                
+                if (typeof urlEncoder.encodeQueryParams === 'function') {
+                    const encodedParams = urlEncoder.encodeQueryParams(queryParams);
+                    if (encodedParams.success) {
+                        input = baseUrl + '?' + encodedParams.encoded;
+                    }
+                } else {
+                    // Fallback: manual encoding
+                    const params = Object.entries(queryParams).map(([k, v]) => 
+                        encodeURIComponent(k) + '=' + encodeURIComponent(v)
+                    ).join('&');
+                    input = baseUrl + '?' + params;
+                }
+            }
+
+            const options = {
+                encodeReserved: document.getElementById('url-encode-reserved').checked,
+                encodeSpaces: document.getElementById('url-encode-spaces').checked,
+                preserveProtocol: document.getElementById('url-preserve-protocol').checked
+            };
+
+            const result = urlEncoder.encodeUrl(input, options);
+            if (result.success) {
+                document.getElementById('url-output').value = result.encoded;
+                updateUrlOutputLineNumbers();
+                hideAllUrlResults();
+                showUrlAnalysisResults(result);
+            } else {
+                document.getElementById('url-output').value = '';
+                updateUrlOutputLineNumbers();
+                hideAllUrlResults();
+                showUrlErrorResults(result);
+            }
+        }
+
+        function decodeUrl() {
+            if (!urlEncoder) {
+                alert('URL Encoder not initialized. Please refresh the page.');
+                return;
+            }
+
+            const input = document.getElementById('url-input').value.trim();
+            if (!input) {
+                alert('Please enter a URL to decode.');
+                return;
+            }
+
+            const options = {
+                strict: document.getElementById('url-strict-decode').checked
+            };
+
+            const result = urlEncoder.decodeUrl(input, options);
+            if (result.success) {
+                document.getElementById('url-output').value = result.decoded;
+                updateUrlOutputLineNumbers();
+                hideAllUrlResults();
+                showUrlAnalysisResults(result);
+            } else {
+                document.getElementById('url-output').value = '';
+                updateUrlOutputLineNumbers();
+                hideAllUrlResults();
+                showUrlErrorResults(result);
+            }
+        }
+
+        function validateUrl() {
+            if (!urlEncoder) {
+                alert('URL Encoder not initialized. Please refresh the page.');
+                return;
+            }
+
+            const input = document.getElementById('url-input').value.trim();
+            if (!input) {
+                alert('Please enter a URL to validate.');
+                return;
+            }
+
+            if (typeof urlEncoder.validateUrl === 'function') {
+                const result = urlEncoder.validateUrl(input);
+                if (result.success && result.isValid) {
+                    hideAllUrlResults();
+                    showUrlValidationResults(result);
+                    const info = urlEncoder.getUrlInfo(input);
+                    if (info && info.success) {
+                        showUrlAnalysisResults(info);
+                    }
+                } else {
+                    hideAllUrlResults();
+                    showUrlErrorResults(result);
+                }
+            } else {
+                // Fallback validation
+                try {
+                    new URL(input);
+                    showUrlValidationResults({
+                        success: true,
+                        isValid: true,
+                        message: 'Valid URL'
+                    });
+                } catch (e) {
+                    showUrlErrorResults({
+                        success: false,
+                        error: 'Invalid URL format'
+                    });
+                }
+            }
+        }
+
+        function beautifyUrl() {
+            if (!urlEncoder) {
+                alert('URL Encoder not initialized. Please refresh the page.');
+                return;
+            }
+
+            const input = document.getElementById('url-input').value.trim();
+            if (!input) {
+                alert('Please enter a URL to beautify.');
+                return;
+            }
+
+            if (typeof urlEncoder.beautifyUrl === 'function') {
+                const result = urlEncoder.beautifyUrl(input);
+                if (result.success) {
+                    document.getElementById('url-output').value = result.beautified;
+                    updateUrlOutputLineNumbers();
+                    hideAllUrlResults();
+                    showUrlBeautificationResults(result);
+                } else {
+                    document.getElementById('url-output').value = '';
+                    updateUrlOutputLineNumbers();
+                    hideAllUrlResults();
+                    showUrlErrorResults(result);
+                }
+            } else {
+                // Fallback beautification
+                try {
+                    const url = new URL(input);
+                    const beautified = url.protocol + '//' + url.hostname + 
+                        (url.port ? ':' + url.port : '') + url.pathname +
+                        (url.search || '') + (url.hash || '');
+                    document.getElementById('url-output').value = beautified;
+                    updateUrlOutputLineNumbers();
+                    showUrlBeautificationResults({
+                        success: true,
+                        beautified: beautified,
+                        message: 'URL beautified successfully'
+                    });
+                } catch (e) {
+                    showUrlErrorResults({
+                        success: false,
+                        error: 'Invalid URL format'
+                    });
+                }
+            }
+        }
+
+        function clearUrl() {
+            document.getElementById('url-input').value = '';
+            document.getElementById('url-output').value = '';
+            document.getElementById('query-key').value = '';
+            document.getElementById('query-value').value = '';
+            queryParams = {};
+            updateQueryParamsList();
+            document.getElementById('url-input-lines').innerHTML = '<div class="text-center text-xs" style="height: 24px; line-height: 24px; display: flex; align-items: center; justify-content: center;">1</div>';
+            document.getElementById('url-output-lines').innerHTML = '<div class="text-center text-xs" style="height: 24px; line-height: 24px; display: flex; align-items: center; justify-content: center;">1</div>';
+            hideAllUrlResults();
+        }
+
+        function copyUrlOutput() {
+            const output = document.getElementById('url-output').value;
+            if (!output) {
+                alert('No URL to copy.');
+                return;
+            }
+
+            navigator.clipboard.writeText(output).then(() => {
+                alert('URL copied to clipboard!');
+            }).catch(() => {
+                alert('Failed to copy to clipboard.');
+            });
+        }
+
+        function downloadUrlOutput() {
+            const output = document.getElementById('url-output').value;
+            if (!output) {
+                alert('No URL to download.');
+                return;
+            }
+
+            const blob = new Blob([output], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'url-output.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function showUrlAnalysisResults(result) {
+            const resultsDiv = document.getElementById('url-analysis-results');
+            const contentDiv = document.getElementById('url-analysis-content');
+            
+            let html = `
+                <div class="flex items-center text-blue-600 mb-2">
+                    <span class="text-2xl mr-2">📊</span>
+                    <span class="font-bold">URL Analysis</span>
+                </div>
+                <div class="text-sm text-gray-600 space-y-3">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white p-3 rounded-lg border">
+                            <div class="font-bold text-gray-700">Original Length</div>
+                            <div class="text-blue-600">${result.originalLength || 'N/A'} characters</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border">
+                            <div class="font-bold text-gray-700">${result.encoded ? 'Encoded' : 'Decoded'} Length</div>
+                            <div class="text-green-600">${result.encodedLength || result.decodedLength || 'N/A'} characters</div>
+                        </div>
+                    </div>
+            `;
+            
+            if (result.compressionRatio) {
+                html += `
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="font-bold text-gray-700">Size Change</div>
+                        <div class="text-${parseFloat(result.compressionRatio) > 0 ? 'red' : 'green'}-600">${result.compressionRatio}% ${parseFloat(result.compressionRatio) > 0 ? 'larger' : 'smaller'}</div>
+                    </div>
+                `;
+            }
+            
+            if (result.protocol || result.hostname || result.pathname) {
+                html += `
+                    <div class="grid grid-cols-2 gap-4">
+                        ${result.protocol ? `
+                            <div class="bg-white p-3 rounded-lg border">
+                                <div class="font-bold text-gray-700">Protocol</div>
+                                <div class="text-purple-600">${result.protocol}</div>
+                            </div>
+                        ` : ''}
+                        ${result.hostname ? `
+                            <div class="bg-white p-3 rounded-lg border">
+                                <div class="font-bold text-gray-700">Hostname</div>
+                                <div class="text-orange-600">${result.hostname}</div>
+                            </div>
+                        ` : ''}
+                        ${result.pathname ? `
+                            <div class="bg-white p-3 rounded-lg border">
+                                <div class="font-bold text-gray-700">Pathname</div>
+                                <div class="text-blue-600">${result.pathname}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
+            
+            contentDiv.innerHTML = html;
+            resultsDiv.classList.remove('hidden');
+        }
+
+        function showUrlValidationResults(result) {
+            const resultsDiv = document.getElementById('url-validation-results');
+            const contentDiv = document.getElementById('url-validation-content');
+            
+            let html = `
+                <div class="flex items-center text-green-600 mb-2">
+                    <span class="text-2xl mr-2">✅</span>
+                    <span class="font-bold">Valid URL</span>
+                </div>
+                <div class="text-sm text-gray-600">
+                    ${result.message || 'URL is valid and well-formed'}
+                </div>
+            `;
+            
+            contentDiv.innerHTML = html;
+            resultsDiv.classList.remove('hidden');
+        }
+
+        function showUrlBeautificationResults(result) {
+            const resultsDiv = document.getElementById('url-beautification-results');
+            const contentDiv = document.getElementById('url-beautification-content');
+            
+            let html = `
+                <div class="flex items-center text-purple-600 mb-2">
+                    <span class="text-2xl mr-2">✨</span>
+                    <span class="font-bold">URL Beautified</span>
+                </div>
+                <div class="text-sm text-gray-600">
+                    ${result.message || 'URL has been beautified successfully'}
+                </div>
+            `;
+            
+            contentDiv.innerHTML = html;
+            resultsDiv.classList.remove('hidden');
+        }
+
+        function showUrlErrorResults(result) {
+            const resultsDiv = document.getElementById('url-error-display');
+            const contentDiv = document.getElementById('url-error-content');
+            
+            let html = `
+                <div class="flex items-center text-red-600 mb-2">
+                    <span class="text-2xl mr-2">❌</span>
+                    <span class="font-bold">Error</span>
+                </div>
+                <div class="text-sm text-gray-600 space-y-3">
+                    <div>
+                        <div class="font-bold mb-1">Error Message:</div>
+                        <div class="bg-red-50 p-3 rounded border-l-4 border-red-400 font-mono text-sm">${result.error || 'Unknown error occurred'}</div>
+                    </div>
+                    <div class="bg-yellow-50 p-3 rounded border-l-4 border-yellow-400">
+                        <div class="font-bold text-yellow-800 mb-2">💡 Tips:</div>
+                        <ul class="text-sm text-yellow-700 space-y-1">
+                            <li>• URLs should start with http:// or https://</li>
+                            <li>• Check for invalid characters in the URL</li>
+                            <li>• Ensure proper encoding for special characters</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            contentDiv.innerHTML = html;
+            resultsDiv.classList.remove('hidden');
+        }
+
+        function hideAllUrlResults() {
+            document.getElementById('url-analysis-results').classList.add('hidden');
+            document.getElementById('url-validation-results').classList.add('hidden');
+            document.getElementById('url-beautification-results').classList.add('hidden');
+            document.getElementById('url-error-display').classList.add('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeUrlEncoder();
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        const availableTools = [
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', pageUrl: '/tools/age-calculator.html' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', pageUrl: '/tools/bmi-calculator.html' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', pageUrl: '/tools/loan-calculator.html' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', pageUrl: '/tools/investment-calculator.html' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', pageUrl: '/tools/tax-calculator.html' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', pageUrl: '/tools/business-metrics.html' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', pageUrl: '/tools/currency-converter.html' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', pageUrl: '/tools/retirement-calculator.html' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', pageUrl: '/tools/mortgage-calculator.html' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', pageUrl: '/tools/budget-planner.html' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', pageUrl: '/tools/salary-calculator.html' },
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', pageUrl: '/tools/json-formatter.html' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', pageUrl: '/tools/xml-formatter.html' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', pageUrl: '/tools/base64-encoder.html' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', pageUrl: '/tools/hash-generator.html' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', modalId: 'regex-tester-modal' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', modalId: 'css-js-minifier-modal' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', modalId: 'color-palette-modal' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', modalId: 'lorem-ipsum-modal' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            btnEl.dataset.modalId = tool.modalId || '';
+            btnEl.dataset.pageUrl = tool.pageUrl || '';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            const modalId = btnEl.dataset.modalId;
+            const pageUrl = btnEl.dataset.pageUrl;
+            
+            if (pageUrl) {
+                window.location.href = pageUrl;
+            } else if (modalId && typeof openModal === 'function') {
+                window.location.href = `/#${modalId}`;
+            } else {
+                window.location.href = '/#tools';
+            }
+        }
+        
+        function initToolSuggestions() {
+            updateToolSuggestion();
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        #tool-suggestion-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+    </style>
+</body>
+</html>
+
+

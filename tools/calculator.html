@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Smart Calculator - FreeToolHub</title>
+    <meta name="description" content="Free online calculator with scientific functions, history, and export features. 100% free, secure, and client-side processing. No downloads or sign-ups required.">
+    <meta property="og:title" content="Smart Calculator - FreeToolHub">
+    <meta property="og:description" content="Advanced calculator with scientific functions, variables, and expression evaluation">
+    <meta property="og:url" content="https://freetoolhub.in/tools/calculator.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* Calculator Button Styles */
+        .calc-btn-number {
+            @apply bg-white border-2 border-gray-300 text-gray-800 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 hover:border-blue-400 transition-all duration-200 text-lg;
+        }
+        .calc-btn-operator {
+            @apply bg-blue-500 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-600 transition-all duration-200 text-lg;
+        }
+        .calc-btn-function {
+            @apply bg-purple-500 text-white font-semibold py-3 px-4 rounded-lg hover:bg-purple-600 transition-all duration-200 text-sm;
+        }
+        .calc-btn-equals {
+            @apply bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition-all duration-200 text-xl;
+        }
+        .calc-btn-clear {
+            @apply bg-red-500 text-white font-semibold py-3 px-4 rounded-lg hover:bg-red-600 transition-all duration-200 text-lg;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🧮 Smart Calculator</h1>
+                    <p class="text-gray-600 text-lg">Advanced calculator with scientific functions, variables, and expression evaluation</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Calculator</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Calculator Display -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-gray-900 rounded-xl p-4 mb-4">
+                            <div class="text-gray-400 text-sm mb-2">Expression:</div>
+                            <input type="text" id="calc-expression" class="w-full bg-transparent text-white text-xl font-mono border-none outline-none" placeholder="Enter expression..." readonly>
+                            <div class="text-gray-400 text-sm mt-2 mb-1">Result:</div>
+                            <div id="calc-result" class="text-green-400 text-3xl font-mono font-bold min-h-[40px]">0</div>
+                        </div>
+                        
+                        <!-- Calculator Buttons -->
+                        <div class="grid grid-cols-5 gap-2">
+                            <!-- Row 1: Functions -->
+                            <button onclick="calcFunction('sin')" class="calc-btn-function">sin</button>
+                            <button onclick="calcFunction('cos')" class="calc-btn-function">cos</button>
+                            <button onclick="calcFunction('tan')" class="calc-btn-function">tan</button>
+                            <button onclick="calcFunction('log')" class="calc-btn-function">log</button>
+                            <button onclick="calcFunction('ln')" class="calc-btn-function">ln</button>
+                            
+                            <!-- Row 2: More Functions -->
+                            <button onclick="calcInput('(')" class="calc-btn-operator">(</button>
+                            <button onclick="calcInput(')')" class="calc-btn-operator">)</button>
+                            <button onclick="calcInput('^')" class="calc-btn-operator">x^y</button>
+                            <button onclick="calcFunction('sqrt')" class="calc-btn-function">√</button>
+                            <button onclick="calcClear()" class="calc-btn-clear">C</button>
+                            
+                            <!-- Row 3: Numbers -->
+                            <button onclick="calcInput('7')" class="calc-btn-number">7</button>
+                            <button onclick="calcInput('8')" class="calc-btn-number">8</button>
+                            <button onclick="calcInput('9')" class="calc-btn-number">9</button>
+                            <button onclick="calcInput('/')" class="calc-btn-operator">÷</button>
+                            <button onclick="calcDelete()" class="calc-btn-clear">⌫</button>
+                            
+                            <!-- Row 4: Numbers -->
+                            <button onclick="calcInput('4')" class="calc-btn-number">4</button>
+                            <button onclick="calcInput('5')" class="calc-btn-number">5</button>
+                            <button onclick="calcInput('6')" class="calc-btn-number">6</button>
+                            <button onclick="calcInput('*')" class="calc-btn-operator">×</button>
+                            <button onclick="calcInput('pi')" class="calc-btn-function">π</button>
+                            
+                            <!-- Row 5: Numbers -->
+                            <button onclick="calcInput('1')" class="calc-btn-number">1</button>
+                            <button onclick="calcInput('2')" class="calc-btn-number">2</button>
+                            <button onclick="calcInput('3')" class="calc-btn-number">3</button>
+                            <button onclick="calcInput('-')" class="calc-btn-operator">-</button>
+                            <button onclick="calcInput('e')" class="calc-btn-function">e</button>
+                            
+                            <!-- Row 6: Numbers -->
+                            <button onclick="calcInput('0')" class="calc-btn-number">0</button>
+                            <button onclick="calcInput('.')" class="calc-btn-number">.</button>
+                            <button onclick="calcCalculate()" class="calc-btn-equals">=</button>
+                            <button onclick="calcInput('+')" class="calc-btn-operator">+</button>
+                            <button onclick="switchMode()" class="calc-btn-function" id="mode-btn">RAD</button>
+                        </div>
+                    </div>
+                    
+                    <!-- History Panel -->
+                    <div class="lg:col-span-1">
+                        <h4 class="text-lg font-bold mb-3 text-gray-700">History</h4>
+                        <div id="calc-history" class="bg-gray-50 rounded-xl p-4 h-96 overflow-y-auto">
+                            <div class="text-gray-500 text-center">No calculations yet</div>
+                        </div>
+                        <div class="mt-4 space-y-2">
+                            <button onclick="clearHistory()" class="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
+                                Clear History
+                            </button>
+                            <button onclick="exportHistory()" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
+                                Export History
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Tool Suggestion Card -->
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Calculator Dependencies -->
+    <script src="/src/js/OperatorTable.js?v=fixed&t=1726744800"></script>
+    <script src="/src/js/Tokenizer.js?v=fixed&t=1726744800"></script>
+    <script src="/src/js/Parser.js?v=fixed&t=1726744800"></script>
+    <script src="/src/js/Evaluator.js?v=fixed&t=1726744800"></script>
+    <script src="/src/js/FunctionRegistry.js?v=fixed&t=1726744800"></script>
+    <script src="/src/js/NumericTypes.js?v=fixed2&t=1726744900"></script>
+    <script src="/src/js/ScientificModes.js?v=fixed&t=1726744800"></script>
+    <script src="/src/js/ScientificFunctions.js?v=fixed&t=1726744800"></script>
+    <script src="/src/js/BasicCalculator.js?v=fixed&t=1726744800"></script>
+    <script src="/src/js/AdvancedCalculator.js?v=fixed&t=1726744800"></script>
+    <script src="/src/js/ScientificCalculator.js?v=fixed&t=1726744800"></script>
+    <script src="/src/js/CalculatorManagerFixed.js?v=fixed&t=1726745000"></script>
+    
+    <!-- Calculator Logic -->
+    <script>
+        // Global Variables
+        let calculatorManager = null;
+        let currentExpression = '';
+        let calculationHistory = [];
+
+        // Initialize calculator
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load header and footer
+            await loadHeader();
+            await loadFooter();
+            
+            // Initialize calculator
+            try {
+                if (typeof CalculatorManagerFixed !== 'undefined') {
+                    calculatorManager = new CalculatorManagerFixed();
+                    console.log('✅ Calculator Manager initialized');
+                }
+            } catch (error) {
+                console.error('Error initializing calculator:', error);
+            }
+            
+            updateDisplay();
+            loadHistoryFromStorage();
+        });
+
+        function updateDisplay() {
+            const expressionEl = document.getElementById('calc-expression');
+            const resultEl = document.getElementById('calc-result');
+            
+            if (expressionEl) {
+                expressionEl.value = currentExpression;
+            }
+            
+            if (!currentExpression && resultEl) {
+                resultEl.textContent = '0';
+            }
+        }
+
+        function calcInput(value) {
+            if (value === 'pi') {
+                currentExpression += 'π';
+            } else if (value === '*') {
+                currentExpression += '×';
+            } else if (value === '/') {
+                currentExpression += '÷';
+            } else {
+                currentExpression += value;
+            }
+            updateDisplay();
+        }
+
+        function calcFunction(func) {
+            currentExpression += func + '(';
+            updateDisplay();
+        }
+
+        function calcClear() {
+            currentExpression = '';
+            updateDisplay();
+        }
+
+        function calcDelete() {
+            currentExpression = currentExpression.slice(0, -1);
+            updateDisplay();
+        }
+
+        function calcCalculate() {
+            if (!currentExpression.trim()) return;
+            
+            try {
+                let result;
+                let expression = currentExpression
+                    .replace(/×/g, '*')
+                    .replace(/÷/g, '/')
+                    .replace(/π/g, Math.PI)
+                    .replace(/e/g, Math.E);
+                
+                if (calculatorManager) {
+                    result = calculatorManager.calculate(expression);
+                } else if (typeof BasicCalculator !== 'undefined') {
+                    const basicCalc = new BasicCalculator();
+                    result = basicCalc.calculate(expression);
+                } else {
+                    expression = expression
+                        .replace(/sin\(/g, 'Math.sin(')
+                        .replace(/cos\(/g, 'Math.cos(')
+                        .replace(/tan\(/g, 'Math.tan(')
+                        .replace(/log\(/g, 'Math.log10(')
+                        .replace(/ln\(/g, 'Math.log(')
+                        .replace(/sqrt\(/g, 'Math.sqrt(')
+                        .replace(/\^/g, '**');
+                    result = eval(expression);
+                }
+                
+                let resultValue;
+                if (result && typeof result === 'object' && result.success !== undefined) {
+                    if (result.success) {
+                        resultValue = result.result;
+                    } else {
+                        throw new Error(result.error || 'Calculation failed');
+                    }
+                } else {
+                    resultValue = result;
+                }
+                
+                addToHistory(currentExpression, resultValue);
+                document.getElementById('calc-result').textContent = resultValue;
+                currentExpression = resultValue.toString();
+                updateDisplay();
+                
+            } catch (error) {
+                console.error('Calculation error:', error);
+                document.getElementById('calc-result').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        function switchMode() {
+            const modeBtn = document.getElementById('mode-btn');
+            if (!modeBtn) return;
+            
+            const currentMode = modeBtn.textContent;
+            let newMode;
+            
+            switch (currentMode) {
+                case 'RAD': newMode = 'DEG'; break;
+                case 'DEG': newMode = 'GRAD'; break;
+                case 'GRAD': newMode = 'RAD'; break;
+                default: newMode = 'RAD';
+            }
+            
+            modeBtn.textContent = newMode;
+            
+            if (calculatorManager && calculatorManager.scientificCalculator) {
+                calculatorManager.scientificCalculator.setAngleMode(newMode.toLowerCase());
+            }
+        }
+
+        function addToHistory(expression, result) {
+            const historyItem = {
+                expression: expression,
+                result: result,
+                timestamp: new Date()
+            };
+            
+            calculationHistory.unshift(historyItem);
+            
+            if (calculationHistory.length > 50) {
+                calculationHistory = calculationHistory.slice(0, 50);
+            }
+            
+            saveHistoryToStorage();
+            updateHistoryDisplay();
+        }
+
+        function updateHistoryDisplay() {
+            const historyEl = document.getElementById('calc-history');
+            if (!historyEl) return;
+            
+            if (calculationHistory.length === 0) {
+                historyEl.innerHTML = '<div class="text-gray-500 text-center">No calculations yet</div>';
+                return;
+            }
+            
+            let historyHTML = '';
+            calculationHistory.forEach((item, index) => {
+                historyHTML += `
+                    <div class="mb-3 p-3 bg-white rounded-lg shadow-sm border cursor-pointer hover:bg-gray-50 transition-colors" onclick="useHistoryItem(${index})">
+                        <div class="font-mono text-sm text-gray-600">${item.expression}</div>
+                        <div class="font-mono font-bold text-lg text-blue-600">= ${item.result}</div>
+                        <div class="text-xs text-gray-400">${item.timestamp.toLocaleTimeString()}</div>
+                    </div>
+                `;
+            });
+            
+            historyEl.innerHTML = historyHTML;
+        }
+
+        function useHistoryItem(index) {
+            if (calculationHistory[index]) {
+                currentExpression = calculationHistory[index].result.toString();
+                updateDisplay();
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all history?')) {
+                calculationHistory = [];
+                saveHistoryToStorage();
+                updateHistoryDisplay();
+            }
+        }
+
+        function exportHistory() {
+            if (calculationHistory.length === 0) {
+                alert('No calculations to export');
+                return;
+            }
+            
+            let exportText = 'FreeToolHub Calculator History\n';
+            exportText += '=================================\n\n';
+            
+            calculationHistory.forEach((item, index) => {
+                exportText += `${index + 1}. ${item.expression} = ${item.result}\n`;
+                exportText += `   Time: ${item.timestamp.toLocaleString()}\n\n`;
+            });
+            
+            const blob = new Blob([exportText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'calculator-history.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function saveHistoryToStorage() {
+            try {
+                localStorage.setItem('calculator-history', JSON.stringify(calculationHistory));
+            } catch (error) {
+                console.error('Error saving history:', error);
+            }
+        }
+
+        function loadHistoryFromStorage() {
+            try {
+                const saved = localStorage.getItem('calculator-history');
+                if (saved) {
+                    calculationHistory = JSON.parse(saved).map(item => ({
+                        ...item,
+                        timestamp: new Date(item.timestamp)
+                    }));
+                    updateHistoryDisplay();
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+    </script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        // Available tools for suggestions (excluding current calculator)
+        const availableTools = [
+            // Student Tools
+            {
+                icon: '⏰',
+                name: 'Study Timer',
+                description: 'Pomodoro technique with focus sessions',
+                modalId: 'study-timer-modal'
+            },
+            {
+                icon: '📝',
+                name: 'Note Taker',
+                description: 'Advanced text summarization & notes',
+                modalId: 'note-taker-modal'
+            },
+            {
+                icon: '🧮',
+                name: 'Math Solver',
+                description: 'Step-by-step math problem solving',
+                modalId: 'math-solver-modal'
+            },
+            {
+                icon: '📊',
+                name: 'Grade Calculator',
+                description: 'GPA tracking & academic analysis',
+                modalId: 'grade-calculator-modal'
+            },
+            {
+                icon: '📖',
+                name: 'Citation Generator',
+                description: 'Multiple citation formats & styles',
+                modalId: 'citation-generator-modal'
+            },
+            {
+                icon: '🎯',
+                name: 'Study Planner',
+                description: 'Study scheduling & time management',
+                modalId: 'study-planner-modal'
+            },
+            {
+                icon: '📚',
+                name: 'Flashcard Generator',
+                description: 'Spaced repetition learning cards',
+                modalId: 'flashcard-generator-modal'
+            },
+            {
+                icon: '📈',
+                name: 'Progress Tracker',
+                description: 'Academic progress & analytics',
+                modalId: 'progress-tracker-modal'
+            },
+            {
+                icon: '🎂',
+                name: 'Age Calculator',
+                description: 'Precise age & date calculations',
+                modalId: 'age-calculator-modal'
+            },
+            {
+                icon: '⚖️',
+                name: 'BMI Calculator',
+                description: 'Health analysis & recommendations',
+                modalId: 'bmi-modal'
+            },
+            // Professional Tools
+            {
+                icon: '🏦',
+                name: 'Loan Calculator',
+                description: 'Professional loan calculation & analysis',
+                modalId: 'loan-calculator-modal'
+            },
+            {
+                icon: '💼',
+                name: 'Investment Calculator',
+                description: 'Investment returns & projections',
+                modalId: 'investment-calculator-modal'
+            },
+            {
+                icon: '💰',
+                name: 'Tax Calculator',
+                description: 'Tax calculation & planning',
+                modalId: 'tax-calculator-modal'
+            },
+            {
+                icon: '📊',
+                name: 'Business Metrics',
+                description: 'Business performance analytics',
+                modalId: 'business-metrics-modal'
+            },
+            {
+                icon: '💱',
+                name: 'Currency Converter',
+                description: 'Real-time currency conversion',
+                modalId: 'currency-converter-modal'
+            },
+            {
+                icon: '🏠',
+                name: 'Retirement Planner',
+                description: 'Retirement savings calculator',
+                modalId: 'retirement-calculator-modal'
+            },
+            {
+                icon: '🏡',
+                name: 'Mortgage Calculator',
+                description: 'Mortgage payment calculations',
+                modalId: 'mortgage-calculator-modal'
+            },
+            {
+                icon: '💳',
+                name: 'Budget Planner',
+                description: 'Personal budget planning tool',
+                modalId: 'budget-planner-modal'
+            },
+            {
+                icon: '💵',
+                name: 'Salary Calculator',
+                description: 'Salary & tax calculations',
+                modalId: 'salary-calculator-modal'
+            },
+            // Developer Tools
+            {
+                icon: '🔧',
+                name: 'JSON Formatter',
+                description: 'Format & validate JSON data',
+                modalId: 'json-formatter-modal'
+            },
+            {
+                icon: '📄',
+                name: 'XML Formatter',
+                description: 'Format & validate XML data',
+                modalId: 'xml-formatter-modal'
+            },
+            {
+                icon: '🔐',
+                name: 'Base64 Encoder',
+                description: 'Encode & decode Base64 data',
+                modalId: 'base64-encoder-modal'
+            },
+            {
+                icon: '🔐',
+                name: 'Hash Generator',
+                description: 'Generate multiple hash types',
+                modalId: 'hash-generator-modal'
+            },
+            {
+                icon: '🌐',
+                name: 'URL Encoder',
+                description: 'Encode & decode URLs',
+                modalId: 'url-encoder-modal'
+            },
+            {
+                icon: '🔍',
+                name: 'Regex Tester',
+                description: 'Test & debug regex patterns',
+                modalId: 'regex-tester-modal'
+            },
+            {
+                icon: '🛠️',
+                name: 'CSS/JS Minifier',
+                description: 'Minify CSS & JavaScript code',
+                modalId: 'css-js-minifier-modal'
+            },
+            {
+                icon: '🎨',
+                name: 'Color Palette',
+                description: 'Generate beautiful color palettes',
+                modalId: 'color-palette-modal'
+            },
+            {
+                icon: '📝',
+                name: 'Lorem Ipsum',
+                description: 'Generate Lorem Ipsum text',
+                modalId: 'lorem-ipsum-modal'
+            },
+            {
+                icon: '🕐',
+                name: 'Timestamp Converter',
+                description: 'Convert timestamps & dates',
+                modalId: 'timestamp-converter-modal'
+            },
+            // PDF Tools
+            {
+                icon: '🔓',
+                name: 'PDF Password Remover',
+                description: 'Remove password from PDFs',
+                modalId: 'pdf-password-remover-modal'
+            },
+            {
+                icon: '📄',
+                name: 'PDF Merger',
+                description: 'Combine multiple PDFs',
+                modalId: 'pdf-merger-modal'
+            },
+            {
+                icon: '✂️',
+                name: 'PDF Splitter',
+                description: 'Split PDFs into separate pages',
+                modalId: 'pdf-splitter-modal'
+            },
+            {
+                icon: '🔒',
+                name: 'PDF Encryptor',
+                description: 'Add password to PDFs',
+                modalId: 'pdf-encryptor-modal'
+            },
+            {
+                icon: '🖼️',
+                name: 'PDF to Images',
+                description: 'Convert PDF pages to images',
+                modalId: 'pdf-to-images-modal'
+            },
+            // Image Tools
+            {
+                icon: '📸',
+                name: 'Image to PDF',
+                description: 'Convert images to PDF documents',
+                modalId: 'image-to-pdf-modal'
+            },
+            {
+                icon: '📏',
+                name: 'Image Compressor',
+                description: 'Reduce image file size',
+                modalId: 'image-compressor-modal'
+            },
+            {
+                icon: '🎨',
+                name: 'Image Converter',
+                description: 'Convert between image formats',
+                modalId: 'image-converter-modal'
+            },
+            {
+                icon: '📐',
+                name: 'Image Resizer',
+                description: 'Resize images to any dimensions',
+                modalId: 'image-resizer-modal'
+            },
+            // Utility Tools
+            {
+                icon: '✍️',
+                name: 'Signature Generator',
+                description: 'Create digital signatures',
+                modalId: 'signature-generator-modal'
+            },
+            {
+                icon: '📊',
+                name: 'CSV to JSON',
+                description: 'Convert CSV to JSON format',
+                modalId: 'csv-json-converter-modal'
+            }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        // Get random tool (excluding current one)
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        // Update tool suggestion display
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            // Store current tool data for button click
+            btnEl.dataset.modalId = tool.modalId;
+            btnEl.dataset.toolAction = tool.action ? 'true' : 'false';
+            
+            // Fade out animation
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                // Update content
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                
+                // Fade in animation
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        // Launch suggested tool
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            
+            const modalId = btnEl.dataset.modalId;
+            
+            if (modalId && typeof openModal === 'function') {
+                // If we're on homepage, open modal directly
+                if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+                    openModal(modalId);
+                } else {
+                    // Otherwise, navigate to homepage and open modal
+                    window.location.href = `/#${modalId}`;
+                }
+            } else {
+                // Fallback: navigate to tools section
+                window.location.href = '/#tools';
+            }
+        }
+        
+        // Initialize tool suggestions
+        function initToolSuggestions() {
+            // Initial display
+            updateToolSuggestion();
+            
+            // Auto-refresh every 10 seconds (no countdown display)
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        #tool-suggestion-card {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+    </style>
+</body>
+</html>
+

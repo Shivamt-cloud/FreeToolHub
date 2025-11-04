@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>CSS/JS Minifier - FreeToolHub</title>
+    <meta name="description" content="Minify and optimize CSS and JavaScript code with advanced options, analysis, and copy/download support.">
+    <meta property="og:title" content="CSS/JS Minifier - FreeToolHub">
+    <meta property="og:description" content="Minify and optimize CSS and JavaScript code with advanced features">
+    <meta property="og:url" content="https://freetoolhub.in/tools/css-js-minifier.html">
+    <meta property="og:type" content="website">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div id="app-header"></div>
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>@media (min-width:1024px){main{padding-top:8.5rem!important}}</style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🧰 CSS/JS Minifier</h1>
+                    <p class="text-gray-600 text-lg">Minify and optimize CSS and JavaScript code with advanced features</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                    Share Tool
+                </button>
+            </div>
+            <nav class="mb-6 text-sm"><a href="/" class="text-blue-600 hover:text-blue-800">Home</a><span class="mx-2 text-gray-400">/</span><a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a><span class="mx-2 text-gray-400">/</span><span class="text-gray-600">CSS/JS Minifier</span></nav>
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div class="lg:col-span-3">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Code Type</label>
+                                    <select id="code-type" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent" onchange="updateCodeType()">
+                                        <option value="css">CSS</option>
+                                        <option value="js">JavaScript</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Input Code</label>
+                                    <div class="relative">
+                                        <div class="absolute left-0 top-0 bottom-0 w-8 bg-gray-100 border border-gray-300 rounded-l-xl flex flex-col items-center text-xs text-gray-500 font-mono overflow-hidden" id="minifier-input-lines" style="z-index:1;"></div>
+                                        <textarea id="minifier-input" placeholder="Paste your CSS or JavaScript code here..." class="w-full h-64 pl-10 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono text-sm resize-none" style="font-family:'Courier New',monospace;line-height:1.5;" oninput="updateMinifierInputLineNumbers()" onscroll="syncMinifierInputScroll()" onpaste="setTimeout(updateMinifierInputLineNumbers,10)"></textarea>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Optimization Options</label>
+                                    <div id="css-options" class="space-y-3">
+                                        <div class="flex items-center"><input type="checkbox" id="remove-comments" class="mr-2" checked><label for="remove-comments" class="text-gray-700">Remove Comments</label></div>
+                                        <div class="flex items-center"><input type="checkbox" id="remove-whitespace" class="mr-2" checked><label for="remove-whitespace" class="text-gray-700">Remove Whitespace</label></div>
+                                        <div class="flex items-center"><input type="checkbox" id="remove-empty-rules" class="mr-2" checked><label for="remove-empty-rules" class="text-gray-700">Remove Empty Rules</label></div>
+                                        <div class="flex items-center"><input type="checkbox" id="merge-selectors" class="mr-2" checked><label for="merge-selectors" class="text-gray-700">Merge Selectors</label></div>
+                                        <div class="flex items-center"><input type="checkbox" id="optimize-colors" class="mr-2" checked><label for="optimize-colors" class="text-gray-700">Optimize Colors</label></div>
+                                        <div class="flex items-center"><input type="checkbox" id="optimize-shorthand" class="mr-2" checked><label for="optimize-shorthand" class="text-gray-700">Optimize Shorthand</label></div>
+                                        <div class="flex items-center"><input type="checkbox" id="css-remove-unused" class="mr-2"><label for="css-remove-unused" class="text-gray-700">Remove Unused (basic)</label></div>
+                                    </div>
+                                    <div id="js-options" class="space-y-3 hidden">
+                                        <div class="flex items-center"><input type="checkbox" id="remove-js-comments" class="mr-2" checked><label for="remove-js-comments" class="text-gray-700">Remove Comments</label></div>
+                                        <div class="flex items-center"><input type="checkbox" id="remove-js-whitespace" class="mr-2" checked><label for="remove-js-whitespace" class="text-gray-700">Remove Whitespace</label></div>
+                                        <div class="flex items-center"><input type="checkbox" id="remove-console-logs" class="mr-2" checked><label for="remove-console-logs" class="text-gray-700">Remove Console Logs</label></div>
+                                        <div class="flex items-center"><input type="checkbox" id="optimize-expressions" class="mr-2" checked><label for="optimize-expressions" class="text-gray-700">Optimize Expressions</label></div>
+                                        <div class="flex items-center"><input type="checkbox" id="minify-identifiers" class="mr-2"><label for="minify-identifiers" class="text-gray-700">Minify Identifiers</label></div>
+                                        <div class="flex items-center"><input type="checkbox" id="js-remove-unused" class="mr-2"><label for="js-remove-unused" class="text-gray-700">Remove Unused (basic)</label></div>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button onclick="minifyCode()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">Minify Code</button>
+                                    <button onclick="beautifyCode()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">Beautify Code</button>
+                                    <button onclick="copyMinified()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">Copy Output</button>
+                                    <button onclick="downloadMinified()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">Download</button>
+                                </div>
+                            </div>
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Output</label>
+                                    <div class="relative">
+                                        <div class="absolute left-0 top-0 bottom-0 w-8 bg-gray-100 border border-gray-300 rounded-l-xl flex flex-col items-center text-xs text-gray-500 font-mono overflow-hidden" id="minifier-output-lines" style="z-index:1;"></div>
+                                        <textarea id="minifier-output" placeholder="Minified or beautified output will appear here..." class="w-full h-64 pl-10 pr-4 py-4 border border-gray-300 rounded-xl bg-gray-50 font-mono text-sm resize-none" style="font-family:'Courier New',monospace;line-height:1.5;" readonly onscroll="syncMinifierOutputScroll()"></textarea>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-3">
+                                    <button onclick="copyMinified()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">Copy Output</button>
+                                    <button onclick="downloadMinified()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">Download</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-8 space-y-6">
+                            <div id="minifier-results" class="hidden">
+                                <div class="bg-orange-50 rounded-xl p-6 border border-orange-200">
+                                    <h4 class="text-lg font-bold mb-4 text-orange-800">Minification Results</h4>
+                                    <div id="minifier-results-content" class="space-y-3"></div>
+                                </div>
+                            </div>
+                            <div id="minifier-error" class="hidden">
+                                <div class="bg-red-50 rounded-xl p-6 border border-red-200">
+                                    <h4 class="text-lg font-bold mb-4 text-red-800">Error</h4>
+                                    <div id="minifier-error-content" class="space-y-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5"><h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4><div class="flex items-center space-x-1"><div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div><span class="text-xs text-gray-500 font-medium">Live</span></div></div>
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in"><div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div><h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5><p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p><button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg"><span>Check it out</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div id="app-footer"></div>
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    <script src="/src/js/CssJsMinifier.js?v=1&t=1726745000"></script>
+    <script>
+        let minifier = null;
+        function initializeMinifier(){ try{ if(typeof CssJsMinifier!=='undefined'){ minifier=new CssJsMinifier(); console.log('✅ Minifier initialized'); updateMinifierInputLineNumbers(); updateMinifierOutputLineNumbers(); updateCodeType(); } else { console.error('❌ CssJsMinifier class not found'); } }catch(e){ console.error('❌ Minifier init failed',e);} }
+        function updateCodeType(){ const type=document.getElementById('code-type').value; document.getElementById('css-options').classList.toggle('hidden', type!=='css'); document.getElementById('js-options').classList.toggle('hidden', type!=='js'); }
+        function updateMinifierInputLineNumbers(){ const t=document.getElementById('minifier-input'); const d=document.getElementById('minifier-input-lines'); const c=t.value; const n=c.split('\n'); let cnt=n.length; if(c.trim()==='') cnt=1; let html=''; for(let i=1;i<=cnt;i++) html+=`<div class="text-center text-xs" style="height:24px;line-height:24px;display:flex;align-items:center;justify-content:center;">${i}</div>`; d.innerHTML=html; }
+        function updateMinifierOutputLineNumbers(){ const t=document.getElementById('minifier-output'); const d=document.getElementById('minifier-output-lines'); const c=t.value; const n=c.split('\n'); let cnt=n.length; if(c.trim()==='') cnt=1; let html=''; for(let i=1;i<=cnt;i++) html+=`<div class="text-center text-xs" style="height:24px;line-height:24px;display:flex;align-items:center;justify-content:center;">${i}</div>`; d.innerHTML=html; }
+        function syncMinifierInputScroll(){ const t=document.getElementById('minifier-input'); document.getElementById('minifier-input-lines').scrollTop=t.scrollTop; }
+        function syncMinifierOutputScroll(){ const t=document.getElementById('minifier-output'); document.getElementById('minifier-output-lines').scrollTop=t.scrollTop; }
+        function showResults(result){ const wrap=document.getElementById('minifier-results'); const div=document.getElementById('minifier-results-content'); let html=`
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div class="bg-white p-3 rounded-lg border"><div class="font-bold text-gray-700">Original Size</div><div class="text-blue-600">${result.originalSize} chars</div></div>
+                <div class="bg-white p-3 rounded-lg border"><div class="font-bold text-gray-700">Minified Size</div><div class="text-green-600">${result.minifiedSize || result.beautifiedLength || result.length || '-'} chars</div></div>
+            </div>`;
+            if(result.compressionRatio!==undefined){ html+=`<div class="bg-white p-3 rounded-lg border"><div class="font-bold text-gray-700">Compression</div><div class="text-${result.compressionRatio>0?'green':'gray'}-600">${result.compressionRatio}%</div></div>`; }
+            div.innerHTML=html; wrap.classList.remove('hidden'); document.getElementById('minifier-error').classList.add('hidden'); }
+        function showError(err){ const wrap=document.getElementById('minifier-error'); const div=document.getElementById('minifier-error-content'); div.innerHTML=`<div class="text-red-600">${err.error || 'Unknown error'}</div>`; wrap.classList.remove('hidden'); document.getElementById('minifier-results').classList.add('hidden'); }
+        function minifyCode(){ if(!minifier){ alert('Minifier not initialized.'); return; } const type=document.getElementById('code-type').value; const input=document.getElementById('minifier-input').value; if(!input.trim()){ alert('Please paste some code.'); return; } if(type==='css'){ const opts={ removeComments:document.getElementById('remove-comments').checked, removeWhitespace:document.getElementById('remove-whitespace').checked, removeEmptyRules:document.getElementById('remove-empty-rules').checked, mergeSelectors:document.getElementById('merge-selectors').checked, optimizeColors:document.getElementById('optimize-colors').checked, optimizeShorthand:document.getElementById('optimize-shorthand').checked, removeUnused:document.getElementById('css-remove-unused').checked }; const res=minifier.minifyCSS(input,opts); if(res.success){ document.getElementById('minifier-output').value=res.minified; updateMinifierOutputLineNumbers(); showResults(res);} else { document.getElementById('minifier-output').value=''; updateMinifierOutputLineNumbers(); showError(res);} } else { const opts={ removeComments:document.getElementById('remove-js-comments').checked, removeWhitespace:document.getElementById('remove-js-whitespace').checked, removeConsoleLogs:document.getElementById('remove-console-logs').checked, minifyIdentifiers:document.getElementById('minify-identifiers').checked, removeUnused:document.getElementById('js-remove-unused').checked, optimizeExpressions:document.getElementById('optimize-expressions').checked }; const res=minifier.minifyJS(input,opts); if(res.success){ document.getElementById('minifier-output').value=res.minified; updateMinifierOutputLineNumbers(); showResults(res);} else { document.getElementById('minifier-output').value=''; updateMinifierOutputLineNumbers(); showError(res);} } }
+        function beautifyCode(){ if(!minifier){ alert('Minifier not initialized.'); return; } const type=document.getElementById('code-type').value; const input=document.getElementById('minifier-input').value; if(!input.trim()){ alert('Please paste some code.'); return; } const res = type==='css' ? (minifier.beautifyCSS ? minifier.beautifyCSS(input) : {success:false,error:'Beautify not supported for CSS'}) : (minifier.beautifyJS ? minifier.beautifyJS(input) : {success:false,error:'Beautify not supported for JS'}); if(res.success){ document.getElementById('minifier-output').value=res.beautified; updateMinifierOutputLineNumbers(); showResults({ originalSize: input.length, beautifiedLength: res.beautified.length, compressionRatio: 0 }); } else { showError(res); }
+        }
+        function copyMinified(){ const out=document.getElementById('minifier-output').value; if(!out) return alert('No output to copy.'); navigator.clipboard.writeText(out).then(()=>alert('Output copied to clipboard!')).catch(()=>alert('Failed to copy to clipboard.')); }
+        function downloadMinified(){ const out=document.getElementById('minifier-output').value; if(!out) return alert('No output to download.'); const blob=new Blob([out],{type:'text/plain'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='minified.txt'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
+        function updateMinifierInputScroll(){ syncMinifierInputScroll(); }
+        document.addEventListener('DOMContentLoaded',()=>{ setTimeout(initializeMinifier,500); });
+    </script>
+    <script>
+        const availableTools=[
+            {icon:'🧮',name:'Smart Calculator',description:'Advanced calculator with scientific functions',pageUrl:'/tools/calculator.html'},
+            {icon:'⏰',name:'Study Timer',description:'Pomodoro technique with focus sessions',pageUrl:'/tools/study-timer.html'},
+            {icon:'📝',name:'Note Taker',description:'Advanced text summarization & notes',pageUrl:'/tools/note-taker.html'},
+            {icon:'🧮',name:'Math Solver',description:'Step-by-step math problem solving',pageUrl:'/tools/math-solver.html'},
+            {icon:'📊',name:'Grade Calculator',description:'GPA tracking & academic analysis',pageUrl:'/tools/grade-calculator.html'},
+            {icon:'📖',name:'Citation Generator',description:'Multiple citation formats & styles',pageUrl:'/tools/citation-generator.html'},
+            {icon:'🎯',name:'Study Planner',description:'Study scheduling & time management',pageUrl:'/tools/study-planner.html'},
+            {icon:'📚',name:'Flashcard Generator',description:'Spaced repetition learning cards',pageUrl:'/tools/flashcard-generator.html'},
+            {icon:'📈',name:'Progress Tracker',description:'Academic progress & analytics',pageUrl:'/tools/progress-tracker.html'},
+            {icon:'🎂',name:'Age Calculator',description:'Precise age & date calculations',pageUrl:'/tools/age-calculator.html'},
+            {icon:'⚖️',name:'BMI Calculator',description:'Health analysis & recommendations',pageUrl:'/tools/bmi-calculator.html'},
+            {icon:'🏦',name:'Loan Calculator',description:'Professional loan calculation & analysis',pageUrl:'/tools/loan-calculator.html'},
+            {icon:'💼',name:'Investment Calculator',description:'Investment returns & projections',pageUrl:'/tools/investment-calculator.html'},
+            {icon:'💰',name:'Tax Calculator',description:'Tax calculation & planning',pageUrl:'/tools/tax-calculator.html'},
+            {icon:'📊',name:'Business Metrics',description:'Business performance analytics',pageUrl:'/tools/business-metrics.html'},
+            {icon:'💱',name:'Currency Converter',description:'Real-time currency conversion',pageUrl:'/tools/currency-converter.html'},
+            {icon:'🏠',name:'Retirement Planner',description:'Retirement savings calculator',pageUrl:'/tools/retirement-calculator.html'},
+            {icon:'🏡',name:'Mortgage Calculator',description:'Mortgage payment calculations',pageUrl:'/tools/mortgage-calculator.html'},
+            {icon:'💳',name:'Budget Planner',description:'Personal budget planning tool',pageUrl:'/tools/budget-planner.html'},
+            {icon:'💵',name:'Salary Calculator',description:'Salary & tax calculations',pageUrl:'/tools/salary-calculator.html'},
+            {icon:'🔧',name:'JSON Formatter',description:'Format & validate JSON data',pageUrl:'/tools/json-formatter.html'},
+            {icon:'📄',name:'XML Formatter',description:'Format & validate XML data',pageUrl:'/tools/xml-formatter.html'},
+            {icon:'🔐',name:'Base64 Encoder',description:'Encode & decode Base64 data',pageUrl:'/tools/base64-encoder.html'},
+            {icon:'🔐',name:'Hash Generator',description:'Generate multiple hash types',pageUrl:'/tools/hash-generator.html'},
+            {icon:'🌐',name:'URL Encoder',description:'Encode & decode URLs',pageUrl:'/tools/url-encoder.html'},
+            {icon:'🔍',name:'Regex Tester',description:'Test & debug regex patterns',pageUrl:'/tools/regex-tester.html'},
+            {icon:'🎨',name:'Color Palette',description:'Generate beautiful color palettes',modalId:'color-palette-modal'},
+            {icon:'📝',name:'Lorem Ipsum',description:'Generate Lorem Ipsum text',modalId:'lorem-ipsum-modal'}
+        ];
+        let currentToolIndex=-1, refreshInterval=null;
+        function getRandomTool(){ let i; do { i=Math.floor(Math.random()*availableTools.length);} while(i===currentToolIndex&&availableTools.length>1); currentToolIndex=i; return availableTools[i]; }
+        function updateToolSuggestion(){ const t=getRandomTool(); const card=document.getElementById('tool-suggestion-card'); const i=document.getElementById('tool-icon'); const n=document.getElementById('tool-name'); const d=document.getElementById('tool-description'); const b=document.getElementById('tool-checkout-btn'); if(!card||!i||!n||!d||!b) return; b.dataset.modalId=t.modalId||''; b.dataset.pageUrl=t.pageUrl||''; card.style.opacity='0'; card.style.transform='translateY(-10px)'; setTimeout(()=>{ i.textContent=t.icon; n.textContent=t.name; d.textContent=t.description; card.style.opacity='1'; card.style.transform='translateY(0)'; },300); }
+        function launchSuggestedTool(){ const b=document.getElementById('tool-checkout-btn'); if(!b) return; const m=b.dataset.modalId, p=b.dataset.pageUrl; if(p){ window.location.href=p; } else if(m&&typeof openModal==='function'){ window.location.href=`/#${m}`; } else { window.location.href='/#tools'; } }
+        function initToolSuggestions(){ updateToolSuggestion(); refreshInterval=setInterval(updateToolSuggestion,10000); }
+        document.addEventListener('DOMContentLoaded',()=>{ setTimeout(initToolSuggestions,1000); });
+        window.addEventListener('beforeunload',()=>{ if(refreshInterval) clearInterval(refreshInterval); });
+    </script>
+    <style>@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeIn .5s ease-in-out}#tool-suggestion-card{transition:opacity .3s ease,transform .3s ease}</style>
+</body>
+</html>
+

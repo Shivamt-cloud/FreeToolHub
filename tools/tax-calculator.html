@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Tax Calculator - FreeToolHub</title>
+    <meta name="description" content="Calculate income tax for multiple countries with progressive tax brackets. Professional tax calculation and take-home pay analysis.">
+    <meta property="og:title" content="Tax Calculator - FreeToolHub">
+    <meta property="og:description" content="Calculate income tax for multiple countries with progressive tax brackets">
+    <meta property="og:url" content="https://freetoolhub.in/tools/tax-calculator.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🧾 Tax Calculator</h1>
+                    <p class="text-gray-600 text-lg">Calculate income tax for multiple countries with progressive tax brackets</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-purple-500 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Tax Calculator</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <!-- Toast Notification Container -->
+                <div id="toast-container" class="fixed top-24 right-4 z-50 space-y-2"></div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Input Section -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Quick Income Templates -->
+                        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border-2 border-indigo-200">
+                            <h4 class="text-lg font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>⚡</span> Quick Income Templates
+                            </h4>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <button onclick="loadIncomeTemplate(50000)" class="bg-white hover:bg-indigo-100 text-gray-800 font-semibold py-2 px-3 rounded-lg border-2 border-indigo-300 hover:border-indigo-400 transition-all duration-200 transform hover:scale-105 shadow-sm text-sm">
+                                    <div class="text-lg mb-1">💰</div>
+                                    <div class="text-xs">$50k</div>
+                                </button>
+                                <button onclick="loadIncomeTemplate(75000)" class="bg-white hover:bg-indigo-100 text-gray-800 font-semibold py-2 px-3 rounded-lg border-2 border-indigo-300 hover:border-indigo-400 transition-all duration-200 transform hover:scale-105 shadow-sm text-sm">
+                                    <div class="text-lg mb-1">💵</div>
+                                    <div class="text-xs">$75k</div>
+                                </button>
+                                <button onclick="loadIncomeTemplate(100000)" class="bg-white hover:bg-indigo-100 text-gray-800 font-semibold py-2 px-3 rounded-lg border-2 border-indigo-300 hover:border-indigo-400 transition-all duration-200 transform hover:scale-105 shadow-sm text-sm">
+                                    <div class="text-lg mb-1">💼</div>
+                                    <div class="text-xs">$100k</div>
+                                </button>
+                                <button onclick="loadIncomeTemplate(150000)" class="bg-white hover:bg-indigo-100 text-gray-800 font-semibold py-2 px-3 rounded-lg border-2 border-indigo-300 hover:border-indigo-400 transition-all duration-200 transform hover:scale-105 shadow-sm text-sm">
+                                    <div class="text-lg mb-1">🏆</div>
+                                    <div class="text-xs">$150k</div>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Basic Tax Calculator -->
+                        <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-xl font-bold text-gray-700 flex items-center gap-2">
+                                    <span>🧾</span> Tax Calculation
+                                </h4>
+                                <button onclick="resetTaxForm()" class="text-sm text-gray-600 hover:text-gray-800 font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                    Reset
+                                </button>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>🌍</span> Country
+                                    </label>
+                                    <select id="tax-country" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" onchange="syncCountryCurrency()">
+                                        <option value="US">🇺🇸 United States</option>
+                                        <option value="UK">🇬🇧 United Kingdom</option>
+                                        <option value="CA">🇨🇦 Canada</option>
+                                        <option value="AU">🇦🇺 Australia</option>
+                                        <option value="IN">🇮🇳 India</option>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">Select your country for accurate tax brackets</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>💱</span> Currency
+                                    </label>
+                                    <select id="tax-currency" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" onchange="updateTaxCurrencyDisplay()">
+                                        <option value="USD">🇺🇸 US Dollar ($)</option>
+                                        <option value="EUR">🇪🇺 Euro (€)</option>
+                                        <option value="GBP">🇬🇧 British Pound (£)</option>
+                                        <option value="JPY">🇯🇵 Japanese Yen (¥)</option>
+                                        <option value="CAD">🇨🇦 Canadian Dollar (C$)</option>
+                                        <option value="AUD">🇦🇺 Australian Dollar (A$)</option>
+                                        <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
+                                        <option value="CNY">🇨🇳 Chinese Yuan (¥)</option>
+                                        <option value="INR">🇮🇳 Indian Rupee (₹)</option>
+                                        <option value="BRL">🇧🇷 Brazilian Real (R$)</option>
+                                        <option value="SGD">🇸🇬 Singapore Dollar (S$)</option>
+                                        <option value="AED">🇦🇪 UAE Dirham (د.إ)</option>
+                                        <option value="SAR">🇸🇦 Saudi Riyal (﷼)</option>
+                                        <option value="ZAR">🇿🇦 South African Rand (R)</option>
+                                        <option value="MXN">🇲🇽 Mexican Peso ($)</option>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">Currency for display purposes</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>👤</span> Filing Status
+                                    </label>
+                                    <select id="filing-status" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all">
+                                        <option value="single">Single</option>
+                                        <option value="married">Married Filing Jointly</option>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">Your tax filing status</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>💵</span> Gross Income
+                                    </label>
+                                    <div class="relative">
+                                        <span id="income-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                        <input type="number" id="gross-income" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" placeholder="75000" value="75000" oninput="formatTaxCurrency()">
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Your annual gross income before deductions</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>📋</span> Deductions
+                                    </label>
+                                    <div class="relative">
+                                        <span id="deduction-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                        <input type="number" id="deductions" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all" placeholder="12500" value="12500" oninput="formatTaxCurrency()">
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Standard/itemized deductions (e.g., 401k, IRA)</p>
+                                </div>
+                            </div>
+                            <button onclick="calculateTax()" id="calculate-tax-btn" class="w-full mt-6 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-5m-6 5h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span>Calculate Tax</span>
+                            </button>
+                        </div>
+
+                        <!-- Take-Home Pay Calculator -->
+                        <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>💼</span> Take-Home Pay Calculator
+                            </h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>💸</span> Other Deductions
+                                    </label>
+                                    <div class="relative">
+                                        <span id="other-deduction-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                        <input type="number" id="other-deductions" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="5000" value="5000" oninput="formatTaxCurrency()">
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">401k, insurance, health savings, etc.</p>
+                                </div>
+                                <button onclick="calculateTakeHomePay()" id="calculate-takehome-btn" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span>Calculate Take-Home Pay</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <!-- Tax Results -->
+                        <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>🧾</span> Tax Results
+                            </h4>
+                            <div id="tax-results" class="space-y-3">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">💡</div>
+                                    <p class="text-sm">Enter tax details and click "Calculate Tax"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Take-Home Pay Results -->
+                        <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>💼</span> Take-Home Pay Analysis
+                            </h4>
+                            <div id="take-home-results" class="space-y-3">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">💰</div>
+                                    <p class="text-sm">Enter details and click "Calculate Take-Home Pay"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tax Bracket Breakdown -->
+                        <div class="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-6 border-2 border-gray-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>📊</span> Tax Bracket Breakdown
+                            </h4>
+                            <div id="tax-breakdown" class="max-h-96 overflow-y-auto">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">📋</div>
+                                    <p class="text-sm">Calculate tax to see bracket breakdown</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Tax Calculator Dependencies -->
+    <script src="/src/js/TaxCalculator.js?v=1&t=1726745000"></script>
+    
+    <!-- Tax Calculator JavaScript -->
+    <script>
+        let taxCalculator = null;
+
+        function initializeTaxCalculator() {
+            try {
+                if (typeof TaxCalculator !== 'undefined') {
+                    taxCalculator = new TaxCalculator();
+                    console.log('✅ Tax Calculator initialized successfully');
+                    updateTaxCurrencyDisplay();
+                } else {
+                    console.error('❌ TaxCalculator class not found');
+                }
+            } catch (error) {
+                console.error('❌ Error initializing Tax Calculator:', error);
+            }
+        }
+
+        // Toast notification function
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            toast.className = `${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] max-w-md animate-slide-in`;
+            toast.innerHTML = `
+                <span class="text-xl">${icon}</span>
+                <span class="flex-1">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-white hover:text-gray-200 font-bold">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, type === 'error' ? 5000 : 3000);
+        }
+
+        // Country-currency sync
+        function syncCountryCurrency() {
+            const country = document.getElementById('tax-country').value;
+            const currencyMap = {
+                'US': 'USD',
+                'UK': 'GBP',
+                'CA': 'CAD',
+                'AU': 'AUD',
+                'IN': 'INR'
+            };
+            
+            const suggestedCurrency = currencyMap[country];
+            if (suggestedCurrency) {
+                document.getElementById('tax-currency').value = suggestedCurrency;
+                updateTaxCurrencyDisplay();
+                showNotification(`Currency set to ${suggestedCurrency} for ${country}`, 'info');
+            }
+        }
+
+        // Format currency display
+        function formatTaxCurrency() {
+            if (!taxCalculator) return;
+            const currency = taxCalculator.currencies[taxCalculator.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            document.getElementById('income-currency-prefix').textContent = symbol;
+            document.getElementById('deduction-currency-prefix').textContent = symbol;
+            document.getElementById('other-deduction-currency-prefix').textContent = symbol;
+        }
+
+        function updateTaxCurrencyDisplay() {
+            if (!taxCalculator) return;
+            const currency = document.getElementById('tax-currency').value;
+            taxCalculator.selectedCurrency = currency;
+            formatTaxCurrency();
+        }
+
+        // Load quick income templates
+        function loadIncomeTemplate(income) {
+            document.getElementById('gross-income').value = income;
+            formatTaxCurrency();
+            showNotification(`Loaded $${income.toLocaleString()} income template`, 'success');
+        }
+
+        // Reset form
+        function resetTaxForm() {
+            document.getElementById('gross-income').value = '';
+            document.getElementById('deductions').value = '';
+            document.getElementById('other-deductions').value = '';
+            document.getElementById('tax-results').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">💡</div>
+                    <p class="text-sm">Enter tax details and click "Calculate Tax"</p>
+                </div>
+            `;
+            document.getElementById('take-home-results').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">💰</div>
+                    <p class="text-sm">Enter details and click "Calculate Take-Home Pay"</p>
+                </div>
+            `;
+            document.getElementById('tax-breakdown').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">📋</div>
+                    <p class="text-sm">Calculate tax to see bracket breakdown</p>
+                </div>
+            `;
+            showNotification('Form reset successfully', 'info');
+        }
+
+        function calculateTax() {
+            if (!taxCalculator) {
+                showNotification('Tax Calculator not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const country = document.getElementById('tax-country').value;
+            const filingStatus = document.getElementById('filing-status').value;
+            const grossIncome = parseFloat(document.getElementById('gross-income').value);
+            const deductions = parseFloat(document.getElementById('deductions').value) || 0;
+
+            if (!grossIncome || grossIncome <= 0) {
+                showNotification('Please enter a valid gross income.', 'warning');
+                document.getElementById('gross-income').focus();
+                return;
+            }
+
+            const calculateBtn = document.getElementById('calculate-tax-btn');
+            const originalHTML = calculateBtn.innerHTML;
+            calculateBtn.disabled = true;
+            calculateBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Calculating...</span>';
+
+            setTimeout(() => {
+                const result = taxCalculator.calculateTax(grossIncome, country, filingStatus, deductions);
+                if (result.success) {
+                    showTaxResults(result);
+                    showNotification('Tax calculated successfully!', 'success');
+                } else {
+                    showNotification('Error calculating tax: ' + result.error, 'error');
+                }
+                calculateBtn.disabled = false;
+                calculateBtn.innerHTML = originalHTML;
+            }, 300);
+        }
+
+        function showTaxResults(result) {
+            const currency = taxCalculator.currencies[taxCalculator.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            const grossIncome = parseFloat(document.getElementById('gross-income').value);
+            
+            // Calculate percentages for visualization
+            const taxPercent = ((result.totalTax / grossIncome) * 100).toFixed(1);
+            const takeHomePercent = ((result.afterTaxIncome / grossIncome) * 100).toFixed(1);
+            
+            document.getElementById('tax-results').innerHTML = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 border-gray-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💰 Gross Income</span>
+                            <span class="text-2xl font-bold text-gray-800">${symbol}${grossIncome.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Total annual income</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📋 Taxable Income</span>
+                            <span class="text-xl font-bold text-blue-600">${symbol}${result.taxableIncome.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">After deductions</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-red-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💸 Total Tax</span>
+                            <span class="text-2xl font-bold text-red-600">${symbol}${result.totalTax.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-red-500 h-2 rounded-full" style="width: ${taxPercent}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">${taxPercent}% of gross income</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-purple-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📊 Effective Tax Rate</span>
+                            <span class="text-xl font-bold text-purple-600">${result.effectiveRate.toFixed(2)}%</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Average tax rate</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-green-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">✅ After-Tax Income</span>
+                            <span class="text-2xl font-bold text-green-600">${symbol}${result.afterTaxIncome.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: ${takeHomePercent}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">${takeHomePercent}% of gross income</div>
+                    </div>
+                    
+                    ${result.marginalRate ? `
+                        <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-3 border border-purple-200">
+                            <div class="text-xs font-semibold text-gray-700 mb-1">Marginal Tax Rate</div>
+                            <div class="text-lg font-bold text-purple-700">${result.marginalRate.toFixed(2)}%</div>
+                            <div class="text-xs text-gray-600 mt-1">Tax rate on your next dollar</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            // Show tax bracket breakdown
+            if (result.bracketBreakdown && result.bracketBreakdown.length > 0) {
+                let breakdownHtml = '<div class="space-y-3">';
+                let totalTaxable = 0;
+                result.bracketBreakdown.forEach((bracket, index) => {
+                    if (bracket.taxableAmount > 0) {
+                        totalTaxable += bracket.taxableAmount;
+                        const bracketPercent = ((bracket.taxAmount / result.totalTax) * 100).toFixed(1);
+                        breakdownHtml += `
+                            <div class="bg-white rounded-lg p-3 border-2 border-gray-200 shadow-sm">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-semibold text-gray-700">Bracket ${index + 1}</span>
+                                    <span class="text-xs font-bold text-purple-600">${bracket.rate}%</span>
+                                </div>
+                                <div class="text-xs text-gray-600 mb-2">${bracket.bracket}</div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs text-gray-600">Taxable:</span>
+                                    <span class="text-xs font-semibold">${symbol}${bracket.taxableAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs text-gray-600">Tax:</span>
+                                    <span class="text-sm font-bold text-red-600">${symbol}${bracket.taxAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-1.5">
+                                    <div class="bg-purple-500 h-1.5 rounded-full" style="width: ${bracketPercent}%"></div>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">${bracketPercent}% of total tax</div>
+                            </div>
+                        `;
+                    }
+                });
+                breakdownHtml += '</div>';
+                document.getElementById('tax-breakdown').innerHTML = breakdownHtml;
+            }
+        }
+
+        function calculateTakeHomePay() {
+            if (!taxCalculator) {
+                showNotification('Tax Calculator not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const grossIncome = parseFloat(document.getElementById('gross-income').value);
+            const deductions = parseFloat(document.getElementById('deductions').value) || 0;
+            const otherDeductions = parseFloat(document.getElementById('other-deductions').value) || 0;
+            const country = document.getElementById('tax-country').value;
+            const filingStatus = document.getElementById('filing-status').value;
+
+            if (!grossIncome || grossIncome <= 0) {
+                showNotification('Please calculate tax first or enter a valid gross income.', 'warning');
+                return;
+            }
+
+            const takeHomeBtn = document.getElementById('calculate-takehome-btn');
+            const originalHTML = takeHomeBtn.innerHTML;
+            takeHomeBtn.disabled = true;
+            takeHomeBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Calculating...</span>';
+
+            setTimeout(() => {
+                const taxResult = taxCalculator.calculateTax(grossIncome, country, filingStatus, deductions);
+                if (!taxResult.success) {
+                    showNotification('Error calculating tax: ' + taxResult.error, 'error');
+                    takeHomeBtn.disabled = false;
+                    takeHomeBtn.innerHTML = originalHTML;
+                    return;
+                }
+
+                const takeHomePay = grossIncome - taxResult.totalTax - otherDeductions;
+                const takeHomePercent = ((takeHomePay / grossIncome) * 100).toFixed(1);
+                
+                const currency = taxCalculator.currencies[taxCalculator.selectedCurrency];
+                const symbol = currency ? currency.symbol : '$';
+                
+                document.getElementById('take-home-results').innerHTML = `
+                    <div class="space-y-4 animate-fade-in">
+                        <div class="bg-white rounded-lg p-4 border-2 border-gray-300 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-gray-600">💰 Gross Income</span>
+                                <span class="text-xl font-bold text-gray-800">${symbol}${grossIncome.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">Starting amount</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg p-4 border-2 border-red-300 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-gray-600">💸 Income Tax</span>
+                                <span class="text-lg font-bold text-red-600">-${symbol}${taxResult.totalTax.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">Federal/state tax</div>
+                        </div>
+                        
+                        ${otherDeductions > 0 ? `
+                            <div class="bg-white rounded-lg p-4 border-2 border-orange-300 shadow-sm">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-semibold text-gray-600">💼 Other Deductions</span>
+                                    <span class="text-lg font-bold text-orange-600">-${symbol}${otherDeductions.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">401k, insurance, etc.</div>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="bg-white rounded-lg p-5 border-2 border-green-300 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-gray-600">✅ Take-Home Pay</span>
+                                <span class="text-3xl font-bold text-green-600">${symbol}${takeHomePay.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: ${takeHomePercent}%"></div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-2">${takeHomePercent}% of gross income</div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-blue-100 to-cyan-100 rounded-lg p-3 border border-blue-200">
+                            <div class="text-xs font-semibold text-gray-700 mb-2">Monthly Take-Home</div>
+                            <div class="text-xl font-bold text-blue-700">${symbol}${(takeHomePay / 12).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                            <div class="text-xs text-gray-600 mt-1">Per month</div>
+                        </div>
+                    </div>
+                `;
+                
+                showNotification('Take-home pay calculated successfully!', 'success');
+                takeHomeBtn.disabled = false;
+                takeHomeBtn.innerHTML = originalHTML;
+            }, 300);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeTaxCalculator();
+                formatTaxCurrency();
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        const availableTools = [
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', pageUrl: '/tools/age-calculator.html' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', pageUrl: '/tools/bmi-calculator.html' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', pageUrl: '/tools/loan-calculator.html' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', pageUrl: '/tools/investment-calculator.html' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', modalId: 'business-metrics-modal' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', modalId: 'currency-converter-modal' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', modalId: 'retirement-calculator-modal' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', modalId: 'mortgage-calculator-modal' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', modalId: 'budget-planner-modal' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', modalId: 'salary-calculator-modal' },
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', modalId: 'json-formatter-modal' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', modalId: 'xml-formatter-modal' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', modalId: 'base64-encoder-modal' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', modalId: 'hash-generator-modal' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', modalId: 'url-encoder-modal' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', modalId: 'regex-tester-modal' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', modalId: 'css-js-minifier-modal' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', modalId: 'color-palette-modal' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', modalId: 'lorem-ipsum-modal' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            btnEl.dataset.modalId = tool.modalId || '';
+            btnEl.dataset.pageUrl = tool.pageUrl || '';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            const modalId = btnEl.dataset.modalId;
+            const pageUrl = btnEl.dataset.pageUrl;
+            
+            if (pageUrl) {
+                window.location.href = pageUrl;
+            } else if (modalId && typeof openModal === 'function') {
+                window.location.href = `/#${modalId}`;
+            } else {
+                window.location.href = '/#tools';
+            }
+        }
+        
+        function initToolSuggestions() {
+            updateToolSuggestion();
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(100%); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .animate-slide-in { animation: slideIn 0.3s ease-out; }
+        #tool-suggestion-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+        
+        /* Input focus effects */
+        input:focus, select:focus {
+            transform: scale(1.01);
+            box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+        }
+        
+        /* Button hover effects */
+        button:not(:disabled):hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</body>
+</html>
+

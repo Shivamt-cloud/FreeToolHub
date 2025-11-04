@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>BMI Calculator - FreeToolHub</title>
+    <meta name="description" content="Comprehensive BMI calculation, health analysis, and personalized recommendations. Calculate your Body Mass Index and get health insights.">
+    <meta property="og:title" content="BMI Calculator - FreeToolHub">
+    <meta property="og:description" content="Comprehensive BMI calculation, health analysis, and personalized recommendations">
+    <meta property="og:url" content="https://freetoolhub.in/tools/bmi-calculator.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">⚖️ BMI Calculator</h1>
+                    <p class="text-gray-600 text-lg">Comprehensive BMI calculation, health analysis, and personalized recommendations for students</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-3 rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">BMI Calculator</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Input Section -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- BMI Calculation -->
+                        <div class="bg-gray-50 p-6 rounded-xl">
+                            <h4 class="text-lg font-bold text-gray-800 mb-4">📊 Calculate BMI</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Unit System</label>
+                                    <select id="bmi-unit" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" onchange="updateUnitLabels()">
+                                        <option value="metric">Metric (kg, cm)</option>
+                                        <option value="imperial">Imperial (lbs, inches)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Weight 
+                                        <span id="weight-unit-label" class="text-gray-500">(kg)</span>
+                                    </label>
+                                    <input type="number" id="bmi-weight" step="0.1" min="10" max="300" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" placeholder="e.g., 70">
+                                    <p class="text-xs text-gray-500 mt-1">Range: 10-300 kg</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Height 
+                                        <span id="height-unit-label" class="text-gray-500">(cm)</span>
+                                    </label>
+                                    <input type="number" id="bmi-height" step="0.1" min="50" max="250" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" placeholder="e.g., 175">
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <span id="height-hint-metric">Range: 50-250 cm (e.g., 175 cm = 5'9")</span>
+                                        <span id="height-hint-imperial" class="hidden">Range: 20-100 inches (e.g., 5'6" = 66 inches)</span>
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Age (Optional)</label>
+                                    <input type="number" id="bmi-age" min="1" max="120" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" placeholder="Enter age">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Gender (Optional)</label>
+                                    <select id="bmi-gender" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                    </select>
+                                </div>
+                                <button onclick="calculateBMI()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300">
+                                    🏥 Calculate BMI
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Weight Goal Calculator -->
+                        <div class="bg-gray-50 p-6 rounded-xl">
+                            <h4 class="text-lg font-bold text-gray-800 mb-4">🎯 Weight Goal Calculator</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Current Weight 
+                                        <span id="goal-weight-unit" class="text-gray-500">(kg)</span>
+                                    </label>
+                                    <input type="number" id="goal-current-weight" step="0.1" min="10" max="300" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" placeholder="e.g., 70">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Height 
+                                        <span id="goal-height-unit" class="text-gray-500">(cm)</span>
+                                    </label>
+                                    <input type="number" id="goal-height" step="0.1" min="50" max="250" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" placeholder="e.g., 175">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Target BMI</label>
+                                    <input type="number" id="target-bmi" step="0.1" min="10" max="50" value="22" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" placeholder="Target BMI (22 recommended)">
+                                    <p class="text-xs text-gray-500 mt-1">Normal range: 18.5 - 24.9</p>
+                                </div>
+                                <button onclick="calculateWeightGoal()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                    🎯 Calculate Goal
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="bg-gray-50 p-6 rounded-xl">
+                            <h4 class="text-lg font-bold text-gray-800 mb-4">⚡ Quick Actions</h4>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="getBMIStatistics()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    📊 Statistics
+                                </button>
+                                <button onclick="clearBMIForm()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    🗑️ Clear All
+                                </button>
+                                <button onclick="copyBMIResult()" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    📋 Copy Result
+                                </button>
+                                <button onclick="exportBMIData()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    💾 Export Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <!-- BMI Results -->
+                        <div id="bmi-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📊 BMI Results</h4>
+                            <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                                <div id="bmi-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+
+                        <!-- Health Analysis Results -->
+                        <div id="health-analysis-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">🏥 Health Analysis</h4>
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <div id="health-analysis-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+
+                        <!-- Body Fat Results -->
+                        <div id="body-fat-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">💪 Body Fat Analysis</h4>
+                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                <div id="body-fat-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+
+                        <!-- Recommendations Results -->
+                        <div id="recommendations-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">💡 Recommendations</h4>
+                            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                                <div id="recommendations-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+
+                        <!-- Weight Goal Results -->
+                        <div id="weight-goal-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">🎯 Weight Goal Results</h4>
+                            <div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                                <div id="weight-goal-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+
+                        <!-- BMI Statistics Results -->
+                        <div id="bmi-statistics-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📊 BMI Statistics</h4>
+                            <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                <div id="bmi-statistics-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- BMI Calculator Dependencies -->
+    <script src="/src/js/BMICalculator.js?v=1&t=1726745000"></script>
+    
+    <!-- BMI Calculator JavaScript -->
+    <script>
+        let bmiCalculator = null;
+
+        function initializeBMICalculator() {
+            try {
+                if (typeof BMICalculator !== 'undefined') {
+                    bmiCalculator = new BMICalculator();
+                    console.log('✅ BMI Calculator initialized successfully');
+                    return true;
+                } else {
+                    console.error('❌ BMICalculator class not found');
+                    setTimeout(() => {
+                        if (typeof BMICalculator !== 'undefined' && !bmiCalculator) {
+                            bmiCalculator = new BMICalculator();
+                            console.log('✅ BMI Calculator initialized successfully (retry)');
+                        }
+                    }, 500);
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Error initializing BMI Calculator:', error);
+                return false;
+            }
+        }
+
+        function calculateBMI() {
+            console.log('calculateBMI called');
+            try {
+                if (!bmiCalculator) {
+                    const initialized = initializeBMICalculator();
+                    if (!initialized || !bmiCalculator) {
+                        alert('BMI Calculator could not be loaded. Please refresh the page and try again.');
+                        return;
+                    }
+                }
+
+                const weight = parseFloat(document.getElementById('bmi-weight').value);
+                const height = parseFloat(document.getElementById('bmi-height').value);
+                const unit = document.getElementById('bmi-unit').value;
+
+                console.log('Input values:', { weight, height, unit });
+
+                if (!weight || !height || isNaN(weight) || isNaN(height)) {
+                    alert('Please enter both weight and height.');
+                    return;
+                }
+
+                // Validate input ranges
+                if (unit === 'metric') {
+                    // Metric: weight in kg, height in cm
+                    if (weight < 10 || weight > 300) {
+                        alert('Weight must be between 10 and 300 kg. Please check your input.');
+                        return;
+                    }
+                    if (height < 50 || height > 250) {
+                        alert('Height must be between 50 and 250 cm.\n\n💡 Tip: If you entered height in feet/inches, please switch to Imperial units.');
+                        return;
+                    }
+                } else {
+                    // Imperial: weight in lbs, height in inches
+                    if (weight < 22 || weight > 660) {
+                        alert('Weight must be between 22 and 660 lbs. Please check your input.');
+                        return;
+                    }
+                    if (height < 20 || height > 100) {
+                        alert('Height must be between 20 and 100 inches.\n\n💡 Tip: Enter height in total inches (e.g., 5 feet 6 inches = 66 inches).');
+                        return;
+                    }
+                }
+
+                const age = document.getElementById('bmi-age').value || null;
+                const gender = document.getElementById('bmi-gender').value || 'male';
+                
+                console.log('Calling bmiCalculator.calculateBMI with:', { weight, height, unit, age, gender });
+                const result = bmiCalculator.calculateBMI(weight, height, unit, age, gender);
+                console.log('BMI calculation result:', result);
+                
+                if (result.success) {
+                    showBMIResults(result);
+                } else {
+                    alert('Error calculating BMI: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error in calculateBMI:', error);
+                alert('An error occurred: ' + error.message);
+            }
+        }
+
+        function showBMIResults(result) {
+            if (!result.success) {
+                alert('Error calculating BMI: ' + result.error);
+                return;
+            }
+            
+            hideAllBMIResults();
+            
+            const data = result.result;
+            
+            // Get color class based on category
+            let colorClass = 'text-blue-600';
+            let bgClass = 'bg-blue-50';
+            let borderClass = 'border-blue-200';
+            
+            switch(data.category.color) {
+                case 'green':
+                    colorClass = 'text-green-600';
+                    bgClass = 'bg-green-50';
+                    borderClass = 'border-green-200';
+                    break;
+                case 'yellow':
+                case 'orange':
+                    colorClass = 'text-orange-600';
+                    bgClass = 'bg-orange-50';
+                    borderClass = 'border-orange-200';
+                    break;
+                case 'red':
+                    colorClass = 'text-red-600';
+                    bgClass = 'bg-red-50';
+                    borderClass = 'border-red-200';
+                    break;
+                default:
+                    colorClass = 'text-blue-600';
+                    bgClass = 'bg-blue-50';
+                    borderClass = 'border-blue-200';
+            }
+            
+            // Format weight and height based on unit
+            const weightDisplay = data.unit === 'metric' 
+                ? `${data.weight.toFixed(1)} kg` 
+                : `${(data.weight / 0.453592).toFixed(1)} lbs`;
+            
+            const heightDisplay = data.unit === 'metric'
+                ? `${(data.height * 100).toFixed(1)} cm`
+                : `${(data.height / 0.0254).toFixed(1)} inches`;
+            
+            document.getElementById('bmi-content').innerHTML = `
+                <div class="space-y-3">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold ${colorClass}">${data.bmi.toFixed(1)}</div>
+                        <div class="text-sm text-gray-600">BMI Value</div>
+                    </div>
+                    <div class="text-center ${bgClass} ${borderClass} border-2 rounded-lg p-3">
+                        <div class="text-lg font-semibold ${colorClass}">${data.category.label}</div>
+                        <div class="text-sm text-gray-600 mt-1">Range: ${data.category.range}</div>
+                        <div class="text-xs text-gray-500 mt-1">Risk Level: ${data.category.risk}</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div class="bg-gray-50 p-2 rounded">
+                            <div class="font-semibold text-gray-700 text-xs">Weight</div>
+                            <div class="text-sm text-gray-600">${weightDisplay}</div>
+                        </div>
+                        <div class="bg-gray-50 p-2 rounded">
+                            <div class="font-semibold text-gray-700 text-xs">Height</div>
+                            <div class="text-sm text-gray-600">${heightDisplay}</div>
+                        </div>
+                    </div>
+                    <div class="text-center bg-gray-50 p-2 rounded">
+                        <div class="font-semibold text-gray-700 text-xs">Ideal Weight Range</div>
+                        <div class="text-sm text-gray-600 mt-1">${data.idealWeight.range}</div>
+                    </div>
+                    ${data.weightToLose > 0 ? `
+                        <div class="text-center bg-orange-50 p-2 rounded border border-orange-200">
+                            <div class="text-xs font-semibold text-orange-700">Weight to Lose</div>
+                            <div class="text-sm text-orange-600">${data.weightToLose.toFixed(1)} kg</div>
+                        </div>
+                    ` : ''}
+                    ${data.weightToGain > 0 ? `
+                        <div class="text-center bg-blue-50 p-2 rounded border border-blue-200">
+                            <div class="text-xs font-semibold text-blue-700">Weight to Gain</div>
+                            <div class="text-sm text-blue-600">${data.weightToGain.toFixed(1)} kg</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('bmi-results').classList.remove('hidden');
+            
+            // Show health analysis if available
+            if (data.healthRisk && data.healthRisk.length > 0) {
+                document.getElementById('health-analysis-content').innerHTML = `
+                    <div class="space-y-2">
+                        <div class="font-semibold text-gray-800 mb-2">Health Risks:</div>
+                        <ul class="list-disc list-inside space-y-1 text-sm text-gray-600">
+                            ${data.healthRisk.map(risk => `<li>${risk}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                document.getElementById('health-analysis-results').classList.remove('hidden');
+            }
+            
+            // Show recommendations if available
+            if (data.recommendations) {
+                let recommendationsHTML = '<div class="space-y-3">';
+                if (data.recommendations.diet) {
+                    recommendationsHTML += `
+                        <div>
+                            <div class="font-semibold text-gray-800 mb-1">🍎 Diet:</div>
+                            <ul class="list-disc list-inside space-y-1 text-sm text-gray-600 ml-2">
+                                ${data.recommendations.diet.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+                if (data.recommendations.exercise) {
+                    recommendationsHTML += `
+                        <div>
+                            <div class="font-semibold text-gray-800 mb-1">💪 Exercise:</div>
+                            <ul class="list-disc list-inside space-y-1 text-sm text-gray-600 ml-2">
+                                ${data.recommendations.exercise.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+                if (data.recommendations.lifestyle) {
+                    recommendationsHTML += `
+                        <div>
+                            <div class="font-semibold text-gray-800 mb-1">🌱 Lifestyle:</div>
+                            <ul class="list-disc list-inside space-y-1 text-sm text-gray-600 ml-2">
+                                ${data.recommendations.lifestyle.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+                recommendationsHTML += '</div>';
+                document.getElementById('recommendations-content').innerHTML = recommendationsHTML;
+                document.getElementById('recommendations-results').classList.remove('hidden');
+            }
+        }
+
+        function calculateWeightGoal() {
+            console.log('calculateWeightGoal called');
+            try {
+                if (!bmiCalculator) {
+                    const initialized = initializeBMICalculator();
+                    if (!initialized || !bmiCalculator) {
+                        alert('BMI Calculator could not be loaded. Please refresh the page and try again.');
+                        return;
+                    }
+                }
+
+                const currentWeight = parseFloat(document.getElementById('goal-current-weight').value);
+                const height = parseFloat(document.getElementById('goal-height').value);
+                const targetBMI = parseFloat(document.getElementById('target-bmi').value) || 22;
+                const unit = document.getElementById('bmi-unit').value;
+
+                console.log('Goal calculation inputs:', { currentWeight, height, targetBMI, unit });
+
+                if (!currentWeight || !height || isNaN(currentWeight) || isNaN(height)) {
+                    alert('Please enter valid current weight and height.');
+                    return;
+                }
+
+                // Validate input ranges
+                if (unit === 'metric') {
+                    if (currentWeight < 10 || currentWeight > 300) {
+                        alert('Weight must be between 10 and 300 kg. Please check your input.');
+                        return;
+                    }
+                    if (height < 50 || height > 250) {
+                        alert('Height must be between 50 and 250 cm.\n\n💡 Tip: If you entered height in feet/inches, please switch to Imperial units.');
+                        return;
+                    }
+                } else {
+                    if (currentWeight < 22 || currentWeight > 660) {
+                        alert('Weight must be between 22 and 660 lbs. Please check your input.');
+                        return;
+                    }
+                    if (height < 20 || height > 100) {
+                        alert('Height must be between 20 and 100 inches.\n\n💡 Tip: Enter height in total inches (e.g., 5 feet 6 inches = 66 inches).');
+                        return;
+                    }
+                }
+
+                if (targetBMI < 10 || targetBMI > 50) {
+                    alert('Target BMI should be between 10 and 50.');
+                    return;
+                }
+
+                // Use BMICalculator method for accurate calculation
+                // The method expects: currentWeight (in original unit), targetBMI, height (in original unit), unit
+                console.log('Calling calculateWeightChange with:', { currentWeight, targetBMI, height, unit });
+                const weightChange = bmiCalculator.calculateWeightChange(
+                    currentWeight, 
+                    targetBMI, 
+                    height, 
+                    unit
+                );
+                console.log('Weight change result:', weightChange);
+
+                hideAllBMIResults();
+                
+                // Format display based on unit
+                // weightChange.targetWeight and weightChange.amount are already in kg
+                const currentWeightDisplay = unit === 'metric' 
+                    ? `${currentWeight.toFixed(1)} kg` 
+                    : `${currentWeight.toFixed(1)} lbs`;
+                
+                const targetWeightDisplay = unit === 'metric'
+                    ? `${weightChange.targetWeight.toFixed(1)} kg`
+                    : `${(weightChange.targetWeight / 0.453592).toFixed(1)} lbs`;
+                
+                const weightChangeDisplay = unit === 'metric'
+                    ? `${weightChange.amount.toFixed(1)} kg`
+                    : `${(weightChange.amount / 0.453592).toFixed(1)} lbs`;
+                
+                document.getElementById('weight-goal-content').innerHTML = `
+                    <div class="space-y-3">
+                        <div class="text-center bg-orange-50 p-3 rounded-lg border border-orange-200">
+                            <div class="text-lg font-bold text-orange-700">${weightChange.action === 'gain' ? '📈 Gain' : '📉 Lose'}</div>
+                            <div class="text-2xl font-bold text-orange-600">${weightChangeDisplay}</div>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between items-center bg-gray-50 p-2 rounded">
+                                <span class="font-semibold text-gray-700">Current Weight:</span>
+                                <span class="text-gray-600">${currentWeightDisplay}</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-green-50 p-2 rounded">
+                                <span class="font-semibold text-gray-700">Target Weight:</span>
+                                <span class="text-green-600 font-bold">${targetWeightDisplay}</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-blue-50 p-2 rounded">
+                                <span class="font-semibold text-gray-700">Target BMI:</span>
+                                <span class="text-blue-600 font-bold">${targetBMI.toFixed(1)}</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-purple-50 p-2 rounded">
+                                <span class="font-semibold text-gray-700">Weight to ${weightChange.action === 'gain' ? 'Gain' : 'Lose'}:</span>
+                                <span class="text-purple-600 font-bold">${weightChangeDisplay}</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-gray-600">
+                            💡 Aim for gradual weight ${weightChange.action === 'gain' ? 'gain' : 'loss'} of 0.5-1 kg per week for healthy results.
+                        </div>
+                    </div>
+                `;
+                document.getElementById('weight-goal-results').classList.remove('hidden');
+            } catch (error) {
+                alert('Error calculating weight goal: ' + error.message);
+            }
+        }
+
+        function getBMIStatistics() {
+            if (!bmiCalculator) {
+                alert('BMI Calculator not initialized. Please refresh the page.');
+                return;
+            }
+
+            hideAllBMIResults();
+            document.getElementById('bmi-statistics-content').innerHTML = `
+                <div class="space-y-2">
+                    <div><strong>BMI Categories:</strong></div>
+                    <div>Underweight: &lt; 18.5</div>
+                    <div>Normal: 18.5 - 24.9</div>
+                    <div>Overweight: 25 - 29.9</div>
+                    <div>Obese: ≥ 30</div>
+                </div>
+            `;
+            document.getElementById('bmi-statistics-results').classList.remove('hidden');
+        }
+
+        function clearBMIForm() {
+            document.getElementById('bmi-weight').value = '';
+            document.getElementById('bmi-height').value = '';
+            document.getElementById('bmi-age').value = '';
+            document.getElementById('goal-current-weight').value = '';
+            document.getElementById('goal-height').value = '';
+            hideAllBMIResults();
+        }
+
+        function copyBMIResult() {
+            const results = document.querySelectorAll('[id$="-content"]');
+            let text = '';
+            results.forEach(el => {
+                if (el.closest('[class*="hidden"]') === null && el.textContent) {
+                    text += el.textContent + '\n\n';
+                }
+            });
+            if (text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Results copied to clipboard!');
+                });
+            }
+        }
+
+        function exportBMIData() {
+            if (!bmiCalculator) {
+                alert('BMI Calculator not initialized. Please refresh the page.');
+                return;
+            }
+
+            const data = {
+                weight: document.getElementById('bmi-weight').value,
+                height: document.getElementById('bmi-height').value,
+                unit: document.getElementById('bmi-unit').value,
+                calculatedAt: new Date().toISOString()
+            };
+
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'bmi-data.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('Data exported successfully!');
+        }
+
+        function hideAllBMIResults() {
+            document.getElementById('bmi-results').classList.add('hidden');
+            document.getElementById('health-analysis-results').classList.add('hidden');
+            document.getElementById('body-fat-results').classList.add('hidden');
+            document.getElementById('recommendations-results').classList.add('hidden');
+            document.getElementById('weight-goal-results').classList.add('hidden');
+            document.getElementById('bmi-statistics-results').classList.add('hidden');
+        }
+
+        function updateUnitLabels() {
+            const unit = document.getElementById('bmi-unit').value;
+            const weightLabel = document.getElementById('weight-unit-label');
+            const heightLabel = document.getElementById('height-unit-label');
+            const goalWeightLabel = document.getElementById('goal-weight-unit');
+            const goalHeightLabel = document.getElementById('goal-height-unit');
+            const heightHintMetric = document.getElementById('height-hint-metric');
+            const heightHintImperial = document.getElementById('height-hint-imperial');
+            const weightInput = document.getElementById('bmi-weight');
+            const heightInput = document.getElementById('bmi-height');
+            
+            if (unit === 'metric') {
+                if (weightLabel) weightLabel.textContent = '(kg)';
+                if (heightLabel) heightLabel.textContent = '(cm)';
+                if (goalWeightLabel) goalWeightLabel.textContent = '(kg)';
+                if (goalHeightLabel) goalHeightLabel.textContent = '(cm)';
+                if (heightHintMetric) heightHintMetric.classList.remove('hidden');
+                if (heightHintImperial) heightHintImperial.classList.add('hidden');
+                if (weightInput) {
+                    weightInput.min = '10';
+                    weightInput.max = '300';
+                    weightInput.placeholder = 'e.g., 70';
+                }
+                if (heightInput) {
+                    heightInput.min = '50';
+                    heightInput.max = '250';
+                    heightInput.placeholder = 'e.g., 175';
+                }
+            } else {
+                if (weightLabel) weightLabel.textContent = '(lbs)';
+                if (heightLabel) heightLabel.textContent = '(inches)';
+                if (goalWeightLabel) goalWeightLabel.textContent = '(lbs)';
+                if (goalHeightLabel) goalHeightLabel.textContent = '(inches)';
+                if (heightHintMetric) heightHintMetric.classList.add('hidden');
+                if (heightHintImperial) heightHintImperial.classList.remove('hidden');
+                if (weightInput) {
+                    weightInput.min = '22';
+                    weightInput.max = '660';
+                    weightInput.placeholder = 'e.g., 154';
+                }
+                if (heightInput) {
+                    heightInput.min = '20';
+                    heightInput.max = '100';
+                    heightInput.placeholder = 'e.g., 66';
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeBMICalculator();
+                updateUnitLabels(); // Initialize unit labels
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        const availableTools = [
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', pageUrl: '/tools/age-calculator.html' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', modalId: 'loan-calculator-modal' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', modalId: 'investment-calculator-modal' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', modalId: 'tax-calculator-modal' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', modalId: 'business-metrics-modal' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', modalId: 'currency-converter-modal' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', modalId: 'retirement-calculator-modal' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', modalId: 'mortgage-calculator-modal' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', modalId: 'budget-planner-modal' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', modalId: 'salary-calculator-modal' },
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', modalId: 'json-formatter-modal' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', modalId: 'xml-formatter-modal' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', modalId: 'base64-encoder-modal' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', modalId: 'hash-generator-modal' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', modalId: 'url-encoder-modal' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', modalId: 'regex-tester-modal' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', modalId: 'css-js-minifier-modal' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', modalId: 'color-palette-modal' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', modalId: 'lorem-ipsum-modal' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            btnEl.dataset.modalId = tool.modalId || '';
+            btnEl.dataset.pageUrl = tool.pageUrl || '';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            const modalId = btnEl.dataset.modalId;
+            const pageUrl = btnEl.dataset.pageUrl;
+            
+            if (pageUrl) {
+                window.location.href = pageUrl;
+            } else if (modalId && typeof openModal === 'function') {
+                window.location.href = `/#${modalId}`;
+            } else {
+                window.location.href = '/#tools';
+            }
+        }
+        
+        function initToolSuggestions() {
+            updateToolSuggestion();
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        #tool-suggestion-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+    </style>
+</body>
+</html>
+
+
+

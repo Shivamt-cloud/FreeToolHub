@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Age Calculator - FreeToolHub</title>
+    <meta name="description" content="Advanced age calculation, date analysis, and time-related calculations. Calculate precise age, age differences, and get zodiac signs.">
+    <meta property="og:title" content="Age Calculator - FreeToolHub">
+    <meta property="og:description" content="Advanced age calculation, date analysis, and time-related calculations">
+    <meta property="og:url" content="https://freetoolhub.in/tools/age-calculator.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🎂 Age Calculator</h1>
+                    <p class="text-gray-600 text-lg">Advanced age calculation, date analysis, and time-related calculations for students</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-pink-500 to-rose-600 text-white px-6 py-3 rounded-lg hover:from-pink-600 hover:to-rose-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Age Calculator</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Input Section -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Calculate Age -->
+                        <div>
+                            <label class="block text-lg font-semibold text-gray-700 mb-3">Calculate Age</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Birth Date</label>
+                                    <input type="date" id="birth-date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Current Date (Optional)</label>
+                                    <input type="date" id="current-date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Calculation Method</label>
+                                    <select id="calculation-method" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                        <option value="precise">Precise Age</option>
+                                        <option value="simple">Simple Age</option>
+                                        <option value="academic">Academic Age</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Date Format</label>
+                                    <select id="date-format" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                        <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+                                        <option value="mm/dd/yyyy">MM/DD/YYYY</option>
+                                        <option value="dd/mm/yyyy">DD/MM/YYYY</option>
+                                        <option value="dd-mm-yyyy">DD-MM-YYYY</option>
+                                        <option value="month-day-year">Month Day, Year</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="calculateAge()" class="w-full mt-4 bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                🎂 Calculate Age
+                            </button>
+                        </div>
+                        
+                        <!-- Age Difference -->
+                        <div>
+                            <label class="block text-lg font-semibold text-gray-700 mb-3">Calculate Age Difference</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Person 1 Birth Date</label>
+                                    <input type="date" id="person1-birth" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Person 2 Birth Date</label>
+                                    <input type="date" id="person2-birth" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                </div>
+                            </div>
+                            <button onclick="calculateAgeDifference()" class="w-full mt-4 bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                👥 Calculate Age Difference
+                            </button>
+                        </div>
+                        
+                        <!-- Date Analysis -->
+                        <div>
+                            <label class="block text-lg font-semibold text-gray-700 mb-3">Date Analysis</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Birth Date</label>
+                                    <input type="date" id="analysis-date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Analysis Type</label>
+                                    <select id="analysis-type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                                        <option value="zodiac">Zodiac Sign</option>
+                                        <option value="chinese">Chinese Zodiac</option>
+                                        <option value="life-stage">Life Stage</option>
+                                        <option value="milestones">Age Milestones</option>
+                                        <option value="next-birthday">Next Birthday</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="analyzeDate()" class="w-full mt-4 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                🔍 Analyze Date
+                            </button>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Quick Actions</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="getCurrentAge()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    🕐 Current Age
+                                </button>
+                                <button onclick="getAgeStatistics()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    📊 Age Stats
+                                </button>
+                                <button onclick="clearAgeForm()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    🗑️ Clear
+                                </button>
+                                <button onclick="copyAgeResult()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    📋 Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <!-- Age Results -->
+                        <div id="age-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">🎂 Age Calculation Results</h4>
+                            <div class="bg-pink-50 p-4 rounded-lg border border-pink-200">
+                                <div id="age-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Age Difference Results -->
+                        <div id="age-difference-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">👥 Age Difference Results</h4>
+                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                <div id="age-difference-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Date Analysis Results -->
+                        <div id="date-analysis-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">🔍 Date Analysis Results</h4>
+                            <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+                                <div id="date-analysis-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Current Age Results -->
+                        <div id="current-age-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">🕐 Current Age</h4>
+                            <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                <div id="current-age-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Age Statistics Results -->
+                        <div id="age-statistics-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📊 Age Statistics</h4>
+                            <div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                                <div id="age-statistics-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Age Calculator Dependencies -->
+    <script src="/src/js/AgeCalculator.js?v=1&t=1726745000"></script>
+    
+    <!-- Age Calculator JavaScript -->
+    <script>
+        let ageCalculator = null;
+
+        function initializeAgeCalculator() {
+            try {
+                if (typeof AgeCalculator !== 'undefined') {
+                    ageCalculator = new AgeCalculator();
+                    console.log('✅ Age Calculator initialized successfully');
+                } else {
+                    console.error('❌ AgeCalculator class not found');
+                }
+            } catch (error) {
+                console.error('❌ Error initializing Age Calculator:', error);
+            }
+        }
+
+        function calculateAge() {
+            if (!ageCalculator) {
+                alert('Age Calculator not initialized. Please refresh the page.');
+                return;
+            }
+
+            const birthDate = document.getElementById('birth-date').value;
+            const currentDate = document.getElementById('current-date').value || null;
+            const method = document.getElementById('calculation-method').value;
+
+            if (!birthDate) {
+                alert('Please enter a birth date.');
+                return;
+            }
+
+            const result = ageCalculator.calculateAge(birthDate, currentDate, method);
+            if (result.success) {
+                hideAllAgeResults();
+                document.getElementById('age-content').innerHTML = `
+                    <div class="space-y-2">
+                        <div><strong>Age:</strong> ${result.age.years} years, ${result.age.months} months, ${result.age.days} days</div>
+                        <div><strong>Total Days:</strong> ${result.age.totalDays}</div>
+                        <div><strong>Total Weeks:</strong> ${result.age.totalWeeks}</div>
+                        <div><strong>Birth Date:</strong> ${result.birthDate}</div>
+                        <div><strong>Current Date:</strong> ${result.currentDate}</div>
+                        <div><strong>Method:</strong> ${result.method}</div>
+                    </div>
+                `;
+                document.getElementById('age-results').classList.remove('hidden');
+            } else {
+                alert('Error calculating age: ' + result.error);
+            }
+        }
+
+        function calculateAgeDifference() {
+            if (!ageCalculator) {
+                alert('Age Calculator not initialized. Please refresh the page.');
+                return;
+            }
+
+            const person1Birth = document.getElementById('person1-birth').value;
+            const person2Birth = document.getElementById('person2-birth').value;
+
+            if (!person1Birth || !person2Birth) {
+                alert('Please enter both birth dates.');
+                return;
+            }
+
+            const result1 = ageCalculator.calculateAge(person1Birth);
+            const result2 = ageCalculator.calculateAge(person2Birth);
+
+            if (result1.success && result2.success) {
+                const diff = Math.abs(result1.age.totalDays - result2.age.totalDays);
+                const years = Math.floor(diff / 365);
+                const months = Math.floor((diff % 365) / 30);
+                const days = diff % 30;
+
+                hideAllAgeResults();
+                document.getElementById('age-difference-content').innerHTML = `
+                    <div class="space-y-2">
+                        <div><strong>Age Difference:</strong> ${years} years, ${months} months, ${days} days</div>
+                        <div><strong>Total Days:</strong> ${diff}</div>
+                        <div><strong>Person 1 Age:</strong> ${result1.age.years} years</div>
+                        <div><strong>Person 2 Age:</strong> ${result2.age.years} years</div>
+                    </div>
+                `;
+                document.getElementById('age-difference-results').classList.remove('hidden');
+            } else {
+                alert('Error calculating age difference.');
+            }
+        }
+
+        function analyzeDate() {
+            if (!ageCalculator) {
+                alert('Age Calculator not initialized. Please refresh the page.');
+                return;
+            }
+
+            const birthDate = document.getElementById('analysis-date').value;
+            const analysisType = document.getElementById('analysis-type').value;
+
+            if (!birthDate) {
+                alert('Please enter a birth date.');
+                return;
+            }
+
+            const date = new Date(birthDate);
+            if (isNaN(date.getTime())) {
+                alert('Invalid date format. Please enter a valid date.');
+                return;
+            }
+
+            let result = { success: true };
+            let content = '';
+
+            try {
+                switch (analysisType) {
+                    case 'zodiac':
+                        const zodiacSign = ageCalculator.getZodiacSign(date);
+                        content = `
+                            <div class="space-y-2">
+                                <div class="text-lg font-bold text-indigo-700 mb-2">♈ Zodiac Sign: ${zodiacSign}</div>
+                                <div class="text-sm text-gray-600">
+                                    <strong>Birth Date:</strong> ${birthDate}<br>
+                                    <strong>Month:</strong> ${date.toLocaleString('default', { month: 'long' })}<br>
+                                    <strong>Day:</strong> ${date.getDate()}
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'chinese':
+                        const chineseZodiac = ageCalculator.getChineseZodiac(date.getFullYear());
+                        content = `
+                            <div class="space-y-2">
+                                <div class="text-lg font-bold text-indigo-700 mb-2">🐉 Chinese Zodiac: ${chineseZodiac}</div>
+                                <div class="text-sm text-gray-600">
+                                    <strong>Birth Year:</strong> ${date.getFullYear()}<br>
+                                    <strong>Zodiac Cycle:</strong> ${(date.getFullYear() - 4) % 12 + 1} of 12
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'life-stage':
+                        const ageResult = ageCalculator.calculateAge(birthDate);
+                        if (ageResult.success) {
+                            const lifeStage = ageCalculator.getLifeStage(ageResult.age.years);
+                            content = `
+                                <div class="space-y-2">
+                                    <div class="text-lg font-bold text-indigo-700 mb-2">🎂 Life Stage: ${lifeStage.name}</div>
+                                    <div class="text-sm text-gray-600">
+                                        <strong>Current Age:</strong> ${ageResult.age.years} years<br>
+                                        <strong>Stage Category:</strong> ${lifeStage.stage}<br>
+                                        <strong>Age Range:</strong> ${ageResult.age.years} years old
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            result.success = false;
+                            result.error = ageResult.error;
+                        }
+                        break;
+                    case 'milestones':
+                        const ageCalc = ageCalculator.calculateAge(birthDate);
+                        if (ageCalc.success) {
+                            const milestones = ageCalculator.getAgeMilestones(ageCalc.age.years);
+                            const milestonesList = milestones.map(m => `${m.age} years: ${m.milestone}`).join('<br>');
+                            content = `
+                                <div class="space-y-2">
+                                    <div class="text-lg font-bold text-indigo-700 mb-2">🎯 Age Milestones</div>
+                                    <div class="text-sm text-gray-600">
+                                        <strong>Current Age:</strong> ${ageCalc.age.years} years<br><br>
+                                        <strong>Milestones Reached:</strong><br>
+                                        <div class="mt-2 pl-4 border-l-2 border-indigo-300">
+                                            ${milestonesList || 'No milestones reached yet'}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            result.success = false;
+                            result.error = ageCalc.error;
+                        }
+                        break;
+                    case 'next-birthday':
+                        const currentDate = new Date();
+                        const nextBirthday = ageCalculator.getNextBirthday(date, currentDate);
+                        content = `
+                            <div class="space-y-2">
+                                <div class="text-lg font-bold text-indigo-700 mb-2">🎉 Next Birthday</div>
+                                <div class="text-sm text-gray-600">
+                                    <strong>Date:</strong> ${nextBirthday.date}<br>
+                                    <strong>Day of Week:</strong> ${nextBirthday.dayOfWeek}<br>
+                                    <strong>Days Until:</strong> ${nextBirthday.daysUntil} days<br>
+                                    <strong>Age at Birthday:</strong> ${nextBirthday.ageAtBirthday} years
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    default:
+                        result.success = false;
+                        result.error = 'Unknown analysis type';
+                }
+            } catch (error) {
+                result.success = false;
+                result.error = error.message || 'Error analyzing date';
+            }
+
+            if (result.success && content) {
+                hideAllAgeResults();
+                document.getElementById('date-analysis-content').innerHTML = content;
+                document.getElementById('date-analysis-results').classList.remove('hidden');
+            } else {
+                alert('Error analyzing date: ' + (result.error || 'Unknown error'));
+            }
+        }
+
+        function getCurrentAge() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('birth-date').value = prompt('Enter your birth date (YYYY-MM-DD):', '2000-01-01') || '';
+            document.getElementById('current-date').value = today;
+            calculateAge();
+        }
+
+        function getAgeStatistics() {
+            const birthDate = document.getElementById('birth-date').value;
+            if (!birthDate) {
+                alert('Please enter a birth date first.');
+                return;
+            }
+
+            const result = ageCalculator.calculateAge(birthDate);
+            if (result.success) {
+                hideAllAgeResults();
+                document.getElementById('age-statistics-content').innerHTML = `
+                    <div class="space-y-2">
+                        <div><strong>Total Days Lived:</strong> ${result.age.totalDays}</div>
+                        <div><strong>Total Weeks:</strong> ${result.age.totalWeeks}</div>
+                        <div><strong>Total Months:</strong> ${result.age.years * 12 + result.age.months}</div>
+                        <div><strong>Total Years:</strong> ${result.age.years}</div>
+                    </div>
+                `;
+                document.getElementById('age-statistics-results').classList.remove('hidden');
+            }
+        }
+
+        function clearAgeForm() {
+            document.getElementById('birth-date').value = '';
+            document.getElementById('current-date').value = '';
+            document.getElementById('person1-birth').value = '';
+            document.getElementById('person2-birth').value = '';
+            document.getElementById('analysis-date').value = '';
+            hideAllAgeResults();
+        }
+
+        function copyAgeResult() {
+            const results = document.querySelectorAll('[id$="-content"]');
+            let text = '';
+            results.forEach(el => {
+                if (!el.classList.contains('hidden')) {
+                    text += el.textContent + '\n';
+                }
+            });
+            if (text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Results copied to clipboard!');
+                });
+            }
+        }
+
+        function hideAllAgeResults() {
+            document.getElementById('age-results').classList.add('hidden');
+            document.getElementById('age-difference-results').classList.add('hidden');
+            document.getElementById('date-analysis-results').classList.add('hidden');
+            document.getElementById('current-age-results').classList.add('hidden');
+            document.getElementById('age-statistics-results').classList.add('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeAgeCalculator();
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        const availableTools = [
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', modalId: 'bmi-modal' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', modalId: 'loan-calculator-modal' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', modalId: 'investment-calculator-modal' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', modalId: 'tax-calculator-modal' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', modalId: 'business-metrics-modal' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', modalId: 'currency-converter-modal' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', modalId: 'retirement-calculator-modal' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', modalId: 'mortgage-calculator-modal' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', modalId: 'budget-planner-modal' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', modalId: 'salary-calculator-modal' },
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', modalId: 'json-formatter-modal' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', modalId: 'xml-formatter-modal' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', modalId: 'base64-encoder-modal' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', modalId: 'hash-generator-modal' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', modalId: 'url-encoder-modal' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', modalId: 'regex-tester-modal' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', modalId: 'css-js-minifier-modal' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', modalId: 'color-palette-modal' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', modalId: 'lorem-ipsum-modal' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            btnEl.dataset.modalId = tool.modalId || '';
+            btnEl.dataset.pageUrl = tool.pageUrl || '';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            const modalId = btnEl.dataset.modalId;
+            const pageUrl = btnEl.dataset.pageUrl;
+            
+            if (pageUrl) {
+                window.location.href = pageUrl;
+            } else if (modalId && typeof openModal === 'function') {
+                window.location.href = `/#${modalId}`;
+            } else {
+                window.location.href = '/#tools';
+            }
+        }
+        
+        function initToolSuggestions() {
+            updateToolSuggestion();
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        #tool-suggestion-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+    </style>
+</body>
+</html>
+
+

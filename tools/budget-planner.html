@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Budget Planner - FreeToolHub</title>
+    <meta name="description" content="Create and manage personal and business budgets with detailed analysis. 50/30/20 rule calculator and emergency fund planner.">
+    <meta property="og:title" content="Budget Planner - FreeToolHub">
+    <meta property="og:description" content="Create and manage personal and business budgets with detailed analysis">
+    <meta property="og:url" content="https://freetoolhub.in/tools/budget-planner.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">📊 Budget Planner</h1>
+                    <p class="text-gray-600 text-lg">Create and manage personal and business budgets with detailed analysis</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-pink-500 to-rose-600 text-white px-6 py-3 rounded-lg hover:from-pink-600 hover:to-rose-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Budget Planner</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Input Section -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Personal Budget Calculator -->
+                        <div class="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-6 border-2 border-pink-200 shadow-lg">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-xl font-bold text-gray-800">💰 Personal Budget Calculator</h4>
+                                <button onclick="resetBudgetForm()" class="text-xs text-gray-600 hover:text-gray-800 underline">Reset</button>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">💱 Currency</label>
+                                    <select id="budget-currency" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white" onchange="updateBudgetCurrencyDisplay()">
+                                        <option value="USD">🇺🇸 US Dollar ($)</option>
+                                        <option value="EUR">🇪🇺 Euro (€)</option>
+                                        <option value="GBP">🇬🇧 British Pound (£)</option>
+                                        <option value="JPY">🇯🇵 Japanese Yen (¥)</option>
+                                        <option value="CAD">🇨🇦 Canadian Dollar (C$)</option>
+                                        <option value="AUD">🇦🇺 Australian Dollar (A$)</option>
+                                        <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
+                                        <option value="CNY">🇨🇳 Chinese Yuan (¥)</option>
+                                        <option value="INR">🇮🇳 Indian Rupee (₹)</option>
+                                        <option value="BRL">🇧🇷 Brazilian Real (R$)</option>
+                                        <option value="SGD">🇸🇬 Singapore Dollar (S$)</option>
+                                        <option value="AED">🇦🇪 UAE Dirham (د.إ)</option>
+                                        <option value="SAR">🇸🇦 Saudi Riyal (﷼)</option>
+                                        <option value="ZAR">🇿🇦 South African Rand (R)</option>
+                                        <option value="MXN">🇲🇽 Mexican Peso ($)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="bg-white rounded-lg p-3 border border-gray-200">
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2">Quick Templates</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button onclick="loadBudgetTemplate('starter')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Starter</button>
+                                        <button onclick="loadBudgetTemplate('moderate')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Moderate</button>
+                                        <button onclick="loadBudgetTemplate('advanced')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Advanced</button>
+                                        <button onclick="loadBudgetTemplate('conservative')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Conservative</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">💵 Monthly Income</label>
+                                        <input type="number" id="monthly-income" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white" placeholder="5000" min="0" step="0.01">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">💸 Monthly Expenses</label>
+                                        <input type="number" id="monthly-expenses" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white" placeholder="3500" min="0" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">💾 Monthly Savings</label>
+                                        <input type="number" id="monthly-savings" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white" placeholder="1000" min="0" step="0.01">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">💳 Monthly Debt</label>
+                                        <input type="number" id="monthly-debt" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 bg-white" placeholder="500" min="0" step="0.01">
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="calculatePersonalBudget()" class="w-full mt-6 bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold py-3 px-6 rounded-xl hover:from-pink-600 hover:to-rose-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                ✨ Calculate Personal Budget
+                            </button>
+                        </div>
+
+                        <!-- 50/30/20 Budget Rule -->
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-xl font-bold text-gray-800">📊 50/30/20 Budget Rule</h4>
+                                <button onclick="resetRuleForm()" class="text-xs text-gray-600 hover:text-gray-800 underline">Reset</button>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="bg-white rounded-lg p-3 border border-gray-200">
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2">Quick Income Templates</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button onclick="loadIncomeTemplate('low')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Low ($3k)</button>
+                                        <button onclick="loadIncomeTemplate('medium')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Medium ($5k)</button>
+                                        <button onclick="loadIncomeTemplate('high')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">High ($8k)</button>
+                                        <button onclick="loadIncomeTemplate('very-high')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Very High ($12k)</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">💵 Monthly Income</label>
+                                    <input type="number" id="rule-income" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white" placeholder="5000" min="0" step="0.01">
+                                </div>
+                            </div>
+                            <button onclick="calculate502030Budget()" class="w-full mt-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                ✨ Calculate 50/30/20 Budget
+                            </button>
+                        </div>
+
+                        <!-- Emergency Fund Calculator -->
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200 shadow-lg">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-xl font-bold text-gray-800">🛡️ Emergency Fund Calculator</h4>
+                                <button onclick="resetEmergencyForm()" class="text-xs text-gray-600 hover:text-gray-800 underline">Reset</button>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="bg-white rounded-lg p-3 border border-gray-200">
+                                    <label class="block text-xs font-semibold text-gray-600 mb-2">Quick Templates</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button onclick="loadEmergencyTemplate('minimal')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Minimal (3mo)</button>
+                                        <button onclick="loadEmergencyTemplate('standard')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Standard (6mo)</button>
+                                        <button onclick="loadEmergencyTemplate('comfortable')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Comfortable (9mo)</button>
+                                        <button onclick="loadEmergencyTemplate('extended')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Extended (12mo)</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">💸 Monthly Expenses</label>
+                                    <input type="number" id="emergency-expenses" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white" placeholder="3500" min="0" step="0.01">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">📅 Months to Cover</label>
+                                    <select id="emergency-months" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white">
+                                        <option value="3">3 months</option>
+                                        <option value="6" selected>6 months</option>
+                                        <option value="9">9 months</option>
+                                        <option value="12">12 months</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="calculateEmergencyFund()" class="w-full mt-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                ✨ Calculate Emergency Fund
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <!-- Budget Analysis -->
+                        <div class="bg-pink-50 rounded-xl p-6 border border-pink-200">
+                            <h4 class="text-lg font-bold mb-4 text-gray-700">Budget Analysis</h4>
+                            <div id="budget-results" class="space-y-3">
+                                <div class="text-center text-gray-500">Enter budget details and click "Calculate Personal Budget"</div>
+                            </div>
+                        </div>
+
+                        <!-- 50/30/20 Results -->
+                        <div class="bg-blue-50 rounded-xl p-6 border border-blue-200">
+                            <h4 class="text-lg font-bold mb-4 text-gray-700">50/30/20 Budget</h4>
+                            <div id="rule-results" class="space-y-3">
+                                <div class="text-center text-gray-500">Enter income and click "Calculate 50/30/20 Budget"</div>
+                            </div>
+                        </div>
+
+                        <!-- Emergency Fund Results -->
+                        <div class="bg-green-50 rounded-xl p-6 border border-green-200">
+                            <h4 class="text-lg font-bold mb-4 text-gray-700">Emergency Fund</h4>
+                            <div id="emergency-results" class="space-y-3">
+                                <div class="text-center text-gray-500">Enter expenses and click "Calculate Emergency Fund"</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Budget Planner Dependencies -->
+    <script src="/src/js/BudgetPlanner.js?v=1&t=1726745000"></script>
+    
+    <!-- Budget Planner JavaScript -->
+    <script>
+        let budgetPlanner = null;
+
+        // Toast Notification System
+        function showNotification(message, type = 'info', duration = 5000) {
+            const toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) return;
+
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : 
+                          type === 'error' ? 'bg-red-500' : 
+                          type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+            const icon = type === 'success' ? '✅' : 
+                        type === 'error' ? '❌' : 
+                        type === 'warning' ? '⚠️' : 'ℹ️';
+
+            toast.className = `${bgColor} text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 min-w-[300px] max-w-md animate-slide-in`;
+            toast.innerHTML = `
+                <span class="text-xl">${icon}</span>
+                <span class="flex-1 font-medium">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-white hover:text-gray-200 font-bold text-lg">×</button>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.style.animation = 'slide-out 0.3s ease-out';
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+        }
+
+        function initializeBudgetPlanner() {
+            try {
+                if (typeof BudgetPlanner !== 'undefined') {
+                    budgetPlanner = new BudgetPlanner();
+                    console.log('✅ Budget Planner initialized successfully');
+                    updateBudgetCurrencyDisplay();
+                    formatBudgetCurrency();
+                } else {
+                    console.error('❌ BudgetPlanner class not found');
+                }
+            } catch (error) {
+                console.error('❌ Error initializing Budget Planner:', error);
+            }
+        }
+
+        function updateBudgetCurrencyDisplay() {
+            if (!budgetPlanner) return;
+            const currency = document.getElementById('budget-currency').value;
+            budgetPlanner.selectedCurrency = currency;
+            formatBudgetCurrency();
+        }
+
+        function formatBudgetCurrency() {
+            if (!budgetPlanner) return;
+            const currency = budgetPlanner.currencies[budgetPlanner.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            
+            // Update currency symbols in placeholders
+            const inputs = ['monthly-income', 'monthly-expenses', 'monthly-savings', 'monthly-debt', 'rule-income', 'emergency-expenses'];
+            inputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input && !input.value) {
+                    const currentPlaceholder = input.placeholder;
+                    if (currentPlaceholder && !currentPlaceholder.includes(symbol)) {
+                        // Keep numeric value but update context
+                    }
+                }
+            });
+        }
+
+        // Quick Templates
+        function loadBudgetTemplate(template) {
+            if (!budgetPlanner) {
+                showNotification('Budget Planner not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const templates = {
+                'starter': { income: 3000, expenses: 2500, savings: 300, debt: 200 },
+                'moderate': { income: 5000, expenses: 3500, savings: 1000, debt: 500 },
+                'advanced': { income: 8000, expenses: 5500, savings: 2000, debt: 500 },
+                'conservative': { income: 6000, expenses: 4000, savings: 1500, debt: 500 }
+            };
+
+            const preset = templates[template];
+            if (preset) {
+                document.getElementById('monthly-income').value = preset.income;
+                document.getElementById('monthly-expenses').value = preset.expenses;
+                document.getElementById('monthly-savings').value = preset.savings;
+                document.getElementById('monthly-debt').value = preset.debt;
+                showNotification(`Loaded ${template} budget template`, 'success');
+            }
+        }
+
+        function loadIncomeTemplate(template) {
+            const templates = {
+                'low': 3000,
+                'medium': 5000,
+                'high': 8000,
+                'very-high': 12000
+            };
+
+            const income = templates[template];
+            if (income) {
+                document.getElementById('rule-income').value = income;
+                showNotification(`Loaded ${template} income template`, 'success');
+            }
+        }
+
+        function loadEmergencyTemplate(template) {
+            const templates = {
+                'minimal': { expenses: 2000, months: 3 },
+                'standard': { expenses: 3500, months: 6 },
+                'comfortable': { expenses: 5000, months: 9 },
+                'extended': { expenses: 6000, months: 12 }
+            };
+
+            const preset = templates[template];
+            if (preset) {
+                document.getElementById('emergency-expenses').value = preset.expenses;
+                document.getElementById('emergency-months').value = preset.months;
+                showNotification(`Loaded ${template} emergency fund template`, 'success');
+            }
+        }
+
+        function resetBudgetForm() {
+            document.getElementById('monthly-income').value = '';
+            document.getElementById('monthly-expenses').value = '';
+            document.getElementById('monthly-savings').value = '';
+            document.getElementById('monthly-debt').value = '';
+            document.getElementById('budget-results').innerHTML = '<div class="text-center text-gray-500">Enter budget details and click "Calculate Personal Budget"</div>';
+            showNotification('Budget form reset', 'info');
+        }
+
+        function resetRuleForm() {
+            document.getElementById('rule-income').value = '';
+            document.getElementById('rule-results').innerHTML = '<div class="text-center text-gray-500">Enter income and click "Calculate 50/30/20 Budget"</div>';
+            showNotification('50/30/20 budget form reset', 'info');
+        }
+
+        function resetEmergencyForm() {
+            document.getElementById('emergency-expenses').value = '';
+            document.getElementById('emergency-months').value = '6';
+            document.getElementById('emergency-results').innerHTML = '<div class="text-center text-gray-500">Enter expenses and click "Calculate Emergency Fund"</div>';
+            showNotification('Emergency fund form reset', 'info');
+        }
+
+        function calculatePersonalBudget() {
+            if (!budgetPlanner) {
+                showNotification('Budget Planner not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const monthlyIncome = parseFloat(document.getElementById('monthly-income').value);
+            const monthlyExpenses = parseFloat(document.getElementById('monthly-expenses').value);
+            const monthlySavings = parseFloat(document.getElementById('monthly-savings').value);
+            const monthlyDebt = parseFloat(document.getElementById('monthly-debt').value);
+
+            if (!monthlyIncome || monthlyIncome <= 0) {
+                showNotification('Please enter a valid monthly income.', 'warning');
+                document.getElementById('monthly-income').focus();
+                return;
+            }
+
+            if (!monthlyExpenses || monthlyExpenses < 0) {
+                showNotification('Please enter valid monthly expenses.', 'warning');
+                document.getElementById('monthly-expenses').focus();
+                return;
+            }
+
+            if (!monthlySavings || monthlySavings < 0) {
+                showNotification('Please enter valid monthly savings.', 'warning');
+                document.getElementById('monthly-savings').focus();
+                return;
+            }
+
+            if (!monthlyDebt || monthlyDebt < 0) {
+                showNotification('Please enter valid monthly debt payments. Enter 0 if no debt.', 'warning');
+                document.getElementById('monthly-debt').focus();
+                return;
+            }
+
+            const calculateBtn = document.querySelector('button[onclick="calculatePersonalBudget()"]');
+            const originalHTML = calculateBtn ? calculateBtn.innerHTML : '';
+            if (calculateBtn) {
+                calculateBtn.disabled = true;
+                calculateBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Calculating...</span>';
+            }
+
+            setTimeout(() => {
+                try {
+                    const income = [{ name: 'Salary', amount: monthlyIncome }];
+                    const expenses = [{ name: 'Living Expenses', amount: monthlyExpenses, category: 'Needs' }];
+                    const savings = [{ name: 'Savings', amount: monthlySavings }];
+                    const debt = [{ name: 'Debt Payments', amount: monthlyDebt }];
+
+                    const result = budgetPlanner.createPersonalBudget(income, expenses, savings, debt);
+                    if (result.success) {
+                        showBudgetResults(result);
+                        showNotification('Budget calculated successfully!', 'success');
+                    } else {
+                        showNotification('Error calculating budget: ' + (result.error || 'Unknown error'), 'error');
+                    }
+                } catch (error) {
+                    console.error('Error in calculatePersonalBudget:', error);
+                    showNotification('Error calculating budget: ' + (error.message || 'Unknown error'), 'error');
+                } finally {
+                    if (calculateBtn) {
+                        calculateBtn.disabled = false;
+                        calculateBtn.innerHTML = originalHTML;
+                    }
+                }
+            }, 300);
+        }
+
+        function showBudgetResults(result) {
+            const currency = budgetPlanner.currencies[budgetPlanner.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            const healthScore = result.budgetHealth ? result.budgetHealth.score : 50;
+            const healthLevel = result.budgetHealth ? result.budgetHealth.healthLevel : 'Moderate';
+            const recommendations = result.budgetHealth ? result.budgetHealth.recommendations : [];
+            const healthColor = healthScore >= 80 ? 'text-green-600' : 
+                              healthScore >= 60 ? 'text-blue-600' : 
+                              healthScore >= 40 ? 'text-yellow-600' : 
+                              healthScore >= 20 ? 'text-orange-600' : 'text-red-600';
+            const healthBgColor = healthScore >= 80 ? 'bg-green-100 border-green-300' : 
+                                healthScore >= 60 ? 'bg-blue-100 border-blue-300' : 
+                                healthScore >= 40 ? 'bg-yellow-100 border-yellow-300' : 
+                                healthScore >= 20 ? 'bg-orange-100 border-orange-300' : 'bg-red-100 border-red-300';
+            
+            const savingsPercent = result.savingsRate;
+            const debtPercent = result.debtToIncomeRatio;
+            const netIncomePercent = result.totalIncome > 0 ? (result.netIncome / result.totalIncome) * 100 : 0;
+            
+            document.getElementById('budget-results').innerHTML = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 ${result.netIncome >= 0 ? 'border-green-300' : 'border-red-300'} shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💰 Net Income</span>
+                            <span class="text-2xl font-bold ${result.netIncome >= 0 ? 'text-green-600' : 'text-red-600'}">${symbol}${result.netIncome.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Income - Expenses</div>
+                        ${result.totalIncome > 0 ? `
+                            <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                <div class="${result.netIncome >= 0 ? 'bg-green-500' : 'bg-red-500'} h-2 rounded-full" style="width: ${Math.min(Math.abs(netIncomePercent), 100)}%"></div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💾 Savings Rate</span>
+                            <span class="text-xl font-bold text-blue-600">${result.savingsRate.toFixed(2)}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-blue-500 h-2 rounded-full" style="width: ${Math.min(savingsPercent, 100)}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Target: 20% or higher</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-purple-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💳 Debt-to-Income Ratio</span>
+                            <span class="text-xl font-bold text-purple-600">${result.debtToIncomeRatio.toFixed(2)}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-purple-500 h-2 rounded-full" style="width: ${Math.min(debtPercent, 100)}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Target: Below 30%</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-5 border-2 ${healthBgColor} shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📊 Budget Health Score</span>
+                            <span class="text-2xl font-bold ${healthColor}">${healthScore.toFixed(1)}/100</span>
+                        </div>
+                        <div class="text-sm font-medium ${healthColor} mb-2">${healthLevel}</div>
+                        <div class="w-full bg-gray-200 rounded-full h-3 mt-2">
+                            <div class="bg-gradient-to-r ${healthScore >= 80 ? 'from-green-500 to-green-600' : healthScore >= 60 ? 'from-blue-500 to-blue-600' : healthScore >= 40 ? 'from-yellow-500 to-yellow-600' : healthScore >= 20 ? 'from-orange-500 to-orange-600' : 'from-red-500 to-red-600'} h-3 rounded-full" style="width: ${healthScore}%"></div>
+                        </div>
+                    </div>
+                    
+                    ${recommendations.length > 0 ? `
+                        <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg p-4 border-2 border-yellow-200 shadow-sm">
+                            <div class="text-sm font-semibold text-yellow-800 mb-2">💡 Recommendations</div>
+                            <ul class="text-xs text-yellow-700 space-y-1">
+                                ${recommendations.map(rec => `<li class="flex items-start gap-2"><span>•</span><span>${rec}</span></li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-3 border border-gray-200">
+                        <div class="text-xs font-semibold text-gray-700 mb-2">📈 Budget Breakdown</div>
+                        <div class="text-xs text-gray-600 space-y-1">
+                            <div class="flex justify-between">
+                                <span>Total Income:</span>
+                                <span class="font-semibold">${symbol}${result.totalIncome.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Total Expenses:</span>
+                                <span class="font-semibold">${symbol}${result.totalExpenses.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Total Savings:</span>
+                                <span class="font-semibold text-green-600">${symbol}${result.totalSavings.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Total Debt:</span>
+                                <span class="font-semibold text-red-600">${symbol}${result.totalDebt.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function calculate502030Budget() {
+            if (!budgetPlanner) {
+                showNotification('Budget Planner not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const income = parseFloat(document.getElementById('rule-income').value);
+
+            if (!income || income <= 0) {
+                showNotification('Please enter a valid monthly income.', 'warning');
+                document.getElementById('rule-income').focus();
+                return;
+            }
+
+            const calculateBtn = document.querySelector('button[onclick="calculate502030Budget()"]');
+            const originalHTML = calculateBtn ? calculateBtn.innerHTML : '';
+            if (calculateBtn) {
+                calculateBtn.disabled = true;
+                calculateBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Calculating...</span>';
+            }
+
+            setTimeout(() => {
+                try {
+                    const result = budgetPlanner.calculate502030Budget(income);
+                    if (result.success) {
+                        show502030Results(result);
+                        showNotification('50/30/20 budget calculated successfully!', 'success');
+                    } else {
+                        showNotification('Error calculating 50/30/20 budget: ' + (result.error || 'Unknown error'), 'error');
+                    }
+                } catch (error) {
+                    console.error('Error in calculate502030Budget:', error);
+                    showNotification('Error calculating 50/30/20 budget: ' + (error.message || 'Unknown error'), 'error');
+                } finally {
+                    if (calculateBtn) {
+                        calculateBtn.disabled = false;
+                        calculateBtn.innerHTML = originalHTML;
+                    }
+                }
+            }, 300);
+        }
+
+        function show502030Results(result) {
+            const currency = budgetPlanner.currencies[budgetPlanner.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            
+            document.getElementById('rule-results').innerHTML = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 border-red-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">🏠 Needs (50%)</span>
+                            <span class="text-2xl font-bold text-red-600">${symbol}${result.needs.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-red-500 h-2 rounded-full" style="width: 50%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Housing, food, utilities, insurance</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-5 border-2 border-blue-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">🎯 Wants (30%)</span>
+                            <span class="text-2xl font-bold text-blue-600">${symbol}${result.wants.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-blue-500 h-2 rounded-full" style="width: 30%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Entertainment, dining out, hobbies</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-5 border-2 border-green-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💰 Savings (20%)</span>
+                            <span class="text-2xl font-bold text-green-600">${symbol}${result.savings.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: 20%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Emergency fund, retirement, investments</div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4 border-2 border-blue-200 shadow-sm">
+                        <div class="text-xs font-semibold text-gray-700 mb-2">💡 Budget Breakdown</div>
+                        <div class="flex items-center gap-2">
+                            <div class="flex-1 bg-red-500 rounded h-2" style="width: 50%"></div>
+                            <span class="text-xs text-gray-600">50% Needs</span>
+                        </div>
+                        <div class="flex items-center gap-2 mt-1">
+                            <div class="flex-1 bg-blue-500 rounded h-2" style="width: 30%"></div>
+                            <span class="text-xs text-gray-600">30% Wants</span>
+                        </div>
+                        <div class="flex items-center gap-2 mt-1">
+                            <div class="flex-1 bg-green-500 rounded h-2" style="width: 20%"></div>
+                            <span class="text-xs text-gray-600">20% Savings</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function calculateEmergencyFund() {
+            if (!budgetPlanner) {
+                showNotification('Budget Planner not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const monthlyExpenses = parseFloat(document.getElementById('emergency-expenses').value);
+            const months = parseInt(document.getElementById('emergency-months').value);
+
+            if (!monthlyExpenses || monthlyExpenses <= 0) {
+                showNotification('Please enter valid monthly expenses.', 'warning');
+                document.getElementById('emergency-expenses').focus();
+                return;
+            }
+
+            const calculateBtn = document.querySelector('button[onclick="calculateEmergencyFund()"]');
+            const originalHTML = calculateBtn ? calculateBtn.innerHTML : '';
+            if (calculateBtn) {
+                calculateBtn.disabled = true;
+                calculateBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Calculating...</span>';
+            }
+
+            setTimeout(() => {
+                try {
+                    const result = budgetPlanner.calculateEmergencyFund(monthlyExpenses, months);
+                    if (result.success) {
+                        showEmergencyResults(result);
+                        showNotification('Emergency fund calculated successfully!', 'success');
+                    } else {
+                        showNotification('Error calculating emergency fund: ' + (result.error || 'Unknown error'), 'error');
+                    }
+                } catch (error) {
+                    console.error('Error in calculateEmergencyFund:', error);
+                    showNotification('Error calculating emergency fund: ' + (error.message || 'Unknown error'), 'error');
+                } finally {
+                    if (calculateBtn) {
+                        calculateBtn.disabled = false;
+                        calculateBtn.innerHTML = originalHTML;
+                    }
+                }
+            }, 300);
+        }
+
+        function showEmergencyResults(result) {
+            const currency = budgetPlanner.currencies[budgetPlanner.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            
+            const progressPercent = result.months <= 12 ? (result.months / 12) * 100 : 100;
+            
+            document.getElementById('emergency-results').innerHTML = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 border-green-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">🎯 Emergency Fund Goal</span>
+                            <span class="text-2xl font-bold text-green-600">${symbol}${result.emergencyFund.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Cover ${result.months} months of expenses</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📅 Monthly Savings Needed</span>
+                            <span class="text-xl font-bold text-blue-600">${symbol}${result.monthlySavings.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">To build fund in 1 year</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-purple-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📆 Weekly Savings Needed</span>
+                            <span class="text-xl font-bold text-purple-600">${symbol}${result.weeklySavings.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Weekly contribution</div>
+                    </div>
+                    
+                    ${result.dailySavings ? `
+                        <div class="bg-white rounded-lg p-4 border-2 border-cyan-300 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-gray-600">📊 Daily Savings Needed</span>
+                                <span class="text-lg font-bold text-cyan-600">${symbol}${result.dailySavings.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">Daily contribution</div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border-2 border-green-200 shadow-sm">
+                        <div class="text-xs font-semibold text-gray-700 mb-2">💡 Emergency Fund Info</div>
+                        <div class="text-xs text-gray-600 space-y-1">
+                            <div>📊 Coverage: ${result.months} months</div>
+                            <div>💰 Monthly Expenses: ${symbol}${result.monthlyExpenses.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                            <div class="mt-2 pt-2 border-t border-green-200">
+                                ${result.months >= 6 ? '✅ Recommended: 6+ months coverage' : '⚠️ Consider: 6+ months for better security'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeBudgetPlanner();
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        const availableTools = [
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', pageUrl: '/tools/age-calculator.html' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', pageUrl: '/tools/bmi-calculator.html' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', pageUrl: '/tools/loan-calculator.html' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', pageUrl: '/tools/investment-calculator.html' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', pageUrl: '/tools/tax-calculator.html' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', pageUrl: '/tools/business-metrics.html' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', pageUrl: '/tools/currency-converter.html' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', pageUrl: '/tools/retirement-calculator.html' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', pageUrl: '/tools/mortgage-calculator.html' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', modalId: 'salary-calculator-modal' },
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', modalId: 'json-formatter-modal' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', modalId: 'xml-formatter-modal' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', modalId: 'base64-encoder-modal' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', modalId: 'hash-generator-modal' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', modalId: 'url-encoder-modal' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', modalId: 'regex-tester-modal' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', modalId: 'css-js-minifier-modal' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', modalId: 'color-palette-modal' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', modalId: 'lorem-ipsum-modal' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            btnEl.dataset.modalId = tool.modalId || '';
+            btnEl.dataset.pageUrl = tool.pageUrl || '';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            const modalId = btnEl.dataset.modalId;
+            const pageUrl = btnEl.dataset.pageUrl;
+            
+            if (pageUrl) {
+                window.location.href = pageUrl;
+            } else if (modalId && typeof openModal === 'function') {
+                window.location.href = `/#${modalId}`;
+            } else {
+                window.location.href = '/#tools';
+            }
+        }
+        
+        function initToolSuggestions() {
+            updateToolSuggestion();
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        #tool-suggestion-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+        
+        @keyframes slide-in {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slide-out {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        .animate-slide-in {
+            animation: slide-in 0.3s ease-out;
+        }
+        
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in {
+            animation: fade-in 0.5s ease-out;
+        }
+    </style>
+</body>
+</html>
+
+

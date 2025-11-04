@@ -1,0 +1,2405 @@
+        // ============================================
+        // WEATHER WIDGET FUNCTIONALITY
+        // ============================================
+        
+        // Weather widget state
+        let weatherData = null;
+        let userLocation = null;
+        let locationName = null;
+        let permissionAsked = false;
+        
+        // Initialize weather widget
+        function initWeatherWidget() {
+            // Ensure DOM elements exist before initializing
+            const weatherWidget = document.getElementById('weather-widget');
+            const mobileWeatherWidget = document.getElementById('mobile-weather-widget');
+            
+            if (!weatherWidget && !mobileWeatherWidget) {
+                console.warn('Weather widget elements not found, retrying in 500ms...');
+                setTimeout(() => initWeatherWidget(), 500);
+                return;
+            }
+            
+            updateTimeAndDate();
+            getLocationAndWeather();
+            initWeatherWidgetInteractivity();
+            
+            // Update time every second
+            setInterval(updateTimeAndDate, 1000);
+            
+            // Update weather every 10 minutes
+            setInterval(getLocationAndWeather, 600000);
+        }
+        
+        // Update time and date display
+        function updateTimeAndDate() {
+            const now = new Date();
+            
+            // Desktop elements
+            const timeElement = document.getElementById('current-time');
+            const dateElement = document.getElementById('current-date');
+            
+            // Mobile elements
+            const mobileTimeElement = document.getElementById('mobile-current-time');
+            const mobileDateElement = document.getElementById('mobile-current-date');
+            
+            // Format time (12-hour format with AM/PM)
+            const timeOptions = { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            };
+            const timeString = now.toLocaleTimeString('en-US', timeOptions);
+            
+            // Format date
+            const dateOptions = { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+            };
+            const dateString = now.toLocaleDateString('en-US', dateOptions);
+            
+            // Update desktop elements
+            if (timeElement && dateElement) {
+                timeElement.textContent = timeString;
+                dateElement.textContent = dateString;
+            }
+            
+            // Update mobile elements
+            if (mobileTimeElement && mobileDateElement) {
+                mobileTimeElement.textContent = timeString;
+                mobileDateElement.textContent = dateString;
+            }
+        }
+        
+        // Get user location and fetch weather
+        async function getLocationAndWeather() {
+            try {
+                // Check if permission was already asked and denied (persist across pages)
+                const storedPermissionStatus = localStorage.getItem('weatherPermissionStatus');
+                if (storedPermissionStatus === 'denied') {
+                    // User previously denied permission, use default location without asking again
+                    console.log('Location permission was previously denied, using default location');
+                    const defaultLocation = { lat: 40.7128, lon: -74.0060 }; // Default: New York
+                    userLocation = defaultLocation;
+                    await getLocationName(defaultLocation.lat, defaultLocation.lon);
+                    await fetchWeatherData(defaultLocation.lat, defaultLocation.lon);
+                    await updateAstronomicalData(defaultLocation.lat, defaultLocation.lon);
+                    return;
+                }
+                
+                // Check if we have a stored location from previous permission grant
+                const storedLocation = localStorage.getItem('userLocation');
+                if (storedLocation) {
+                    try {
+                        const location = JSON.parse(storedLocation);
+                        const locationAge = Date.now() - (location.timestamp || 0);
+                        // Use stored location if it's less than 1 hour old
+                        if (locationAge < 3600000 && location.lat && location.lon) {
+                            userLocation = { lat: location.lat, lon: location.lon };
+                            
+                            // Always fetch fresh location name and weather data
+                            // This ensures accurate data even when using stored coordinates
+                            await getLocationName(location.lat, location.lon);
+                            
+                            // Update stored location with fresh name if it changed
+                            if (locationName && locationName !== location.locationName) {
+                                localStorage.setItem('userLocation', JSON.stringify({
+                                    lat: location.lat,
+                                    lon: location.lon,
+                                    locationName: locationName,
+                                    timestamp: Date.now()
+                                }));
+                            }
+                            
+                            // Always fetch fresh weather data
+                            await fetchWeatherData(location.lat, location.lon);
+                            await updateAstronomicalData(location.lat, location.lon);
+                            return;
+                        } else {
+                            // Stored location is too old, clear it
+                            localStorage.removeItem('userLocation');
+                        }
+                    } catch (e) {
+                        console.log('Could not parse stored location, requesting new');
+                        localStorage.removeItem('userLocation');
+                    }
+                }
+                
+                // Check if permission was already asked in this session
+                const sessionPermission = sessionStorage.getItem('weatherPermissionAsked');
+                if (sessionPermission === 'true') {
+                    permissionAsked = true;
+                }
+                
+                // Show loading state for desktop
+                const weatherDesc = document.getElementById('weather-desc');
+                if (weatherDesc) {
+                    weatherDesc.textContent = 'Getting location...';
+                    weatherDesc.classList.add('weather-loading');
+                }
+                
+                // Show loading state for mobile
+                const mobileWeatherDesc = document.getElementById('mobile-weather-desc');
+                if (mobileWeatherDesc) {
+                    mobileWeatherDesc.textContent = 'Getting location...';
+                    mobileWeatherDesc.classList.add('weather-loading');
+                }
+                
+                // Get user's location with smart permission handling
+                const position = await getCurrentPosition();
+                userLocation = {
+                    lat: position.coords.latitude,
+                    lon: position.coords.longitude
+                };
+                
+                // Get location name using reverse geocoding first
+                await getLocationName(userLocation.lat, userLocation.lon);
+                
+                // Store location for future use (persists across pages)
+                localStorage.setItem('userLocation', JSON.stringify({
+                    lat: userLocation.lat,
+                    lon: userLocation.lon,
+                    locationName: locationName, // Store the resolved location name
+                    timestamp: Date.now()
+                }));
+                
+                // Fetch weather data
+                await fetchWeatherData(userLocation.lat, userLocation.lon);
+                
+                // Update astronomical and environmental data
+                await updateAstronomicalData(userLocation.lat, userLocation.lon);
+                
+            } catch (error) {
+                console.error('Weather widget error:', error);
+                showWeatherError();
+            }
+        }
+        
+        // Get current position with fallback
+        function getCurrentPosition() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error('Geolocation not supported'));
+                    return;
+                }
+                
+                // Check if permission was already denied (don't ask again)
+                const storedPermissionStatus = localStorage.getItem('weatherPermissionStatus');
+                if (storedPermissionStatus === 'denied') {
+                    // User previously denied, use default without asking
+                    console.log('Location permission previously denied, using default');
+                    resolve({
+                        coords: {
+                            latitude: 40.7128,
+                            longitude: -74.0060
+                        }
+                    });
+                    return;
+                }
+                
+                // Only mark as asked if we haven't asked before
+                if (!permissionAsked) {
+                    sessionStorage.setItem('weatherPermissionAsked', 'true');
+                    permissionAsked = true;
+                }
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        // Permission granted - store status
+                        localStorage.setItem('weatherPermissionStatus', 'granted');
+                        resolve(position);
+                    },
+                    (error) => {
+                        // Permission denied or error - store status and use default
+                        console.warn('Location access denied or error:', error.message);
+                        localStorage.setItem('weatherPermissionStatus', 'denied');
+                        
+                        // Use default location (New York) as fallback
+                        resolve({
+                            coords: {
+                                latitude: 40.7128,
+                                longitude: -74.0060
+                            }
+                        });
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 300000 // 5 minutes
+                    }
+                );
+            });
+        }
+        
+        // Get location name using reverse geocoding
+        async function getLocationName(lat, lon) {
+            try {
+                // Try browser timezone first (fastest, free)
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const cityFromTimezone = timezone.split('/').pop().replace('_', ' ');
+                
+                // Update location display with timezone-based name
+                updateLocationDisplay(cityFromTimezone);
+                
+                // Try reverse geocoding for more accurate location name
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.address) {
+                        const city = data.address.city || data.address.town || data.address.village || data.address.municipality;
+                        const country = data.address.country;
+                        const state = data.address.state || data.address.region || data.address.province;
+                        
+                        let locationString = '';
+                        // Build location string: City, State, Country
+                        if (city && country) {
+                            if (state) {
+                                locationString = `${city}, ${state}, ${country}`;
+                            } else {
+                                locationString = `${city}, ${country}`;
+                            }
+                        } else if (city) {
+                            locationString = city;
+                        } else if (state && country) {
+                            locationString = `${state}, ${country}`;
+                        } else {
+                            locationString = cityFromTimezone;
+                        }
+                        
+                        locationName = locationString;
+                        updateLocationDisplay(locationString);
+                    }
+                }
+            } catch (error) {
+                console.warn('Reverse geocoding failed, using timezone-based location');
+                // Fallback to timezone-based location name
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const cityFromTimezone = timezone.split('/').pop().replace('_', ' ');
+                updateLocationDisplay(cityFromTimezone);
+            }
+        }
+        
+        // Update location display in both desktop and mobile widgets
+        function updateLocationDisplay(locationText) {
+            if (!locationText) {
+                console.warn('No location text provided to updateLocationDisplay');
+                return;
+            }
+            
+            // Desktop elements
+            const locationNameElement = document.getElementById('location-name');
+            const weatherLocationElement = document.getElementById('weather-location');
+            
+            if (locationNameElement) {
+                locationNameElement.textContent = locationText;
+                // Add slide-in animation
+                if (weatherLocationElement) {
+                    weatherLocationElement.classList.add('location-slide-in');
+                    setTimeout(() => {
+                        weatherLocationElement.classList.remove('location-slide-in');
+                    }, 500);
+                }
+            } else {
+                console.warn('Desktop location element not found, will retry');
+            }
+            
+            // Mobile elements
+            const mobileLocationNameElement = document.getElementById('mobile-location-name');
+            const mobileWeatherLocationElement = document.getElementById('mobile-weather-location');
+            
+            if (mobileLocationNameElement) {
+                mobileLocationNameElement.textContent = locationText;
+                // Add slide-in animation
+                if (mobileWeatherLocationElement) {
+                    mobileWeatherLocationElement.classList.add('location-slide-in');
+                    setTimeout(() => {
+                        mobileWeatherLocationElement.classList.remove('location-slide-in');
+                    }, 500);
+                }
+            } else {
+                console.warn('Mobile location element not found, will retry');
+            }
+        }
+        
+        // Fetch weather data from OpenWeatherMap API
+        async function fetchWeatherData(lat, lon) {
+            try {
+                // Using a free weather API (OpenWeatherMap)
+                const API_KEY = 'demo'; // You can get a free API key from OpenWeatherMap
+                const API_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
+                
+                // For demo purposes, we'll use a mock weather service
+                // In production, replace with actual API call
+                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`);
+                
+                if (!response.ok) {
+                    throw new Error('Weather API error');
+                }
+                
+                const data = await response.json();
+                updateWeatherDisplay(data);
+                
+            } catch (error) {
+                console.error('Weather fetch error:', error);
+                // Fallback to mock data for demo
+                updateWeatherDisplay(getMockWeatherData());
+            }
+        }
+        
+        // Update weather display
+        function updateWeatherDisplay(data) {
+            // Desktop elements
+            const weatherIcon = document.getElementById('weather-icon');
+            const weatherTemp = document.getElementById('weather-temp');
+            const weatherDesc = document.getElementById('weather-desc');
+            
+            // Mobile elements
+            const mobileWeatherIcon = document.getElementById('mobile-weather-icon');
+            const mobileWeatherTemp = document.getElementById('mobile-weather-temp');
+            const mobileWeatherDesc = document.getElementById('mobile-weather-desc');
+            
+            // Get weather data
+            const temp = data.current_weather ? data.current_weather.temperature : 22;
+            const weatherCode = data.current_weather ? data.current_weather.weathercode : 0;
+            const description = getWeatherDescription(weatherCode);
+            const icon = getWeatherIcon(weatherCode);
+            const tempString = `${Math.round(temp)}°C`;
+            
+            // Update desktop elements
+            if (weatherIcon && weatherTemp && weatherDesc) {
+                weatherDesc.classList.remove('weather-loading');
+                weatherTemp.textContent = tempString;
+                weatherDesc.textContent = description;
+                weatherIcon.textContent = icon;
+            }
+            
+            // Update mobile elements
+            if (mobileWeatherIcon && mobileWeatherTemp && mobileWeatherDesc) {
+                mobileWeatherDesc.classList.remove('weather-loading');
+                mobileWeatherTemp.textContent = tempString;
+                mobileWeatherDesc.textContent = description;
+                mobileWeatherIcon.textContent = icon;
+            }
+        }
+        
+        // Get weather description from weather code
+        function getWeatherDescription(code) {
+            const descriptions = {
+                0: 'Clear sky',
+                1: 'Mainly clear',
+                2: 'Partly cloudy',
+                3: 'Overcast',
+                45: 'Fog',
+                48: 'Depositing rime fog',
+                51: 'Light drizzle',
+                53: 'Moderate drizzle',
+                55: 'Dense drizzle',
+                61: 'Slight rain',
+                63: 'Moderate rain',
+                65: 'Heavy rain',
+                71: 'Slight snow',
+                73: 'Moderate snow',
+                75: 'Heavy snow',
+                80: 'Rain showers',
+                81: 'Moderate rain showers',
+                82: 'Violent rain showers',
+                95: 'Thunderstorm',
+                96: 'Thunderstorm with hail',
+                99: 'Heavy thunderstorm with hail'
+            };
+            return descriptions[code] || 'Unknown';
+        }
+        
+        // Get weather icon from weather code
+        function getWeatherIcon(code) {
+            const icons = {
+                0: '☀️', // Clear sky
+                1: '🌤️', // Mainly clear
+                2: '⛅', // Partly cloudy
+                3: '☁️', // Overcast
+                45: '🌫️', // Fog
+                48: '🌫️', // Fog
+                51: '🌦️', // Light drizzle
+                53: '🌦️', // Moderate drizzle
+                55: '🌧️', // Dense drizzle
+                61: '🌦️', // Slight rain
+                63: '🌧️', // Moderate rain
+                65: '🌧️', // Heavy rain
+                71: '🌨️', // Slight snow
+                73: '🌨️', // Moderate snow
+                75: '🌨️', // Heavy snow
+                80: '🌦️', // Rain showers
+                81: '🌧️', // Moderate rain showers
+                82: '🌧️', // Violent rain showers
+                95: '⛈️', // Thunderstorm
+                96: '⛈️', // Thunderstorm with hail
+                99: '⛈️' // Heavy thunderstorm with hail
+            };
+            return icons[code] || '🌤️';
+        }
+        
+        // Show weather error state
+        function showWeatherError() {
+            // Desktop elements
+            const weatherDesc = document.getElementById('weather-desc');
+            const weatherTemp = document.getElementById('weather-temp');
+            const weatherIcon = document.getElementById('weather-icon');
+            const locationNameElement = document.getElementById('location-name');
+            
+            // Mobile elements
+            const mobileWeatherDesc = document.getElementById('mobile-weather-desc');
+            const mobileWeatherTemp = document.getElementById('mobile-weather-temp');
+            const mobileWeatherIcon = document.getElementById('mobile-weather-icon');
+            const mobileLocationNameElement = document.getElementById('mobile-location-name');
+            
+            // Update desktop elements
+            if (weatherDesc) {
+                weatherDesc.textContent = 'Location unavailable';
+                weatherDesc.classList.remove('weather-loading');
+            }
+            if (weatherTemp) {
+                weatherTemp.textContent = '--°C';
+            }
+            if (weatherIcon) {
+                weatherIcon.textContent = '❓';
+            }
+            if (locationNameElement) {
+                locationNameElement.textContent = 'Location unavailable';
+            }
+            
+            // Update mobile elements
+            if (mobileWeatherDesc) {
+                mobileWeatherDesc.textContent = 'Location unavailable';
+                mobileWeatherDesc.classList.remove('weather-loading');
+            }
+            if (mobileWeatherTemp) {
+                mobileWeatherTemp.textContent = '--°C';
+            }
+            if (mobileWeatherIcon) {
+                mobileWeatherIcon.textContent = '❓';
+            }
+            if (mobileLocationNameElement) {
+                mobileLocationNameElement.textContent = 'Location unavailable';
+            }
+        }
+        
+        // Mock weather data for demo purposes
+        function getMockWeatherData() {
+            const weatherCodes = [0, 1, 2, 3, 45, 61, 63, 65, 71, 73, 80, 95];
+            const randomCode = weatherCodes[Math.floor(Math.random() * weatherCodes.length)];
+            const randomTemp = Math.floor(Math.random() * 30) + 5; // 5-35°C
+            
+            return {
+                current_weather: {
+                    temperature: randomTemp,
+                    weathercode: randomCode
+                }
+            };
+        }
+        
+        // Weather widget flip and state management
+        let weatherWidgetFlipInterval = null;
+        let isDesktopWeatherFlipped = false;
+        let isMobileWeatherFlipped = false;
+        
+        // Calculate moon phase
+        function calculateMoonPhase(date = new Date()) {
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            
+            // Calculate days since last known new moon (January 6, 2000)
+            const knownNewMoon = new Date(2000, 0, 6);
+            const daysSinceNewMoon = Math.floor((date - knownNewMoon) / (1000 * 60 * 60 * 24));
+            const moonCycle = 29.53058867; // Average lunar cycle in days
+            const phase = (daysSinceNewMoon % moonCycle) / moonCycle;
+            
+            // Moon phase icons
+            const phases = {
+                0: '🌑', // New Moon
+                0.0625: '🌒', // Waxing Crescent
+                0.25: '🌓', // First Quarter
+                0.375: '🌔', // Waxing Gibbous
+                0.5: '🌕', // Full Moon
+                0.625: '🌖', // Waning Gibbous
+                0.75: '🌗', // Last Quarter
+                0.875: '🌘' // Waning Crescent
+            };
+            
+            if (phase < 0.03125 || phase >= 0.96875) return { icon: '🌑', name: 'New' };
+            if (phase < 0.125) return { icon: '🌒', name: 'Waxing Crescent' };
+            if (phase < 0.3125) return { icon: '🌓', name: 'First Quarter' };
+            if (phase < 0.4375) return { icon: '🌔', name: 'Waxing Gibbous' };
+            if (phase < 0.5625) return { icon: '🌕', name: 'Full' };
+            if (phase < 0.6875) return { icon: '🌖', name: 'Waning Gibbous' };
+            if (phase < 0.8125) return { icon: '🌗', name: 'Last Quarter' };
+            return { icon: '🌘', name: 'Waning Crescent' };
+        }
+        
+        // Calculate sunrise and sunset times using API or fallback to calculation
+        async function calculateSunriseSunset(lat, lon, date = new Date()) {
+            try {
+                // Try to fetch from Open-Meteo API (more accurate)
+                const dateStr = date.toISOString().split('T')[0];
+                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset&timezone=auto&start_date=${dateStr}&end_date=${dateStr}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.daily && data.daily.sunrise && data.daily.sunset && data.daily.sunrise[0]) {
+                        const sunrise = new Date(data.daily.sunrise[0]);
+                        const sunset = new Date(data.daily.sunset[0]);
+                        
+                        return {
+                            sunrise: formatTimeFromDate(sunrise),
+                            sunset: formatTimeFromDate(sunset)
+                        };
+                    }
+                }
+            } catch (error) {
+                console.warn('Sunrise/sunset API failed, using calculation');
+            }
+            
+            // Fallback to calculation
+            return calculateSunriseSunsetLocal(lat, lon, date);
+        }
+        
+        // Local calculation fallback
+        function calculateSunriseSunsetLocal(lat, lon, date = new Date()) {
+            // Convert latitude to radians
+            const latRad = lat * Math.PI / 180;
+            
+            // Calculate day of year
+            const startOfYear = new Date(date.getFullYear(), 0, 1);
+            const dayOfYear = Math.floor((date - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+            
+            // Solar declination in radians
+            const declinationRad = 23.45 * Math.sin((360 * (284 + dayOfYear) / 365) * Math.PI / 180) * Math.PI / 180;
+            
+            // Hour angle for sunrise/sunset (when sun is at horizon)
+            const cosHourAngle = -Math.tan(latRad) * Math.tan(declinationRad);
+            
+            // Handle polar day/night (no sunrise/sunset)
+            if (cosHourAngle >= 1) {
+                return { sunrise: '--:--', sunset: '--:--' }; // Polar night
+            }
+            if (cosHourAngle <= -1) {
+                return { sunrise: '--:--', sunset: '--:--' }; // Polar day
+            }
+            
+            const hourAngle = Math.acos(cosHourAngle);
+            
+            // Equation of time (in minutes)
+            const B = (360 * (dayOfYear - 81)) / 365;
+            const equationOfTime = 9.87 * Math.sin(2 * B * Math.PI / 180) - 7.53 * Math.cos(B * Math.PI / 180) - 1.5 * Math.sin(B * Math.PI / 180);
+            
+            // Get timezone offset in hours
+            const tzOffset = date.getTimezoneOffset() / 60;
+            
+            // Time offset for longitude (each degree = 4 minutes)
+            const timeOffset = (lon / 15) * 60; // in minutes
+            
+            // Solar noon (in minutes from midnight UTC)
+            const solarNoon = 12 * 60 + equationOfTime - timeOffset;
+            
+            // Sunrise and sunset times (in minutes from midnight UTC)
+            const hourAngleInMinutes = (hourAngle * 180 / Math.PI);
+            const sunriseMinutes = solarNoon - hourAngleInMinutes;
+            const sunsetMinutes = solarNoon + hourAngleInMinutes;
+            
+            // Convert to hours and minutes with timezone adjustment
+            const formatTime = (minutes) => {
+                // Normalize to 0-1439 range (minutes in a day)
+                let mins = minutes % 1440;
+                if (mins < 0) mins += 1440;
+                
+                const hours = Math.floor(mins / 60);
+                const minsRemainder = Math.round(mins % 60);
+                
+                return `${String(hours).padStart(2, '0')}:${String(minsRemainder).padStart(2, '0')}`;
+            };
+            
+            return {
+                sunrise: formatTime(sunriseMinutes),
+                sunset: formatTime(sunsetMinutes)
+            };
+        }
+        
+        // Format time from Date object
+        function formatTimeFromDate(date) {
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        }
+        
+        // Get environmental data (AQI, UV Index, Humidity)
+        async function getEnvironmentalData(lat, lon) {
+            try {
+                // Try to fetch from Open-Meteo (includes UV index)
+                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=relativehumidity_2m,uv_index&current_weather=true`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const humidity = data.hourly?.relativehumidity_2m?.[0] || 65;
+                    const uvIndex = data.hourly?.uv_index?.[0] || 5;
+                    
+                    // Calculate AQI (simplified - in real app, use proper AQI API)
+                    const aqi = Math.floor(Math.random() * 50) + 20; // Mock AQI for now
+                    
+                    return {
+                        aqi: aqi,
+                        uvIndex: Math.round(uvIndex),
+                        humidity: Math.round(humidity)
+                    };
+                }
+            } catch (error) {
+                console.warn('Environmental data fetch failed, using defaults');
+            }
+            
+            // Fallback to mock data
+            return {
+                aqi: Math.floor(Math.random() * 50) + 20,
+                uvIndex: Math.floor(Math.random() * 10) + 1,
+                humidity: Math.floor(Math.random() * 40) + 40
+            };
+        }
+        
+        // Get space fact of the day
+        function getSpaceFactOfDay() {
+            const today = new Date();
+            const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+            const factIndex = dayOfYear % spaceFactsDatabase.length;
+            return spaceFactsDatabase[factIndex];
+        }
+        
+        // Update astronomical and environmental data
+        async function updateAstronomicalData(lat, lon) {
+            // Moon phase
+            const moonPhase = calculateMoonPhase();
+            
+            // Sunrise/Sunset (async API call)
+            const sunTimes = await calculateSunriseSunset(lat, lon);
+            
+            // Environmental data
+            const envData = await getEnvironmentalData(lat, lon);
+            
+            // Space fact
+            const spaceFact = getSpaceFactOfDay();
+            
+            // Update desktop elements
+            const moonPhaseEl = document.getElementById('moon-phase');
+            const sunriseEl = document.getElementById('sunrise-time');
+            const sunsetEl = document.getElementById('sunset-time');
+            const aqiEl = document.getElementById('aqi-value');
+            const uvEl = document.getElementById('uv-index');
+            const humidityEl = document.getElementById('humidity-value');
+            const spaceFactEl = document.getElementById('space-fact-display');
+            
+            if (moonPhaseEl) moonPhaseEl.textContent = moonPhase.icon;
+            if (sunriseEl) sunriseEl.textContent = sunTimes.sunrise;
+            if (sunsetEl) sunsetEl.textContent = sunTimes.sunset;
+            if (aqiEl) aqiEl.textContent = envData.aqi;
+            if (uvEl) uvEl.textContent = envData.uvIndex;
+            if (humidityEl) humidityEl.textContent = `${envData.humidity}%`;
+            if (spaceFactEl) spaceFactEl.textContent = spaceFact;
+            
+            // Update mobile elements
+            const mobileMoonPhaseEl = document.getElementById('mobile-moon-phase');
+            const mobileSunriseEl = document.getElementById('mobile-sunrise-time');
+            const mobileSunsetEl = document.getElementById('mobile-sunset-time');
+            const mobileAqiEl = document.getElementById('mobile-aqi-value');
+            const mobileUvEl = document.getElementById('mobile-uv-index');
+            const mobileHumidityEl = document.getElementById('mobile-humidity-value');
+            const mobileSpaceFactEl = document.getElementById('mobile-space-fact-display');
+            
+            if (mobileMoonPhaseEl) mobileMoonPhaseEl.textContent = moonPhase.icon;
+            if (mobileSunriseEl) mobileSunriseEl.textContent = sunTimes.sunrise;
+            if (mobileSunsetEl) mobileSunsetEl.textContent = sunTimes.sunset;
+            if (mobileAqiEl) mobileAqiEl.textContent = envData.aqi;
+            if (mobileUvEl) mobileUvEl.textContent = envData.uvIndex;
+            if (mobileHumidityEl) mobileHumidityEl.textContent = `${envData.humidity}%`;
+            if (mobileSpaceFactEl) mobileSpaceFactEl.textContent = spaceFact;
+        }
+        
+        // Flip weather widget
+        function flipWeatherWidget(isDesktop = true) {
+            const flipElement = isDesktop 
+                ? document.getElementById('weather-widget-flip')
+                : document.getElementById('mobile-weather-widget-flip');
+            
+            const dot1 = isDesktop 
+                ? document.getElementById('weather-dot-1')
+                : document.getElementById('mobile-weather-dot-1');
+            
+            const dot2 = isDesktop 
+                ? document.getElementById('weather-dot-2')
+                : document.getElementById('mobile-weather-dot-2');
+            
+            if (!flipElement) return;
+            
+            if (isDesktop) {
+                isDesktopWeatherFlipped = !isDesktopWeatherFlipped;
+                flipElement.classList.toggle('flipped', isDesktopWeatherFlipped);
+            } else {
+                isMobileWeatherFlipped = !isMobileWeatherFlipped;
+                flipElement.classList.toggle('flipped', isMobileWeatherFlipped);
+            }
+            
+            // Update indicator dots
+            if (dot1 && dot2) {
+                if (isDesktop ? isDesktopWeatherFlipped : isMobileWeatherFlipped) {
+                    dot1.classList.remove('active');
+                    dot2.classList.add('active');
+                } else {
+                    dot1.classList.add('active');
+                    dot2.classList.remove('active');
+                }
+            }
+        }
+        
+        // Start auto-rotate for weather widget
+        function startWeatherWidgetAutoRotate() {
+            if (weatherWidgetFlipInterval) {
+                clearInterval(weatherWidgetFlipInterval);
+            }
+            
+            weatherWidgetFlipInterval = setInterval(() => {
+                // Flip desktop widget
+                flipWeatherWidget(true);
+                
+                // Flip mobile widget independently
+                setTimeout(() => {
+                    flipWeatherWidget(false);
+                }, 100);
+            }, 10000); // 10 seconds delay
+        }
+        
+        // Add click handlers for weather widget
+        function initWeatherWidgetInteractivity() {
+            // Desktop widget click handler
+            const desktopWidget = document.getElementById('weather-widget');
+            if (desktopWidget) {
+                desktopWidget.addEventListener('click', () => flipWeatherWidget(true));
+            }
+            
+            // Mobile widget click handler
+            const mobileWidget = document.getElementById('mobile-weather-widget');
+            if (mobileWidget) {
+                mobileWidget.addEventListener('click', () => flipWeatherWidget(false));
+            }
+            
+            // Start auto-rotation
+            startWeatherWidgetAutoRotate();
+        }
+        
+        // ============================================
+        // WORD OF THE DAY WIDGET FUNCTIONALITY
+        // ============================================
+        
+        // Word of the Day Database (365 words - one for each day)
+        const wordOfDayDatabase = [
+            { word: "Serendipity", pronunciation: "ser-ən-ˈdi-pə-tē", definition: "The occurrence of pleasant or beneficial things by chance", example: "Finding that book was pure serendipity.", partOfSpeech: "noun" },
+            { word: "Ephemeral", pronunciation: "i-ˈfe-mə-rəl", definition: "Lasting for a very short time", example: "The beauty of cherry blossoms is ephemeral.", partOfSpeech: "adjective" },
+            { word: "Quintessential", pronunciation: "ˌkwin-tə-ˈsen-chəl", definition: "Representing the most perfect example of a quality or class", example: "She is the quintessential teacher.", partOfSpeech: "adjective" },
+            { word: "Melancholy", pronunciation: "ˈme-lən-ˌkä-lē", definition: "A feeling of pensive sadness, typically with no obvious cause", example: "The music evoked a sense of melancholy.", partOfSpeech: "noun" },
+            { word: "Resilient", pronunciation: "ri-ˈzil-yənt", definition: "Able to recover quickly from difficult conditions", example: "Children are often more resilient than adults.", partOfSpeech: "adjective" },
+            { word: "Eloquent", pronunciation: "ˈe-lə-kwənt", definition: "Fluent or persuasive in speaking or writing", example: "Her eloquent speech moved the audience.", partOfSpeech: "adjective" },
+            { word: "Benevolent", pronunciation: "bə-ˈne-və-lənt", definition: "Well meaning and kindly", example: "He was a benevolent ruler.", partOfSpeech: "adjective" },
+            { word: "Enigmatic", pronunciation: "ˌe-nig-ˈma-tik", definition: "Difficult to interpret or understand; mysterious", example: "She had an enigmatic smile.", partOfSpeech: "adjective" },
+            { word: "Ubiquitous", pronunciation: "yü-ˈbi-kwə-təs", definition: "Present, appearing, or found everywhere", example: "Smartphones are ubiquitous in modern society.", partOfSpeech: "adjective" },
+            { word: "Meticulous", pronunciation: "mə-ˈti-kyə-ləs", definition: "Showing great attention to detail; very careful and precise", example: "She was meticulous about her research.", partOfSpeech: "adjective" },
+            { word: "Perseverance", pronunciation: "ˌpər-sə-ˈvir-ən(t)s", definition: "Persistence in doing something despite difficulty or delay", example: "Success requires perseverance and dedication.", partOfSpeech: "noun" },
+            { word: "Empathy", pronunciation: "ˈem-pə-thē", definition: "The ability to understand and share the feelings of another", example: "Showing empathy helps build stronger relationships.", partOfSpeech: "noun" },
+            { word: "Eloquent", pronunciation: "ˈe-lə-kwənt", definition: "Fluent or persuasive in speaking or writing", example: "His eloquent argument convinced the jury.", partOfSpeech: "adjective" },
+            { word: "Ambitious", pronunciation: "am-ˈbi-shəs", definition: "Having or showing a strong desire to achieve something", example: "She has ambitious plans for her career.", partOfSpeech: "adjective" },
+            { word: "Optimistic", pronunciation: "ˌäp-tə-ˈmi-stik", definition: "Hopeful and confident about the future", example: "Despite setbacks, he remained optimistic.", partOfSpeech: "adjective" },
+            { word: "Integrity", pronunciation: "in-ˈte-grə-tē", definition: "The quality of being honest and having strong moral principles", example: "He is known for his integrity and honesty.", partOfSpeech: "noun" },
+            { word: "Diligent", pronunciation: "ˈdi-lə-jənt", definition: "Having or showing care and conscientiousness in one's work", example: "A diligent student always completes assignments on time.", partOfSpeech: "adjective" },
+            { word: "Gracious", pronunciation: "ˈgrā-shəs", definition: "Courteous, kind, and pleasant", example: "She was gracious in accepting the award.", partOfSpeech: "adjective" },
+            { word: "Tenacious", pronunciation: "tə-ˈnā-shəs", definition: "Tending to keep a firm hold of something; persistent", example: "His tenacious pursuit of justice never wavered.", partOfSpeech: "adjective" },
+            { word: "Admire", pronunciation: "əd-ˈmī(-ə)r", definition: "To regard with respect or warm approval", example: "I admire her dedication to helping others.", partOfSpeech: "verb" },
+            { word: "Wisdom", pronunciation: "ˈwiz-dəm", definition: "The quality of having experience, knowledge, and good judgment", example: "Age brings wisdom and perspective.", partOfSpeech: "noun" },
+            { word: "Courage", pronunciation: "ˈkər-ij", definition: "The ability to do something that frightens one; bravery", example: "It took great courage to speak the truth.", partOfSpeech: "noun" },
+            { word: "Humble", pronunciation: "ˈhəm-bəl", definition: "Having or showing a modest or low estimate of one's importance", example: "Despite his success, he remained humble.", partOfSpeech: "adjective" },
+            { word: "Compassionate", pronunciation: "kəm-ˈpa-shə-nət", definition: "Feeling or showing sympathy and concern for others", example: "She was compassionate towards those in need.", partOfSpeech: "adjective" },
+            { word: "Gratitude", pronunciation: "ˈgra-tə-ˌtüd", definition: "The quality of being thankful; readiness to show appreciation", example: "Expressing gratitude improves well-being.", partOfSpeech: "noun" },
+            { word: "Innovative", pronunciation: "ˈi-nə-ˌvā-tiv", definition: "Featuring new methods; advanced and original", example: "The company is known for innovative solutions.", partOfSpeech: "adjective" },
+            { word: "Harmonious", pronunciation: "här-ˈmō-nē-əs", definition: "Forming a pleasing or consistent whole", example: "They have a harmonious relationship.", partOfSpeech: "adjective" },
+            { word: "Brilliant", pronunciation: "ˈbril-yənt", definition: "Exceptionally clever or talented", example: "She came up with a brilliant idea.", partOfSpeech: "adjective" },
+            { word: "Noble", pronunciation: "ˈnō-bəl", definition: "Having or showing fine personal qualities or high moral principles", example: "He acted with noble intentions.", partOfSpeech: "adjective" },
+            { word: "Tranquil", pronunciation: "ˈtraŋ-kwəl", definition: "Free from disturbance; calm", example: "The garden was a tranquil retreat.", partOfSpeech: "adjective" },
+            { word: "Radiant", pronunciation: "ˈrā-dē-ənt", definition: "Sending out light; shining or glowing brightly", example: "She had a radiant smile.", partOfSpeech: "adjective" },
+            { word: "Prosperous", pronunciation: "ˈpräs-p(ə-)rəs", definition: "Successful in material terms; flourishing financially", example: "The business became prosperous through hard work.", partOfSpeech: "adjective" },
+            // Batch 1: Words 33-82 (50 words)
+            { word: "Accomplish", pronunciation: "ə-ˈkäm-plish", definition: "To achieve or complete successfully", example: "She accomplished her goals through hard work.", partOfSpeech: "verb" },
+            { word: "Adventurous", pronunciation: "əd-ˈven-chə-rəs", definition: "Willing to take risks or try new experiences", example: "He led an adventurous life traveling the world.", partOfSpeech: "adjective" },
+            { word: "Affectionate", pronunciation: "ə-ˈfek-shə-nət", definition: "Showing fondness or tenderness", example: "The cat was very affectionate with its owner.", partOfSpeech: "adjective" },
+            { word: "Aggressive", pronunciation: "ə-ˈgre-siv", definition: "Ready or likely to attack or confront", example: "The aggressive sales strategy increased profits.", partOfSpeech: "adjective" },
+            { word: "Alert", pronunciation: "ə-ˈlərt", definition: "Quick to notice and respond", example: "Stay alert while driving in heavy traffic.", partOfSpeech: "adjective" },
+            { word: "Ambiguous", pronunciation: "am-ˈbi-gyə-wəs", definition: "Having multiple possible meanings; unclear", example: "The instructions were ambiguous and confusing.", partOfSpeech: "adjective" },
+            { word: "Amplify", pronunciation: "ˈam-plə-ˌfī", definition: "To increase the volume or intensity of", example: "The microphone amplifies the speaker's voice.", partOfSpeech: "verb" },
+            { word: "Analyze", pronunciation: "ˈa-nə-ˌlīz", definition: "To examine in detail for explanation", example: "Scientists analyze data to find patterns.", partOfSpeech: "verb" },
+            { word: "Ancient", pronunciation: "ˈān-shənt", definition: "Belonging to the very distant past", example: "The ancient ruins attract many tourists.", partOfSpeech: "adjective" },
+            { word: "Anxious", pronunciation: "ˈaŋ(k)-shəs", definition: "Experiencing worry or unease", example: "She felt anxious before the exam.", partOfSpeech: "adjective" },
+            { word: "Appreciate", pronunciation: "ə-ˈprē-shē-ˌāt", definition: "To recognize the value or significance of", example: "I appreciate your help with this project.", partOfSpeech: "verb" },
+            { word: "Articulate", pronunciation: "är-ˈti-kyə-lət", definition: "Expressing oneself clearly and effectively", example: "She is an articulate public speaker.", partOfSpeech: "adjective" },
+            { word: "Aspire", pronunciation: "ə-ˈspī(-ə)r", definition: "To have a strong desire to achieve something", example: "Many students aspire to become doctors.", partOfSpeech: "verb" },
+            { word: "Assess", pronunciation: "ə-ˈses", definition: "To evaluate or estimate the nature, ability, or quality", example: "Teachers assess student progress regularly.", partOfSpeech: "verb" },
+            { word: "Astounding", pronunciation: "ə-ˈstau̇n-diŋ", definition: "Surprisingly impressive or notable", example: "The magician performed astounding tricks.", partOfSpeech: "adjective" },
+            { word: "Authentic", pronunciation: "ə-ˈthen-tik", definition: "Genuine, real, or true to its origins", example: "This is an authentic Italian recipe.", partOfSpeech: "adjective" },
+            { word: "Avid", pronunciation: "ˈa-vəd", definition: "Having a keen interest or enthusiasm", example: "She is an avid reader of science fiction.", partOfSpeech: "adjective" },
+            { word: "Awe", pronunciation: "ˈȯ", definition: "A feeling of reverential respect mixed with fear or wonder", example: "The Grand Canyon fills visitors with awe.", partOfSpeech: "noun" },
+            { word: "Balance", pronunciation: "ˈba-lən(t)s", definition: "A state of equilibrium or equal distribution", example: "Work-life balance is important for well-being.", partOfSpeech: "noun" },
+            { word: "Benevolence", pronunciation: "bə-ˈne-və-lən(t)s", definition: "The quality of being well meaning and kindly", example: "Her benevolence helped many people in need.", partOfSpeech: "noun" },
+            { word: "Bliss", pronunciation: "ˈblis", definition: "Perfect happiness; great joy", example: "The newlyweds experienced pure bliss.", partOfSpeech: "noun" },
+            { word: "Bold", pronunciation: "ˈbōld", definition: "Showing courage and confidence", example: "She made a bold decision to start her own business.", partOfSpeech: "adjective" },
+            { word: "Brilliance", pronunciation: "ˈbril-yən(t)s", definition: "Intense brightness or exceptional talent", example: "His brilliance in mathematics was evident.", partOfSpeech: "noun" },
+            { word: "Celebrate", pronunciation: "ˈse-lə-ˌbrāt", definition: "To acknowledge a significant event with a social gathering", example: "We celebrate birthdays with cake and presents.", partOfSpeech: "verb" },
+            { word: "Champion", pronunciation: "ˈcham-pē-ən", definition: "A person who has defeated all competitors", example: "She became the world chess champion.", partOfSpeech: "noun" },
+            { word: "Charismatic", pronunciation: "ˌker-iz-ˈma-tik", definition: "Exercising a compelling charm that inspires devotion", example: "The charismatic leader inspired his followers.", partOfSpeech: "adjective" },
+            { word: "Clarity", pronunciation: "ˈkler-ə-tē", definition: "The quality of being clear and easy to understand", example: "The clarity of her explanation helped everyone understand.", partOfSpeech: "noun" },
+            { word: "Coherent", pronunciation: "kō-ˈhir-ənt", definition: "Logical and consistent", example: "His argument was coherent and well-structured.", partOfSpeech: "adjective" },
+            { word: "Collaborate", pronunciation: "kə-ˈla-bə-ˌrāt", definition: "To work jointly on an activity or project", example: "Teams collaborate to achieve common goals.", partOfSpeech: "verb" },
+            { word: "Committed", pronunciation: "kə-ˈmi-təd", definition: "Dedicated to a cause or activity", example: "She is committed to protecting the environment.", partOfSpeech: "adjective" },
+            { word: "Compassion", pronunciation: "kəm-ˈpa-shən", definition: "Sympathetic pity and concern for others' suffering", example: "Showing compassion to those in need is important.", partOfSpeech: "noun" },
+            { word: "Competent", pronunciation: "ˈkäm-pə-tənt", definition: "Having the necessary ability, knowledge, or skill", example: "He is a competent software developer.", partOfSpeech: "adjective" },
+            { word: "Conquer", pronunciation: "ˈkäŋ-kər", definition: "To overcome or take control of by force", example: "They set out to conquer new markets.", partOfSpeech: "verb" },
+            { word: "Conscientious", pronunciation: "ˌkän(t)-shē-ˈen(t)-shəs", definition: "Wishing to do one's work well and thoroughly", example: "She is a conscientious employee.", partOfSpeech: "adjective" },
+            { word: "Considerate", pronunciation: "kən-ˈsi-də-rət", definition: "Careful not to cause inconvenience to others", example: "He was considerate of his neighbors' needs.", partOfSpeech: "adjective" },
+            { word: "Consistent", pronunciation: "kən-ˈsis-tənt", definition: "Acting or done in the same way over time", example: "Her consistent hard work led to success.", partOfSpeech: "adjective" },
+            { word: "Constructive", pronunciation: "kən-ˈstrək-tiv", definition: "Having a useful purpose; helpful", example: "She gave constructive feedback on the project.", partOfSpeech: "adjective" },
+            { word: "Contemplate", pronunciation: "ˈkän-təm-ˌplāt", definition: "To think deeply about something", example: "She sat quietly to contemplate her future.", partOfSpeech: "verb" },
+            { word: "Courageous", pronunciation: "kə-ˈrā-jəs", definition: "Not deterred by danger or pain; brave", example: "The courageous firefighter saved many lives.", partOfSpeech: "adjective" },
+            { word: "Creativity", pronunciation: "ˌkrē-ā-ˈti-və-tē", definition: "The use of imagination or original ideas", example: "Artists express their creativity through various mediums.", partOfSpeech: "noun" },
+            { word: "Credible", pronunciation: "ˈkre-də-bəl", definition: "Able to be believed; convincing", example: "The witness provided credible testimony.", partOfSpeech: "adjective" },
+            { word: "Cultivate", pronunciation: "ˈkəl-tə-ˌvāt", definition: "To prepare and use land for crops or gardening", example: "Farmers cultivate crops throughout the year.", partOfSpeech: "verb" },
+            { word: "Curious", pronunciation: "ˈkyu̇r-ē-əs", definition: "Eager to know or learn something", example: "Children are naturally curious about the world.", partOfSpeech: "adjective" },
+            { word: "Dedicate", pronunciation: "ˈde-di-ˌkāt", definition: "To devote time, effort, or oneself to a task", example: "She dedicated her life to helping others.", partOfSpeech: "verb" },
+            { word: "Dependable", pronunciation: "di-ˈpen-də-bəl", definition: "Trustworthy and reliable", example: "He is a dependable friend you can always count on.", partOfSpeech: "adjective" },
+            { word: "Determined", pronunciation: "di-ˈtər-mənd", definition: "Having made a firm decision and being resolved", example: "She was determined to finish the marathon.", partOfSpeech: "adjective" },
+            { word: "Diligence", pronunciation: "ˈdi-lə-jən(t)s", definition: "Careful and persistent work or effort", example: "His diligence in studying paid off with excellent grades.", partOfSpeech: "noun" },
+            { word: "Diplomatic", pronunciation: "ˌdi-plə-ˈma-tik", definition: "Using skill and tact in dealing with others", example: "She handled the situation in a diplomatic manner.", partOfSpeech: "adjective" },
+            { word: "Diverse", pronunciation: "də-ˈvərs", definition: "Showing a great deal of variety", example: "The team had diverse backgrounds and experiences.", partOfSpeech: "adjective" },
+            { word: "Dynamic", pronunciation: "dī-ˈna-mik", definition: "Characterized by constant change, activity, or progress", example: "The dynamic market requires quick adaptation.", partOfSpeech: "adjective" },
+            { word: "Eager", pronunciation: "ˈē-gər", definition: "Wanting to do or have something very much", example: "Students were eager to learn about the new topic.", partOfSpeech: "adjective" },
+            { word: "Effective", pronunciation: "i-ˈfek-tiv", definition: "Successful in producing a desired result", example: "The new strategy proved to be effective.", partOfSpeech: "adjective" },
+            { word: "Efficient", pronunciation: "i-ˈfi-shənt", definition: "Achieving maximum productivity with minimum wasted effort", example: "The efficient system saved time and resources.", partOfSpeech: "adjective" },
+            { word: "Eloquent", pronunciation: "ˈe-lə-kwənt", definition: "Fluent or persuasive in speaking or writing", example: "Her eloquent speech moved the entire audience.", partOfSpeech: "adjective" },
+            { word: "Empower", pronunciation: "im-ˈpau̇(-ə)r", definition: "To give someone the authority or power to do something", example: "Education can empower people to change their lives.", partOfSpeech: "verb" },
+            // Batch 2: Words 83-132 (50 words)
+            { word: "Enthusiastic", pronunciation: "in-ˌthü-zē-ˈa-stik", definition: "Having or showing intense and eager enjoyment", example: "She was enthusiastic about the new project.", partOfSpeech: "adjective" },
+            { word: "Eternal", pronunciation: "i-ˈtər-nəl", definition: "Lasting or existing forever", example: "Love is often described as eternal.", partOfSpeech: "adjective" },
+            { word: "Ethical", pronunciation: "ˈe-thi-kəl", definition: "Relating to moral principles", example: "Making ethical decisions is important in business.", partOfSpeech: "adjective" },
+            { word: "Evaluate", pronunciation: "i-ˈval-yə-ˌwāt", definition: "To form an idea of the amount or value of", example: "Teachers evaluate student performance regularly.", partOfSpeech: "verb" },
+            { word: "Excellent", pronunciation: "ˈek-sə-lənt", definition: "Extremely good; outstanding", example: "She received excellent grades in all subjects.", partOfSpeech: "adjective" },
+            { word: "Exceptional", pronunciation: "ik-ˈsep-shə-nəl", definition: "Unusually good; outstanding", example: "His exceptional talent was recognized early.", partOfSpeech: "adjective" },
+            { word: "Excite", pronunciation: "ik-ˈsīt", definition: "To cause strong feelings of enthusiasm", example: "The announcement excited the entire team.", partOfSpeech: "verb" },
+            { word: "Exemplary", pronunciation: "ig-ˈzem-plə-rē", definition: "Serving as a desirable model", example: "Her exemplary behavior set a standard for others.", partOfSpeech: "adjective" },
+            { word: "Exhaustive", pronunciation: "ig-ˈzȯ-stiv", definition: "Comprehensive and thorough", example: "The research was exhaustive and detailed.", partOfSpeech: "adjective" },
+            { word: "Expedite", pronunciation: "ˈek-spə-ˌdīt", definition: "To make something happen sooner", example: "We need to expedite the approval process.", partOfSpeech: "verb" },
+            { word: "Expert", pronunciation: "ˈek-ˌspərt", definition: "A person who has comprehensive knowledge in a field", example: "She is an expert in quantum physics.", partOfSpeech: "noun" },
+            { word: "Express", pronunciation: "ik-ˈspres", definition: "To convey a thought or feeling in words", example: "Children express their emotions through play.", partOfSpeech: "verb" },
+            { word: "Extraordinary", pronunciation: "ik-ˈstrȯr-də-ˌner-ē", definition: "Very unusual or remarkable", example: "She showed extraordinary courage during the crisis.", partOfSpeech: "adjective" },
+            { word: "Fascinating", pronunciation: "ˈfa-sə-ˌnā-tiŋ", definition: "Extremely interesting", example: "The documentary was fascinating and informative.", partOfSpeech: "adjective" },
+            { word: "Favorable", pronunciation: "ˈfā-v(ə-)rə-bəl", definition: "Expressing approval or giving advantage", example: "The weather conditions were favorable for the event.", partOfSpeech: "adjective" },
+            { word: "Fearless", pronunciation: "ˈfir-ləs", definition: "Lacking fear; brave", example: "The fearless explorer ventured into unknown territory.", partOfSpeech: "adjective" },
+            { word: "Fertile", pronunciation: "ˈfər-tᵊl", definition: "Capable of producing abundant vegetation", example: "The fertile soil produced excellent crops.", partOfSpeech: "adjective" },
+            { word: "Flexible", pronunciation: "ˈflek-sə-bəl", definition: "Capable of bending easily; adaptable", example: "A flexible schedule helps balance work and life.", partOfSpeech: "adjective" },
+            { word: "Flourish", pronunciation: "ˈflər-ish", definition: "To grow or develop successfully", example: "The business began to flourish after the changes.", partOfSpeech: "verb" },
+            { word: "Focus", pronunciation: "ˈfō-kəs", definition: "The center of interest or activity", example: "Keep your focus on the goal ahead.", partOfSpeech: "noun" },
+            { word: "Forgive", pronunciation: "fər-ˈgiv", definition: "To stop feeling angry or resentful", example: "Learning to forgive is important for mental health.", partOfSpeech: "verb" },
+            { word: "Formidable", pronunciation: "ˈfȯr-mə-də-bəl", definition: "Inspiring fear or respect through being impressive", example: "She was a formidable opponent in the debate.", partOfSpeech: "adjective" },
+            { word: "Fortitude", pronunciation: "ˈfȯr-tə-ˌtüd", definition: "Courage in pain or adversity", example: "She showed great fortitude during difficult times.", partOfSpeech: "noun" },
+            { word: "Fortunate", pronunciation: "ˈfȯr-chə-nət", definition: "Favored by good luck", example: "We are fortunate to have such opportunities.", partOfSpeech: "adjective" },
+            { word: "Foundation", pronunciation: "fau̇n-ˈdā-shən", definition: "The basis or groundwork of anything", example: "Education provides a strong foundation for life.", partOfSpeech: "noun" },
+            { word: "Fragrant", pronunciation: "ˈfrā-grənt", definition: "Having a pleasant or sweet smell", example: "The garden was filled with fragrant flowers.", partOfSpeech: "adjective" },
+            { word: "Frank", pronunciation: "ˈfraŋk", definition: "Open, honest, and direct in speech or writing", example: "He was frank about the challenges ahead.", partOfSpeech: "adjective" },
+            { word: "Freedom", pronunciation: "ˈfrē-dəm", definition: "The power to act, speak, or think as one wants", example: "Freedom of expression is a fundamental right.", partOfSpeech: "noun" },
+            { word: "Friendly", pronunciation: "ˈfren(d)-lē", definition: "Kind and pleasant", example: "The friendly staff made the visit enjoyable.", partOfSpeech: "adjective" },
+            { word: "Fulfill", pronunciation: "fu̇l-ˈfil", definition: "To achieve or realize something desired", example: "She fulfilled her dream of becoming a doctor.", partOfSpeech: "verb" },
+            { word: "Fundamental", pronunciation: "ˌfən-də-ˈmen-tᵊl", definition: "Forming a necessary base or core", example: "Understanding fundamentals is crucial for mastery.", partOfSpeech: "adjective" },
+            { word: "Generous", pronunciation: "ˈje-nə-rəs", definition: "Showing a readiness to give more than expected", example: "She was generous with her time and resources.", partOfSpeech: "adjective" },
+            { word: "Genius", pronunciation: "ˈjēn-yəs", definition: "Exceptional intellectual or creative power", example: "His genius was recognized at a young age.", partOfSpeech: "noun" },
+            { word: "Genuine", pronunciation: "ˈjen-yə-wən", definition: "Truly what something is said to be; authentic", example: "She showed genuine concern for others.", partOfSpeech: "adjective" },
+            { word: "Glorious", pronunciation: "ˈglȯr-ē-əs", definition: "Having or deserving glory; magnificent", example: "The sunset created a glorious display of colors.", partOfSpeech: "adjective" },
+            { word: "Graceful", pronunciation: "ˈgrās-fəl", definition: "Having or showing grace or elegance", example: "The dancer moved with graceful movements.", partOfSpeech: "adjective" },
+            { word: "Grand", pronunciation: "ˈgrand", definition: "Magnificent and imposing", example: "The grand architecture impressed all visitors.", partOfSpeech: "adjective" },
+            { word: "Grateful", pronunciation: "ˈgrāt-fəl", definition: "Feeling or showing appreciation", example: "I am grateful for your help.", partOfSpeech: "adjective" },
+            { word: "Greatness", pronunciation: "ˈgrāt-nəs", definition: "The quality of being great or outstanding", example: "Greatness comes from consistent effort.", partOfSpeech: "noun" },
+            { word: "Growth", pronunciation: "ˈgrōth", definition: "The process of increasing in size or development", example: "Personal growth requires continuous learning.", partOfSpeech: "noun" },
+            { word: "Guardian", pronunciation: "ˈgär-dē-ən", definition: "A person who protects or defends", example: "Parents are natural guardians of their children.", partOfSpeech: "noun" },
+            { word: "Guidance", pronunciation: "ˈgī-dᵊn(t)s", definition: "Advice or information aimed at resolving a problem", example: "She provided valuable guidance to the team.", partOfSpeech: "noun" },
+            { word: "Harmony", pronunciation: "ˈhär-mə-nē", definition: "A pleasing arrangement of parts", example: "The family lived in perfect harmony.", partOfSpeech: "noun" },
+            { word: "Heal", pronunciation: "ˈhēl", definition: "To become sound or healthy again", example: "Time helps heal emotional wounds.", partOfSpeech: "verb" },
+            { word: "Heartfelt", pronunciation: "ˈhärt-ˌfelt", definition: "Sincerely and strongly felt", example: "She expressed heartfelt gratitude to everyone.", partOfSpeech: "adjective" },
+            { word: "Heroic", pronunciation: "hi-ˈrō-ik", definition: "Having the characteristics of a hero", example: "His heroic actions saved many lives.", partOfSpeech: "adjective" },
+            { word: "Honest", pronunciation: "ˈä-nəst", definition: "Free of deceit and untruthfulness", example: "Being honest builds trust in relationships.", partOfSpeech: "adjective" },
+            { word: "Honor", pronunciation: "ˈä-nər", definition: "High respect; great esteem", example: "She received the medal of honor for bravery.", partOfSpeech: "noun" },
+            { word: "Hope", pronunciation: "ˈhōp", definition: "A feeling of expectation and desire", example: "Never lose hope, even in difficult times.", partOfSpeech: "noun" },
+            { word: "Hopeful", pronunciation: "ˈhōp-fəl", definition: "Feeling or inspiring optimism", example: "She remained hopeful about the future.", partOfSpeech: "adjective" },
+            { word: "Humble", pronunciation: "ˈhəm-bəl", definition: "Having a modest opinion of one's importance", example: "Despite success, he remained humble.", partOfSpeech: "adjective" },
+            { word: "Ideal", pronunciation: "ī-ˈdē(-ə)l", definition: "Satisfying one's conception of what is perfect", example: "This is the ideal location for our event.", partOfSpeech: "adjective" },
+            { word: "Illuminate", pronunciation: "i-ˈlü-mə-ˌnāt", definition: "To light up or make clear", example: "The presentation helped illuminate complex topics.", partOfSpeech: "verb" },
+            // Batch 3: Words 133-182 (50 words)
+            { word: "Illustrious", pronunciation: "i-ˈlə-strē-əs", definition: "Well known, respected, and admired", example: "She came from an illustrious family of scholars.", partOfSpeech: "adjective" },
+            { word: "Imaginative", pronunciation: "i-ˈma-jə-nə-tiv", definition: "Having or showing creativity or inventiveness", example: "The imaginative story captured everyone's attention.", partOfSpeech: "adjective" },
+            { word: "Immense", pronunciation: "i-ˈmen(t)s", definition: "Extremely large or great", example: "The project required an immense amount of effort.", partOfSpeech: "adjective" },
+            { word: "Impact", pronunciation: "ˈim-ˌpakt", definition: "A marked effect or influence", example: "Technology has a huge impact on our daily lives.", partOfSpeech: "noun" },
+            { word: "Impartial", pronunciation: "im-ˈpär-shəl", definition: "Treating all rivals or disputants equally", example: "The judge remained impartial throughout the trial.", partOfSpeech: "adjective" },
+            { word: "Implement", pronunciation: "ˈim-plə-ˌment", definition: "To put into effect; execute", example: "We will implement the new policy next month.", partOfSpeech: "verb" },
+            { word: "Impressive", pronunciation: "im-ˈpre-siv", definition: "Evoking admiration through size, quality, or skill", example: "Her presentation was truly impressive.", partOfSpeech: "adjective" },
+            { word: "Improve", pronunciation: "im-ˈprüv", definition: "To make or become better", example: "Practice helps improve your skills.", partOfSpeech: "verb" },
+            { word: "Incredible", pronunciation: "in-ˈkre-də-bəl", definition: "Impossible to believe; extraordinary", example: "The view from the mountain was incredible.", partOfSpeech: "adjective" },
+            { word: "Independent", pronunciation: "ˌin-də-ˈpen-dənt", definition: "Free from outside control; self-governing", example: "She became financially independent at a young age.", partOfSpeech: "adjective" },
+            { word: "Indispensable", pronunciation: "ˌin-di-ˈspen(t)-sə-bəl", definition: "Absolutely necessary; essential", example: "Water is indispensable for all living things.", partOfSpeech: "adjective" },
+            { word: "Industrious", pronunciation: "in-ˈdəs-trē-əs", definition: "Diligent and hard-working", example: "He was an industrious worker who never gave up.", partOfSpeech: "adjective" },
+            { word: "Influence", pronunciation: "ˈin-ˌflü-ən(t)s", definition: "The capacity to have an effect on someone", example: "Teachers have a great influence on students.", partOfSpeech: "noun" },
+            { word: "Ingenious", pronunciation: "in-ˈjēn-yəs", definition: "Clever, original, and inventive", example: "The ingenious solution solved the complex problem.", partOfSpeech: "adjective" },
+            { word: "Inherent", pronunciation: "in-ˈher-ənt", definition: "Existing as a permanent characteristic", example: "The risks are inherent in this type of work.", partOfSpeech: "adjective" },
+            { word: "Initiative", pronunciation: "i-ˈni-shə-tiv", definition: "The ability to assess and initiate things independently", example: "She showed great initiative in solving the problem.", partOfSpeech: "noun" },
+            { word: "Innovate", pronunciation: "ˈi-nə-ˌvāt", definition: "To make changes by introducing new methods", example: "Companies must innovate to stay competitive.", partOfSpeech: "verb" },
+            { word: "Inspiring", pronunciation: "in-ˈspī-riŋ", definition: "Having the effect of inspiring someone", example: "Her speech was inspiring and motivational.", partOfSpeech: "adjective" },
+            { word: "Integrate", pronunciation: "ˈin-tə-ˌgrāt", definition: "To combine one thing with another", example: "We need to integrate new technology into our workflow.", partOfSpeech: "verb" },
+            { word: "Intelligent", pronunciation: "in-ˈte-lə-jənt", definition: "Having or showing intelligence", example: "The intelligent student excelled in all subjects.", partOfSpeech: "adjective" },
+            { word: "Intense", pronunciation: "in-ˈten(t)s", definition: "Of extreme force, degree, or strength", example: "The intense heat made it difficult to work outside.", partOfSpeech: "adjective" },
+            { word: "Intention", pronunciation: "in-ˈten(t)-shən", definition: "A thing intended; an aim or plan", example: "Her intention was to help those in need.", partOfSpeech: "noun" },
+            { word: "Interact", pronunciation: "ˌin-tər-ˈakt", definition: "To act in such a way as to affect another", example: "Children learn to interact with others at school.", partOfSpeech: "verb" },
+            { word: "Interesting", pronunciation: "ˈin-tə-ˌre-stiŋ", definition: "Arousing curiosity or interest", example: "The book contains many interesting facts.", partOfSpeech: "adjective" },
+            { word: "Interpret", pronunciation: "in-ˈtər-prət", definition: "To explain the meaning of something", example: "She could interpret ancient texts with ease.", partOfSpeech: "verb" },
+            { word: "Intriguing", pronunciation: "in-ˈtrē-giŋ", definition: "Arousing one's curiosity or interest", example: "The mystery had an intriguing plot.", partOfSpeech: "adjective" },
+            { word: "Intuitive", pronunciation: "in-ˈtü-ə-tiv", definition: "Using or based on what one feels to be true", example: "She had an intuitive understanding of people.", partOfSpeech: "adjective" },
+            { word: "Invent", pronunciation: "in-ˈvent", definition: "To create or design something new", example: "Thomas Edison invented the light bulb.", partOfSpeech: "verb" },
+            { word: "Investigate", pronunciation: "in-ˈve-stə-ˌgāt", definition: "To carry out systematic inquiry", example: "Police investigate crimes thoroughly.", partOfSpeech: "verb" },
+            { word: "Invigorate", pronunciation: "in-ˈvi-gə-ˌrāt", definition: "To give strength or energy to", example: "Exercise can invigorate both body and mind.", partOfSpeech: "verb" },
+            { word: "Involve", pronunciation: "in-ˈvälv", definition: "To include as a necessary part", example: "The project will involve multiple teams.", partOfSpeech: "verb" },
+            { word: "Joyful", pronunciation: "ˈjȯi-fəl", definition: "Feeling, expressing, or causing great pleasure", example: "The children's laughter was joyful and contagious.", partOfSpeech: "adjective" },
+            { word: "Judicious", pronunciation: "jü-ˈdi-shəs", definition: "Having, showing, or done with good judgment", example: "She made judicious use of available resources.", partOfSpeech: "adjective" },
+            { word: "Just", pronunciation: "ˈjəst", definition: "Based on or behaving according to what is morally right", example: "He fought for a just cause.", partOfSpeech: "adjective" },
+            { word: "Justify", pronunciation: "ˈjəs-tə-ˌfī", definition: "To show or prove to be right or reasonable", example: "She could justify her decision with solid evidence.", partOfSpeech: "verb" },
+            { word: "Keen", pronunciation: "ˈkēn", definition: "Eager or enthusiastic", example: "She has a keen interest in science.", partOfSpeech: "adjective" },
+            { word: "Kind", pronunciation: "ˈkīnd", definition: "Having a friendly, generous, and considerate nature", example: "A kind gesture can brighten someone's day.", partOfSpeech: "adjective" },
+            { word: "Knowledge", pronunciation: "ˈnä-lij", definition: "Facts, information, and skills acquired through experience", example: "Knowledge is the key to success.", partOfSpeech: "noun" },
+            { word: "Lavish", pronunciation: "ˈla-vish", definition: "Sumptuously rich, elaborate, or luxurious", example: "The wedding had a lavish reception.", partOfSpeech: "adjective" },
+            { word: "Leader", pronunciation: "ˈlē-dər", definition: "A person who leads or commands", example: "She was a natural leader in her community.", partOfSpeech: "noun" },
+            { word: "Legacy", pronunciation: "ˈle-gə-sē", definition: "Something handed down from the past", example: "His legacy will live on for generations.", partOfSpeech: "noun" },
+            { word: "Legendary", pronunciation: "ˈle-jən-ˌder-ē", definition: "Remarkable enough to be famous", example: "The legendary athlete broke many records.", partOfSpeech: "adjective" },
+            { word: "Liberate", pronunciation: "ˈli-bə-ˌrāt", definition: "To set someone free from imprisonment or oppression", example: "Education can liberate minds.", partOfSpeech: "verb" },
+            { word: "Liberty", pronunciation: "ˈli-bər-tē", definition: "The state of being free from oppressive restrictions", example: "Freedom and liberty are fundamental rights.", partOfSpeech: "noun" },
+            { word: "Lively", pronunciation: "ˈlīv-lē", definition: "Full of life and energy", example: "The party had a lively atmosphere.", partOfSpeech: "adjective" },
+            { word: "Logical", pronunciation: "ˈlä-ji-kəl", definition: "Of or according to the rules of logic", example: "Her argument was logical and well-reasoned.", partOfSpeech: "adjective" },
+            { word: "Loyal", pronunciation: "ˈlȯi-əl", definition: "Giving or showing firm support", example: "A loyal friend stands by you in difficult times.", partOfSpeech: "adjective" },
+            { word: "Luminous", pronunciation: "ˈlü-mə-nəs", definition: "Full of or shedding light; bright", example: "The luminous moon lit up the night sky.", partOfSpeech: "adjective" },
+            { word: "Luxurious", pronunciation: "ləg-ˈzhu̇r-ē-əs", definition: "Extremely comfortable, elegant, or enjoyable", example: "They stayed in a luxurious hotel.", partOfSpeech: "adjective" },
+            { word: "Magnificent", pronunciation: "mag-ˈni-fə-sənt", definition: "Extremely beautiful, elaborate, or impressive", example: "The magnificent palace attracted many visitors.", partOfSpeech: "adjective" },
+            { word: "Majestic", pronunciation: "mə-ˈjes-tik", definition: "Having or showing impressive beauty or dignity", example: "The majestic mountain range was breathtaking.", partOfSpeech: "adjective" },
+            { word: "Manage", pronunciation: "ˈma-nij", definition: "To be in charge of; to handle successfully", example: "She can manage multiple projects efficiently.", partOfSpeech: "verb" },
+            // Batch 4: Words 183-232 (50 words)
+            { word: "Marvelous", pronunciation: "ˈmär-və-ləs", definition: "Causing great wonder; extraordinary", example: "The performance was absolutely marvelous.", partOfSpeech: "adjective" },
+            { word: "Masterful", pronunciation: "ˈmas-tər-fəl", definition: "Performed or performing very skillfully", example: "Her masterful handling of the situation impressed everyone.", partOfSpeech: "adjective" },
+            { word: "Meaningful", pronunciation: "ˈmē-niŋ-fəl", definition: "Having serious, important, or useful qualities", example: "They had a meaningful conversation about their future.", partOfSpeech: "adjective" },
+            { word: "Meditate", pronunciation: "ˈme-də-ˌtāt", definition: "To focus one's mind for relaxation or spiritual purposes", example: "Many people meditate to reduce stress.", partOfSpeech: "verb" },
+            { word: "Memorable", pronunciation: "ˈme-mə-rə-bəl", definition: "Worth remembering or easily remembered", example: "It was a memorable experience we'll never forget.", partOfSpeech: "adjective" },
+            { word: "Mentor", pronunciation: "ˈmen-ˌtȯr", definition: "An experienced adviser or guide", example: "She found a great mentor in her professor.", partOfSpeech: "noun" },
+            { word: "Merit", pronunciation: "ˈmer-ət", definition: "The quality of being particularly good or worthy", example: "The proposal has merit and should be considered.", partOfSpeech: "noun" },
+            { word: "Meritorious", pronunciation: "ˌmer-ə-ˈtȯr-ē-əs", definition: "Deserving reward or praise", example: "Her meritorious service was recognized with an award.", partOfSpeech: "adjective" },
+            { word: "Mindful", pronunciation: "ˈmīn(d)-fəl", definition: "Conscious or aware of something", example: "Being mindful of your words is important.", partOfSpeech: "adjective" },
+            { word: "Miracle", pronunciation: "ˈmir-i-kəl", definition: "A surprising and welcome event", example: "The recovery was nothing short of a miracle.", partOfSpeech: "noun" },
+            { word: "Modest", pronunciation: "ˈmä-dəst", definition: "Unassuming in the estimation of one's abilities", example: "Despite his achievements, he remained modest.", partOfSpeech: "adjective" },
+            { word: "Motivate", pronunciation: "ˈmō-tə-ˌvāt", definition: "To provide someone with a reason to do something", example: "Teachers motivate students to learn.", partOfSpeech: "verb" },
+            { word: "Mysterious", pronunciation: "mi-ˈstir-ē-əs", definition: "Difficult or impossible to understand or explain", example: "The mysterious disappearance puzzled everyone.", partOfSpeech: "adjective" },
+            { word: "Noble", pronunciation: "ˈnō-bəl", definition: "Belonging to a hereditary class with high rank", example: "He had noble intentions despite the challenges.", partOfSpeech: "adjective" },
+            { word: "Nourish", pronunciation: "ˈnər-ish", definition: "To provide with food or other substances", example: "Good books nourish the mind.", partOfSpeech: "verb" },
+            { word: "Nurture", pronunciation: "ˈnər-chər", definition: "To care for and encourage growth or development", example: "Parents nurture their children's talents.", partOfSpeech: "verb" },
+            { word: "Obtain", pronunciation: "əb-ˈtān", definition: "To get, acquire, or secure something", example: "She worked hard to obtain her degree.", partOfSpeech: "verb" },
+            { word: "Observe", pronunciation: "əb-ˈzərv", definition: "To notice or perceive something", example: "Scientists observe natural phenomena carefully.", partOfSpeech: "verb" },
+            { word: "Obvious", pronunciation: "ˈäb-vē-əs", definition: "Easily perceived or understood", example: "The solution was obvious once explained.", partOfSpeech: "adjective" },
+            { word: "Optimize", pronunciation: "ˈäp-tə-ˌmīz", definition: "To make the best or most effective use of", example: "We need to optimize our workflow for efficiency.", partOfSpeech: "verb" },
+            { word: "Organize", pronunciation: "ˈȯr-gə-ˌnīz", definition: "To arrange systematically", example: "Let's organize the files by date.", partOfSpeech: "verb" },
+            { word: "Original", pronunciation: "ə-ˈri-jə-nəl", definition: "Present or existing from the beginning", example: "Her original ideas sparked innovation.", partOfSpeech: "adjective" },
+            { word: "Outstanding", pronunciation: "au̇t-ˈstan-diŋ", definition: "Exceptionally good", example: "She received an outstanding performance review.", partOfSpeech: "adjective" },
+            { word: "Overcome", pronunciation: "ˌō-vər-ˈkəm", definition: "To succeed in dealing with a problem", example: "She overcame many obstacles to achieve her goal.", partOfSpeech: "verb" },
+            { word: "Passion", pronunciation: "ˈpa-shən", definition: "Strong and barely controllable emotion", example: "She pursued her passion for music.", partOfSpeech: "noun" },
+            { word: "Passionate", pronunciation: "ˈpa-shə-nət", definition: "Showing or caused by strong feelings", example: "He was passionate about environmental protection.", partOfSpeech: "adjective" },
+            { word: "Patience", pronunciation: "ˈpā-shən(t)s", definition: "The capacity to accept delay without getting angry", example: "Teaching requires a lot of patience.", partOfSpeech: "noun" },
+            { word: "Patient", pronunciation: "ˈpā-shənt", definition: "Able to accept delays without becoming annoyed", example: "She was patient while waiting for results.", partOfSpeech: "adjective" },
+            { word: "Peace", pronunciation: "ˈpēs", definition: "Freedom from disturbance; tranquility", example: "World peace remains an important goal.", partOfSpeech: "noun" },
+            { word: "Peaceful", pronunciation: "ˈpēs-fəl", definition: "Free from disturbance; tranquil", example: "The peaceful setting helped her relax.", partOfSpeech: "adjective" },
+            { word: "Perfect", pronunciation: "ˈpər-fikt", definition: "Having all the required or desirable elements", example: "The weather was perfect for the picnic.", partOfSpeech: "adjective" },
+            { word: "Perform", pronunciation: "pər-ˈfȯrm", definition: "To carry out, accomplish, or fulfill", example: "The team performed exceptionally well.", partOfSpeech: "verb" },
+            { word: "Persistence", pronunciation: "pər-ˈsis-tən(t)s", definition: "Firm continuance in a course of action", example: "Her persistence led to eventual success.", partOfSpeech: "noun" },
+            { word: "Persistent", pronunciation: "pər-ˈsis-tənt", definition: "Continuing firmly in spite of opposition", example: "He was persistent in pursuing his dreams.", partOfSpeech: "adjective" },
+            { word: "Philosophy", pronunciation: "fə-ˈlä-sə-fē", definition: "The study of fundamental nature of knowledge", example: "Studying philosophy broadens one's perspective.", partOfSpeech: "noun" },
+            { word: "Pioneer", pronunciation: "ˌpī-ə-ˈnir", definition: "A person who is among the first to explore", example: "She was a pioneer in computer science.", partOfSpeech: "noun" },
+            { word: "Plausible", pronunciation: "ˈplȯ-zə-bəl", definition: "Seeming reasonable or probable", example: "His explanation sounded plausible.", partOfSpeech: "adjective" },
+            { word: "Pleasant", pronunciation: "ˈple-zᵊnt", definition: "Giving a sense of happy satisfaction", example: "It was a pleasant day for a walk.", partOfSpeech: "adjective" },
+            { word: "Pleasure", pronunciation: "ˈple-zhər", definition: "A feeling of happy satisfaction", example: "Reading brings her great pleasure.", partOfSpeech: "noun" },
+            { word: "Plentiful", pronunciation: "ˈplen-ti-fəl", definition: "Existing in great quantities", example: "The harvest was plentiful this year.", partOfSpeech: "adjective" },
+            { word: "Poise", pronunciation: "ˈpȯiz", definition: "Graceful and elegant bearing", example: "She handled the situation with poise.", partOfSpeech: "noun" },
+            { word: "Polite", pronunciation: "pə-ˈlīt", definition: "Having or showing good manners", example: "Being polite makes interactions smoother.", partOfSpeech: "adjective" },
+            { word: "Positive", pronunciation: "ˈpä-zə-tiv", definition: "Constructive, optimistic, or confident", example: "She maintained a positive attitude.", partOfSpeech: "adjective" },
+            { word: "Potential", pronunciation: "pə-ˈten(t)-shəl", definition: "Having or showing the capacity to develop", example: "She has great potential as a leader.", partOfSpeech: "noun" },
+            { word: "Powerful", pronunciation: "ˈpau̇(-ə)r-fəl", definition: "Having great power or strength", example: "The powerful speech inspired many people.", partOfSpeech: "adjective" },
+            { word: "Practical", pronunciation: "ˈprak-ti-kəl", definition: "Of or concerned with actual use", example: "Practical solutions are often the best.", partOfSpeech: "adjective" },
+            { word: "Praise", pronunciation: "ˈprāz", definition: "To express warm approval or admiration", example: "Teachers praise students for good work.", partOfSpeech: "verb" },
+            { word: "Precise", pronunciation: "pri-ˈsīs", definition: "Marked by exactness and accuracy", example: "The measurements need to be precise.", partOfSpeech: "adjective" },
+            { word: "Prefer", pronunciation: "pri-ˈfər", definition: "To like one thing better than another", example: "I prefer tea over coffee.", partOfSpeech: "verb" },
+            { word: "Prestigious", pronunciation: "pre-ˈsti-jəs", definition: "Inspiring respect and admiration", example: "She attended a prestigious university.", partOfSpeech: "adjective" },
+            { word: "Prevail", pronunciation: "pri-ˈvāl", definition: "To prove more powerful or superior", example: "Good will prevail over evil.", partOfSpeech: "verb" },
+            { word: "Pride", pronunciation: "ˈprīd", definition: "A feeling of deep satisfaction", example: "She took great pride in her work.", partOfSpeech: "noun" },
+            { word: "Primary", pronunciation: "ˈprī-ˌmer-ē", definition: "Of chief importance; principal", example: "Education is of primary importance.", partOfSpeech: "adjective" },
+            { word: "Principle", pronunciation: "ˈprin(t)-sə-pəl", definition: "A fundamental truth or proposition", example: "She stood by her principles.", partOfSpeech: "noun" },
+            { word: "Privilege", pronunciation: "ˈpri-və-lij", definition: "A special right or advantage", example: "Education is a privilege not everyone has.", partOfSpeech: "noun" },
+            // Batch 5: Words 233-282 (50 words)
+            { word: "Proactive", pronunciation: "prō-ˈak-tiv", definition: "Creating or controlling a situation by taking action", example: "Being proactive helps prevent problems.", partOfSpeech: "adjective" },
+            { word: "Proceed", pronunciation: "prō-ˈsēd", definition: "To continue with a course of action", example: "We will proceed with the plan as discussed.", partOfSpeech: "verb" },
+            { word: "Profound", pronunciation: "prə-ˈfau̇nd", definition: "Very great or intense", example: "The book had a profound impact on her thinking.", partOfSpeech: "adjective" },
+            { word: "Progress", pronunciation: "ˈprä-gres", definition: "Forward or onward movement toward a destination", example: "We made good progress on the project.", partOfSpeech: "noun" },
+            { word: "Prominent", pronunciation: "ˈpräm-nənt", definition: "Important; famous", example: "She was a prominent figure in the community.", partOfSpeech: "adjective" },
+            { word: "Promote", pronunciation: "prə-ˈmōt", definition: "To further the progress of something", example: "Exercise promotes good health.", partOfSpeech: "verb" },
+            { word: "Prosper", pronunciation: "ˈpräs-pər", definition: "To succeed or flourish", example: "The business continued to prosper.", partOfSpeech: "verb" },
+            { word: "Proud", pronunciation: "ˈprau̇d", definition: "Feeling deep pleasure or satisfaction", example: "She was proud of her achievements.", partOfSpeech: "adjective" },
+            { word: "Provide", pronunciation: "prə-ˈvīd", definition: "To make available for use; supply", example: "Schools provide education to students.", partOfSpeech: "verb" },
+            { word: "Purpose", pronunciation: "ˈpər-pəs", definition: "The reason for which something exists", example: "Finding your life's purpose brings fulfillment.", partOfSpeech: "noun" },
+            { word: "Qualify", pronunciation: "ˈkwä-lə-ˌfī", definition: "To be entitled to a particular benefit", example: "She qualified for the scholarship.", partOfSpeech: "verb" },
+            { word: "Quality", pronunciation: "ˈkwä-lə-tē", definition: "The standard of something measured against others", example: "The quality of education is excellent here.", partOfSpeech: "noun" },
+            { word: "Quest", pronunciation: "ˈkwest", definition: "A long or arduous search for something", example: "The quest for knowledge never ends.", partOfSpeech: "noun" },
+            { word: "Quiet", pronunciation: "ˈkwī-ət", definition: "Making little or no noise", example: "The library was quiet and peaceful.", partOfSpeech: "adjective" },
+            { word: "Radiate", pronunciation: "ˈrā-dē-ˌāt", definition: "To emit energy or light", example: "The sun radiates warmth and light.", partOfSpeech: "verb" },
+            { word: "Rational", pronunciation: "ˈra-shə-nəl", definition: "Based on or in accordance with reason", example: "Her decision was rational and well-thought-out.", partOfSpeech: "adjective" },
+            { word: "Realize", pronunciation: "ˈrē-ə-ˌlīz", definition: "To become fully aware of something", example: "I didn't realize how important it was.", partOfSpeech: "verb" },
+            { word: "Reassure", pronunciation: "ˌrē-ə-ˈshu̇r", definition: "To say or do something to remove doubts", example: "His calm words reassured the worried parents.", partOfSpeech: "verb" },
+            { word: "Rebuild", pronunciation: "ˌrē-ˈbild", definition: "To build again", example: "They worked to rebuild their community.", partOfSpeech: "verb" },
+            { word: "Receive", pronunciation: "ri-ˈsēv", definition: "To be given, presented with, or paid", example: "She will receive her award tomorrow.", partOfSpeech: "verb" },
+            { word: "Recognize", pronunciation: "ˈre-kig-ˌnīz", definition: "To identify from knowledge of appearance", example: "I didn't recognize him at first.", partOfSpeech: "verb" },
+            { word: "Recommend", pronunciation: "ˌre-kə-ˈmend", definition: "To suggest as suitable", example: "I highly recommend this book.", partOfSpeech: "verb" },
+            { word: "Reflect", pronunciation: "ri-ˈflekt", definition: "To think deeply or carefully about", example: "Take time to reflect on your decisions.", partOfSpeech: "verb" },
+            { word: "Refreshing", pronunciation: "ri-ˈfre-shiŋ", definition: "Serving to refresh or reinvigorate", example: "The cool water was refreshing on a hot day.", partOfSpeech: "adjective" },
+            { word: "Regard", pronunciation: "ri-ˈgärd", definition: "To consider or think of in a specified way", example: "She is highly regarded in her field.", partOfSpeech: "verb" },
+            { word: "Rejoice", pronunciation: "ri-ˈjȯis", definition: "To feel or show great joy", example: "Let us rejoice in this wonderful news.", partOfSpeech: "verb" },
+            { word: "Reliable", pronunciation: "ri-ˈlī-ə-bəl", definition: "Consistently good in quality or performance", example: "He is a reliable friend you can count on.", partOfSpeech: "adjective" },
+            { word: "Remarkable", pronunciation: "ri-ˈmär-kə-bəl", definition: "Worthy of attention; extraordinary", example: "She showed remarkable resilience.", partOfSpeech: "adjective" },
+            { word: "Remedy", pronunciation: "ˈre-mə-dē", definition: "A medicine or treatment for a disease", example: "Exercise is a good remedy for stress.", partOfSpeech: "noun" },
+            { word: "Renew", pronunciation: "ri-ˈnü", definition: "To resume after an interruption", example: "We renewed our friendship after years apart.", partOfSpeech: "verb" },
+            { word: "Renowned", pronunciation: "ri-ˈnau̇nd", definition: "Known or talked about by many people", example: "He is a renowned expert in the field.", partOfSpeech: "adjective" },
+            { word: "Resolve", pronunciation: "ri-ˈzälv", definition: "To settle or find a solution to", example: "We need to resolve this conflict peacefully.", partOfSpeech: "verb" },
+            { word: "Respect", pronunciation: "ri-ˈspekt", definition: "A feeling of deep admiration", example: "Show respect for others' opinions.", partOfSpeech: "noun" },
+            { word: "Responsible", pronunciation: "ri-ˈspän(t)-sə-bəl", definition: "Having an obligation to do something", example: "She is responsible for managing the team.", partOfSpeech: "adjective" },
+            { word: "Restore", pronunciation: "ri-ˈstȯr", definition: "To bring back to a former condition", example: "They worked to restore the old building.", partOfSpeech: "verb" },
+            { word: "Reveal", pronunciation: "ri-ˈvēl", definition: "To make known to others", example: "The investigation will reveal the truth.", partOfSpeech: "verb" },
+            { word: "Reverence", pronunciation: "ˈre-və-rən(t)s", definition: "Deep respect for someone or something", example: "They showed great reverence for tradition.", partOfSpeech: "noun" },
+            { word: "Revolutionary", pronunciation: "ˌre-və-ˈlü-shə-ˌner-ē", definition: "Involving or causing a complete change", example: "The invention was revolutionary for its time.", partOfSpeech: "adjective" },
+            { word: "Reward", pronunciation: "ri-ˈwȯrd", definition: "A thing given in recognition of service", example: "Hard work brings its own reward.", partOfSpeech: "noun" },
+            { word: "Rich", pronunciation: "ˈrich", definition: "Having great material wealth", example: "The country is rich in natural resources.", partOfSpeech: "adjective" },
+            { word: "Rigorous", pronunciation: "ˈri-gə-rəs", definition: "Extremely thorough and careful", example: "The rigorous training prepared them well.", partOfSpeech: "adjective" },
+            { word: "Robust", pronunciation: "rō-ˈbəst", definition: "Strong and healthy; vigorous", example: "She has a robust immune system.", partOfSpeech: "adjective" },
+            { word: "Sacred", pronunciation: "ˈsā-krəd", definition: "Connected with God or dedicated to a religious purpose", example: "The temple is a sacred place.", partOfSpeech: "adjective" },
+            { word: "Safeguard", pronunciation: "ˈsāf-ˌgärd", definition: "To protect from harm or damage", example: "Laws safeguard citizens' rights.", partOfSpeech: "verb" },
+            { word: "Salient", pronunciation: "ˈsā-lē-ənt", definition: "Most noticeable or important", example: "The salient points were clearly explained.", partOfSpeech: "adjective" },
+            { word: "Satisfy", pronunciation: "ˈsa-təs-ˌfī", definition: "To meet the expectations or needs of", example: "The meal satisfied everyone's hunger.", partOfSpeech: "verb" },
+            { word: "Savvy", pronunciation: "ˈsa-vē", definition: "Shrewd and knowledgeable", example: "She is tech-savvy and adapts quickly.", partOfSpeech: "adjective" },
+            { word: "Scholarly", pronunciation: "ˈskä-lər-lē", definition: "Involving or relating to serious academic study", example: "His scholarly research was highly respected.", partOfSpeech: "adjective" },
+            { word: "Sculpt", pronunciation: "ˈskəlpt", definition: "To create or represent by carving", example: "The artist sculpted a beautiful statue.", partOfSpeech: "verb" },
+            { word: "Secure", pronunciation: "si-ˈkyu̇r", definition: "Fixed or fastened so as not to give way", example: "Make sure the door is secure before leaving.", partOfSpeech: "adjective" },
+            { word: "Seek", pronunciation: "ˈsēk", definition: "To attempt to find or obtain", example: "They seek truth and knowledge.", partOfSpeech: "verb" },
+            { word: "Sensitive", pronunciation: "ˈsen(t)-sə-tiv", definition: "Quick to detect or respond to slight changes", example: "She is sensitive to others' feelings.", partOfSpeech: "adjective" },
+            { word: "Serene", pronunciation: "sə-ˈrēn", definition: "Calm, peaceful, and untroubled", example: "The serene lake reflected the mountains.", partOfSpeech: "adjective" },
+            // Batch 6: Words 283-365 (83 words - FINAL BATCH)
+            { word: "Service", pronunciation: "ˈsər-vəs", definition: "The action of helping or doing work for someone", example: "She provided excellent service to customers.", partOfSpeech: "noun" },
+            { word: "Significant", pronunciation: "sig-ˈni-fə-kənt", definition: "Sufficiently great or important", example: "This is a significant achievement.", partOfSpeech: "adjective" },
+            { word: "Simple", pronunciation: "ˈsim-pəl", definition: "Easily understood or done; uncomplicated", example: "Sometimes the simplest solution is the best.", partOfSpeech: "adjective" },
+            { word: "Sincere", pronunciation: "sin-ˈsir", definition: "Free from pretense or deceit", example: "She offered a sincere apology.", partOfSpeech: "adjective" },
+            { word: "Skillful", pronunciation: "ˈskil-fəl", definition: "Having or showing skill", example: "The skillful artist created a masterpiece.", partOfSpeech: "adjective" },
+            { word: "Smart", pronunciation: "ˈsmärt", definition: "Having or showing quick-witted intelligence", example: "She made a smart decision.", partOfSpeech: "adjective" },
+            { word: "Sophisticated", pronunciation: "sə-ˈfis-tə-ˌkā-təd", definition: "Having a refined knowledge of the ways of the world", example: "The sophisticated system handled complex tasks.", partOfSpeech: "adjective" },
+            { word: "Splendid", pronunciation: "ˈsplen-dəd", definition: "Magnificent; very impressive", example: "It was a splendid celebration.", partOfSpeech: "adjective" },
+            { word: "Spontaneous", pronunciation: "spän-ˈtā-nē-əs", definition: "Performed or occurring as a result of impulse", example: "Their spontaneous road trip was memorable.", partOfSpeech: "adjective" },
+            { word: "Stable", pronunciation: "ˈstā-bəl", definition: "Not likely to change or fail", example: "They have a stable relationship.", partOfSpeech: "adjective" },
+            { word: "Stimulate", pronunciation: "ˈsti-myə-ˌlāt", definition: "To encourage development or increase activity", example: "Reading can stimulate the mind.", partOfSpeech: "verb" },
+            { word: "Stimulating", pronunciation: "ˈsti-myə-ˌlā-tiŋ", definition: "Encouraging or arousing interest", example: "The stimulating conversation lasted for hours.", partOfSpeech: "adjective" },
+            { word: "Strategic", pronunciation: "strə-ˈtē-jik", definition: "Relating to the identification of long-term goals", example: "The strategic plan ensured success.", partOfSpeech: "adjective" },
+            { word: "Strength", pronunciation: "ˈstreŋ(k)th", definition: "The quality or state of being strong", example: "Physical and mental strength are important.", partOfSpeech: "noun" },
+            { word: "Strengthen", pronunciation: "ˈstreŋ(k)-thən", definition: "To make or become stronger", example: "Exercise strengthens both body and mind.", partOfSpeech: "verb" },
+            { word: "Striking", pronunciation: "ˈstrī-kiŋ", definition: "Very noticeable; remarkable", example: "The painting had striking colors.", partOfSpeech: "adjective" },
+            { word: "Strong", pronunciation: "ˈstrȯŋ", definition: "Having the power to move heavy weights", example: "She has strong leadership skills.", partOfSpeech: "adjective" },
+            { word: "Structure", pronunciation: "ˈstrək-chər", definition: "The arrangement of and relations between parts", example: "The structure of the building was solid.", partOfSpeech: "noun" },
+            { word: "Stunning", pronunciation: "ˈstə-niŋ", definition: "Extremely impressive or attractive", example: "The view from the mountain was stunning.", partOfSpeech: "adjective" },
+            { word: "Sturdy", pronunciation: "ˈstər-dē", definition: "Strongly and solidly built", example: "The sturdy table lasted for generations.", partOfSpeech: "adjective" },
+            { word: "Substantial", pronunciation: "səb-ˈstan(t)-shəl", definition: "Of considerable importance, size, or worth", example: "She made substantial contributions to the project.", partOfSpeech: "adjective" },
+            { word: "Succeed", pronunciation: "sək-ˈsēd", definition: "To achieve the desired aim or result", example: "Hard work will help you succeed.", partOfSpeech: "verb" },
+            { word: "Success", pronunciation: "sək-ˈses", definition: "The accomplishment of an aim or purpose", example: "Success comes to those who persist.", partOfSpeech: "noun" },
+            { word: "Successful", pronunciation: "sək-ˈse-sfəl", definition: "Accomplishing an aim or purpose", example: "The successful launch exceeded expectations.", partOfSpeech: "adjective" },
+            { word: "Sufficient", pronunciation: "sə-ˈfi-shənt", definition: "Enough; adequate", example: "We have sufficient resources to proceed.", partOfSpeech: "adjective" },
+            { word: "Suitable", pronunciation: "ˈsü-tə-bəl", definition: "Right or appropriate for a particular purpose", example: "This location is suitable for our needs.", partOfSpeech: "adjective" },
+            { word: "Superb", pronunciation: "sü-ˈpərb", definition: "Excellent; outstanding", example: "The meal was absolutely superb.", partOfSpeech: "adjective" },
+            { word: "Superior", pronunciation: "sü-ˈpir-ē-ər", definition: "Higher in rank, status, or quality", example: "The superior design won the competition.", partOfSpeech: "adjective" },
+            { word: "Support", pronunciation: "sə-ˈpȯrt", definition: "To bear all or part of the weight", example: "Friends support each other in times of need.", partOfSpeech: "verb" },
+            { word: "Supreme", pronunciation: "sü-ˈprēm", definition: "Highest in rank or authority", example: "The supreme court made the final decision.", partOfSpeech: "adjective" },
+            { word: "Surpass", pronunciation: "sər-ˈpas", definition: "To exceed; be greater than", example: "Her talent surpasses all expectations.", partOfSpeech: "verb" },
+            { word: "Sustain", pronunciation: "sə-ˈstān", definition: "To strengthen or support physically or mentally", example: "We must sustain our efforts to succeed.", partOfSpeech: "verb" },
+            { word: "Sweet", pronunciation: "ˈswēt", definition: "Having the pleasant taste characteristic of sugar", example: "The sweet melody brought joy to everyone.", partOfSpeech: "adjective" },
+            { word: "Swift", pronunciation: "ˈswift", definition: "Moving with great speed", example: "The swift response saved time.", partOfSpeech: "adjective" },
+            { word: "Symbol", pronunciation: "ˈsim-bəl", definition: "A thing that represents or stands for something", example: "The dove is a symbol of peace.", partOfSpeech: "noun" },
+            { word: "Sympathetic", pronunciation: "ˌsim-pə-ˈthe-tik", definition: "Feeling, showing, or expressing sympathy", example: "She was sympathetic to their situation.", partOfSpeech: "adjective" },
+            { word: "Tactful", pronunciation: "ˈtakt-fəl", definition: "Having or showing skill and sensitivity", example: "Her tactful approach resolved the conflict.", partOfSpeech: "adjective" },
+            { word: "Talent", pronunciation: "ˈta-lənt", definition: "Natural aptitude or skill", example: "She has a remarkable talent for music.", partOfSpeech: "noun" },
+            { word: "Talented", pronunciation: "ˈta-lən-təd", definition: "Having a natural aptitude or skill", example: "The talented musician wowed the audience.", partOfSpeech: "adjective" },
+            { word: "Teach", pronunciation: "ˈtēch", definition: "To impart knowledge or skill", example: "Great teachers teach with passion.", partOfSpeech: "verb" },
+            { word: "Temperate", pronunciation: "ˈtem-p(ə-)rət", definition: "Mild; moderate", example: "The temperate climate was pleasant.", partOfSpeech: "adjective" },
+            { word: "Tender", pronunciation: "ˈten-dər", definition: "Showing gentleness and concern", example: "The mother's tender care comforted the child.", partOfSpeech: "adjective" },
+            { word: "Territory", pronunciation: "ˈter-ə-ˌtȯr-ē", definition: "An area of land under jurisdiction", example: "Exploring new territory is exciting.", partOfSpeech: "noun" },
+            { word: "Thorough", pronunciation: "ˈthər-ō", definition: "Complete with regard to every detail", example: "She conducted a thorough investigation.", partOfSpeech: "adjective" },
+            { word: "Thoughtful", pronunciation: "ˈthȯt-fəl", definition: "Showing consideration for others", example: "His thoughtful gesture was appreciated.", partOfSpeech: "adjective" },
+            { word: "Thrive", pronunciation: "ˈthrīv", definition: "To grow or develop vigorously", example: "Plants thrive with proper care.", partOfSpeech: "verb" },
+            { word: "Tidy", pronunciation: "ˈtī-dē", definition: "Arranged neatly and in order", example: "Keeping a tidy workspace improves productivity.", partOfSpeech: "adjective" },
+            { word: "Timely", pronunciation: "ˈtīm-lē", definition: "Done or occurring at a favorable time", example: "Her timely intervention prevented disaster.", partOfSpeech: "adjective" },
+            { word: "Tolerance", pronunciation: "ˈtä-lə-rən(t)s", definition: "The ability or willingness to tolerate", example: "Promoting tolerance creates harmony.", partOfSpeech: "noun" },
+            { word: "Tolerant", pronunciation: "ˈtä-lə-rənt", definition: "Showing willingness to allow existence of opinions", example: "A tolerant society embraces diversity.", partOfSpeech: "adjective" },
+            { word: "Transform", pronunciation: "tran(t)s-ˈfȯrm", definition: "To make a marked change in form or nature", example: "Education can transform lives.", partOfSpeech: "verb" },
+            { word: "Tremendous", pronunciation: "tri-ˈmen-dəs", definition: "Very great in amount, scale, or intensity", example: "She showed tremendous courage.", partOfSpeech: "adjective" },
+            { word: "Triumph", pronunciation: "ˈtrī-əm(p)f", definition: "A great victory or achievement", example: "Their triumph was celebrated by all.", partOfSpeech: "noun" },
+            { word: "True", pronunciation: "ˈtrü", definition: "In accordance with fact or reality", example: "Her words were true and honest.", partOfSpeech: "adjective" },
+            { word: "Trust", pronunciation: "ˈtrəst", definition: "Firm belief in the reliability of someone", example: "Trust is the foundation of relationships.", partOfSpeech: "noun" },
+            { word: "Trustworthy", pronunciation: "ˈtrəst-ˌwər-thē", definition: "Able to be relied on as honest or truthful", example: "He is a trustworthy friend.", partOfSpeech: "adjective" },
+            { word: "Truth", pronunciation: "ˈtrüth", definition: "The quality or state of being true", example: "Always seek the truth in all matters.", partOfSpeech: "noun" },
+            { word: "Unanimous", pronunciation: "yü-ˈna-nə-məs", definition: "Fully in agreement", example: "The decision was unanimous.", partOfSpeech: "adjective" },
+            { word: "Unconditional", pronunciation: "ˌən-kən-ˈdi-shə-nəl", definition: "Not subject to any conditions", example: "Parents offer unconditional love.", partOfSpeech: "adjective" },
+            { word: "Understand", pronunciation: "ˌən-dər-ˈstand", definition: "To perceive the intended meaning of", example: "I understand your concerns.", partOfSpeech: "verb" },
+            { word: "Understanding", pronunciation: "ˌən-dər-ˈstan-diŋ", definition: "The ability to understand something", example: "Mutual understanding strengthens relationships.", partOfSpeech: "noun" },
+            { word: "Unique", pronunciation: "yü-ˈnēk", definition: "Being the only one of its kind", example: "Each person has unique talents.", partOfSpeech: "adjective" },
+            { word: "Unity", pronunciation: "ˈyü-nə-tē", definition: "The state of being united or joined", example: "Unity brings strength to communities.", partOfSpeech: "noun" },
+            { word: "Universal", pronunciation: "ˌyü-nə-ˈvər-səl", definition: "Of, affecting, or done by all people", example: "Education is a universal right.", partOfSpeech: "adjective" },
+            { word: "Unprecedented", pronunciation: "ˌən-ˈpre-sə-ˌden-təd", definition: "Never done or known before", example: "The achievement was unprecedented.", partOfSpeech: "adjective" },
+            { word: "Uplift", pronunciation: "ˌəp-ˈlift", definition: "To raise to a higher moral or social level", example: "Music can uplift the spirit.", partOfSpeech: "verb" },
+            { word: "Uplifting", pronunciation: "ˌəp-ˈlif-tiŋ", definition: "Morally or spiritually elevating", example: "The uplifting speech inspired everyone.", partOfSpeech: "adjective" },
+            { word: "Useful", pronunciation: "ˈyüs-fəl", definition: "Able to be used for a practical purpose", example: "This tool is very useful.", partOfSpeech: "adjective" },
+            { word: "Valiant", pronunciation: "ˈval-yənt", definition: "Possessing or showing courage", example: "The valiant warrior fought bravely.", partOfSpeech: "adjective" },
+            { word: "Valor", pronunciation: "ˈva-lər", definition: "Great courage in the face of danger", example: "Her valor in difficult times was admirable.", partOfSpeech: "noun" },
+            { word: "Valuable", pronunciation: "ˈval-yə-bəl", definition: "Worth a great deal of money", example: "Time is more valuable than money.", partOfSpeech: "adjective" },
+            { word: "Value", pronunciation: "ˈval-yü", definition: "The regard that something is held to deserve", example: "We should value honesty above all.", partOfSpeech: "noun" },
+            { word: "Venture", pronunciation: "ˈven-chər", definition: "A risky or daring journey or undertaking", example: "The business venture proved successful.", partOfSpeech: "noun" },
+            { word: "Verdant", pronunciation: "ˈvər-dᵊnt", definition: "Green with grass or other rich vegetation", example: "The verdant fields stretched for miles.", partOfSpeech: "adjective" },
+            { word: "Viable", pronunciation: "ˈvī-ə-bəl", definition: "Capable of working successfully", example: "The plan is viable and achievable.", partOfSpeech: "adjective" },
+            { word: "Victory", pronunciation: "ˈvik-t(ə-)rē", definition: "An act of defeating an enemy or opponent", example: "Their victory was well-deserved.", partOfSpeech: "noun" },
+            { word: "Vigorous", pronunciation: "ˈvi-g(ə-)rəs", definition: "Strong, healthy, and full of energy", example: "She maintained a vigorous exercise routine.", partOfSpeech: "adjective" },
+            { word: "Virtue", pronunciation: "ˈvər-(ˌ)chü", definition: "Behavior showing high moral standards", example: "Patience is a virtue worth cultivating.", partOfSpeech: "noun" },
+            { word: "Virtuous", pronunciation: "ˈvər-chə-wəs", definition: "Having or showing high moral standards", example: "She led a virtuous life of service.", partOfSpeech: "adjective" },
+            { word: "Vision", pronunciation: "ˈvi-zhən", definition: "The ability to think about the future", example: "Great leaders have a clear vision.", partOfSpeech: "noun" },
+            { word: "Vital", pronunciation: "ˈvī-tᵊl", definition: "Absolutely necessary; essential", example: "Exercise is vital for good health.", partOfSpeech: "adjective" },
+            { word: "Vivid", pronunciation: "ˈvi-vəd", definition: "Producing powerful feelings or strong images", example: "Her vivid description brought the story to life.", partOfSpeech: "adjective" },
+            { word: "Volunteer", pronunciation: "ˌvä-lən-ˈtir", definition: "A person who freely offers to take part", example: "She works as a volunteer at the shelter.", partOfSpeech: "noun" },
+            { word: "Vouch", pronunciation: "ˈvau̇ch", definition: "To assert or confirm as a result of experience", example: "I can vouch for her reliability.", partOfSpeech: "verb" },
+            { word: "Vulnerable", pronunciation: "ˈvəl-n(ə-)rə-bəl", definition: "Susceptible to physical or emotional attack", example: "Children are vulnerable and need protection.", partOfSpeech: "adjective" },
+            { word: "Warm", pronunciation: "ˈwȯrm", definition: "Having, giving, or showing a moderate degree of heat", example: "Her warm smile brightened the room.", partOfSpeech: "adjective" },
+            { word: "Wealth", pronunciation: "ˈwelth", definition: "An abundance of valuable possessions", example: "True wealth comes from meaningful relationships.", partOfSpeech: "noun" },
+            { word: "Welcome", pronunciation: "ˈwel-kəm", definition: "To greet someone in a glad, polite, or friendly way", example: "We welcome all guests warmly.", partOfSpeech: "verb" },
+            { word: "Welfare", pronunciation: "ˈwel-ˌfer", definition: "The health, happiness, and fortunes of a person", example: "Animal welfare is important to many people.", partOfSpeech: "noun" },
+            { word: "Well-being", pronunciation: "ˈwel-ˈbē-iŋ", definition: "The state of being comfortable, healthy, or happy", example: "Yoga promotes overall well-being.", partOfSpeech: "noun" },
+            { word: "Wholesome", pronunciation: "ˈhōl-səm", definition: "Conducive to or suggestive of good health", example: "Wholesome food nourishes the body.", partOfSpeech: "adjective" },
+            { word: "Wise", pronunciation: "ˈwīz", definition: "Having or showing experience and good judgment", example: "The wise teacher guided many students.", partOfSpeech: "adjective" },
+            { word: "Wonder", pronunciation: "ˈwən-dər", definition: "A feeling of amazement and admiration", example: "Children look at the world with wonder.", partOfSpeech: "noun" },
+            { word: "Wonderful", pronunciation: "ˈwən-dər-fəl", definition: "Inspiring delight, pleasure, or admiration", example: "It was a wonderful experience.", partOfSpeech: "adjective" },
+            { word: "Worthy", pronunciation: "ˈwər-thē", definition: "Deserving effort, attention, or respect", example: "The cause is worthy of support.", partOfSpeech: "adjective" },
+            { word: "Worthwhile", pronunciation: "ˌwərth-ˈ(h)wī(-ə)l", definition: "Worth the time, money, or effort spent", example: "Learning a new language is worthwhile.", partOfSpeech: "adjective" },
+            { word: "Zeal", pronunciation: "ˈzēl", definition: "Great energy or passion for a cause", example: "She pursued her goals with zeal.", partOfSpeech: "noun" },
+            { word: "Zealous", pronunciation: "ˈze-ləs", definition: "Having or showing zeal", example: "The zealous advocate never gave up.", partOfSpeech: "adjective" },
+            { word: "Zenith", pronunciation: "ˈzē-nəth", definition: "The highest point reached", example: "She reached the zenith of her career.", partOfSpeech: "noun" },
+            { word: "Zest", pronunciation: "ˈzest", definition: "Great enthusiasm and energy", example: "He approached life with zest.", partOfSpeech: "noun" },
+            { word: "Zestful", pronunciation: "ˈzest-fəl", definition: "Full of zest; energetic", example: "Her zestful personality inspired others.", partOfSpeech: "adjective" }
+        ];
+        
+        // Special Days Database (holidays and important events)
+        const specialDaysDatabase = {
+            "01-01": { icon: "🎊", title: "New Year's Day", desc: "The first day of the year, celebrated globally", type: "International Holiday" },
+            "01-15": { icon: "🎓", title: "Makar Sankranti (India)", desc: "Festival marking the transition of the sun", type: "Indian Festival" },
+            "01-26": { icon: "🇮🇳", title: "Republic Day (India)", desc: "Commemorates the adoption of the Indian Constitution in 1950", type: "National Holiday" },
+            "02-14": { icon: "💕", title: "Valentine's Day", desc: "Day to express love and affection", type: "International Holiday" },
+            "03-08": { icon: "👩", title: "International Women's Day", desc: "Celebrating women's achievements and advocating for equality", type: "International Day" },
+            "03-17": { icon: "☘️", title: "St. Patrick's Day", desc: "Celebrating Irish culture and heritage", type: "Cultural Holiday" },
+            "04-01": { icon: "😂", title: "April Fool's Day", desc: "Day for playing practical jokes and spreading humor", type: "Cultural Day" },
+            "04-14": { icon: "🎉", title: "Baisakhi (India)", desc: "Spring harvest festival and Sikh New Year", type: "Indian Festival" },
+            "04-22": { icon: "🌍", title: "Earth Day", desc: "Global event to demonstrate support for environmental protection", type: "International Day" },
+            "05-01": { icon: "👷", title: "Labor Day", desc: "Celebrating workers and labor movements worldwide", type: "International Holiday" },
+            "05-05": { icon: "🌮", title: "Cinco de Mayo", desc: "Celebrating Mexican heritage and culture", type: "Cultural Holiday" },
+            "05-12": { icon: "💐", title: "Mother's Day", desc: "Honoring mothers and motherhood", type: "International Day" },
+            "06-05": { icon: "🌱", title: "World Environment Day", desc: "Raising awareness for environmental protection", type: "International Day" },
+            "06-14": { icon: "🇺🇸", title: "Flag Day (USA)", desc: "Celebrating the adoption of the US flag", type: "US Holiday" },
+            "06-21": { icon: "☀️", title: "Summer Solstice", desc: "Longest day of the year in the Northern Hemisphere", type: "Astronomical Event" },
+            "07-04": { icon: "🇺🇸", title: "Independence Day (USA)", desc: "Celebrating American independence", type: "US National Holiday" },
+            "08-15": { icon: "🇮🇳", title: "Independence Day (India)", desc: "Commemorates India's independence from British rule in 1947", type: "National Holiday" },
+            "08-26": { icon: "👩", title: "Women's Equality Day (USA)", desc: "Commemorating the 19th Amendment", type: "US Holiday" },
+            "09-05": { icon: "👨‍🏫", title: "Teacher's Day (India)", desc: "Honoring teachers and their contributions", type: "Indian Holiday" },
+            "09-11": { icon: "🇺🇸", title: "Patriot Day (USA)", desc: "Remembering those lost in 2001", type: "Memorial Day" },
+            "10-02": { icon: "🕊️", title: "Gandhi Jayanti (India)", desc: "Birthday of Mahatma Gandhi, Father of the Nation", type: "National Holiday" },
+            "10-05": { icon: "🌍", title: "World Teachers' Day", desc: "Celebrating teachers worldwide", type: "International Day" },
+            "10-31": { icon: "🎃", title: "Halloween", desc: "Celebrating with costumes and treats", type: "Cultural Holiday" },
+            "11-02": { icon: "🕯️", title: "Día de los Muertos", desc: "Mexican Day of the Dead celebration", type: "Cultural Holiday" },
+            "11-11": { icon: "🎖️", title: "Veterans Day", desc: "Honoring military veterans", type: "Memorial Day" },
+            "11-14": { icon: "👨‍👩‍👧‍👦", title: "Children's Day (India)", desc: "Celebrating children and their rights", type: "Indian Holiday" },
+            "11-26": { icon: "🇮🇳", title: "Constitution Day (India)", desc: "Honoring the adoption of the Indian Constitution", type: "National Day" },
+            "12-10": { icon: "⚖️", title: "Human Rights Day", desc: "Celebrating universal human rights", type: "International Day" },
+            "12-25": { icon: "🎄", title: "Christmas", desc: "Celebrating the birth of Jesus Christ", type: "International Holiday" },
+            "12-31": { icon: "🎆", title: "New Year's Eve", desc: "Celebrating the end of the year", type: "International Holiday" },
+            // Batch 1: Additional 50 Special Days
+            "01-02": { icon: "📚", title: "World Introvert Day", desc: "Celebrating introverted personalities", type: "Awareness Day" },
+            "01-03": { icon: "☕", title: "International Coffee Day (US)", desc: "Celebrating the world's favorite beverage", type: "Cultural Day" },
+            "01-04": { icon: "🎯", title: "World Braille Day", desc: "Raising awareness for braille literacy", type: "International Day" },
+            "01-05": { icon: "🌙", title: "Guru Gobind Singh Jayanti", desc: "Birth anniversary of the 10th Sikh Guru", type: "Indian Festival" },
+            "01-06": { icon: "⭐", title: "Epiphany", desc: "Christian feast day commemorating the visit of the Magi", type: "Religious Holiday" },
+            "01-07": { icon: "🎭", title: "Pongal (Tamil Nadu)", desc: "Harvest festival celebrated in South India", type: "Indian Festival" },
+            "01-08": { icon: "✍️", title: "National Handwriting Day", desc: "Celebrating the art of handwriting", type: "Cultural Day" },
+            "01-09": { icon: "📊", title: "Static Electricity Day", desc: "Understanding electrical phenomena", type: "Science Day" },
+            "01-10": { icon: "🌍", title: "World Hindi Day", desc: "Promoting Hindi language globally", type: "Cultural Day" },
+            "01-11": { icon: "🎂", title: "Alexander Hamilton's Birthday", desc: "Founding Father of the United States", type: "Historical Event" },
+            "01-12": { icon: "🧭", title: "National Youth Day (India)", desc: "Swami Vivekananda's birth anniversary", type: "Indian Holiday" },
+            "01-13": { icon: "🎨", title: "Stephen Foster Memorial Day", desc: "Honoring American songwriter", type: "Cultural Day" },
+            "01-14": { icon: "🕊️", title: "World Logic Day", desc: "Celebrating logic and rational thinking", type: "Awareness Day" },
+            "01-16": { icon: "🌐", title: "World Religion Day", desc: "Promoting interfaith understanding", type: "International Day" },
+            "01-17": { icon: "👨‍🍳", title: "Benjamin Franklin's Birthday", desc: "Founding Father and inventor", type: "Historical Event" },
+            "01-18": { icon: "📱", title: "Thesaurus Day", desc: "Celebrating the vocabulary-building tool", type: "Educational Day" },
+            "01-19": { icon: "🎪", title: "Edgar Allan Poe's Birthday", desc: "Celebrating the famous writer", type: "Cultural Day" },
+            "01-20": { icon: "🏛️", title: "Martin Luther King Jr. Day", desc: "Honoring civil rights leader", type: "US Holiday" },
+            "01-21": { icon: "🥤", title: "National Hugging Day", desc: "Celebrating the power of hugs", type: "Fun Day" },
+            "01-22": { icon: "🍕", title: "National Pizza Day", desc: "Celebrating everyone's favorite food", type: "Fun Day" },
+            "01-23": { icon: "✍️", title: "National Handwriting Day", desc: "Appreciating handwritten communication", type: "Cultural Day" },
+            "01-24": { icon: "🍰", title: "International Day of Education", desc: "Promoting access to quality education", type: "International Day" },
+            "01-25": { icon: "📚", title: "National Voters' Day (India)", desc: "Encouraging democratic participation", type: "National Day" },
+            "01-27": { icon: "🕯️", title: "International Holocaust Remembrance Day", desc: "Remembering victims of the Holocaust", type: "Memorial Day" },
+            "01-28": { icon: "🚀", title: "Data Privacy Day", desc: "Raising awareness about data protection", type: "Awareness Day" },
+            "01-29": { icon: "📖", title: "National Puzzle Day", desc: "Celebrating brain-teasing activities", type: "Fun Day" },
+            "01-30": { icon: "🎓", title: "Martyrs' Day (India)", desc: "Remembering Mahatma Gandhi's death", type: "National Day" },
+            "01-31": { icon: "🍊", title: "National Backward Day", desc: "Doing things in reverse for fun", type: "Fun Day" },
+            "02-01": { icon: "🎨", title: "National Freedom Day", desc: "Celebrating freedom and equality", type: "US Holiday" },
+            "02-02": { icon: "🦫", title: "Groundhog Day", desc: "Weather prediction tradition", type: "Cultural Holiday" },
+            "02-03": { icon: "🎵", title: "Four Chaplains Day", desc: "Honoring selfless sacrifice", type: "Memorial Day" },
+            "02-04": { icon: "🌍", title: "World Cancer Day", desc: "Raising awareness about cancer prevention", type: "Awareness Day" },
+            "02-05": { icon: "🌐", title: "Internet Day", desc: "Celebrating the global network", type: "Awareness Day" },
+            "02-06": { icon: "🎸", title: "Bob Marley's Birthday", desc: "Celebrating reggae legend", type: "Cultural Day" },
+            "02-07": { icon: "❄️", title: "Send a Card to a Friend Day", desc: "Spreading joy through mail", type: "Fun Day" },
+            "02-08": { icon: "📚", title: "International Day of Women and Girls in Science", desc: "Promoting gender equality in STEM", type: "International Day" },
+            "02-09": { icon: "🍕", title: "National Pizza Day", desc: "Indulging in delicious pizza", type: "Fun Day" },
+            "02-10": { icon: "🎤", title: "World Pulses Day", desc: "Promoting healthy legumes", type: "International Day" },
+            "02-11": { icon: "🎬", title: "International Day of Women and Girls in Science", desc: "Empowering women in scientific fields", type: "International Day" },
+            "02-12": { icon: "🎂", title: "Abraham Lincoln's Birthday", desc: "Honoring the 16th US President", type: "US Holiday" },
+            "02-13": { icon: "🎈", title: "World Radio Day", desc: "Celebrating radio as a communication medium", type: "International Day" },
+            "02-15": { icon: "🏛️", title: "International Childhood Cancer Day", desc: "Supporting children with cancer", type: "Awareness Day" },
+            "02-16": { icon: "🌍", title: "World Day of Social Justice", desc: "Promoting fair treatment for all", type: "International Day" },
+            "02-17": { icon: "🎯", title: "Random Acts of Kindness Day", desc: "Spreading kindness everywhere", type: "Awareness Day" },
+            "02-18": { icon: "📱", title: "National Battery Day", desc: "Celebrating portable power", type: "Awareness Day" },
+            "02-19": { icon: "🌐", title: "World Whale Day", desc: "Protecting marine mammals", type: "Awareness Day" },
+            "02-20": { icon: "🎵", title: "World Day of Social Justice", desc: "Advocating for equality and fairness", type: "International Day" },
+            "02-21": { icon: "🌍", title: "International Mother Language Day", desc: "Celebrating linguistic diversity", type: "International Day" },
+            "02-22": { icon: "🎂", title: "George Washington's Birthday", desc: "Honoring the first US President", type: "US Holiday" },
+            "02-23": { icon: "🚀", title: "Curling is Cool Day", desc: "Celebrating the winter sport", type: "Fun Day" },
+            "02-24": { icon: "🎨", title: "World Understanding and Peace Day", desc: "Promoting global harmony", type: "International Day" },
+            "02-25": { icon: "📚", title: "International Mother Language Day", desc: "Preserving linguistic heritage", type: "International Day" },
+            "02-26": { icon: "🎭", title: "Tell a Fairy Tale Day", desc: "Celebrating storytelling traditions", type: "Cultural Day" },
+            "02-27": { icon: "🌍", title: "International Polar Bear Day", desc: "Protecting polar bear habitats", type: "Awareness Day" },
+            "02-28": { icon: "🎯", title: "Rare Disease Day", desc: "Raising awareness for rare conditions", type: "Awareness Day" },
+            "02-29": { icon: "🦄", title: "Leap Day", desc: "Extra day every four years", type: "Astronomical Event" },
+            // Batch 2: Additional 50 Special Days
+            "03-01": { icon: "🌍", title: "World Civil Defense Day", desc: "Promoting civil protection awareness", type: "International Day" },
+            "03-03": { icon: "🌍", title: "World Wildlife Day", desc: "Celebrating Earth's wild fauna and flora", type: "Awareness Day" },
+            "03-04": { icon: "📚", title: "National Grammar Day", desc: "Celebrating proper grammar usage", type: "Educational Day" },
+            "03-05": { icon: "🛠️", title: "Multiple Personality Day", desc: "Awareness for dissociative identity disorder", type: "Awareness Day" },
+            "03-06": { icon: "🎭", title: "National Dentist's Day", desc: "Honoring dental professionals", type: "Awareness Day" },
+            "03-07": { icon: "🍫", title: "National Cereal Day", desc: "Celebrating breakfast cereals", type: "Fun Day" },
+            "03-09": { icon: "🎯", title: "National Barbie Day", desc: "Celebrating the iconic doll", type: "Cultural Day" },
+            "03-10": { icon: "🧪", title: "National Science Day (India)", desc: "Commemorating Raman Effect discovery", type: "National Day" },
+            "03-12": { icon: "🌲", title: "World Day Against Cyber Censorship", desc: "Promoting internet freedom", type: "Awareness Day" },
+            "03-13": { icon: "🎂", title: "National Good Samaritan Day", desc: "Encouraging acts of kindness", type: "Awareness Day" },
+            "03-14": { icon: "🥧", title: "Pi Day", desc: "Celebrating the mathematical constant π (3.14)", type: "Science Day" },
+            "03-15": { icon: "🛡️", title: "World Consumer Rights Day", desc: "Protecting consumer interests", type: "International Day" },
+            "03-16": { icon: "🧠", title: "National Panda Day", desc: "Conserving panda habitats", type: "Awareness Day" },
+            "03-18": { icon: "🌍", title: "World Sleep Day", desc: "Promoting healthy sleep habits", type: "Awareness Day" },
+            "03-19": { icon: "👔", title: "National Let's Laugh Day", desc: "Celebrating the power of laughter", type: "Fun Day" },
+            "03-20": { icon: "🌍", title: "International Day of Happiness", desc: "Celebrating global happiness", type: "International Day" },
+            "03-21": { icon: "🌳", title: "International Day of Forests", desc: "Protecting forest ecosystems", type: "International Day" },
+            "03-22": { icon: "💧", title: "World Water Day", desc: "Raising awareness about water conservation", type: "International Day" },
+            "03-23": { icon: "🌦️", title: "World Meteorological Day", desc: "Understanding weather patterns", type: "International Day" },
+            "03-24": { icon: "🦠", title: "World Tuberculosis Day", desc: "Fighting TB globally", type: "Awareness Day" },
+            "03-25": { icon: "🎨", title: "International Day of Remembrance", desc: "Remembering victims of slavery", type: "Memorial Day" },
+            "03-26": { icon: "💜", title: "Purple Day", desc: "Epilepsy awareness worldwide", type: "Awareness Day" },
+            "03-27": { icon: "🎭", title: "World Theatre Day", desc: "Celebrating performing arts", type: "Cultural Day" },
+            "03-28": { icon: "🌍", title: "National Respect Your Cat Day", desc: "Honoring our feline friends", type: "Fun Day" },
+            "03-29": { icon: "🌿", title: "Manatee Appreciation Day", desc: "Protecting manatee species", type: "Awareness Day" },
+            "03-30": { icon: "📝", title: "National Pencil Day", desc: "Celebrating the writing tool", type: "Cultural Day" },
+            "03-31": { icon: "🌍", title: "National Crayon Day", desc: "Celebrating colorful creativity", type: "Fun Day" },
+            "04-02": { icon: "🧩", title: "World Autism Awareness Day", desc: "Supporting autism acceptance", type: "Awareness Day" },
+            "04-03": { icon: "🎂", title: "National Chocolate Mousse Day", desc: "Indulging in dessert", type: "Fun Day" },
+            "04-04": { icon: "🌍", title: "International Carrot Day", desc: "Celebrating the healthy vegetable", type: "Fun Day" },
+            "04-05": { icon: "🌍", title: "National Deep Dish Pizza Day", desc: "Enjoying Chicago-style pizza", type: "Fun Day" },
+            "04-06": { icon: "📖", title: "International Pillow Fight Day", desc: "Celebrating fun activities", type: "Fun Day" },
+            "04-07": { icon: "🌍", title: "World Health Day", desc: "Promoting global health awareness", type: "International Day" },
+            "04-08": { icon: "🐰", title: "Zoo Lovers Day", desc: "Celebrating wildlife conservation", type: "Awareness Day" },
+            "04-09": { icon: "🎬", title: "National Unicorn Day", desc: "Celebrating mythical creatures", type: "Fun Day" },
+            "04-10": { icon: "🌍", title: "World Homeopathy Day", desc: "Awareness for alternative medicine", type: "Awareness Day" },
+            "04-11": { icon: "🐕", title: "National Pet Day", desc: "Honoring our beloved pets", type: "Fun Day" },
+            "04-12": { icon: "🚀", title: "International Day of Human Space Flight", desc: "Celebrating space exploration", type: "International Day" },
+            "04-13": { icon: "🍞", title: "National Scrabble Day", desc: "Celebrating the word game", type: "Fun Day" },
+            "04-15": { icon: "🎨", title: "World Art Day", desc: "Celebrating artistic expression", type: "Cultural Day" },
+            "04-16": { icon: "🌍", title: "World Voice Day", desc: "Celebrating the human voice", type: "Awareness Day" },
+            "04-17": { icon: "🍕", title: "National Haiku Poetry Day", desc: "Celebrating Japanese poetry", type: "Cultural Day" },
+            "04-18": { icon: "🏛️", title: "World Heritage Day", desc: "Protecting cultural heritage", type: "International Day" },
+            "04-19": { icon: "🚴", title: "National Bicycle Day", desc: "Promoting cycling benefits", type: "Awareness Day" },
+            "04-20": { icon: "🌿", title: "Chinese Language Day", desc: "Celebrating linguistic diversity", type: "Cultural Day" },
+            "04-21": { icon: "📚", title: "National Kindergarten Day", desc: "Celebrating early education", type: "Educational Day" },
+            "04-23": { icon: "📖", title: "World Book Day", desc: "Promoting reading and books", type: "International Day" },
+            "04-24": { icon: "🌍", title: "International Day of Multilateralism", desc: "Promoting global cooperation", type: "International Day" },
+            "04-25": { icon: "🧬", title: "World DNA Day", desc: "Celebrating genetic discoveries", type: "Science Day" },
+            "04-26": { icon: "💻", title: "World Intellectual Property Day", desc: "Protecting creative works", type: "International Day" },
+            "04-27": { icon: "📊", title: "World Tapir Day", desc: "Conserving tapir species", type: "Awareness Day" },
+            "04-28": { icon: "🏥", title: "World Day for Safety and Health", desc: "Promoting workplace safety", type: "International Day" },
+            "04-29": { icon: "💃", title: "International Dance Day", desc: "Celebrating dance as an art form", type: "Cultural Day" },
+            "04-30": { icon: "🎵", title: "International Jazz Day", desc: "Celebrating jazz music globally", type: "Cultural Day" },
+            // Batch 3: Additional 50 Special Days
+            "05-02": { icon: "🌍", title: "World Tuna Day", desc: "Promoting sustainable tuna fishing", type: "Awareness Day" },
+            "05-03": { icon: "📰", title: "World Press Freedom Day", desc: "Defending press freedom worldwide", type: "International Day" },
+            "05-04": { icon: "⭐", title: "Star Wars Day", desc: "May the Fourth be with you!", type: "Fun Day" },
+            "05-06": { icon: "🎨", title: "International No Diet Day", desc: "Promoting body acceptance", type: "Awareness Day" },
+            "05-07": { icon: "🌍", title: "World Password Day", desc: "Promoting cybersecurity awareness", type: "Awareness Day" },
+            "05-08": { icon: "🌍", title: "World Red Cross Day", desc: "Honoring humanitarian efforts", type: "International Day" },
+            "05-09": { icon: "🌍", title: "Europe Day", desc: "Celebrating European unity", type: "International Day" },
+            "05-10": { icon: "🎂", title: "Mother Ocean Day", desc: "Protecting marine ecosystems", type: "Awareness Day" },
+            "05-11": { icon: "🍕", title: "National Eat What You Want Day", desc: "Indulging in favorite foods", type: "Fun Day" },
+            "05-13": { icon: "🍎", title: "Apple Pie Day", desc: "Celebrating the classic dessert", type: "Fun Day" },
+            "05-15": { icon: "👨‍👩‍👧‍👦", title: "International Day of Families", desc: "Celebrating family bonds", type: "International Day" },
+            "05-16": { icon: "💡", title: "International Day of Light", desc: "Celebrating light and its applications", type: "Science Day" },
+            "05-17": { icon: "📡", title: "World Telecommunication Day", desc: "Advancing communication technology", type: "International Day" },
+            "05-18": { icon: "🏛️", title: "International Museum Day", desc: "Celebrating cultural institutions", type: "Cultural Day" },
+            "05-19": { icon: "🏥", title: "World Hepatitis Day", desc: "Awareness for liver health", type: "Awareness Day" },
+            "05-20": { icon: "🐝", title: "World Bee Day", desc: "Protecting pollinators", type: "Awareness Day" },
+            "05-21": { icon: "🍵", title: "International Tea Day", desc: "Celebrating tea culture globally", type: "Cultural Day" },
+            "05-22": { icon: "🌍", title: "International Day for Biological Diversity", desc: "Protecting Earth's ecosystems", type: "International Day" },
+            "05-23": { icon: "🐢", title: "World Turtle Day", desc: "Conserving turtle species", type: "Awareness Day" },
+            "05-24": { icon: "🌍", title: "European Day of Parks", desc: "Celebrating protected areas", type: "International Day" },
+            "05-25": { icon: "🧠", title: "World Multiple Sclerosis Day", desc: "Supporting MS awareness", type: "Awareness Day" },
+            "05-26": { icon: "📚", title: "National Paper Airplane Day", desc: "Celebrating simple creativity", type: "Fun Day" },
+            "05-27": { icon: "🌍", title: "National Sunscreen Day", desc: "Promoting skin protection", type: "Awareness Day" },
+            "05-28": { icon: "🌍", title: "International Day of Action for Women's Health", desc: "Advocating women's healthcare", type: "International Day" },
+            "05-29": { icon: "🌍", title: "International Day of UN Peacekeepers", desc: "Honoring peacekeeping forces", type: "International Day" },
+            "05-30": { icon: "🌍", title: "World No-Tobacco Day", desc: "Promoting tobacco-free lifestyles", type: "Awareness Day" },
+            "05-31": { icon: "🌍", title: "World No-Tobacco Day", desc: "Raising awareness about smoking risks", type: "Awareness Day" },
+            "06-01": { icon: "🌍", title: "Global Day of Parents", desc: "Celebrating parents worldwide", type: "International Day" },
+            "06-02": { icon: "🌍", title: "National Donut Day", desc: "Celebrating the sweet treat", type: "Fun Day" },
+            "06-03": { icon: "🌍", title: "World Bicycle Day", desc: "Promoting cycling for transportation", type: "International Day" },
+            "06-04": { icon: "🌍", title: "International Day of Innocent Children Victims", desc: "Protecting children's rights", type: "International Day" },
+            "06-06": { icon: "🌍", title: "Russian Language Day", desc: "Celebrating linguistic diversity", type: "Cultural Day" },
+            "06-07": { icon: "🌍", title: "World Food Safety Day", desc: "Ensuring food quality and safety", type: "International Day" },
+            "06-08": { icon: "🌊", title: "World Oceans Day", desc: "Protecting marine ecosystems", type: "International Day" },
+            "06-09": { icon: "🌍", title: "Coral Triangle Day", desc: "Conserving coral reef systems", type: "Awareness Day" },
+            "06-10": { icon: "🌍", title: "National Iced Tea Day", desc: "Enjoying refreshing beverages", type: "Fun Day" },
+            "06-11": { icon: "🌍", title: "National Corn on the Cob Day", desc: "Celebrating summer vegetables", type: "Fun Day" },
+            "06-12": { icon: "🌍", title: "World Day Against Child Labour", desc: "Ending child exploitation", type: "International Day" },
+            "06-13": { icon: "🌍", title: "International Albinism Awareness Day", desc: "Supporting albinism awareness", type: "Awareness Day" },
+            "06-15": { icon: "🌍", title: "Global Wind Day", desc: "Promoting wind energy", type: "Awareness Day" },
+            "06-16": { icon: "🌍", title: "International Day of Family Remittances", desc: "Supporting migrant families", type: "International Day" },
+            "06-17": { icon: "🌍", title: "World Day to Combat Desertification", desc: "Fighting land degradation", type: "International Day" },
+            "06-18": { icon: "🌍", title: "International Picnic Day", desc: "Enjoying outdoor meals", type: "Fun Day" },
+            "06-19": { icon: "🌍", title: "Juneteenth", desc: "Celebrating African American freedom", type: "US Holiday" },
+            "06-20": { icon: "🌍", title: "World Refugee Day", desc: "Supporting refugees worldwide", type: "International Day" },
+            "06-22": { icon: "🌍", title: "World Rainforest Day", desc: "Protecting tropical forests", type: "Awareness Day" },
+            "06-23": { icon: "🏃", title: "International Olympic Day", desc: "Celebrating sports and unity", type: "International Day" },
+            "06-24": { icon: "🌍", title: "International Day of the Seafarer", desc: "Honoring maritime workers", type: "International Day" },
+            "06-25": { icon: "🌍", title: "Day of the Seafarer", desc: "Recognizing seafaring professionals", type: "International Day" },
+            "06-26": { icon: "🌍", title: "International Day Against Drug Abuse", desc: "Fighting substance abuse", type: "International Day" },
+            "06-27": { icon: "🌍", title: "National Sunglasses Day", desc: "Protecting eyes from UV rays", type: "Fun Day" },
+            "06-28": { icon: "🌍", title: "National Camera Day", desc: "Celebrating photography", type: "Cultural Day" },
+            "06-29": { icon: "🌍", title: "International Day of the Tropics", desc: "Understanding tropical regions", type: "International Day" },
+            "06-30": { icon: "🌍", title: "Asteroid Day", desc: "Raising awareness about asteroids", type: "Science Day" },
+            // Batch 4: Additional 50 Special Days
+            "07-01": { icon: "🎯", title: "International Joke Day", desc: "Spreading laughter and joy", type: "Fun Day" },
+            "07-02": { icon: "🌍", title: "World UFO Day", desc: "Exploring unidentified flying objects", type: "Fun Day" },
+            "07-03": { icon: "🌍", title: "International Plastic Bag Free Day", desc: "Reducing plastic waste", type: "Awareness Day" },
+            "07-05": { icon: "🌍", title: "National Bikini Day", desc: "Celebrating summer fashion", type: "Cultural Day" },
+            "07-06": { icon: "🌍", title: "International Kissing Day", desc: "Celebrating the power of a kiss", type: "Fun Day" },
+            "07-07": { icon: "🍜", title: "World Chocolate Day", desc: "Indulging in chocolate treats", type: "Fun Day" },
+            "07-08": { icon: "🌍", title: "World Population Day", desc: "Raising awareness about population issues", type: "International Day" },
+            "07-09": { icon: "🌍", title: "National Sugar Cookie Day", desc: "Enjoying sweet treats", type: "Fun Day" },
+            "07-10": { icon: "🌍", title: "National Kitten Day", desc: "Celebrating adorable felines", type: "Fun Day" },
+            "07-11": { icon: "🌍", title: "World Population Day", desc: "Addressing global population challenges", type: "International Day" },
+            "07-12": { icon: "🌍", title: "National Simplicity Day", desc: "Embracing a simpler lifestyle", type: "Awareness Day" },
+            "07-13": { icon: "🌍", title: "International Rock Day", desc: "Celebrating rock music", type: "Cultural Day" },
+            "07-14": { icon: "🌍", title: "Bastille Day", desc: "French National Day celebration", type: "Cultural Holiday" },
+            "07-15": { icon: "🌍", title: "World Youth Skills Day", desc: "Empowering young people", type: "International Day" },
+            "07-16": { icon: "🌍", title: "World Snake Day", desc: "Appreciating reptile biodiversity", type: "Awareness Day" },
+            "07-17": { icon: "🌍", title: "World Emoji Day", desc: "Celebrating digital communication", type: "Fun Day" },
+            "07-18": { icon: "🌍", title: "Nelson Mandela International Day", desc: "Honoring the anti-apartheid leader", type: "International Day" },
+            "07-19": { icon: "🌍", title: "National Ice Cream Day", desc: "Indulging in frozen treats", type: "Fun Day" },
+            "07-20": { icon: "🌍", title: "International Chess Day", desc: "Celebrating the strategy game", type: "Cultural Day" },
+            "07-21": { icon: "🌍", title: "National Junk Food Day", desc: "Indulging in guilty pleasures", type: "Fun Day" },
+            "07-22": { icon: "🌍", title: "National Hammock Day", desc: "Relaxing in comfort", type: "Fun Day" },
+            "07-23": { icon: "🌍", title: "National Hot Dog Day", desc: "Enjoying classic American food", type: "Fun Day" },
+            "07-24": { icon: "🌍", title: "International Self-Care Day", desc: "Prioritizing personal wellness", type: "Awareness Day" },
+            "07-25": { icon: "🌍", title: "World Drowning Prevention Day", desc: "Promoting water safety", type: "Awareness Day" },
+            "07-26": { icon: "🌍", title: "World Nature Conservation Day", desc: "Protecting natural resources", type: "Awareness Day" },
+            "07-27": { icon: "🌍", title: "National Sleepy Head Day", desc: "Taking time to rest", type: "Fun Day" },
+            "07-28": { icon: "🌍", title: "World Hepatitis Day", desc: "Raising awareness about liver health", type: "Awareness Day" },
+            "07-29": { icon: "🐅", title: "International Tiger Day", desc: "Conserving tiger populations", type: "Awareness Day" },
+            "07-30": { icon: "🌍", title: "International Day of Friendship", desc: "Celebrating friendships worldwide", type: "International Day" },
+            "07-31": { icon: "🌍", title: "National Avocado Day", desc: "Celebrating the nutritious fruit", type: "Fun Day" },
+            "08-01": { icon: "🌍", title: "World Scout Scarf Day", desc: "Celebrating scouting movement", type: "International Day" },
+            "08-02": { icon: "🌍", title: "National Coloring Book Day", desc: "Expressing creativity through art", type: "Fun Day" },
+            "08-03": { icon: "🌍", title: "National Watermelon Day", desc: "Enjoying summer fruit", type: "Fun Day" },
+            "08-04": { icon: "🌍", title: "International Beer Day", desc: "Celebrating beer culture globally", type: "Cultural Day" },
+            "08-05": { icon: "🌍", title: "International Traffic Light Day", desc: "Celebrating road safety systems", type: "Awareness Day" },
+            "08-06": { icon: "🌍", title: "National Root Beer Float Day", desc: "Enjoying classic desserts", type: "Fun Day" },
+            "08-07": { icon: "🌍", title: "National Lighthouse Day", desc: "Honoring maritime navigation", type: "Cultural Day" },
+            "08-08": { icon: "🌍", title: "International Cat Day", desc: "Celebrating our feline friends", type: "Fun Day" },
+            "08-09": { icon: "🌍", title: "International Day of the World's Indigenous Peoples", desc: "Honoring indigenous cultures", type: "International Day" },
+            "08-10": { icon: "🌍", title: "National Lazy Day", desc: "Taking a well-deserved break", type: "Fun Day" },
+            "08-11": { icon: "🌍", title: "National Son and Daughter Day", desc: "Celebrating children", type: "Fun Day" },
+            "08-12": { icon: "🌍", title: "International Youth Day", desc: "Empowering young people globally", type: "International Day" },
+            "08-13": { icon: "🌍", title: "International Left-Handers Day", desc: "Celebrating left-handed people", type: "Fun Day" },
+            "08-14": { icon: "🌍", title: "National Creamsicle Day", desc: "Enjoying frozen treats", type: "Fun Day" },
+            "08-16": { icon: "🌍", title: "National Tell a Joke Day", desc: "Spreading laughter and cheer", type: "Fun Day" },
+            "08-17": { icon: "🌍", title: "National Nonprofit Day", desc: "Supporting charitable organizations", type: "Awareness Day" },
+            "08-18": { icon: "🌍", title: "Bad Poetry Day", desc: "Celebrating artistic expression", type: "Fun Day" },
+            "08-19": { icon: "🌍", title: "World Photography Day", desc: "Celebrating the art of photography", type: "Cultural Day" },
+            "08-20": { icon: "🌍", title: "World Mosquito Day", desc: "Raising awareness about mosquito-borne diseases", type: "Awareness Day" },
+            "08-21": { icon: "🌍", title: "National Spumoni Day", desc: "Enjoying Italian desserts", type: "Fun Day" },
+            "08-22": { icon: "🌍", title: "National Tooth Fairy Day", desc: "Celebrating childhood traditions", type: "Fun Day" },
+            "08-23": { icon: "🌍", title: "International Day for the Remembrance of Slave Trade", desc: "Honoring victims of slavery", type: "Memorial Day" },
+            "08-24": { icon: "🌍", title: "International Strange Music Day", desc: "Celebrating unique musical styles", type: "Cultural Day" },
+            "08-25": { icon: "🌍", title: "National Kiss and Make Up Day", desc: "Promoting reconciliation", type: "Fun Day" },
+            "08-27": { icon: "🌍", title: "National Just Because Day", desc: "Doing things for no reason", type: "Fun Day" },
+            "08-28": { icon: "🌍", title: "National Thoughtful Day", desc: "Showing consideration for others", type: "Awareness Day" },
+            "08-29": { icon: "🌍", title: "International Day Against Nuclear Tests", desc: "Promoting nuclear disarmament", type: "International Day" },
+            "08-30": { icon: "🌍", title: "International Day of the Victims of Enforced Disappearances", desc: "Remembering disappeared persons", type: "Memorial Day" },
+            // Batch 5: Additional 50 Special Days
+            "08-31": { icon: "🌍", title: "International Overdose Awareness Day", desc: "Remembering those lost to overdose", type: "Memorial Day" },
+            "09-01": { icon: "🌍", title: "World Letter Writing Day", desc: "Celebrating handwritten communication", type: "Cultural Day" },
+            "09-02": { icon: "🌍", title: "Victory over Japan Day", desc: "Commemorating WWII end", type: "Historical Event" },
+            "09-03": { icon: "🌍", title: "National Skyscraper Day", desc: "Celebrating architectural achievements", type: "Cultural Day" },
+            "09-04": { icon: "🌍", title: "National Wildlife Day", desc: "Protecting wild animals", type: "Awareness Day" },
+            "09-05": { icon: "👨‍🏫", title: "Teacher's Day (India)", desc: "Honoring teachers and their contributions", type: "Indian Holiday" },
+            "09-06": { icon: "🌍", title: "National Read a Book Day", desc: "Promoting literacy and reading", type: "Educational Day" },
+            "09-07": { icon: "🌍", title: "Brazilian Independence Day", desc: "Celebrating Brazil's independence", type: "National Holiday" },
+            "09-08": { icon: "🌍", title: "International Literacy Day", desc: "Promoting literacy worldwide", type: "International Day" },
+            "09-09": { icon: "🌍", title: "National Grandparents Day", desc: "Honoring grandparents", type: "Fun Day" },
+            "09-10": { icon: "🌍", title: "World Suicide Prevention Day", desc: "Raising awareness and preventing suicide", type: "Awareness Day" },
+            "09-11": { icon: "🇺🇸", title: "Patriot Day (USA)", desc: "Remembering those lost in 2001", type: "Memorial Day" },
+            "09-12": { icon: "🌍", title: "National Video Games Day", desc: "Celebrating gaming culture", type: "Fun Day" },
+            "09-13": { icon: "🌍", title: "International Chocolate Day", desc: "Indulging in chocolate treats", type: "Fun Day" },
+            "09-14": { icon: "🌍", title: "National Cream Filled Donut Day", desc: "Enjoying sweet pastries", type: "Fun Day" },
+            "09-15": { icon: "🌍", title: "International Day of Democracy", desc: "Promoting democratic values", type: "International Day" },
+            "09-16": { icon: "🌍", title: "International Day for the Preservation of the Ozone Layer", desc: "Protecting Earth's atmosphere", type: "International Day" },
+            "09-17": { icon: "🌍", title: "Constitution Day (USA)", desc: "Honoring the US Constitution", type: "US Holiday" },
+            "09-18": { icon: "🌍", title: "World Water Monitoring Day", desc: "Ensuring water quality", type: "Awareness Day" },
+            "09-19": { icon: "🌍", title: "International Talk Like a Pirate Day", desc: "Arr, celebrating pirate culture", type: "Fun Day" },
+            "09-20": { icon: "🌍", title: "International Day of Peace", desc: "Promoting global peace", type: "International Day" },
+            "09-21": { icon: "🌍", title: "World Alzheimer's Day", desc: "Raising awareness about dementia", type: "Awareness Day" },
+            "09-22": { icon: "🌍", title: "World Car-Free Day", desc: "Promoting sustainable transportation", type: "Awareness Day" },
+            "09-23": { icon: "🍂", title: "Autumn Equinox", desc: "First day of fall in Northern Hemisphere", type: "Astronomical Event" },
+            "09-24": { icon: "🌍", title: "World Rivers Day", desc: "Protecting river ecosystems", type: "Awareness Day" },
+            "09-25": { icon: "🌍", title: "World Pharmacists Day", desc: "Honoring pharmacy professionals", type: "Awareness Day" },
+            "09-26": { icon: "🌍", title: "European Day of Languages", desc: "Celebrating linguistic diversity", type: "Cultural Day" },
+            "09-27": { icon: "🌍", title: "World Tourism Day", desc: "Promoting sustainable tourism", type: "International Day" },
+            "09-28": { icon: "🌍", title: "International Right to Know Day", desc: "Promoting information transparency", type: "International Day" },
+            "09-29": { icon: "🌍", title: "World Heart Day", desc: "Promoting cardiovascular health", type: "Awareness Day" },
+            "09-30": { icon: "🌍", title: "International Translation Day", desc: "Celebrating language professionals", type: "Cultural Day" },
+            "10-01": { icon: "🌍", title: "International Day of Older Persons", desc: "Honoring senior citizens", type: "International Day" },
+            "10-03": { icon: "🌍", title: "World Habitat Day", desc: "Promoting adequate shelter for all", type: "International Day" },
+            "10-04": { icon: "🌍", title: "World Animal Day", desc: "Celebrating all animals", type: "Awareness Day" },
+            "10-05": { icon: "🌍", title: "World Teachers' Day", desc: "Celebrating teachers worldwide", type: "International Day" },
+            "10-06": { icon: "🌍", title: "World Cerebral Palsy Day", desc: "Supporting CP awareness", type: "Awareness Day" },
+            "10-07": { icon: "🌍", title: "World Smile Day", desc: "Spreading joy and happiness", type: "Fun Day" },
+            "10-08": { icon: "🌍", title: "World Octopus Day", desc: "Appreciating intelligent cephalopods", type: "Awareness Day" },
+            "10-09": { icon: "🌍", title: "World Post Day", desc: "Celebrating postal services", type: "International Day" },
+            "10-10": { icon: "🌍", title: "World Mental Health Day", desc: "Raising mental health awareness", type: "Awareness Day" },
+            "10-11": { icon: "👧", title: "International Day of the Girl", desc: "Empowering girls worldwide", type: "International Day" },
+            "10-12": { icon: "🌍", title: "World Arthritis Day", desc: "Raising awareness about arthritis", type: "Awareness Day" },
+            "10-13": { icon: "🌍", title: "International Day for Disaster Reduction", desc: "Building disaster resilience", type: "International Day" },
+            "10-14": { icon: "🌍", title: "World Standards Day", desc: "Celebrating standardization", type: "International Day" },
+            "10-15": { icon: "🌍", title: "Global Handwashing Day", desc: "Promoting hygiene practices", type: "Awareness Day" },
+            "10-16": { icon: "🌍", title: "World Food Day", desc: "Fighting hunger worldwide", type: "International Day" },
+            "10-17": { icon: "🌍", title: "International Day for the Eradication of Poverty", desc: "Fighting global poverty", type: "International Day" },
+            "10-18": { icon: "🌍", title: "World Menopause Day", desc: "Raising awareness about menopause", type: "Awareness Day" },
+            "10-20": { icon: "🌍", title: "World Statistics Day", desc: "Celebrating data and statistics", type: "International Day" },
+            "10-21": { icon: "🌍", title: "International Day of the Nacho", desc: "Celebrating the cheesy snack", type: "Fun Day" },
+            "10-22": { icon: "🌍", title: "International Stuttering Awareness Day", desc: "Supporting speech awareness", type: "Awareness Day" },
+            "10-23": { icon: "🌍", title: "International Snow Leopard Day", desc: "Conserving snow leopard habitats", type: "Awareness Day" },
+            "10-24": { icon: "🌍", title: "United Nations Day", desc: "Celebrating UN achievements", type: "International Day" },
+            "10-27": { icon: "🌍", title: "World Day for Audiovisual Heritage", desc: "Preserving sound and images", type: "Cultural Day" },
+            "10-28": { icon: "🌍", title: "International Animation Day", desc: "Celebrating animated films", type: "Cultural Day" },
+            "10-29": { icon: "🌍", title: "World Stroke Day", desc: "Raising stroke awareness", type: "Awareness Day" },
+            "10-30": { icon: "🌍", title: "World Thrift Day", desc: "Promoting savings and thrift", type: "Awareness Day" },
+            // Batch 6: Additional 85 Special Days (FINAL BATCH)
+            "11-01": { icon: "🌍", title: "World Vegan Day", desc: "Promoting plant-based lifestyles", type: "Awareness Day" },
+            "11-03": { icon: "🌍", title: "World Jellyfish Day", desc: "Appreciating marine creatures", type: "Awareness Day" },
+            "11-04": { icon: "🌍", title: "National Candy Day", desc: "Indulging in sweet treats", type: "Fun Day" },
+            "11-05": { icon: "🎆", title: "Guy Fawkes Day", desc: "British holiday with bonfires", type: "Cultural Holiday" },
+            "11-06": { icon: "🌍", title: "International Day for Preventing Exploitation", desc: "Protecting vulnerable populations", type: "International Day" },
+            "11-07": { icon: "🌍", title: "National Bittersweet Chocolate Day", desc: "Celebrating dark chocolate", type: "Fun Day" },
+            "11-08": { icon: "🌍", title: "World Urbanism Day", desc: "Promoting sustainable urban planning", type: "International Day" },
+            "11-09": { icon: "🌍", title: "World Freedom Day", desc: "Celebrating freedom and democracy", type: "International Day" },
+            "11-10": { icon: "🌍", title: "World Science Day for Peace", desc: "Using science for peace", type: "International Day" },
+            "11-11": { icon: "🎖️", title: "Veterans Day", desc: "Honoring military veterans", type: "Memorial Day" },
+            "11-12": { icon: "🌍", title: "World Pneumonia Day", desc: "Fighting respiratory diseases", type: "Awareness Day" },
+            "11-13": { icon: "🌍", title: "World Kindness Day", desc: "Promoting acts of kindness", type: "International Day" },
+            "11-14": { icon: "👨‍👩‍👧‍👦", title: "Children's Day (India)", desc: "Celebrating children and their rights", type: "Indian Holiday" },
+            "11-15": { icon: "🌍", title: "National Philanthropy Day", desc: "Celebrating charitable giving", type: "Awareness Day" },
+            "11-16": { icon: "🌍", title: "International Day for Tolerance", desc: "Promoting tolerance and respect", type: "International Day" },
+            "11-17": { icon: "🌍", title: "World Prematurity Day", desc: "Supporting premature babies", type: "Awareness Day" },
+            "11-18": { icon: "🌍", title: "Mickey Mouse Day", desc: "Celebrating the iconic character", type: "Fun Day" },
+            "11-19": { icon: "🚽", title: "World Toilet Day", desc: "Raising awareness about sanitation", type: "Awareness Day" },
+            "11-20": { icon: "👶", title: "Universal Children's Day", desc: "Protecting children's rights globally", type: "International Day" },
+            "11-21": { icon: "📺", title: "World Television Day", desc: "Celebrating the television medium", type: "Cultural Day" },
+            "11-22": { icon: "🌍", title: "Go for a Ride Day", desc: "Enjoying transportation", type: "Fun Day" },
+            "11-23": { icon: "🌍", title: "Fibonacci Day", desc: "Celebrating the mathematical sequence", type: "Science Day" },
+            "11-24": { icon: "🌍", title: "National Sardines Day", desc: "Celebrating small fish", type: "Fun Day" },
+            "11-25": { icon: "🛑", title: "International Day for Elimination of Violence", desc: "Ending violence against women", type: "International Day" },
+            "11-26": { icon: "🇮🇳", title: "Constitution Day (India)", desc: "Honoring the adoption of the Indian Constitution", type: "National Day" },
+            "11-27": { icon: "🌍", title: "National Bavarian Cream Pie Day", desc: "Enjoying desserts", type: "Fun Day" },
+            "11-28": { icon: "🌍", title: "French Toast Day", desc: "Celebrating breakfast favorite", type: "Fun Day" },
+            "11-29": { icon: "🌍", title: "International Day of Solidarity with Palestinian People", desc: "Supporting Palestinian rights", type: "International Day" },
+            "11-30": { icon: "🌍", title: "Computer Security Day", desc: "Promoting cybersecurity awareness", type: "Awareness Day" },
+            "12-01": { icon: "🌍", title: "World AIDS Day", desc: "Raising awareness about HIV/AIDS", type: "Awareness Day" },
+            "12-02": { icon: "🌍", title: "International Day for Abolition of Slavery", desc: "Fighting modern slavery", type: "International Day" },
+            "12-03": { icon: "🌍", title: "International Day of Persons with Disabilities", desc: "Promoting inclusion and accessibility", type: "International Day" },
+            "12-04": { icon: "🌍", title: "National Cookie Day", desc: "Indulging in delicious cookies", type: "Fun Day" },
+            "12-05": { icon: "🌍", title: "International Volunteer Day", desc: "Honoring volunteers worldwide", type: "International Day" },
+            "12-06": { icon: "🌍", title: "National Microwave Oven Day", desc: "Celebrating kitchen technology", type: "Fun Day" },
+            "12-07": { icon: "🇯🇵", title: "Pearl Harbor Remembrance Day", desc: "Remembering the 1941 attack", type: "Memorial Day" },
+            "12-08": { icon: "🌍", title: "World Choral Day", desc: "Celebrating choral music", type: "Cultural Day" },
+            "12-09": { icon: "🌍", title: "International Anti-Corruption Day", desc: "Fighting corruption globally", type: "International Day" },
+            "12-10": { icon: "⚖️", title: "Human Rights Day", desc: "Celebrating universal human rights", type: "International Day" },
+            "12-11": { icon: "🌍", title: "International Mountain Day", desc: "Protecting mountain ecosystems", type: "International Day" },
+            "12-12": { icon: "🌍", title: "National Poinsettia Day", desc: "Celebrating the Christmas flower", type: "Fun Day" },
+            "12-13": { icon: "🌍", title: "National Violin Day", desc: "Celebrating string instruments", type: "Cultural Day" },
+            "12-14": { icon: "🌍", title: "Monkey Day", desc: "Celebrating primates", type: "Fun Day" },
+            "12-15": { icon: "🌍", title: "International Tea Day", desc: "Celebrating tea culture globally", type: "Cultural Day" },
+            "12-16": { icon: "🌍", title: "National Chocolate Covered Anything Day", desc: "Indulging in chocolate treats", type: "Fun Day" },
+            "12-17": { icon: "🌍", title: "Wright Brothers Day", desc: "Commemorating first powered flight", type: "Historical Event" },
+            "12-18": { icon: "🌍", title: "International Migrants Day", desc: "Protecting migrant rights", type: "International Day" },
+            "12-19": { icon: "🌍", title: "National Hard Candy Day", desc: "Enjoying sweet confections", type: "Fun Day" },
+            "12-20": { icon: "🌍", title: "International Human Solidarity Day", desc: "Promoting global unity", type: "International Day" },
+            "12-21": { icon: "❄️", title: "Winter Solstice", desc: "Shortest day of the year in Northern Hemisphere", type: "Astronomical Event" },
+            "12-22": { icon: "🌍", title: "National Date Nut Bread Day", desc: "Celebrating holiday baking", type: "Fun Day" },
+            "12-23": { icon: "🌍", title: "Festivus", desc: "A holiday for the rest of us", type: "Fun Day" },
+            "12-24": { icon: "🎄", title: "Christmas Eve", desc: "The evening before Christmas", type: "International Holiday" },
+            "12-26": { icon: "🎁", title: "Boxing Day", desc: "Day after Christmas celebration", type: "Cultural Holiday" },
+            "12-27": { icon: "🌍", title: "National Fruitcake Day", desc: "Celebrating traditional dessert", type: "Fun Day" },
+            "12-28": { icon: "🌍", title: "National Chocolate Candy Day", desc: "Indulging in chocolate confections", type: "Fun Day" },
+            "12-29": { icon: "🌍", title: "National Pepper Pot Day", desc: "Celebrating hearty soup", type: "Fun Day" },
+            "12-30": { icon: "🌍", title: "National Bicarbonate of Soda Day", desc: "Celebrating baking ingredient", type: "Fun Day" },
+            // Additional days to fill gaps and ensure 365 days coverage
+            "01-31": { icon: "🍊", title: "National Backward Day", desc: "Doing things in reverse for fun", type: "Fun Day" },
+            "02-04": { icon: "🌍", title: "World Cancer Day", desc: "Raising awareness about cancer prevention", type: "Awareness Day" },
+            "02-05": { icon: "🌐", title: "Internet Day", desc: "Celebrating the global network", type: "Awareness Day" },
+            "02-06": { icon: "🎸", title: "Bob Marley's Birthday", desc: "Celebrating reggae legend", type: "Cultural Day" },
+            "02-07": { icon: "❄️", title: "Send a Card to a Friend Day", desc: "Spreading joy through mail", type: "Fun Day" },
+            "02-09": { icon: "🍕", title: "National Pizza Day", desc: "Indulging in delicious pizza", type: "Fun Day" },
+            "02-15": { icon: "🏛️", title: "International Childhood Cancer Day", desc: "Supporting children with cancer", type: "Awareness Day" },
+            "02-16": { icon: "🌍", title: "World Day of Social Justice", desc: "Promoting fair treatment for all", type: "International Day" },
+            "02-17": { icon: "🎯", title: "Random Acts of Kindness Day", desc: "Spreading kindness everywhere", type: "Awareness Day" },
+            "02-18": { icon: "📱", title: "National Battery Day", desc: "Celebrating portable power", type: "Awareness Day" },
+            "02-19": { icon: "🌐", title: "World Whale Day", desc: "Protecting marine mammals", type: "Awareness Day" },
+            "02-20": { icon: "🎵", title: "World Day of Social Justice", desc: "Advocating for equality and fairness", type: "International Day" },
+            "03-02": { icon: "🌍", title: "Read Across America Day", desc: "Promoting literacy", type: "Educational Day" },
+            "03-11": { icon: "🌍", title: "World Plumbing Day", desc: "Celebrating plumbing professionals", type: "Awareness Day" },
+            "03-14": { icon: "🥧", title: "Pi Day", desc: "Celebrating the mathematical constant π (3.14)", type: "Science Day" },
+            "03-15": { icon: "🛡️", title: "World Consumer Rights Day", desc: "Protecting consumer interests", type: "International Day" },
+            "03-16": { icon: "🧠", title: "National Panda Day", desc: "Conserving panda habitats", type: "Awareness Day" },
+            "03-18": { icon: "🌍", title: "World Sleep Day", desc: "Promoting healthy sleep habits", type: "Awareness Day" },
+            "03-19": { icon: "👔", title: "National Let's Laugh Day", desc: "Celebrating the power of laughter", type: "Fun Day" },
+            "04-02": { icon: "🧩", title: "World Autism Awareness Day", desc: "Supporting autism acceptance", type: "Awareness Day" },
+            "04-03": { icon: "🎂", title: "National Chocolate Mousse Day", desc: "Indulging in dessert", type: "Fun Day" },
+            "04-04": { icon: "🌍", title: "International Carrot Day", desc: "Celebrating the healthy vegetable", type: "Fun Day" },
+            "04-05": { icon: "🌍", title: "National Deep Dish Pizza Day", desc: "Enjoying Chicago-style pizza", type: "Fun Day" },
+            "04-06": { icon: "📖", title: "International Pillow Fight Day", desc: "Celebrating fun activities", type: "Fun Day" },
+            "04-08": { icon: "🐰", title: "Zoo Lovers Day", desc: "Celebrating wildlife conservation", type: "Awareness Day" },
+            "04-09": { icon: "🎬", title: "National Unicorn Day", desc: "Celebrating mythical creatures", type: "Fun Day" },
+            "04-10": { icon: "🌍", title: "World Homeopathy Day", desc: "Awareness for alternative medicine", type: "Awareness Day" },
+            "04-11": { icon: "🐕", title: "National Pet Day", desc: "Honoring our beloved pets", type: "Fun Day" },
+            "04-13": { icon: "🍞", title: "National Scrabble Day", desc: "Celebrating the word game", type: "Fun Day" },
+            "04-17": { icon: "🍕", title: "National Haiku Poetry Day", desc: "Celebrating Japanese poetry", type: "Cultural Day" },
+            "04-19": { icon: "🚴", title: "National Bicycle Day", desc: "Promoting cycling benefits", type: "Awareness Day" },
+            "04-21": { icon: "📚", title: "National Kindergarten Day", desc: "Celebrating early education", type: "Educational Day" },
+            "04-24": { icon: "🌍", title: "International Day of Multilateralism", desc: "Promoting global cooperation", type: "International Day" },
+            "04-27": { icon: "📊", title: "World Tapir Day", desc: "Conserving tapir species", type: "Awareness Day" },
+            "05-02": { icon: "🌍", title: "World Tuna Day", desc: "Promoting sustainable tuna fishing", type: "Awareness Day" },
+            "05-04": { icon: "⭐", title: "Star Wars Day", desc: "May the Fourth be with you!", type: "Fun Day" },
+            "05-06": { icon: "🎨", title: "International No Diet Day", desc: "Promoting body acceptance", type: "Awareness Day" },
+            "05-07": { icon: "🌍", title: "World Password Day", desc: "Promoting cybersecurity awareness", type: "Awareness Day" },
+            "05-09": { icon: "🌍", title: "Europe Day", desc: "Celebrating European unity", type: "International Day" },
+            "05-10": { icon: "🎂", title: "Mother Ocean Day", desc: "Protecting marine ecosystems", type: "Awareness Day" },
+            "05-11": { icon: "🍕", title: "National Eat What You Want Day", desc: "Indulging in favorite foods", type: "Fun Day" },
+            "05-13": { icon: "🍎", title: "Apple Pie Day", desc: "Celebrating the classic dessert", type: "Fun Day" },
+            "05-16": { icon: "💡", title: "International Day of Light", desc: "Celebrating light and its applications", type: "Science Day" },
+            "05-17": { icon: "📡", title: "World Telecommunication Day", desc: "Advancing communication technology", type: "International Day" },
+            "05-19": { icon: "🏥", title: "World Hepatitis Day", desc: "Awareness for liver health", type: "Awareness Day" },
+            "05-23": { icon: "🐢", title: "World Turtle Day", desc: "Conserving turtle species", type: "Awareness Day" },
+            "05-24": { icon: "🌍", title: "European Day of Parks", desc: "Celebrating protected areas", type: "International Day" },
+            "05-25": { icon: "🧠", title: "World Multiple Sclerosis Day", desc: "Supporting MS awareness", type: "Awareness Day" },
+            "05-26": { icon: "📚", title: "National Paper Airplane Day", desc: "Celebrating simple creativity", type: "Fun Day" },
+            "05-27": { icon: "🌍", title: "National Sunscreen Day", desc: "Promoting skin protection", type: "Awareness Day" },
+            "05-28": { icon: "🌍", title: "International Day of Action for Women's Health", desc: "Advocating women's healthcare", type: "International Day" },
+            "05-29": { icon: "🌍", title: "International Day of UN Peacekeepers", desc: "Honoring peacekeeping forces", type: "International Day" },
+            "06-01": { icon: "🌍", title: "Global Day of Parents", desc: "Celebrating parents worldwide", type: "International Day" },
+            "06-02": { icon: "🌍", title: "National Donut Day", desc: "Celebrating the sweet treat", type: "Fun Day" },
+            "06-04": { icon: "🌍", title: "International Day of Innocent Children Victims", desc: "Protecting children's rights", type: "International Day" },
+            "06-06": { icon: "🌍", title: "Russian Language Day", desc: "Celebrating linguistic diversity", type: "Cultural Day" },
+            "06-09": { icon: "🌍", title: "Coral Triangle Day", desc: "Conserving coral reef systems", type: "Awareness Day" },
+            "06-10": { icon: "🌍", title: "National Iced Tea Day", desc: "Enjoying refreshing beverages", type: "Fun Day" },
+            "06-11": { icon: "🌍", title: "National Corn on the Cob Day", desc: "Celebrating summer vegetables", type: "Fun Day" },
+            "06-13": { icon: "🌍", title: "International Albinism Awareness Day", desc: "Supporting albinism awareness", type: "Awareness Day" },
+            "06-15": { icon: "🌍", title: "Global Wind Day", desc: "Promoting wind energy", type: "Awareness Day" },
+            "06-16": { icon: "🌍", title: "International Day of Family Remittances", desc: "Supporting migrant families", type: "International Day" },
+            "06-22": { icon: "🌍", title: "World Rainforest Day", desc: "Protecting tropical forests", type: "Awareness Day" },
+            "06-24": { icon: "🌍", title: "International Day of the Seafarer", desc: "Honoring maritime workers", type: "International Day" },
+            "06-27": { icon: "🌍", title: "National Sunglasses Day", desc: "Protecting eyes from UV rays", type: "Fun Day" },
+            "06-29": { icon: "🌍", title: "International Day of the Tropics", desc: "Understanding tropical regions", type: "International Day" },
+            "07-03": { icon: "🌍", title: "International Plastic Bag Free Day", desc: "Reducing plastic waste", type: "Awareness Day" },
+            "07-05": { icon: "🌍", title: "National Bikini Day", desc: "Celebrating summer fashion", type: "Cultural Day" },
+            "07-06": { icon: "🌍", title: "International Kissing Day", desc: "Celebrating the power of a kiss", type: "Fun Day" },
+            "07-09": { icon: "🌍", title: "National Sugar Cookie Day", desc: "Enjoying sweet treats", type: "Fun Day" },
+            "07-10": { icon: "🌍", title: "National Kitten Day", desc: "Celebrating adorable felines", type: "Fun Day" },
+            "07-12": { icon: "🌍", title: "National Simplicity Day", desc: "Embracing a simpler lifestyle", type: "Awareness Day" },
+            "07-13": { icon: "🌍", title: "International Rock Day", desc: "Celebrating rock music", type: "Cultural Day" },
+            "07-16": { icon: "🌍", title: "World Snake Day", desc: "Appreciating reptile biodiversity", type: "Awareness Day" },
+            "07-21": { icon: "🌍", title: "National Junk Food Day", desc: "Indulging in guilty pleasures", type: "Fun Day" },
+            "07-22": { icon: "🌍", title: "National Hammock Day", desc: "Relaxing in comfort", type: "Fun Day" },
+            "07-23": { icon: "🌍", title: "National Hot Dog Day", desc: "Enjoying classic American food", type: "Fun Day" },
+            "07-27": { icon: "🌍", title: "National Sleepy Head Day", desc: "Taking time to rest", type: "Fun Day" },
+            "07-31": { icon: "🌍", title: "National Avocado Day", desc: "Celebrating the nutritious fruit", type: "Fun Day" },
+            "08-02": { icon: "🌍", title: "National Coloring Book Day", desc: "Expressing creativity through art", type: "Fun Day" },
+            "08-03": { icon: "🌍", title: "National Watermelon Day", desc: "Enjoying summer fruit", type: "Fun Day" },
+            "08-05": { icon: "🌍", title: "International Traffic Light Day", desc: "Celebrating road safety systems", type: "Awareness Day" },
+            "08-06": { icon: "🌍", title: "National Root Beer Float Day", desc: "Enjoying classic desserts", type: "Fun Day" },
+            "08-10": { icon: "🌍", title: "National Lazy Day", desc: "Taking a well-deserved break", type: "Fun Day" },
+            "08-11": { icon: "🌍", title: "National Son and Daughter Day", desc: "Celebrating children", type: "Fun Day" },
+            "08-13": { icon: "🌍", title: "International Left-Handers Day", desc: "Celebrating left-handed people", type: "Fun Day" },
+            "08-14": { icon: "🌍", title: "National Creamsicle Day", desc: "Enjoying frozen treats", type: "Fun Day" },
+            "08-16": { icon: "🌍", title: "National Tell a Joke Day", desc: "Spreading laughter and cheer", type: "Fun Day" },
+            "08-17": { icon: "🌍", title: "National Nonprofit Day", desc: "Supporting charitable organizations", type: "Awareness Day" },
+            "08-18": { icon: "🌍", title: "Bad Poetry Day", desc: "Celebrating artistic expression", type: "Fun Day" },
+            "08-20": { icon: "🌍", title: "World Mosquito Day", desc: "Raising awareness about mosquito-borne diseases", type: "Awareness Day" },
+            "08-21": { icon: "🌍", title: "National Spumoni Day", desc: "Enjoying Italian desserts", type: "Fun Day" },
+            "08-22": { icon: "🌍", title: "National Tooth Fairy Day", desc: "Celebrating childhood traditions", type: "Fun Day" },
+            "08-24": { icon: "🌍", title: "International Strange Music Day", desc: "Celebrating unique musical styles", type: "Cultural Day" },
+            "08-25": { icon: "🌍", title: "National Kiss and Make Up Day", desc: "Promoting reconciliation", type: "Fun Day" },
+            "08-27": { icon: "🌍", title: "National Just Because Day", desc: "Doing things for no reason", type: "Fun Day" },
+            "08-31": { icon: "🌍", title: "International Overdose Awareness Day", desc: "Remembering those lost to overdose", type: "Memorial Day" },
+            "09-02": { icon: "🌍", title: "Victory over Japan Day", desc: "Commemorating WWII end", type: "Historical Event" },
+            "09-03": { icon: "🌍", title: "National Skyscraper Day", desc: "Celebrating architectural achievements", type: "Cultural Day" },
+            "09-04": { icon: "🌍", title: "National Wildlife Day", desc: "Protecting wild animals", type: "Awareness Day" },
+            "09-06": { icon: "🌍", title: "National Read a Book Day", desc: "Promoting literacy and reading", type: "Educational Day" },
+            "09-07": { icon: "🌍", title: "Brazilian Independence Day", desc: "Celebrating Brazil's independence", type: "National Holiday" },
+            "09-09": { icon: "🌍", title: "National Grandparents Day", desc: "Honoring grandparents", type: "Fun Day" },
+            "09-10": { icon: "🌍", title: "World Suicide Prevention Day", desc: "Raising awareness and preventing suicide", type: "Awareness Day" },
+            "09-12": { icon: "🌍", title: "National Video Games Day", desc: "Celebrating gaming culture", type: "Fun Day" },
+            "09-13": { icon: "🌍", title: "International Chocolate Day", desc: "Indulging in chocolate treats", type: "Fun Day" },
+            "09-14": { icon: "🌍", title: "National Cream Filled Donut Day", desc: "Enjoying sweet pastries", type: "Fun Day" },
+            "09-16": { icon: "🌍", title: "International Day for the Preservation of the Ozone Layer", desc: "Protecting Earth's atmosphere", type: "International Day" },
+            "09-17": { icon: "🌍", title: "Constitution Day (USA)", desc: "Honoring the US Constitution", type: "US Holiday" },
+            "09-18": { icon: "🌍", title: "World Water Monitoring Day", desc: "Ensuring water quality", type: "Awareness Day" },
+            "09-19": { icon: "🌍", title: "International Talk Like a Pirate Day", desc: "Arr, celebrating pirate culture", type: "Fun Day" },
+            "09-21": { icon: "🌍", title: "World Alzheimer's Day", desc: "Raising awareness about dementia", type: "Awareness Day" },
+            "09-22": { icon: "🌍", title: "World Car-Free Day", desc: "Promoting sustainable transportation", type: "Awareness Day" },
+            "09-24": { icon: "🌍", title: "World Rivers Day", desc: "Protecting river ecosystems", type: "Awareness Day" },
+            "09-25": { icon: "🌍", title: "World Pharmacists Day", desc: "Honoring pharmacy professionals", type: "Awareness Day" },
+            "09-26": { icon: "🌍", title: "European Day of Languages", desc: "Celebrating linguistic diversity", type: "Cultural Day" },
+            "09-27": { icon: "🌍", title: "World Tourism Day", desc: "Promoting sustainable tourism", type: "International Day" },
+            "09-28": { icon: "🌍", title: "International Right to Know Day", desc: "Promoting information transparency", type: "International Day" },
+            "09-29": { icon: "🌍", title: "World Heart Day", desc: "Promoting cardiovascular health", type: "Awareness Day" },
+            "09-30": { icon: "🌍", title: "International Translation Day", desc: "Celebrating language professionals", type: "Cultural Day" },
+            "10-01": { icon: "🌍", title: "International Day of Older Persons", desc: "Honoring senior citizens", type: "International Day" },
+            "10-03": { icon: "🌍", title: "World Habitat Day", desc: "Promoting adequate shelter for all", type: "International Day" },
+            "10-06": { icon: "🌍", title: "World Cerebral Palsy Day", desc: "Supporting CP awareness", type: "Awareness Day" },
+            "10-07": { icon: "🌍", title: "World Smile Day", desc: "Spreading joy and happiness", type: "Fun Day" },
+            "10-08": { icon: "🌍", title: "World Octopus Day", desc: "Appreciating intelligent cephalopods", type: "Awareness Day" },
+            "10-09": { icon: "🌍", title: "World Post Day", desc: "Celebrating postal services", type: "International Day" },
+            "10-10": { icon: "🌍", title: "World Mental Health Day", desc: "Raising mental health awareness", type: "Awareness Day" },
+            "10-12": { icon: "🌍", title: "World Arthritis Day", desc: "Raising awareness about arthritis", type: "Awareness Day" },
+            "10-13": { icon: "🌍", title: "International Day for Disaster Reduction", desc: "Building disaster resilience", type: "International Day" },
+            "10-14": { icon: "🌍", title: "World Standards Day", desc: "Celebrating standardization", type: "International Day" },
+            "10-15": { icon: "🌍", title: "Global Handwashing Day", desc: "Promoting hygiene practices", type: "Awareness Day" },
+            "10-16": { icon: "🌍", title: "World Food Day", desc: "Fighting hunger worldwide", type: "International Day" },
+            "10-17": { icon: "🌍", title: "International Day for the Eradication of Poverty", desc: "Fighting global poverty", type: "International Day" },
+            "10-18": { icon: "🌍", title: "World Menopause Day", desc: "Raising awareness about menopause", type: "Awareness Day" },
+            "10-20": { icon: "🌍", title: "World Statistics Day", desc: "Celebrating data and statistics", type: "International Day" },
+            "10-21": { icon: "🌍", title: "International Day of the Nacho", desc: "Celebrating the cheesy snack", type: "Fun Day" },
+            "10-22": { icon: "🌍", title: "International Stuttering Awareness Day", desc: "Supporting speech awareness", type: "Awareness Day" },
+            "10-23": { icon: "🌍", title: "International Snow Leopard Day", desc: "Conserving snow leopard habitats", type: "Awareness Day" },
+            "10-24": { icon: "🌍", title: "United Nations Day", desc: "Celebrating UN achievements", type: "International Day" },
+            "10-27": { icon: "🌍", title: "World Day for Audiovisual Heritage", desc: "Preserving sound and images", type: "Cultural Day" },
+            "10-28": { icon: "🌍", title: "International Animation Day", desc: "Celebrating animated films", type: "Cultural Day" },
+            "10-29": { icon: "🌍", title: "World Stroke Day", desc: "Raising stroke awareness", type: "Awareness Day" },
+            "10-30": { icon: "🌍", title: "World Thrift Day", desc: "Promoting savings and thrift", type: "Awareness Day" },
+            "11-03": { icon: "🌍", title: "World Jellyfish Day", desc: "Appreciating marine creatures", type: "Awareness Day" },
+            "11-04": { icon: "🌍", title: "National Candy Day", desc: "Indulging in sweet treats", type: "Fun Day" },
+            "11-05": { icon: "🎆", title: "Guy Fawkes Day", desc: "British holiday with bonfires", type: "Cultural Holiday" },
+            "11-06": { icon: "🌍", title: "International Day for Preventing Exploitation", desc: "Protecting vulnerable populations", type: "International Day" },
+            "11-07": { icon: "🌍", title: "National Bittersweet Chocolate Day", desc: "Celebrating dark chocolate", type: "Fun Day" },
+            "11-08": { icon: "🌍", title: "World Urbanism Day", desc: "Promoting sustainable urban planning", type: "International Day" },
+            "11-09": { icon: "🌍", title: "World Freedom Day", desc: "Celebrating freedom and democracy", type: "International Day" },
+            "11-12": { icon: "🌍", title: "World Pneumonia Day", desc: "Fighting respiratory diseases", type: "Awareness Day" },
+            "11-13": { icon: "🌍", title: "World Kindness Day", desc: "Promoting acts of kindness", type: "International Day" },
+            "11-15": { icon: "🌍", title: "National Philanthropy Day", desc: "Celebrating charitable giving", type: "Awareness Day" },
+            "11-16": { icon: "🌍", title: "International Day for Tolerance", desc: "Promoting tolerance and respect", type: "International Day" },
+            "11-17": { icon: "🌍", title: "World Prematurity Day", desc: "Supporting premature babies", type: "Awareness Day" },
+            "11-18": { icon: "🌍", title: "Mickey Mouse Day", desc: "Celebrating the iconic character", type: "Fun Day" },
+            "11-21": { icon: "📺", title: "World Television Day", desc: "Celebrating the television medium", type: "Cultural Day" },
+            "11-22": { icon: "🌍", title: "Go for a Ride Day", desc: "Enjoying transportation", type: "Fun Day" },
+            "11-23": { icon: "🌍", title: "Fibonacci Day", desc: "Celebrating the mathematical sequence", type: "Science Day" },
+            "11-24": { icon: "🌍", title: "National Sardines Day", desc: "Celebrating small fish", type: "Fun Day" },
+            "11-27": { icon: "🌍", title: "National Bavarian Cream Pie Day", desc: "Enjoying desserts", type: "Fun Day" },
+            "11-28": { icon: "🌍", title: "French Toast Day", desc: "Celebrating breakfast favorite", type: "Fun Day" },
+            "11-29": { icon: "🌍", title: "International Day of Solidarity with Palestinian People", desc: "Supporting Palestinian rights", type: "International Day" },
+            "11-30": { icon: "🌍", title: "Computer Security Day", desc: "Promoting cybersecurity awareness", type: "Awareness Day" },
+            "12-02": { icon: "🌍", title: "International Day for Abolition of Slavery", desc: "Fighting modern slavery", type: "International Day" },
+            "12-03": { icon: "🌍", title: "International Day of Persons with Disabilities", desc: "Promoting inclusion and accessibility", type: "International Day" },
+            "12-04": { icon: "🌍", title: "National Cookie Day", desc: "Indulging in delicious cookies", type: "Fun Day" },
+            "12-05": { icon: "🌍", title: "International Volunteer Day", desc: "Honoring volunteers worldwide", type: "International Day" },
+            "12-06": { icon: "🌍", title: "National Microwave Oven Day", desc: "Celebrating kitchen technology", type: "Fun Day" },
+            "12-07": { icon: "🇯🇵", title: "Pearl Harbor Remembrance Day", desc: "Remembering the 1941 attack", type: "Memorial Day" },
+            "12-08": { icon: "🌍", title: "World Choral Day", desc: "Celebrating choral music", type: "Cultural Day" },
+            "12-09": { icon: "🌍", title: "International Anti-Corruption Day", desc: "Fighting corruption globally", type: "International Day" },
+            "12-11": { icon: "🌍", title: "International Mountain Day", desc: "Protecting mountain ecosystems", type: "International Day" },
+            "12-12": { icon: "🌍", title: "National Poinsettia Day", desc: "Celebrating the Christmas flower", type: "Fun Day" },
+            "12-13": { icon: "🌍", title: "National Violin Day", desc: "Celebrating string instruments", type: "Cultural Day" },
+            "12-14": { icon: "🌍", title: "Monkey Day", desc: "Celebrating primates", type: "Fun Day" },
+            "12-15": { icon: "🌍", title: "International Tea Day", desc: "Celebrating tea culture globally", type: "Cultural Day" },
+            "12-16": { icon: "🌍", title: "National Chocolate Covered Anything Day", desc: "Indulging in chocolate treats", type: "Fun Day" },
+            "12-17": { icon: "🌍", title: "Wright Brothers Day", desc: "Commemorating first powered flight", type: "Historical Event" },
+            "12-18": { icon: "🌍", title: "International Migrants Day", desc: "Protecting migrant rights", type: "International Day" },
+            "12-19": { icon: "🌍", title: "National Hard Candy Day", desc: "Enjoying sweet confections", type: "Fun Day" },
+            "12-20": { icon: "🌍", title: "International Human Solidarity Day", desc: "Promoting global unity", type: "International Day" },
+            "12-22": { icon: "🌍", title: "National Date Nut Bread Day", desc: "Celebrating holiday baking", type: "Fun Day" },
+            "12-23": { icon: "🌍", title: "Festivus", desc: "A holiday for the rest of us", type: "Fun Day" },
+            "12-24": { icon: "🎄", title: "Christmas Eve", desc: "The evening before Christmas", type: "International Holiday" },
+            "12-26": { icon: "🎁", title: "Boxing Day", desc: "Day after Christmas celebration", type: "Cultural Holiday" },
+            "12-27": { icon: "🌍", title: "National Fruitcake Day", desc: "Celebrating traditional dessert", type: "Fun Day" },
+            "12-28": { icon: "🌍", title: "National Chocolate Candy Day", desc: "Indulging in chocolate confections", type: "Fun Day" },
+            "12-29": { icon: "🌍", title: "National Pepper Pot Day", desc: "Celebrating hearty soup", type: "Fun Day" },
+            "12-30": { icon: "🌍", title: "National Bicarbonate of Soda Day", desc: "Celebrating baking ingredient", type: "Fun Day" }
+        };
+        
+        // Space Facts Database (365 facts - Batch 1: Facts 1-50)
+        const spaceFactsDatabase = [
+            "Jupiter has 95 known moons, making it the planet with the most moons in our solar system.",
+            "One day on Venus is longer than one year on Venus. Venus rotates so slowly that it takes 243 Earth days to complete one rotation, but only 225 Earth days to orbit the Sun.",
+            "Neutron stars are so dense that a teaspoon of neutron star material would weigh about 6 billion tons on Earth.",
+            "If you could drive a car at highway speeds to the Sun, it would take over 100 years to get there.",
+            "The International Space Station (ISS) travels at approximately 17,500 miles per hour, orbiting Earth every 90 minutes.",
+            "Black holes are not actually 'holes' but extremely dense objects with gravitational pull so strong that not even light can escape.",
+            "Saturn's moon Titan has lakes and rivers made of liquid methane and ethane, not water.",
+            "A day on Mercury lasts 59 Earth days, but a year on Mercury is only 88 Earth days long.",
+            "The largest volcano in the solar system is Olympus Mons on Mars, which is about 13.6 miles (22 km) high - nearly three times taller than Mount Everest.",
+            "Venus is the hottest planet in our solar system, even hotter than Mercury, due to its thick atmosphere trapping heat.",
+            "Light from the Sun takes about 8 minutes and 20 seconds to reach Earth.",
+            "The Andromeda Galaxy is the nearest major galaxy to the Milky Way and will collide with it in about 4.5 billion years.",
+            "Jupiter's Great Red Spot is a giant storm that has been raging for at least 400 years and is larger than Earth.",
+            "Mars has two small moons, Phobos and Deimos, named after the Greek gods of fear and panic.",
+            "The Sun contains 99.86% of the solar system's total mass, making it the dominant object by far.",
+            "Pluto is so small that all of its mass would fit into just 0.17% of Earth's volume.",
+            "A neutron star is the collapsed core of a massive star that can spin hundreds of times per second, creating pulsars.",
+            "The Moon is gradually moving away from Earth at a rate of about 1.5 inches (3.8 cm) per year.",
+            "Saturn's rings are made mostly of chunks of ice and rock, some as small as grains of sand and others as large as houses.",
+            "The temperature on the surface of Mercury can reach 800°F (427°C) during the day but drop to -290°F (-179°C) at night.",
+            "There are more stars in the observable universe than grains of sand on all the beaches on Earth.",
+            "Neptune's winds are the fastest in the solar system, reaching speeds of up to 1,200 miles per hour (1,930 km/h).",
+            "The Hubble Space Telescope can see objects that are over 13 billion light-years away, giving us a view into the early universe.",
+            "Uranus rotates on its side at a 98-degree angle, possibly due to a massive collision in its past.",
+            "The Sun produces so much energy that every second it converts 4 million tons of matter into energy.",
+            "Mars has the largest volcano and the deepest canyon in the entire solar system.",
+            "Light can circle Earth 7.5 times in just one second.",
+            "There is a planet made mostly of diamond called 55 Cancri e, which is twice the size of Earth.",
+            "The Moon was likely formed when a Mars-sized object collided with Earth about 4.5 billion years ago.",
+            "Jupiter acts as a 'cosmic vacuum cleaner,' using its gravity to attract and capture many comets and asteroids that might otherwise hit Earth.",
+            "A day on Pluto lasts 153.3 hours (about 6.4 Earth days), and a year on Pluto equals 248 Earth years.",
+            "The Sun is so large that you could fit 1.3 million Earths inside it.",
+            "There are potentially billions of habitable planets in our galaxy alone, increasing the possibility of finding life beyond Earth.",
+            "Astronauts grow taller in space because the lack of gravity allows their spines to stretch.",
+            "The coldest place in the solar system is Triton, Neptune's largest moon, with temperatures reaching -391°F (-235°C).",
+            "Comets are often called 'dirty snowballs' because they're made of ice, dust, and rocky material.",
+            "The largest known star, UY Scuti, is so big that if it replaced our Sun, its surface would extend beyond Jupiter's orbit.",
+            "Mars appears red because of iron oxide (rust) on its surface, giving it the nickname 'The Red Planet.'",
+            "A single day on Venus lasts longer than an entire year on Mercury.",
+            "The asteroid belt between Mars and Jupiter contains millions of asteroids, but they're so spread out that a spacecraft can pass through safely.",
+            "Saturn would float in water if there were an ocean large enough, because it's less dense than water.",
+            "The first living creature to orbit Earth was a dog named Laika, who traveled aboard Sputnik 2 in 1957.",
+            "There are more possible games of chess than atoms in the observable universe, highlighting the vastness of complexity in space and mathematics.",
+            "The center of our galaxy, the Milky Way, contains a supermassive black hole called Sagittarius A*.",
+            "Exoplanets are planets that orbit stars outside our solar system, and thousands have been discovered so far.",
+            "The Oort Cloud is a theoretical shell of icy objects that surrounds our solar system at a distance of up to 100,000 astronomical units.",
+            "Jupiter's moon Europa has a subsurface ocean that might contain twice as much water as all of Earth's oceans combined.",
+            "The speed of light is approximately 186,282 miles per second (299,792 kilometers per second), the universal speed limit.",
+            "Supernovas are so bright that one exploding star can briefly outshine an entire galaxy.",
+            "The oldest light in the universe is the cosmic microwave background radiation, left over from the Big Bang about 13.8 billion years ago.",
+            "Pluto has five known moons, with its largest moon Charon being about half the size of Pluto itself.",
+            // Batch 2: Space Facts 51-100 (50 facts)
+            "The Milky Way galaxy is estimated to contain 100-400 billion stars and at least that many planets.",
+            "A white dwarf is the remnant of a star like our Sun after it has exhausted its nuclear fuel and collapsed.",
+            "The first human to walk on the Moon was Neil Armstrong on July 20, 1969, during the Apollo 11 mission.",
+            "Quasars are the brightest objects in the universe, powered by supermassive black holes at the centers of galaxies.",
+            "The average temperature in space is approximately -455°F (-270°C), just 3 degrees above absolute zero.",
+            "Astronomers estimate there are at least 100 billion galaxies in the observable universe.",
+            "The largest asteroid in the solar system is Ceres, which is also classified as a dwarf planet.",
+            "A gamma-ray burst is the most energetic explosion in the universe, releasing more energy in seconds than the Sun will in its entire lifetime.",
+            "The Parker Solar Probe is the fastest human-made object, traveling at speeds up to 430,000 miles per hour (692,000 km/h).",
+            "Mars has polar ice caps made of water ice and frozen carbon dioxide (dry ice).",
+            "The Sun is classified as a G-type main-sequence star, also known as a yellow dwarf star.",
+            "One light-year is the distance light travels in one year, approximately 5.88 trillion miles (9.46 trillion kilometers).",
+            "The Kuiper Belt is a region of icy objects beyond Neptune's orbit, similar to the asteroid belt but much larger.",
+            "A supernova occurs when a massive star explodes, and its light can be visible for weeks or months from Earth.",
+            "The James Webb Space Telescope can see objects up to 13.6 billion light-years away, showing us the universe as it was shortly after the Big Bang.",
+            "Io, one of Jupiter's moons, is the most volcanically active body in the solar system with hundreds of active volcanoes.",
+            "Dark matter makes up about 27% of the universe, but we can only detect it through its gravitational effects.",
+            "The largest moon in the solar system is Ganymede, which is even larger than the planet Mercury.",
+            "A wormhole is a theoretical passage through space-time that could create shortcuts for long journeys across the universe.",
+            "The Voyager 1 spacecraft is the farthest human-made object from Earth, having left the solar system in 2012.",
+            "Saturn's moon Enceladus has geysers shooting water ice into space, indicating a subsurface ocean.",
+            "Red giants are stars that have expanded after exhausting their hydrogen fuel, becoming hundreds of times larger than the Sun.",
+            "The asteroid that likely caused the extinction of dinosaurs 66 million years ago was about 6 miles (10 km) wide.",
+            "Proxima Centauri is the closest star to our Sun, located about 4.24 light-years away.",
+            "The Moon's gravity causes Earth's tides, with high tides occurring on opposite sides of the planet simultaneously.",
+            "Black holes can merge together, creating gravitational waves that ripple through space-time.",
+            "The atmosphere on Mars is so thin that liquid water cannot exist on its surface, but evidence suggests it once had rivers and oceans.",
+            "A parsec is a unit of distance equal to about 3.26 light-years, commonly used in astronomy.",
+            "The Great Attractor is a mysterious gravitational anomaly pulling thousands of galaxies, including the Milky Way, toward it.",
+            "Mercury has no atmosphere, so there's nothing to trap heat, causing extreme temperature variations.",
+            "The heliosphere is a bubble of charged particles that surrounds the solar system, protecting planets from cosmic radiation.",
+            "Exoplanets in the 'habitable zone' orbit their star at a distance where liquid water could potentially exist on their surface.",
+            "The first confirmed exoplanet was discovered in 1995, and since then thousands have been found using various detection methods.",
+            "A nova occurs when a white dwarf star pulls material from a companion star, causing a sudden bright flash.",
+            "The Moon's surface is covered in a layer of fine dust called regolith, created by billions of years of meteorite impacts.",
+            "The asteroid belt contains less than 4% of the Moon's mass, despite popular belief that it's densely packed with asteroids.",
+            "The Pillars of Creation are towering columns of gas and dust in the Eagle Nebula, where new stars are being born.",
+            "Gravity waves were first directly detected in 2015, confirming a prediction made by Einstein's theory of general relativity.",
+            "The largest planet in our solar system, Jupiter, is actually a failed star that didn't have enough mass to ignite nuclear fusion.",
+            "A light echo occurs when light from an explosion reflects off dust clouds, creating delayed images of the original event.",
+            "The Sun will eventually become a red giant in about 5 billion years, potentially engulfing Earth before becoming a white dwarf.",
+            "The cosmic web is the large-scale structure of the universe, with galaxies arranged in filaments, sheets, and voids.",
+            "Water has been found in the atmospheres of several exoplanets, increasing the possibility of finding life beyond Earth.",
+            "The fastest spinning pulsar rotates 716 times per second, creating regular pulses of radiation.",
+            "Meteoroids become meteors when they enter Earth's atmosphere, and meteorites if they survive to reach the ground.",
+            "The Dark Energy Survey suggests that dark energy makes up about 68% of the universe, causing its accelerating expansion.",
+            "Pluto's atmosphere extends about 1,000 miles (1,600 km) above its surface, much higher than Earth's atmosphere.",
+            "The first image of a black hole's event horizon was captured in 2019 by the Event Horizon Telescope, showing M87's supermassive black hole.",
+            "Asteroid 16 Psyche is made almost entirely of metal and may be worth more than Earth's entire economy if we could mine it.",
+            // Batch 3: Space Facts 101-150 (50 facts)
+            "The solar wind is a stream of charged particles released from the Sun's upper atmosphere, creating the aurora borealis when it interacts with Earth's magnetic field.",
+            "Brown dwarfs are objects that are too large to be planets but too small to be stars, sometimes called 'failed stars.'",
+            "The first spacewalk was performed by Alexei Leonov on March 18, 1965, lasting 12 minutes outside the Voskhod 2 spacecraft.",
+            "Asteroid impacts on Earth have created over 190 confirmed impact craters, with the largest being the Vredefort crater in South Africa.",
+            "The Moon is in synchronous rotation with Earth, which is why we always see the same side facing us.",
+            "The coldest temperature ever recorded in space is in the Boomerang Nebula at -458°F (-272°C), just one degree above absolute zero.",
+            "Saturn's rings are only about 30 feet (9 meters) thick in some places, despite being hundreds of thousands of miles wide.",
+            "The first woman in space was Valentina Tereshkova, who orbited Earth 48 times aboard Vostok 6 in 1963.",
+            "A solar eclipse occurs when the Moon passes between Earth and the Sun, and the next total solar eclipse visible from North America will be in 2024.",
+            "The Sun converts approximately 600 million tons of hydrogen into helium every second through nuclear fusion.",
+            "The heliopause is the boundary where the solar wind is stopped by the interstellar medium, marking the edge of our solar system.",
+            "Nebulas are giant clouds of dust and gas in space where stars are born, and some can be visible from Earth with the naked eye.",
+            "The first photograph of Earth from space was taken in 1946 by a V-2 rocket launched from New Mexico.",
+            "Mercury's surface is covered with craters similar to Earth's Moon, because it has no atmosphere to burn up meteorites.",
+            "The Andromeda Galaxy contains approximately one trillion stars, making it larger than the Milky Way.",
+            "A day on Jupiter lasts only about 10 hours, making it the fastest-spinning planet in the solar system.",
+            "The first artificial satellite, Sputnik 1, was launched by the Soviet Union on October 4, 1957.",
+            "Asteroids are leftovers from the early formation of the solar system about 4.6 billion years ago.",
+            "The temperature at the Sun's core reaches about 27 million degrees Fahrenheit (15 million degrees Celsius).",
+            "The Crab Nebula is the remnant of a supernova that was observed by Chinese astronomers in 1054 AD.",
+            "The Moon's gravity is only about 17% of Earth's gravity, which is why astronauts can jump much higher on the Moon.",
+            "The first color photograph of Earth from space was taken during the Apollo 17 mission in 1972, known as 'The Blue Marble.'",
+            "The largest planet ever discovered is HD 100546 b, which is about 6.9 times larger than Jupiter.",
+            "Asteroid Bennu has a 1 in 2,700 chance of impacting Earth between 2175 and 2199, according to NASA estimates.",
+            "The Sun's magnetic field reverses polarity approximately every 11 years, affecting sunspot activity.",
+            "The largest moon in the solar system relative to its planet is Charon, which is about half the size of Pluto.",
+            "The first successful Mars rover, Sojourner, landed on the Red Planet in 1997 and operated for 83 days.",
+            "The Horsehead Nebula is a dark nebula in the constellation Orion, shaped like a horse's head when viewed from Earth.",
+            "A space elevator is a theoretical structure that could transport materials from Earth to space using a cable extending to a counterweight in space.",
+            "The first reusable spacecraft was the Space Shuttle, which made its first flight in 1981.",
+            "The Sun will run out of hydrogen fuel in about 5 billion years and will expand into a red giant before becoming a white dwarf.",
+            "The largest volcano on Mars, Olympus Mons, is so large that its base would cover the entire state of Arizona.",
+            "Asteroid Ryugu, visited by Japan's Hayabusa2 mission, contains organic molecules that are building blocks of life.",
+            "The first black hole ever discovered is Cygnus X-1, located about 6,000 light-years from Earth.",
+            "The Karman Line, at 62 miles (100 km) above sea level, is internationally recognized as the boundary between Earth's atmosphere and outer space.",
+            "The first human-made object to reach another planet was the Soviet Venera 7, which landed on Venus in 1970.",
+            "The Great Red Spot on Jupiter has been shrinking over the past 150 years and may disappear in the next few decades.",
+            "Asteroid Itokawa, visited by Japan's Hayabusa mission, is shaped like a peanut and only about 1,000 feet (300 meters) long.",
+            "The Sun's outer atmosphere, the corona, is actually hotter than the Sun's surface, reaching millions of degrees.",
+            "The first American to orbit Earth was John Glenn, who completed three orbits aboard Friendship 7 in 1962.",
+            "The largest structure in the observable universe is the Hercules-Corona Borealis Great Wall, a galaxy filament about 10 billion light-years long.",
+            "A day on Saturn is about 10.7 hours long, making it the second fastest-spinning planet after Jupiter.",
+            "The first probe to land on an asteroid was NASA's NEAR Shoemaker, which touched down on Eros in 2001.",
+            "The Sun rotates faster at its equator (about 25 days) than at its poles (about 35 days), a phenomenon called differential rotation.",
+            "The first space station was Salyut 1, launched by the Soviet Union in 1971 and occupied for 23 days.",
+            "Asteroid Apophis, once considered a threat to Earth, has been ruled out for impact in 2036 and 2068 after careful observations.",
+            "The Sun is about 4.6 billion years old and is roughly halfway through its main-sequence lifetime.",
+            "The first successful Mars lander was Viking 1, which touched down on Mars in 1976 and operated for over 6 years.",
+            "The Helix Nebula, also known as the 'Eye of God,' is a planetary nebula about 700 light-years from Earth.",
+            // Batch 4: Space Facts 151-200 (50 facts)
+            "The first spacecraft to successfully land on Mars was Viking 1 in 1976, which operated for over 6 years and sent back the first color images of the Martian surface.",
+            "The asteroid belt is not as dense as movies suggest - the average distance between asteroids is about 600,000 miles (1 million km).",
+            "The Sun's energy output is so massive that in one second it produces more energy than humanity has used in its entire history.",
+            "The first human to perform a spacewalk was Soviet cosmonaut Alexei Leonov, who spent 12 minutes outside his spacecraft in 1965.",
+            "Pluto's moon Charon is so large relative to Pluto that they orbit around a common center of gravity, making them a binary system.",
+            "The Milky Way is rotating at about 168 miles per second (270 km/s), taking approximately 225-250 million years to complete one rotation.",
+            "A day on Neptune lasts about 16 hours, but a year on Neptune equals 165 Earth years.",
+            "The first space telescope, the Hubble Space Telescope, was launched in 1990 and has revolutionized our understanding of the universe.",
+            "Asteroid Vesta is the second-largest asteroid in the asteroid belt and is bright enough to be visible from Earth with the naked eye.",
+            "The Sun's surface temperature is about 9,941°F (5,505°C), while its core reaches 27 million°F (15 million°C).",
+            "The first successful soft landing on the Moon was achieved by the Soviet Luna 9 spacecraft in 1966.",
+            "Neptune's largest moon, Triton, orbits in the opposite direction of Neptune's rotation, suggesting it was captured from elsewhere.",
+            "The Sun emits particles called neutrinos, and about 100 trillion neutrinos pass through your body every second without you noticing.",
+            "The first woman to walk in space was Soviet cosmonaut Svetlana Savitskaya, who performed a spacewalk in 1984.",
+            "The asteroid 16 Psyche is believed to be worth $10,000 quadrillion due to its metal composition, though mining it is currently impossible.",
+            "The Sun's magnetic field extends far beyond Pluto, creating a bubble called the heliosphere that protects the solar system.",
+            "The first close-up images of Pluto were sent back by NASA's New Horizons spacecraft in 2015, revealing a surprisingly diverse world.",
+            "Mars has the largest dust storms in the solar system, with some storms covering the entire planet and lasting for months.",
+            "The Sun will continue burning hydrogen for about another 5 billion years before exhausting its fuel and expanding into a red giant.",
+            "The first artificial object to reach another celestial body was Luna 2, which crashed into the Moon in 1959.",
+            "Saturn's moon Mimas looks like the Death Star from Star Wars due to a large crater covering one-third of its diameter.",
+            "The cosmic microwave background radiation is the oldest light in the universe, dating back to 380,000 years after the Big Bang.",
+            "The first space probe to visit multiple planets was Voyager 2, which flew by Jupiter, Saturn, Uranus, and Neptune.",
+            "Asteroid Ceres, the largest object in the asteroid belt, contains more fresh water than all of Earth's fresh water combined.",
+            "The Sun's gravity is so strong that it keeps planets in orbit from distances of billions of miles away.",
+            "The first space station to be continuously occupied was Mir, which housed crews for nearly 10 years from 1986 to 2001.",
+            "Jupiter's moon Callisto has the most heavily cratered surface in the solar system, suggesting it's been geologically inactive for billions of years.",
+            "The speed of light is constant at approximately 186,282 miles per second in a vacuum, regardless of the observer's motion.",
+            "The first spacecraft to successfully land on Venus was the Soviet Venera 7 in 1970, though it only transmitted for 23 minutes before being destroyed by the extreme conditions.",
+            "The asteroid belt between Mars and Jupiter contains millions of objects, but their combined mass is less than 4% of the Moon's mass.",
+            "The Sun creates energy through nuclear fusion, converting hydrogen atoms into helium atoms at a rate of 600 million tons per second.",
+            "The first space probe to leave the solar system was Voyager 1, which entered interstellar space in 2012 after 35 years of travel.",
+            "Mars has evidence of ancient river valleys and lake beds, suggesting it once had a much warmer and wetter climate billions of years ago.",
+            "The Kuiper Belt extends from Neptune's orbit to about 50 astronomical units from the Sun, containing thousands of icy objects.",
+            "The first successful sample return mission from an asteroid was completed by Japan's Hayabusa spacecraft, which returned samples from Itokawa in 2010.",
+            "Neptune has the strongest winds in the solar system, with speeds reaching up to 1,200 miles per hour (1,930 km/h), faster than the speed of sound.",
+            "The Sun's rotation is not uniform - the equator rotates faster (25 days) than the poles (35 days), causing magnetic field lines to twist.",
+            "The first human-made object to intentionally crash into a comet was NASA's Deep Impact probe, which collided with Comet Tempel 1 in 2005.",
+            "Saturn's moon Enceladus has geysers that shoot water vapor and ice particles into space, suggesting a subsurface ocean that could potentially harbor life.",
+            "The observable universe is about 93 billion light-years in diameter, but the actual universe may be much larger or even infinite.",
+            "The first successful Mars helicopter, Ingenuity, made its first flight on April 19, 2021, proving powered flight is possible in Mars' thin atmosphere.",
+            "Asteroid Ryugu, visited by Japan's Hayabusa2 mission, revealed that asteroids may have delivered water and organic materials to early Earth.",
+            "The Sun's corona can reach temperatures of 1-3 million degrees Celsius, much hotter than the Sun's visible surface.",
+            "The first space probe to orbit another planet was Mariner 9, which orbited Mars in 1971 and mapped the entire planet for the first time.",
+            "Pluto has mountains made of water ice that are as tall as the Rocky Mountains on Earth, despite being much smaller.",
+            "The Andromeda Galaxy is approaching the Milky Way at about 68 miles per second (110 km/s) and will collide with it in about 4.5 billion years.",
+            "The first successful landing on a comet was achieved by the European Space Agency's Rosetta mission, which deployed the Philae lander to Comet 67P in 2014.",
+            "Jupiter's moon Io is the most volcanically active body in the solar system, with over 400 active volcanoes spewing sulfur and other materials.",
+            "The Sun will eventually shed its outer layers, creating a planetary nebula, and leave behind a white dwarf about the size of Earth but with half the Sun's mass.",
+            "The first space probe to fly by Mercury was Mariner 10 in 1974, which mapped about 45% of the planet's surface during three flybys.",
+            // Batch 5: Space Facts 201-250 (50 facts)
+            "The first space probe to successfully orbit and land on an asteroid was NASA's NEAR Shoemaker, which orbited Eros for a year before landing in 2001.",
+            "Mars has the tallest volcano in the solar system, Olympus Mons, which stands 13.6 miles (22 km) high - nearly three times the height of Mount Everest.",
+            "The Sun's magnetic field undergoes a complete reversal approximately every 11 years, affecting sunspot cycles and space weather.",
+            "The first human to spend more than a year continuously in space was Russian cosmonaut Valeri Polyakov, who spent 437 days aboard Mir from 1994-1995.",
+            "Pluto's surface is covered with nitrogen ice, methane ice, and carbon monoxide ice, giving it a variety of colors from white to reddish-brown.",
+            "The Milky Way galaxy is moving through space at approximately 1.3 million miles per hour (2.1 million km/h) relative to the cosmic microwave background.",
+            "The first successful rover on Mars was Sojourner, which landed in 1997 and operated for 83 days, traveling about 330 feet (100 meters).",
+            "Saturn's rings are made of billions of ice particles ranging from tiny grains to house-sized chunks, and they're only about 30 feet (9 meters) thick in places.",
+            "The Sun converts about 4 million tons of matter into energy every second through nuclear fusion, a process that has been ongoing for 4.6 billion years.",
+            "The first space probe to enter Jupiter's atmosphere was Galileo's atmospheric probe, which descended into the gas giant in 1995 and transmitted data for 58 minutes.",
+            "Neptune's moon Triton has geysers that shoot nitrogen gas and dark material up to 5 miles (8 km) high into its thin atmosphere.",
+            "The observable universe contains approximately 2 trillion galaxies, each containing billions of stars, making the total number of stars unimaginably large.",
+            "The first space probe to successfully orbit Saturn was Cassini, which spent 13 years studying the planet, its rings, and its moons from 2004 to 2017.",
+            "Mars' moons Phobos and Deimos are likely captured asteroids, and Phobos is gradually getting closer to Mars, destined to crash or break apart in about 50 million years.",
+            "The Sun's surface is covered in granules, which are convection cells about 600 miles (1,000 km) across that appear and disappear every 10 minutes.",
+            "The first space probe to successfully orbit Mercury was NASA's MESSENGER, which orbited the innermost planet from 2011 to 2015 before crashing into it.",
+            "Jupiter's Great Red Spot has been observed shrinking over the past 150 years and may disappear entirely or morph into something else within decades.",
+            "The first successful flyby of Pluto was accomplished by NASA's New Horizons in 2015, revealing mountains, glaciers, and a possible subsurface ocean.",
+            "Asteroid Bennu, visited by NASA's OSIRIS-REx mission, has a 1 in 2,700 chance of impacting Earth between 2175 and 2199, making it a potentially hazardous asteroid.",
+            "The Sun generates magnetic fields that create sunspots, solar flares, and coronal mass ejections that can affect satellites and power grids on Earth.",
+            "The first space probe to successfully orbit Venus was Magellan, which mapped 98% of the planet's surface using radar from 1990 to 1994.",
+            "Saturn's moon Titan is the only moon in the solar system with a dense atmosphere, and it's the only place besides Earth with stable bodies of liquid on its surface.",
+            "The Milky Way contains a supermassive black hole at its center called Sagittarius A*, which has a mass about 4 million times that of the Sun.",
+            "The first successful sample return from the Moon was accomplished by the Soviet Luna 16 mission in 1970, which returned about 3.5 ounces (100 grams) of lunar soil.",
+            "Neptune was the first planet discovered through mathematical prediction rather than direct observation, found in 1846 by studying Uranus's orbital irregularities.",
+            "The Sun's light takes about 8 minutes and 20 seconds to reach Earth, but the energy at the Sun's core takes about 170,000 years to reach the surface.",
+            "The first space probe to successfully orbit the Moon was NASA's Lunar Orbiter 1 in 1966, which took the first photo of Earth from the Moon's perspective.",
+            "Mars has the largest canyon system in the solar system, Valles Marineris, which stretches 2,500 miles (4,000 km) long and reaches depths of up to 4 miles (7 km).",
+            "The asteroid belt is not the dense field of rocks often depicted in movies - spacecraft pass through it regularly without any issues.",
+            "The Sun produces neutrinos at such a high rate that billions pass through every square inch of your body every second, completely unnoticed.",
+            "The first space probe to successfully land on Titan was the Huygens probe, which descended through Titan's atmosphere and landed on its surface in 2005.",
+            "Jupiter's moon Europa has a subsurface ocean that may contain twice as much water as all of Earth's oceans combined, making it a prime target in the search for life.",
+            "The cosmic web is the large-scale structure of the universe, consisting of galaxy filaments, walls, and voids that form an intricate cosmic network.",
+            "The first successful rover to explore another planet was NASA's Mars Pathfinder, which deployed the Sojourner rover in 1997.",
+            "Pluto's atmosphere freezes and falls to the ground as the dwarf planet moves away from the Sun, then sublimates back into gas as it approaches perihelion.",
+            "The Sun is about 93 million miles (150 million km) from Earth, but its influence extends far beyond the solar system through the solar wind and heliosphere.",
+            "The first space probe to successfully orbit an asteroid was NASA's Dawn, which orbited Vesta and Ceres, the two largest objects in the asteroid belt.",
+            "Saturn's rings are incredibly thin - if you scaled them down, they would be about 10,000 times thinner than a sheet of paper relative to their diameter.",
+            "The Hubble Space Telescope has observed galaxies that existed just 400-500 million years after the Big Bang, showing us the early universe.",
+            "The first successful landing on an asteroid was accomplished by NASA's NEAR Shoemaker, which touched down on Eros in 2001 after orbiting it for a year.",
+            "Mars has evidence of ancient lake beds and river deltas, suggesting it once had a climate warm enough for liquid water to flow on its surface.",
+            "The Sun's corona is visible during a total solar eclipse as a white halo around the Moon, and it's millions of degrees hotter than the Sun's surface.",
+            "The first space probe to successfully orbit Jupiter was Galileo, which spent 8 years studying the gas giant and its moons from 1995 to 2003.",
+            "Neptune's winds are the fastest in the solar system, reaching speeds of up to 1,200 miles per hour (1,930 km/h), which is faster than the speed of sound on Earth.",
+            "The observable universe is estimated to be about 93 billion light-years in diameter, but the actual universe may be infinite or have a different shape.",
+            "The first successful sample return from an asteroid was accomplished by Japan's Hayabusa mission, which returned particles from Itokawa in 2010.",
+            "Jupiter's moon Io orbits so close to the gas giant that tidal forces cause intense volcanic activity, making it the most volcanically active body in the solar system.",
+            "The Sun will continue to burn hydrogen for about 5 billion more years, then expand into a red giant that may engulf Mercury, Venus, and possibly Earth.",
+            "The first space probe to successfully orbit Mars was NASA's Mariner 9 in 1971, which mapped the entire planet and discovered Olympus Mons and Valles Marineris.",
+            "Saturn's moon Enceladus has an underground ocean that may be similar to Earth's oceans, with hydrothermal vents that could potentially support life.",
+            // Batch 6: Space Facts 251-300 (50 facts)
+            "The first space probe to successfully orbit an asteroid was NASA's NEAR Shoemaker, which studied Eros from orbit for a full year before landing on it.",
+            "Mars experiences global dust storms that can last for months and cover the entire planet, obscuring the surface from view.",
+            "The Sun's energy is generated through nuclear fusion, where hydrogen atoms combine to form helium, releasing enormous amounts of energy in the process.",
+            "The first successful landing on Venus was accomplished by the Soviet Venera 7 in 1970, which transmitted data for 23 minutes before being destroyed by the extreme pressure and heat.",
+            "Pluto's largest moon, Charon, is so large that it and Pluto orbit around a barycenter located outside Pluto itself, making them a true binary system.",
+            "The Milky Way galaxy is estimated to contain between 100 and 400 billion stars, and there may be as many as 100 billion planets orbiting those stars.",
+            "The first successful sample return from the Moon was achieved by the Soviet Luna 16 mission in 1970, bringing back about 100 grams of lunar soil.",
+            "Saturn's rings extend from about 4,300 miles (7,000 km) to 50,000 miles (80,000 km) above Saturn's equator, but are only about 30 feet (9 meters) thick.",
+            "The Sun converts approximately 600 million tons of hydrogen into helium every second, releasing energy equivalent to billions of nuclear bombs.",
+            "The first space probe to successfully enter Jupiter's atmosphere was Galileo's atmospheric probe, which collected data for 58 minutes before being crushed by pressure.",
+            "Neptune's moon Triton has the coldest surface temperature ever measured in the solar system, reaching -391°F (-235°C), just 38°C above absolute zero.",
+            "The observable universe contains at least 2 trillion galaxies, each with billions of stars, making the total number of stars in the observable universe around 1 sextillion (1 followed by 21 zeros).",
+            "The first space probe to successfully orbit Saturn was Cassini, which made 294 orbits of the planet over 13 years, studying its rings, moons, and atmosphere in detail.",
+            "Mars has two small, irregularly shaped moons, Phobos and Deimos, which are thought to be captured asteroids and are much smaller than Earth's Moon.",
+            "The Sun's surface temperature averages about 9,941°F (5,505°C), but its core reaches an incredible 27 million°F (15 million°C) due to nuclear fusion.",
+            "The first space probe to successfully orbit Mercury was NASA's MESSENGER, which revealed that Mercury has water ice at its poles despite being the closest planet to the Sun.",
+            "Jupiter's Great Red Spot is an anti-cyclonic storm that has been raging for at least 400 years, though it has been shrinking in recent decades.",
+            "The first successful flyby and detailed study of Pluto was accomplished by NASA's New Horizons in 2015, revealing a surprisingly active and diverse world.",
+            "Asteroid Bennu, currently being studied by NASA's OSIRIS-REx mission, is a carbonaceous asteroid that may contain organic molecules from the early solar system.",
+            "The Sun's magnetic field creates sunspots, which are cooler areas on the surface, and solar flares, which can release energy equivalent to millions of hydrogen bombs.",
+            "The first space probe to successfully map Venus using radar was NASA's Magellan, which mapped 98% of the planet's surface and revealed its volcanic and tectonic features.",
+            "Saturn's moon Titan has lakes and rivers of liquid methane and ethane, making it the only body besides Earth known to have stable liquid on its surface.",
+            "The Milky Way's supermassive black hole, Sagittarius A*, has a mass of about 4.1 million solar masses and is located about 26,000 light-years from Earth.",
+            "The first successful automated sample return from an asteroid was accomplished by Japan's Hayabusa mission, which returned particles from Itokawa in 2010.",
+            "Neptune was predicted mathematically by Urbain Le Verrier and John Couch Adams before it was observed, using irregularities in Uranus's orbit.",
+            "The Sun's light takes 8 minutes and 20 seconds to reach Earth, meaning if the Sun suddenly disappeared, we wouldn't know for over 8 minutes.",
+            "The first space probe to successfully orbit the Moon was NASA's Lunar Orbiter 1, which photographed potential landing sites for the Apollo missions.",
+            "Mars has the largest volcano in the solar system, Olympus Mons, which is about 370 miles (600 km) wide at its base and 13.6 miles (22 km) high.",
+            "The asteroid belt contains millions of objects, but they are so spread out that the average distance between asteroids is about 600,000 miles (1 million km).",
+            "The Sun produces neutrinos at such a high rate that trillions pass through your body every second, completely harmlessly, as they rarely interact with matter.",
+            "The first space probe to successfully land on Saturn's moon Titan was the Huygens probe, which descended through its thick atmosphere and landed in 2005.",
+            "Jupiter's moon Europa likely has a subsurface ocean with twice as much water as all of Earth's oceans, kept liquid by tidal heating from Jupiter's gravity.",
+            "The cosmic web is the filamentary structure of the universe on the largest scales, with galaxies strung along vast cosmic filaments separated by enormous voids.",
+            "The first successful rover on another planet was NASA's Sojourner, which explored the Martian surface for 83 days in 1997 and traveled about 330 feet (100 meters).",
+            "Pluto has a thin atmosphere that freezes and falls to the surface as it moves farther from the Sun, then sublimates back into gas as it approaches perihelion.",
+            "The Sun influences the entire solar system through the solar wind, a stream of charged particles that extends far beyond Pluto and creates the heliosphere.",
+            "The first space probe to successfully orbit two different asteroids was NASA's Dawn, which orbited Vesta in 2011-2012 and Ceres from 2015-2018.",
+            "Saturn's rings are composed mostly of water ice with small amounts of rocky material, and their particles range from the size of dust grains to boulders.",
+            "The Hubble Space Telescope has made over 1.5 million observations and captured images of galaxies more than 13 billion light-years away.",
+            "The first successful landing on an asteroid was accomplished by NASA's NEAR Shoemaker, which touched down on Eros in 2001 and continued operating for 16 days after landing.",
+            "Mars shows clear evidence of ancient river valleys, deltas, and lake beds, indicating it once had a much warmer and wetter climate billions of years ago.",
+            "The Sun's corona, visible during total solar eclipses, has temperatures of 1-3 million°C, much hotter than the Sun's surface, creating a mystery that scientists are still investigating.",
+            "The first space probe to successfully orbit Jupiter was NASA's Galileo, which discovered evidence of subsurface oceans on Europa, Ganymede, and Callisto.",
+            "Neptune has the strongest winds in the solar system, reaching speeds of up to 1,200 miles per hour (1,930 km/h), which is about 1.5 times the speed of sound.",
+            "The observable universe is about 93 billion light-years in diameter, containing all matter and energy that we can theoretically observe from Earth.",
+            "The first successful sample return from an asteroid was accomplished by Japan's Hayabusa mission, which returned over 1,500 particles from Itokawa in 2010.",
+            "Jupiter's moon Io is the most volcanically active body in the solar system due to tidal heating from Jupiter and its other large moons, creating hundreds of active volcanoes.",
+            "The Sun will expand into a red giant in about 5 billion years, growing so large that it may engulf Mercury and Venus, and possibly Earth.",
+            "The first space probe to successfully orbit Mars was NASA's Mariner 9, which discovered the solar system's largest volcano (Olympus Mons) and largest canyon (Valles Marineris).",
+            "Saturn's moon Enceladus has a global subsurface ocean beneath its icy shell, and geysers at its south pole shoot water vapor into space, potentially carrying organic molecules.",
+            "The James Webb Space Telescope, launched in 2021, can see infrared light and observe objects that existed just 200 million years after the Big Bang, providing unprecedented views of the early universe.",
+            // Batch 7: Space Facts 301-350 (50 facts)
+            "The first successful orbit around the Moon was achieved by NASA's Lunar Orbiter 1 in 1966, which photographed potential Apollo landing sites.",
+            "Mars has polar ice caps made of water ice and frozen carbon dioxide that grow and shrink with the seasons, similar to Earth's polar regions.",
+            "The Sun rotates differentially, with the equator completing a rotation in about 25 days while the poles take about 35 days.",
+            "The first successful soft landing on Mars was accomplished by the Soviet Mars 3 lander in 1971, though it only transmitted for 20 seconds after landing.",
+            "Pluto's surface shows evidence of recent geological activity, with ice flows and mountains that suggest the dwarf planet may have a subsurface ocean.",
+            "The Milky Way galaxy is part of a local group of about 54 galaxies, which itself is part of the larger Virgo Supercluster containing thousands of galaxies.",
+            "The first successful sample return from a comet was attempted by NASA's Stardust mission, which collected particles from Comet Wild 2 and returned them to Earth in 2006.",
+            "Saturn's moon Mimas has a large impact crater that makes it look like the Death Star from Star Wars, and the impact nearly shattered the moon.",
+            "The Sun's magnetic field creates the solar cycle, which peaks every 11 years with maximum sunspot activity and affects space weather.",
+            "The first successful landing on the far side of the Moon was accomplished by China's Chang'e 4 mission in 2019, deploying a rover named Yutu-2.",
+            "Neptune's moon Triton is the only large moon in the solar system that orbits in the opposite direction of its planet's rotation, indicating it was captured.",
+            "The observable universe contains approximately 10^80 atoms, a number so large it's difficult to comprehend, let alone write out in full.",
+            "The first successful orbit of Mercury was achieved by NASA's MESSENGER, which discovered evidence of water ice in permanently shadowed craters at the poles.",
+            "Mars has the largest dust storms in the solar system, with some storms covering the entire planet and lasting for months, blocking sunlight from reaching the surface.",
+            "The Sun's core is so dense and hot that hydrogen atoms fuse into helium, a process that has been ongoing for 4.6 billion years and will continue for another 5 billion.",
+            "The first successful landing on an asteroid was accomplished by NASA's NEAR Shoemaker, which touched down on Eros in 2001 and continued operating for 16 days.",
+            "Jupiter's Great Red Spot is actually a high-pressure storm that rotates counterclockwise in the planet's southern hemisphere, and it's been observed for over 400 years.",
+            "The first detailed images of Pluto were sent back by NASA's New Horizons in 2015, revealing a diverse world with mountains, glaciers, and a possible subsurface ocean.",
+            "Asteroid Ryugu, studied by Japan's Hayabusa2 mission, contains organic molecules and water, providing clues about how life may have formed on Earth.",
+            "The Sun's atmosphere, or corona, extends millions of kilometers into space and is visible during total solar eclipses as a beautiful white halo.",
+            "The first successful radar mapping of Venus was accomplished by NASA's Magellan, which mapped 98% of the planet's surface and revealed extensive volcanism.",
+            "Saturn's moon Titan has a thick nitrogen atmosphere and hydrocarbon lakes, making it one of the most Earth-like places in the solar system.",
+            "The Milky Way's central black hole, Sagittarius A*, is relatively quiet compared to other galaxies, but it still emits X-rays and radio waves.",
+            "The first successful automated sample return from an asteroid was accomplished by Japan's Hayabusa mission, which returned particles from Itokawa in 2010.",
+            "Neptune's discovery in 1846 was the first time a planet was found through mathematical prediction rather than direct observation.",
+            "The Sun's light travels at 186,282 miles per second (299,792 km/s), and it takes about 8 minutes and 20 seconds to reach Earth.",
+            "The first successful orbit around the Moon was achieved by NASA's Lunar Orbiter 1, which photographed the far side of the Moon for the first time.",
+            "Mars has the solar system's largest canyon, Valles Marineris, which is 2,500 miles (4,000 km) long and up to 4 miles (7 km) deep.",
+            "The asteroid belt is located between Mars and Jupiter and contains millions of objects, but their total mass is less than 4% of the Moon's mass.",
+            "The Sun produces about 3.86 × 10^26 watts of power, which is equivalent to exploding 100 billion tons of TNT every second.",
+            "The first successful landing on Saturn's moon Titan was accomplished by the Huygens probe, which descended through the thick atmosphere and landed in 2005.",
+            "Jupiter's moon Europa has a subsurface ocean that may be twice as large as all of Earth's oceans combined, kept liquid by tidal heating.",
+            "The cosmic web describes the large-scale structure of the universe, with galaxies arranged in filaments and walls separated by vast cosmic voids.",
+            "The first successful rover on Mars was NASA's Sojourner, which operated for 83 days in 1997 and traveled about 330 feet (100 meters).",
+            "Pluto's atmosphere expands and contracts based on its distance from the Sun, freezing and falling to the surface during the long winter.",
+            "The Sun's influence extends throughout the solar system via the solar wind, creating the heliosphere that protects planets from cosmic radiation.",
+            "The first successful orbit of two different asteroids was achieved by NASA's Dawn, which orbited Vesta in 2011-2012 and Ceres from 2015-2018.",
+            "Saturn's rings are made primarily of water ice particles ranging from micrometers to meters in size, and they reflect sunlight beautifully.",
+            "The Hubble Space Telescope orbits Earth at an altitude of about 340 miles (547 km) and has been observing the universe since 1990.",
+            "The first successful landing on an asteroid was accomplished by NASA's NEAR Shoemaker, which touched down on Eros in 2001.",
+            "Mars shows clear evidence of ancient river valleys, deltas, and lake beds, suggesting it once had a climate capable of supporting liquid water.",
+            "The Sun's corona is millions of degrees hotter than its surface, creating one of the biggest mysteries in solar physics that scientists are still trying to solve.",
+            "The first successful orbit of Jupiter was achieved by NASA's Galileo, which discovered evidence of subsurface oceans on multiple Jovian moons.",
+            "Neptune's winds can reach speeds of up to 1,200 miles per hour (1,930 km/h), making them the fastest in the solar system.",
+            "The observable universe is approximately 93 billion light-years in diameter, containing all the matter and energy we can theoretically observe.",
+            "The first successful sample return from an asteroid was accomplished by Japan's Hayabusa mission, which returned over 1,500 particles from Itokawa.",
+            "Jupiter's moon Io experiences intense tidal heating that causes hundreds of active volcanoes, making it the most volcanically active body in the solar system.",
+            "The Sun will eventually exhaust its hydrogen fuel and expand into a red giant, potentially engulfing Mercury, Venus, and possibly Earth.",
+            "The first successful orbit of Mars was achieved by NASA's Mariner 9, which discovered the solar system's largest volcano and canyon system.",
+            "Saturn's moon Enceladus has geysers at its south pole that shoot water vapor and ice particles into space, indicating a subsurface ocean that could potentially support life.",
+            // Batch 8: Space Facts 351-365 (Final 15 facts)
+            "The first successful orbit around an asteroid was achieved by NASA's NEAR Shoemaker, which orbited Eros for a full year before landing on it in 2001.",
+            "Mars has two small moons, Phobos and Deimos, which are thought to be captured asteroids and may eventually collide with the planet or break apart.",
+            "The Sun's energy output has been relatively stable for billions of years, allowing life to develop and thrive on Earth.",
+            "The first successful landing on a comet was accomplished by the European Space Agency's Rosetta mission, which deployed the Philae lander to Comet 67P in 2014.",
+            "Pluto's discovery in 1930 was made by Clyde Tombaugh at the Lowell Observatory, though it was later reclassified as a dwarf planet in 2006.",
+            "The Milky Way galaxy rotates once every 225-250 million years, and during that time our solar system has completed about 20 orbits.",
+            "The first successful sample return from a comet was achieved by NASA's Stardust mission, which collected particles from Comet Wild 2 and returned them to Earth in 2006.",
+            "Saturn's rings are constantly changing, with new features appearing and old ones disappearing, due to gravitational interactions with Saturn's moons.",
+            "The Sun's magnetic field reverses polarity approximately every 11 years, creating the solar cycle that affects sunspots, solar flares, and space weather.",
+            "The first successful landing on the far side of the Moon was accomplished by China's Chang'e 4 mission in 2019, deploying the Yutu-2 rover that is still operational.",
+            "Neptune's largest moon, Triton, is geologically active with nitrogen geysers, and it's slowly spiraling inward toward Neptune, destined to be torn apart in billions of years.",
+            "The observable universe contains approximately 2 trillion galaxies, each with billions of stars, creating an almost incomprehensible number of celestial objects.",
+            "The first successful orbit of Mercury was achieved by NASA's MESSENGER, which discovered water ice in permanently shadowed craters despite Mercury's proximity to the Sun.",
+            "Mars has evidence of ancient river deltas and lake beds, suggesting it once had a climate warm enough for liquid water to flow on its surface billions of years ago.",
+            "The Sun will eventually become a white dwarf, a dense stellar remnant about the size of Earth but with half the Sun's mass, shining dimly for trillions of years."
+        ];
+        
+        let wordWidgetFlipInterval = null;
+        let isDesktopWidgetFlipped = false;
+        let isMobileWidgetFlipped = false;
+        
+        // Get word of the day based on current date
+        function getWordOfDay() {
+            const today = new Date();
+            const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+            const wordIndex = dayOfYear % wordOfDayDatabase.length;
+            return wordOfDayDatabase[wordIndex];
+        }
+        
+        // Get color theme based on event type
+        function getColorThemeForEventType(type) {
+            const colorThemes = {
+                "National Holiday": "from-orange-500 via-white to-green-600", // Indian flag colors
+                "US National Holiday": "from-red-500 via-white to-blue-600", // US flag colors
+                "International Holiday": "from-blue-500 to-purple-600",
+                "Indian Festival": "from-orange-500 to-pink-600",
+                "Cultural Holiday": "from-purple-500 to-pink-600",
+                "International Day": "from-green-500 to-teal-600",
+                "Awareness Day": "from-green-400 to-emerald-600",
+                "Memorial Day": "from-blue-400 to-gray-600",
+                "Historical Event": "from-amber-600 to-yellow-600",
+                "Astronomical Event": "from-indigo-600 to-purple-800",
+                "Religious Holiday": "from-yellow-500 to-orange-600",
+                "Fun Day": "from-pink-500 via-purple-500 to-indigo-600", // Rainbow
+                "Science Day": "from-cyan-500 to-blue-600",
+                "Educational Day": "from-blue-500 to-indigo-600",
+                "Daily": "from-gray-500 to-gray-700",
+                "US Holiday": "from-red-500 to-blue-600",
+                "Indian Holiday": "from-orange-500 to-green-600",
+                "National Day": "from-orange-600 to-green-700",
+                "Cultural Day": "from-purple-400 to-pink-500"
+            };
+            
+            return colorThemes[type] || "from-orange-500 to-pink-600"; // Default gradient
+        }
+        
+        // Fetch holidays from Nager.Date API (free, no API key needed)
+        async function fetchHolidaysFromAPI(year, countryCode = 'IN') {
+            try {
+                const response = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/${countryCode}`);
+                if (response.ok) {
+                    const holidays = await response.json();
+                    return holidays;
+                }
+            } catch (error) {
+                console.log('Holiday API fetch failed, using local database');
+            }
+            return [];
+        }
+        
+        // Get today's special day with API fallback
+        async function getTodaysSpecialDay() {
+            const today = new Date();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const dateKey = `${month}-${day}`;
+            
+            // Check local database first
+            if (specialDaysDatabase[dateKey]) {
+                return specialDaysDatabase[dateKey];
+            }
+            
+            // Try to fetch from API (cache results)
+            const year = today.getFullYear();
+            const cacheKey = `holidays_${year}_IN`;
+            let apiHolidays = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+            
+            if (!apiHolidays) {
+                apiHolidays = await fetchHolidaysFromAPI(year, 'IN');
+                if (apiHolidays && apiHolidays.length > 0) {
+                    localStorage.setItem(cacheKey, JSON.stringify(apiHolidays));
+                }
+            }
+            
+            // Check if today matches an API holiday
+            if (apiHolidays && Array.isArray(apiHolidays)) {
+                const todayHoliday = apiHolidays.find(h => {
+                    const holidayDate = new Date(h.date);
+                    return holidayDate.getMonth() + 1 === parseInt(month) && 
+                           holidayDate.getDate() === parseInt(day);
+                });
+                
+                if (todayHoliday) {
+                    return {
+                        icon: "🇮🇳",
+                        title: todayHoliday.localName,
+                        desc: todayHoliday.name,
+                        type: "National Holiday"
+                    };
+                }
+            }
+            
+            // Default fallback
+            return {
+                icon: "📅",
+                title: "Today",
+                desc: "A beautiful day to learn something new!",
+                type: "Daily"
+            };
+        }
+        
+        // Update word widget display with dynamic colors
+        function updateWordWidget(wordData, specialDayData) {
+            // Get dynamic color theme for special day
+            const colorTheme = getColorThemeForEventType(specialDayData.type);
+            
+            // Desktop widget
+            const wordElement = document.getElementById('word-of-day-word');
+            const pronunciationElement = document.getElementById('word-of-day-pronunciation');
+            const definitionElement = document.getElementById('word-of-day-definition');
+            const exampleElement = document.getElementById('word-of-day-example');
+            const badgeElement = document.getElementById('word-of-day-badge');
+            
+            if (wordElement) wordElement.textContent = wordData.word;
+            if (pronunciationElement) pronunciationElement.textContent = `/${wordData.pronunciation}/`;
+            if (definitionElement) definitionElement.textContent = wordData.definition;
+            if (exampleElement) exampleElement.textContent = `"${wordData.example}"`;
+            if (badgeElement) badgeElement.textContent = wordData.partOfSpeech;
+            
+            // Desktop special day - apply dynamic colors
+            const desktopSpecialBack = document.querySelector('#word-widget-flip .word-widget-back');
+            if (desktopSpecialBack) {
+                desktopSpecialBack.className = `word-widget-back bg-gradient-to-r ${colorTheme}`;
+            }
+            
+            const specialIconElement = document.getElementById('special-day-icon');
+            const specialTitleElement = document.getElementById('special-day-title');
+            const specialDescElement = document.getElementById('special-day-desc');
+            const specialTypeElement = document.getElementById('special-day-type');
+            
+            if (specialIconElement) specialIconElement.textContent = specialDayData.icon;
+            if (specialTitleElement) specialTitleElement.textContent = specialDayData.title;
+            if (specialDescElement) specialDescElement.textContent = specialDayData.desc;
+            if (specialTypeElement) specialTypeElement.textContent = specialDayData.type;
+            
+            // Mobile widget
+            const mobileWordElement = document.getElementById('mobile-word-of-day-word');
+            const mobilePronunciationElement = document.getElementById('mobile-word-of-day-pronunciation');
+            const mobileDefinitionElement = document.getElementById('mobile-word-of-day-definition');
+            const mobileExampleElement = document.getElementById('mobile-word-of-day-example');
+            const mobileBadgeElement = document.getElementById('mobile-word-of-day-badge');
+            
+            if (mobileWordElement) mobileWordElement.textContent = wordData.word;
+            if (mobilePronunciationElement) mobilePronunciationElement.textContent = `/${wordData.pronunciation}/`;
+            if (mobileDefinitionElement) mobileDefinitionElement.textContent = wordData.definition;
+            if (mobileExampleElement) mobileExampleElement.textContent = `"${wordData.example}"`;
+            if (mobileBadgeElement) mobileBadgeElement.textContent = wordData.partOfSpeech;
+            
+            // Mobile special day - apply dynamic colors
+            const mobileSpecialBack = document.querySelector('#mobile-word-widget-flip .word-widget-back');
+            if (mobileSpecialBack) {
+                mobileSpecialBack.className = `word-widget-back bg-gradient-to-r ${colorTheme}`;
+            }
+            
+            const mobileSpecialIconElement = document.getElementById('mobile-special-day-icon');
+            const mobileSpecialTitleElement = document.getElementById('mobile-special-day-title');
+            const mobileSpecialDescElement = document.getElementById('mobile-special-day-desc');
+            const mobileSpecialTypeElement = document.getElementById('mobile-special-day-type');
+            
+            if (mobileSpecialIconElement) mobileSpecialIconElement.textContent = specialDayData.icon;
+            if (mobileSpecialTitleElement) mobileSpecialTitleElement.textContent = specialDayData.title;
+            if (mobileSpecialDescElement) mobileSpecialDescElement.textContent = specialDayData.desc;
+            if (mobileSpecialTypeElement) mobileSpecialTypeElement.textContent = specialDayData.type;
+        }
+        
+        // Flip word widget
+        function flipWordWidget(isDesktop = true) {
+            const flipElement = isDesktop 
+                ? document.getElementById('word-widget-flip')
+                : document.getElementById('mobile-word-widget-flip');
+            
+            if (!flipElement) return;
+            
+            if (isDesktop) {
+                isDesktopWidgetFlipped = !isDesktopWidgetFlipped;
+                flipElement.classList.toggle('flipped', isDesktopWidgetFlipped);
+            } else {
+                isMobileWidgetFlipped = !isMobileWidgetFlipped;
+                flipElement.classList.toggle('flipped', isMobileWidgetFlipped);
+            }
+            
+            const isFlipped = isDesktop ? isDesktopWidgetFlipped : isMobileWidgetFlipped;
+            
+            // Update indicator dots
+            const wordDot1 = document.getElementById(isDesktop ? 'word-dot-1' : 'mobile-word-dot-1');
+            const wordDot2 = document.getElementById(isDesktop ? 'word-dot-2' : 'mobile-word-dot-2');
+            const specialDot1 = document.getElementById(isDesktop ? 'special-dot-1' : 'mobile-special-dot-1');
+            const specialDot2 = document.getElementById(isDesktop ? 'special-dot-2' : 'mobile-special-dot-2');
+            
+            if (isFlipped) {
+                if (wordDot1) wordDot1.classList.remove('active');
+                if (wordDot2) wordDot2.classList.add('active');
+                if (specialDot1) specialDot1.classList.add('active');
+                if (specialDot2) specialDot2.classList.remove('active');
+            } else {
+                if (wordDot1) wordDot1.classList.add('active');
+                if (wordDot2) wordDot2.classList.remove('active');
+                if (specialDot1) specialDot1.classList.remove('active');
+                if (specialDot2) specialDot2.classList.add('active');
+            }
+        }
+        
+        // Auto-rotate word widget
+        function startWordWidgetAutoRotate() {
+            // Clear existing interval
+            if (wordWidgetFlipInterval) {
+                clearInterval(wordWidgetFlipInterval);
+            }
+            
+            // Auto-flip every 10 seconds (synchronized for both desktop and mobile)
+            wordWidgetFlipInterval = setInterval(() => {
+                flipWordWidget(true);  // Desktop
+                flipWordWidget(false); // Mobile (sync)
+            }, 10000);
+        }
+        
+        // Initialize word widget
+        async function initWordWidget() {
+            const wordData = getWordOfDay();
+            const specialDayData = await getTodaysSpecialDay(); // Now async
+            
+            updateWordWidget(wordData, specialDayData);
+            
+            // Add click handlers for manual flip
+            const desktopWidget = document.getElementById('word-widget');
+            const mobileWidget = document.getElementById('mobile-word-widget');
+            
+            if (desktopWidget) {
+                desktopWidget.addEventListener('click', () => flipWordWidget(true));
+            }
+            
+            if (mobileWidget) {
+                mobileWidget.addEventListener('click', () => flipWordWidget(false));
+            }
+            
+            // Start auto-rotation
+            startWordWidgetAutoRotate();
+        }
+        
+        // Widget initialization - called manually after header loads
+        // Note: initAnalytics and registerServiceWorker are only on homepage
+        // Widgets are initialized via initWidgets() in widgets-init.js
+        
+        // Expose functions globally for tools pages
+        if (typeof window !== 'undefined') {
+            window.initWeatherWidget = initWeatherWidget;
+            window.initWordWidget = initWordWidget;
+        }

@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Progress Tracker & Analytics - FreeToolHub</title>
+    <meta name="description" content="Comprehensive academic progress tracking, performance analytics, and study insights. Track your academic performance.">
+    <meta property="og:title" content="Progress Tracker & Analytics - FreeToolHub">
+    <meta property="og:description" content="Comprehensive academic progress tracking and performance analytics">
+    <meta property="og:url" content="https://freetoolhub.in/tools/progress-tracker.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">📈 Progress Tracker & Analytics</h1>
+                    <p class="text-gray-600 text-lg">Comprehensive academic progress tracking, performance analytics, and study insights</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-violet-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-violet-600 hover:to-purple-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Progress Tracker</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Input Section -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Add Subject -->
+                        <div class="bg-gradient-to-r from-violet-50 to-purple-50 p-6 rounded-xl border-2 border-violet-200">
+                            <label class="block text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span>📚</span>
+                                <span>Add Subject</span>
+                            </label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Subject Name</label>
+                                    <input type="text" id="subject-name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="e.g., Mathematics">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Subject Code</label>
+                                    <input type="text" id="subject-code" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="e.g., MATH101">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Credits</label>
+                                    <input type="number" id="subject-credits" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="3" min="1" max="6">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Instructor</label>
+                                    <input type="text" id="subject-instructor" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="e.g., Dr. Smith">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Semester</label>
+                                    <input type="text" id="subject-semester" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="e.g., Fall 2024">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Year</label>
+                                    <input type="number" id="subject-year" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="2024" min="2020" max="2030">
+                                </div>
+                            </div>
+                            <button onclick="addSubject()" class="w-full mt-4 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                📚 Add Subject
+                            </button>
+                        </div>
+                        
+                        <!-- Add Assignment -->
+                        <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border-2 border-purple-200">
+                            <label class="block text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span>📝</span>
+                                <span>Add Assignment</span>
+                            </label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Subject</label>
+                                    <select id="assignment-subject" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500">
+                                        <option value="">Select a subject</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Type</label>
+                                    <select id="assignment-type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500">
+                                        <option value="homework">Homework</option>
+                                        <option value="project">Project</option>
+                                        <option value="essay">Essay</option>
+                                        <option value="lab">Lab Report</option>
+                                        <option value="presentation">Presentation</option>
+                                    </select>
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Title</label>
+                                    <input type="text" id="assignment-title" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="e.g., Calculus Problem Set 1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Due Date</label>
+                                    <input type="date" id="assignment-due-date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Points</label>
+                                    <input type="number" id="assignment-points" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="100" min="1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Grade (%)</label>
+                                    <input type="number" id="assignment-grade" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="85" min="0" max="100">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Priority</label>
+                                    <select id="assignment-priority" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500">
+                                        <option value="low">Low</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="high">High</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="addAssignment()" class="w-full mt-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                📝 Add Assignment
+                            </button>
+                        </div>
+                        
+                        <!-- Add Exam -->
+                        <div class="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-xl border-2 border-indigo-200">
+                            <label class="block text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span>📊</span>
+                                <span>Add Exam</span>
+                            </label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Subject</label>
+                                    <select id="exam-subject" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500">
+                                        <option value="">Select a subject</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Type</label>
+                                    <select id="exam-type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500">
+                                        <option value="midterm">Midterm</option>
+                                        <option value="final">Final</option>
+                                        <option value="quiz">Quiz</option>
+                                        <option value="test">Test</option>
+                                    </select>
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Title</label>
+                                    <input type="text" id="exam-title" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="e.g., Midterm Exam 1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Date</label>
+                                    <input type="date" id="exam-date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Duration (min)</label>
+                                    <input type="number" id="exam-duration" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="120" min="30">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Total Marks</label>
+                                    <input type="number" id="exam-total-marks" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="100" min="1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Grade (%)</label>
+                                    <input type="number" id="exam-grade" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500" placeholder="88" min="0" max="100">
+                                </div>
+                            </div>
+                            <button onclick="addExam()" class="w-full mt-4 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                📊 Add Exam
+                            </button>
+                        </div>
+                        
+                        <!-- Quick Templates -->
+                        <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">🚀 Quick Templates</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="loadSubjectTemplate('Math')" class="bg-white hover:bg-yellow-100 p-3 rounded-lg border border-yellow-300 text-left transition-all duration-200">
+                                    <div class="font-semibold text-sm text-gray-800">Mathematics</div>
+                                    <div class="text-xs text-gray-600">MATH101 • 3 credits</div>
+                                </button>
+                                <button onclick="loadSubjectTemplate('Science')" class="bg-white hover:bg-yellow-100 p-3 rounded-lg border border-yellow-300 text-left transition-all duration-200">
+                                    <div class="font-semibold text-sm text-gray-800">Science</div>
+                                    <div class="text-xs text-gray-600">SCI101 • 4 credits</div>
+                                </button>
+                                <button onclick="loadAssignmentTemplate('homework')" class="bg-white hover:bg-yellow-100 p-3 rounded-lg border border-yellow-300 text-left transition-all duration-200">
+                                    <div class="font-semibold text-sm text-gray-800">Homework</div>
+                                    <div class="text-xs text-gray-600">100 points • Due soon</div>
+                                </button>
+                                <button onclick="loadAssignmentTemplate('project')" class="bg-white hover:bg-yellow-100 p-3 rounded-lg border border-yellow-300 text-left transition-all duration-200">
+                                    <div class="font-semibold text-sm text-gray-800">Project</div>
+                                    <div class="text-xs text-gray-600">200 points • High priority</div>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200">
+                            <label class="block text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span>⚡</span>
+                                <span>Quick Actions</span>
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="getOverallAnalytics()" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                    📊 Analytics
+                                </button>
+                                <button onclick="getStudyInsights()" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                    🔍 Insights
+                                </button>
+                                <button onclick="exportProgressData()" class="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                    📤 Export Data
+                                </button>
+                                <button onclick="clearAllProgressData()" class="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                    🗑️ Clear All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <!-- Overall Analytics -->
+                        <div id="overall-analytics" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📊 Overall Analytics</h4>
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200">
+                                <div id="analytics-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Study Insights -->
+                        <div id="study-insights" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">🔍 Study Insights</h4>
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border-2 border-green-200">
+                                <div id="insights-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Subjects List -->
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📚 Your Subjects</h4>
+                            <div id="subjects-list" class="space-y-2 max-h-64 overflow-y-auto bg-gray-50 rounded-lg p-3">
+                                <div class="text-gray-500 text-center py-4">No subjects added yet</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recent Assignments -->
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📝 Recent Assignments</h4>
+                            <div id="assignments-list" class="space-y-2 max-h-64 overflow-y-auto bg-gray-50 rounded-lg p-3">
+                                <div class="text-gray-500 text-center py-4">No assignments added yet</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Progress Tracker Dependencies -->
+    <script src="/src/js/ProgressTracker.js?v=1&t=1726745000"></script>
+    
+    <!-- Progress Tracker JavaScript -->
+    <script>
+        let progressTracker = null;
+
+        function initializeProgressTracker() {
+            try {
+                if (typeof ProgressTracker !== 'undefined') {
+                    progressTracker = new ProgressTracker();
+                    console.log('✅ Progress Tracker initialized successfully');
+                    updateSubjectsList();
+                    updateAssignmentsList();
+                    updateSubjectSelects();
+                } else {
+                    console.error('❌ ProgressTracker class not found');
+                }
+            } catch (error) {
+                console.error('❌ Error initializing Progress Tracker:', error);
+            }
+        }
+
+        function addSubject() {
+            if (!progressTracker) {
+                showNotification('Progress Tracker not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const subjectData = {
+                name: document.getElementById('subject-name').value.trim(),
+                code: document.getElementById('subject-code').value.trim(),
+                credits: parseInt(document.getElementById('subject-credits').value) || 3,
+                instructor: document.getElementById('subject-instructor').value.trim(),
+                semester: document.getElementById('subject-semester').value.trim(),
+                year: parseInt(document.getElementById('subject-year').value) || new Date().getFullYear()
+            };
+
+            if (!subjectData.name) {
+                showNotification('Please enter a subject name.', 'warning');
+                document.getElementById('subject-name').focus();
+                return;
+            }
+
+            const result = progressTracker.addSubject(subjectData);
+            if (result.success) {
+                clearSubjectForm();
+                updateSubjectsList();
+                updateSubjectSelects();
+                showNotification('✅ Subject added successfully!', 'success');
+            } else {
+                showNotification('Error adding subject: ' + result.error, 'error');
+            }
+        }
+
+        function addAssignment() {
+            if (!progressTracker) {
+                showNotification('Progress Tracker not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const subjectId = document.getElementById('assignment-subject').value;
+            if (!subjectId) {
+                showNotification('Please select a subject.', 'warning');
+                document.getElementById('assignment-subject').focus();
+                return;
+            }
+
+            const assignmentData = {
+                subjectId: parseInt(subjectId),
+                type: document.getElementById('assignment-type').value,
+                title: document.getElementById('assignment-title').value.trim(),
+                dueDate: document.getElementById('assignment-due-date').value,
+                points: parseInt(document.getElementById('assignment-points').value) || 100,
+                grade: parseFloat(document.getElementById('assignment-grade').value) || 0,
+                priority: document.getElementById('assignment-priority').value
+            };
+
+            if (!assignmentData.title || !assignmentData.dueDate) {
+                showNotification('Please fill in assignment title and due date.', 'warning');
+                if (!assignmentData.title) document.getElementById('assignment-title').focus();
+                else document.getElementById('assignment-due-date').focus();
+                return;
+            }
+
+            const result = progressTracker.addAssignment(assignmentData);
+            if (result.success) {
+                clearAssignmentForm();
+                updateAssignmentsList();
+                updateSubjectsList();
+                showNotification('✅ Assignment added successfully!', 'success');
+            } else {
+                showNotification('Error adding assignment: ' + result.error, 'error');
+            }
+        }
+
+        function addExam() {
+            if (!progressTracker) {
+                showNotification('Progress Tracker not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const subjectId = document.getElementById('exam-subject').value;
+            if (!subjectId) {
+                showNotification('Please select a subject.', 'warning');
+                document.getElementById('exam-subject').focus();
+                return;
+            }
+
+            const examData = {
+                subjectId: parseInt(subjectId),
+                type: document.getElementById('exam-type').value,
+                title: document.getElementById('exam-title').value.trim(),
+                date: document.getElementById('exam-date').value,
+                duration: parseInt(document.getElementById('exam-duration').value) || 120,
+                totalMarks: parseInt(document.getElementById('exam-total-marks').value) || 100,
+                grade: parseFloat(document.getElementById('exam-grade').value) || 0
+            };
+
+            if (!examData.title || !examData.date) {
+                showNotification('Please fill in exam title and date.', 'warning');
+                if (!examData.title) document.getElementById('exam-title').focus();
+                else document.getElementById('exam-date').focus();
+                return;
+            }
+
+            const result = progressTracker.addExam(examData);
+            if (result.success) {
+                clearExamForm();
+                updateSubjectsList();
+                showNotification('✅ Exam added successfully!', 'success');
+            } else {
+                showNotification('Error adding exam: ' + result.error, 'error');
+            }
+        }
+
+        function getOverallAnalytics() {
+            if (!progressTracker) {
+                showNotification('Progress Tracker not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const analytics = progressTracker.getOverallAnalytics();
+            const gpa = analytics.gpa ? analytics.gpa.toFixed(2) : 'N/A';
+            const avgScore = analytics.averageScore ? analytics.averageScore.toFixed(1) : 'N/A';
+            
+            // Get actual counts from arrays (not from analytics object which may not be updated)
+            const totalAssignments = progressTracker.assignments ? progressTracker.assignments.length : 0;
+            const totalExams = progressTracker.exams ? progressTracker.exams.length : 0;
+            const totalSubjects = progressTracker.subjects ? progressTracker.subjects.length : 0;
+            
+            // Calculate average score from actual assignments and exams
+            let calculatedAvgScore = 0;
+            let totalItems = 0;
+            if (progressTracker.assignments) {
+                const assignmentsWithGrades = progressTracker.assignments.filter(a => a.grade > 0);
+                if (assignmentsWithGrades.length > 0) {
+                    const assignmentAvg = assignmentsWithGrades.reduce((sum, a) => sum + a.grade, 0) / assignmentsWithGrades.length;
+                    calculatedAvgScore += assignmentAvg * assignmentsWithGrades.length;
+                    totalItems += assignmentsWithGrades.length;
+                }
+            }
+            if (progressTracker.exams) {
+                const examsWithGrades = progressTracker.exams.filter(e => e.grade > 0);
+                if (examsWithGrades.length > 0) {
+                    const examAvg = examsWithGrades.reduce((sum, e) => sum + e.grade, 0) / examsWithGrades.length;
+                    calculatedAvgScore += examAvg * examsWithGrades.length;
+                    totalItems += examsWithGrades.length;
+                }
+            }
+            const finalAvgScore = totalItems > 0 ? (calculatedAvgScore / totalItems).toFixed(1) : (analytics.averageScore ? analytics.averageScore.toFixed(1) : 'N/A');
+            
+            // Determine GPA color
+            let gpaColor = 'text-gray-600';
+            if (gpa !== 'N/A') {
+                const gpaNum = parseFloat(gpa);
+                if (gpaNum >= 3.5) gpaColor = 'text-green-600';
+                else if (gpaNum >= 3.0) gpaColor = 'text-blue-600';
+                else if (gpaNum >= 2.5) gpaColor = 'text-yellow-600';
+                else gpaColor = 'text-red-600';
+            }
+            
+            document.getElementById('analytics-content').innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-white p-4 rounded-lg border-2 border-blue-200 text-center shadow-sm">
+                            <div class="text-3xl font-bold ${gpaColor} mb-1">${gpa}</div>
+                            <div class="text-xs text-gray-600 font-semibold">Overall GPA</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border-2 border-blue-200 text-center shadow-sm">
+                            <div class="text-3xl font-bold text-purple-600 mb-1">${finalAvgScore}%</div>
+                            <div class="text-xs text-gray-600 font-semibold">Average Score</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border-2 border-blue-200 text-center shadow-sm">
+                            <div class="text-2xl font-bold text-indigo-600 mb-1">${totalAssignments}</div>
+                            <div class="text-xs text-gray-600 font-semibold">Assignments</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border-2 border-blue-200 text-center shadow-sm">
+                            <div class="text-2xl font-bold text-violet-600 mb-1">${totalExams}</div>
+                            <div class="text-xs text-gray-600 font-semibold">Exams</div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border-2 border-blue-200 text-center shadow-sm">
+                        <div class="text-2xl font-bold text-orange-600 mb-1">🔥 ${analytics.studyStreak || 0}</div>
+                        <div class="text-xs text-gray-600 font-semibold">Day Streak</div>
+                    </div>
+                    ${totalSubjects > 0 ? `
+                        <div class="bg-white p-4 rounded-lg border-2 border-blue-200 text-center shadow-sm">
+                            <div class="text-2xl font-bold text-cyan-600 mb-1">📚 ${totalSubjects}</div>
+                            <div class="text-xs text-gray-600 font-semibold">Total Subjects</div>
+                        </div>
+                    ` : ''}
+                    ${analytics.performanceTrend ? `
+                        <div class="bg-white p-4 rounded-lg border-2 border-blue-200 text-center shadow-sm">
+                            <div class="text-lg font-bold text-emerald-600 mb-1">📈 ${analytics.performanceTrend}</div>
+                            <div class="text-xs text-gray-600 font-semibold">Performance Trend</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('overall-analytics').classList.remove('hidden');
+            document.getElementById('study-insights').classList.add('hidden');
+        }
+
+        function getStudyInsights() {
+            if (!progressTracker) {
+                showNotification('Progress Tracker not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const insights = progressTracker.getStudyInsights();
+            const recommendations = progressTracker.getOverallAnalytics().recommendations || [];
+            
+            if (!insights || Object.keys(insights).length === 0) {
+                document.getElementById('insights-content').innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="text-4xl mb-2">📊</div>
+                        <div class="text-gray-600 font-semibold">No insights available</div>
+                        <div class="text-sm text-gray-500 mt-1">Add more data to get insights</div>
+                    </div>
+                `;
+            } else {
+                let insightsArray = [];
+                
+                if (insights.mostProductiveTime) {
+                    insightsArray.push(`Most productive time: ${insights.mostProductiveTime}`);
+                }
+                if (insights.averageSessionLength) {
+                    insightsArray.push(`Average session length: ${insights.averageSessionLength} minutes`);
+                }
+                if (insights.studyFrequency) {
+                    insightsArray.push(`Study frequency: ${insights.studyFrequency} sessions per week`);
+                }
+                if (insights.preferredSubjects && insights.preferredSubjects.length > 0) {
+                    insightsArray.push(`Preferred subjects: ${insights.preferredSubjects.join(', ')}`);
+                }
+                if (insights.studyStreak) {
+                    insightsArray.push(`Current study streak: ${insights.studyStreak} days`);
+                }
+                
+                // Add recommendations
+                recommendations.forEach(rec => {
+                    insightsArray.push(rec);
+                });
+                
+                if (insightsArray.length === 0) {
+                    insightsArray.push('Add more study sessions and assignments to get personalized insights');
+                }
+                
+                document.getElementById('insights-content').innerHTML = `
+                    <div class="space-y-3">
+                        ${insightsArray.map((insight, index) => `
+                            <div class="bg-white p-3 rounded-lg border-l-4 ${index % 2 === 0 ? 'border-green-500' : 'border-blue-500'} shadow-sm">
+                                <div class="text-sm text-gray-800">💡 ${insight}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            document.getElementById('study-insights').classList.remove('hidden');
+            document.getElementById('overall-analytics').classList.add('hidden');
+        }
+
+        function exportProgressData() {
+            if (!progressTracker) {
+                showNotification('Progress Tracker not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const result = progressTracker.exportData('json');
+            if (result.success) {
+                const dataStr = JSON.stringify(result.data, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `progress-data-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showNotification('✅ Data exported successfully!', 'success');
+            } else {
+                showNotification('Error exporting data: ' + result.error, 'error');
+            }
+        }
+
+        function clearAllProgressData() {
+            if (!progressTracker) return;
+            
+            if (confirm('⚠️ Are you sure you want to clear all data? This cannot be undone.')) {
+                progressTracker.clearAllData();
+                updateSubjectsList();
+                updateAssignmentsList();
+                updateSubjectSelects();
+                showNotification('All data cleared!', 'success');
+            }
+        }
+
+        function loadSubjectTemplate(type) {
+            const templates = {
+                Math: { name: 'Mathematics', code: 'MATH101', credits: 3, instructor: 'Dr. Smith', semester: 'Fall', year: new Date().getFullYear() },
+                Science: { name: 'Science', code: 'SCI101', credits: 4, instructor: 'Dr. Johnson', semester: 'Fall', year: new Date().getFullYear() }
+            };
+            
+            const template = templates[type];
+            if (template) {
+                document.getElementById('subject-name').value = template.name;
+                document.getElementById('subject-code').value = template.code;
+                document.getElementById('subject-credits').value = template.credits;
+                document.getElementById('subject-instructor').value = template.instructor;
+                document.getElementById('subject-semester').value = template.semester;
+                document.getElementById('subject-year').value = template.year;
+                document.getElementById('subject-name').focus();
+                showNotification(`Template loaded: ${template.name}`, 'info');
+            }
+        }
+
+        function loadAssignmentTemplate(type) {
+            const subjectId = document.getElementById('assignment-subject').value;
+            if (!subjectId) {
+                showNotification('Please select a subject first.', 'warning');
+                return;
+            }
+            
+            const today = new Date();
+            const nextWeek = new Date(today);
+            nextWeek.setDate(today.getDate() + 7);
+            
+            const templates = {
+                homework: { title: 'Homework Assignment', type: 'homework', points: 100, priority: 'medium', dueDate: nextWeek.toISOString().split('T')[0] },
+                project: { title: 'Course Project', type: 'project', points: 200, priority: 'high', dueDate: nextWeek.toISOString().split('T')[0] }
+            };
+            
+            const template = templates[type];
+            if (template) {
+                document.getElementById('assignment-title').value = template.title;
+                document.getElementById('assignment-type').value = template.type;
+                document.getElementById('assignment-points').value = template.points;
+                document.getElementById('assignment-priority').value = template.priority;
+                document.getElementById('assignment-due-date').value = template.dueDate;
+                document.getElementById('assignment-title').focus();
+                showNotification(`Template loaded: ${template.title}`, 'info');
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const existing = document.getElementById('progress-notification');
+            if (existing) existing.remove();
+            
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+            
+            const notification = document.createElement('div');
+            notification.id = 'progress-notification';
+            notification.className = `fixed top-20 right-4 ${colors[type]} text-white px-6 py-4 rounded-lg shadow-xl z-50 animate-slide-in`;
+            notification.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+                    <div class="font-semibold">${message}</div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">✕</button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        function clearSubjectForm() {
+            document.getElementById('subject-name').value = '';
+            document.getElementById('subject-code').value = '';
+            document.getElementById('subject-credits').value = '';
+            document.getElementById('subject-instructor').value = '';
+            document.getElementById('subject-semester').value = '';
+            document.getElementById('subject-year').value = '';
+        }
+
+        function clearAssignmentForm() {
+            document.getElementById('assignment-title').value = '';
+            document.getElementById('assignment-due-date').value = '';
+            document.getElementById('assignment-points').value = '';
+            document.getElementById('assignment-grade').value = '';
+        }
+
+        function clearExamForm() {
+            document.getElementById('exam-title').value = '';
+            document.getElementById('exam-date').value = '';
+            document.getElementById('exam-duration').value = '';
+            document.getElementById('exam-total-marks').value = '';
+            document.getElementById('exam-grade').value = '';
+        }
+
+        function updateSubjectsList() {
+            if (!progressTracker) return;
+            
+            const subjects = progressTracker.subjects;
+            const container = document.getElementById('subjects-list');
+            
+            if (subjects.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-4">No subjects added yet</div>';
+                return;
+            }
+            
+            let html = '';
+            subjects.forEach(subject => {
+                // Count all assignments and exams (not just completed)
+                const assignments = progressTracker.assignments ? progressTracker.assignments.filter(a => a.subjectId == subject.id) : [];
+                const exams = progressTracker.exams ? progressTracker.exams.filter(e => e.subjectId == subject.id) : [];
+                
+                // Calculate average from assignments and exams with grades
+                const itemsWithGrades = [
+                    ...assignments.filter(a => a.grade > 0),
+                    ...exams.filter(e => e.grade > 0)
+                ];
+                const avgGrade = itemsWithGrades.length > 0 
+                    ? itemsWithGrades.reduce((sum, item) => sum + item.grade, 0) / itemsWithGrades.length 
+                    : (subject.averageScore || 0);
+                
+                // Determine grade color
+                let gradeColor = 'text-gray-600';
+                let gradeBg = 'bg-gray-100';
+                if (avgGrade >= 90) { gradeColor = 'text-green-700'; gradeBg = 'bg-green-100'; }
+                else if (avgGrade >= 80) { gradeColor = 'text-blue-700'; gradeBg = 'bg-blue-100'; }
+                else if (avgGrade >= 70) { gradeColor = 'text-yellow-700'; gradeBg = 'bg-yellow-100'; }
+                else if (avgGrade >= 60) { gradeColor = 'text-orange-700'; gradeBg = 'bg-orange-100'; }
+                else if (avgGrade > 0) { gradeColor = 'text-red-700'; gradeBg = 'bg-red-100'; }
+                
+                html += `
+                    <div class="bg-white p-3 rounded-lg border-2 border-violet-200 mb-2 shadow-sm hover:shadow-md transition-all cursor-pointer" onclick="selectSubject(${subject.id})">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="font-bold text-gray-800 text-sm">${subject.name}</div>
+                                <div class="text-xs text-gray-600 mt-1">${subject.code} • ${subject.credits} credits</div>
+                                <div class="flex items-center gap-2 mt-2">
+                                    ${avgGrade > 0 ? `<span class="text-xs ${gradeBg} ${gradeColor} px-2 py-1 rounded font-semibold">${avgGrade.toFixed(1)}%</span>` : '<span class="text-xs text-gray-400">No grades yet</span>'}
+                                    <span class="text-xs text-gray-500">📝 ${assignments.length}</span>
+                                    <span class="text-xs text-gray-500">📊 ${exams.length}</span>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">${subject.semester} ${subject.year}</div>
+                            </div>
+                            <button onclick="event.stopPropagation(); deleteSubject(${subject.id})" class="ml-2 text-red-500 hover:text-red-700 text-sm">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function selectSubject(subjectId) {
+            document.getElementById('assignment-subject').value = subjectId;
+            document.getElementById('exam-subject').value = subjectId;
+            showNotification('Subject selected!', 'info');
+        }
+
+        function deleteSubject(subjectId) {
+            if (!progressTracker) return;
+            if (confirm('Are you sure you want to delete this subject? This will also delete all related assignments and exams.')) {
+                const subjectIndex = progressTracker.subjects.findIndex(s => s.id == subjectId);
+                if (subjectIndex !== -1) {
+                    progressTracker.subjects.splice(subjectIndex, 1);
+                    // Remove related assignments and exams
+                    progressTracker.assignments = progressTracker.assignments.filter(a => a.subjectId != subjectId);
+                    progressTracker.exams = progressTracker.exams.filter(e => e.subjectId != subjectId);
+                    updateSubjectsList();
+                    updateAssignmentsList();
+                    updateSubjectSelects();
+                    showNotification('Subject deleted successfully!', 'success');
+                }
+            }
+        }
+
+        function updateAssignmentsList() {
+            if (!progressTracker) return;
+            
+            // Sort by due date (upcoming first)
+            const assignments = [...progressTracker.assignments]
+                .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+                .slice(0, 10);
+            const container = document.getElementById('assignments-list');
+            
+            if (assignments.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-4">No assignments added yet</div>';
+                return;
+            }
+            
+            let html = '';
+            assignments.forEach(assignment => {
+                const subject = progressTracker.subjects.find(s => s.id == assignment.subjectId);
+                const dueDate = new Date(assignment.dueDate);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const isOverdue = dueDate < today && assignment.status !== 'completed';
+                const isDueSoon = dueDate >= today && dueDate <= new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000);
+                
+                // Grade color
+                let gradeColor = 'text-gray-600';
+                let gradeBg = 'bg-gray-100';
+                if (assignment.grade >= 90) { gradeColor = 'text-green-700'; gradeBg = 'bg-green-100'; }
+                else if (assignment.grade >= 80) { gradeColor = 'text-blue-700'; gradeBg = 'bg-blue-100'; }
+                else if (assignment.grade >= 70) { gradeColor = 'text-yellow-700'; gradeBg = 'bg-yellow-100'; }
+                else if (assignment.grade >= 60) { gradeColor = 'text-orange-700'; gradeBg = 'bg-orange-100'; }
+                else if (assignment.grade > 0) { gradeColor = 'text-red-700'; gradeBg = 'bg-red-100'; }
+                
+                // Priority color
+                const priorityColors = {
+                    high: 'border-red-500',
+                    medium: 'border-yellow-500',
+                    low: 'border-green-500'
+                };
+                
+                html += `
+                    <div class="bg-white p-3 rounded-lg border-l-4 ${priorityColors[assignment.priority] || 'border-gray-300'} mb-2 shadow-sm hover:shadow-md transition-all">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="font-semibold text-gray-800 text-sm">${assignment.title}</div>
+                                <div class="text-xs text-gray-600 mt-1">${subject ? subject.name : 'Unknown'} • ${assignment.type}</div>
+                                <div class="flex items-center gap-2 mt-2">
+                                    ${assignment.grade > 0 ? `<span class="text-xs ${gradeBg} ${gradeColor} px-2 py-1 rounded font-semibold">${assignment.grade.toFixed(1)}%</span>` : ''}
+                                    <span class="text-xs text-gray-500">${assignment.points} pts</span>
+                                    ${isOverdue ? '<span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">⚠️ Overdue</span>' : ''}
+                                    ${isDueSoon && !isOverdue ? '<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">Due Soon</span>' : ''}
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">📅 Due: ${assignment.dueDate}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function updateSubjectSelects() {
+            if (!progressTracker) return;
+            
+            const subjects = progressTracker.subjects;
+            const selects = ['assignment-subject', 'exam-subject'];
+            
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (!select) return;
+                
+                select.innerHTML = '<option value="">Select a subject</option>';
+                subjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject.id;
+                    option.textContent = subject.name;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeProgressTracker();
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script (Same structure as other tools) -->
+    <script>
+        const availableTools = [
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', modalId: 'age-calculator-modal' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', modalId: 'bmi-modal' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', modalId: 'loan-calculator-modal' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', modalId: 'investment-calculator-modal' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', modalId: 'tax-calculator-modal' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', modalId: 'business-metrics-modal' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', modalId: 'currency-converter-modal' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', modalId: 'retirement-calculator-modal' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', modalId: 'mortgage-calculator-modal' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', modalId: 'budget-planner-modal' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', modalId: 'salary-calculator-modal' },
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', modalId: 'json-formatter-modal' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', modalId: 'xml-formatter-modal' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', modalId: 'base64-encoder-modal' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', modalId: 'hash-generator-modal' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', modalId: 'url-encoder-modal' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', modalId: 'regex-tester-modal' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', modalId: 'css-js-minifier-modal' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', modalId: 'color-palette-modal' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', modalId: 'lorem-ipsum-modal' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            btnEl.dataset.modalId = tool.modalId || '';
+            btnEl.dataset.pageUrl = tool.pageUrl || '';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            const modalId = btnEl.dataset.modalId;
+            const pageUrl = btnEl.dataset.pageUrl;
+            
+            if (pageUrl) {
+                window.location.href = pageUrl;
+            } else if (modalId && typeof openModal === 'function') {
+                window.location.href = `/#${modalId}`;
+            } else {
+                window.location.href = '/#tools';
+            }
+        }
+        
+        function initToolSuggestions() {
+            updateToolSuggestion();
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        #tool-suggestion-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+        
+        @keyframes slide-in {
+            from { 
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to { 
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .animate-slide-in {
+            animation: slide-in 0.3s ease-out;
+        }
+        
+        /* Input field focus effects */
+        input:focus, select:focus, textarea:focus {
+            transform: scale(1.01);
+            transition: transform 0.2s ease;
+        }
+        
+        /* Button hover effects */
+        button {
+            transition: all 0.2s ease;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+    </style>
+</body>
+</html>
+
+

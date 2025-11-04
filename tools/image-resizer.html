@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Image Resizer - FreeToolHub</title>
+    <meta name="description" content="Resize images to any dimensions with custom sizes, percentage scaling, presets, and batch processing. 100% free, secure, and client-side processing.">
+    <meta property="og:title" content="Image Resizer - FreeToolHub">
+    <meta property="og:description" content="Resize images to any dimensions with custom sizes, percentage scaling, presets, and batch processing">
+    <meta property="og:url" content="https://freetoolhub.in/tools/image-resizer.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- JSZip for ZIP file generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">📐 Image Resizer</h1>
+                    <p class="text-gray-600 text-lg">Resize images to any dimensions with custom sizes, percentage scaling, presets, and batch processing</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Image Resizer</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <!-- Privacy Notice -->
+                <div class="bg-cyan-50 border-l-4 border-cyan-500 p-4 mb-6 rounded">
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">🔒</span>
+                        <div>
+                            <p class="font-semibold text-cyan-800 mb-1">100% Private & Secure</p>
+                            <p class="text-sm text-cyan-700">All processing happens locally in your browser. Your images never leave your device!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 1: Upload Images -->
+                <div class="mb-6">
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">
+                        <span class="text-cyan-600">Step 1:</span> Upload Images
+                    </label>
+                    
+                    <!-- Drop Zone -->
+                    <div id="resizer-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-cyan-500 transition-all cursor-pointer bg-gray-50 hover:bg-cyan-50">
+                        <input type="file" id="resizer-file-input" accept="image/*" multiple class="hidden">
+                        <div class="text-5xl mb-3">📏</div>
+                        <p class="text-lg font-semibold text-gray-700 mb-2">Drop images here or click to browse</p>
+                        <p class="text-sm text-gray-500">Supports: JPG, PNG, WebP, GIF - Select multiple files</p>
+                    </div>
+
+                    <!-- Image Preview Grid -->
+                    <div id="resizer-preview-section" class="hidden mt-4">
+                        <div class="flex items-center justify-between mb-3 p-3 bg-cyan-50 rounded-lg">
+                            <p class="font-semibold text-gray-700">
+                                Uploaded: <span id="resizer-count" class="text-cyan-600 text-xl">0</span> images
+                            </p>
+                            <button onclick="clearAllResizerImages()" class="text-red-600 hover:text-red-700 text-sm font-semibold px-3 py-1 bg-white rounded-lg hover:bg-red-50 transition-all">
+                                Clear All
+                            </button>
+                        </div>
+                        <div id="resizer-preview-grid" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 p-3 bg-gray-50 rounded-lg">
+                            <!-- Image previews will be added here -->
+                        </div>
+                        <p class="text-xs text-gray-500 text-center mt-2">💡 Tip: All images will be resized to the same dimensions</p>
+                    </div>
+                </div>
+
+                <!-- Step 2: Resize Settings -->
+                <div id="resizer-settings-section" class="hidden mb-6">
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">
+                        <span class="text-cyan-600">Step 2:</span> Resize Settings
+                    </label>
+
+                    <div class="space-y-4">
+                        <!-- Resize Method -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Resize Method</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <label class="border-2 border-cyan-300 rounded-lg p-3 cursor-pointer hover:bg-cyan-50 transition-all text-center bg-cyan-50">
+                                    <input type="radio" name="resizer-method" value="custom" checked class="mb-2">
+                                    <div class="font-semibold text-sm">Custom</div>
+                                    <div class="text-xs text-gray-600">Exact pixels</div>
+                                </label>
+                                <label class="border-2 border-gray-300 rounded-lg p-3 cursor-pointer hover:bg-cyan-50 transition-all text-center">
+                                    <input type="radio" name="resizer-method" value="percentage" class="mb-2">
+                                    <div class="font-semibold text-sm">Percentage</div>
+                                    <div class="text-xs text-gray-600">Scale by %</div>
+                                </label>
+                                <label class="border-2 border-gray-300 rounded-lg p-3 cursor-pointer hover:bg-cyan-50 transition-all text-center">
+                                    <input type="radio" name="resizer-method" value="preset" class="mb-2">
+                                    <div class="font-semibold text-sm">Preset</div>
+                                    <div class="text-xs text-gray-600">Common sizes</div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Custom Dimensions -->
+                        <div id="resizer-custom-section">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Custom Dimensions</label>
+                            <div class="flex items-center gap-3">
+                                <div class="flex-1">
+                                    <label class="block text-xs text-gray-600 mb-1">Width (px)</label>
+                                    <input type="number" id="resizer-width" value="1920" min="1" max="10000" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
+                                </div>
+                                <div class="flex items-end pb-2">
+                                    <button onclick="toggleAspectRatioLock()" id="resizer-lock-btn" class="p-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-all">
+                                        <span id="resizer-lock-icon">🔒</span>
+                                    </button>
+                                </div>
+                                <div class="flex-1">
+                                    <label class="block text-xs text-gray-600 mb-1">Height (px)</label>
+                                    <input type="number" id="resizer-height" value="1080" min="1" max="10000" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2 text-center">
+                                <span id="resizer-lock-status">🔒 Aspect ratio locked</span>
+                            </p>
+                        </div>
+
+                        <!-- Percentage Section -->
+                        <div id="resizer-percentage-section" class="hidden">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Scale Percentage</label>
+                            <div class="flex items-center gap-4 mb-3">
+                                <span class="text-xs text-gray-600">10%</span>
+                                <input type="range" id="resizer-percentage-slider" min="10" max="500" value="100" class="flex-1 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer">
+                                <span class="text-xs text-gray-600">500%</span>
+                            </div>
+                            <div class="text-center mb-3">
+                                <span class="text-2xl font-bold text-cyan-600" id="resizer-percentage-value">100%</span>
+                            </div>
+                            <div class="grid grid-cols-4 gap-2">
+                                <button onclick="setResizePercentage(50)" class="border border-cyan-300 rounded-lg p-2 text-sm hover:bg-cyan-50">50%</button>
+                                <button onclick="setResizePercentage(75)" class="border border-cyan-300 rounded-lg p-2 text-sm hover:bg-cyan-50">75%</button>
+                                <button onclick="setResizePercentage(150)" class="border border-cyan-300 rounded-lg p-2 text-sm hover:bg-cyan-50">150%</button>
+                                <button onclick="setResizePercentage(200)" class="border border-cyan-300 rounded-lg p-2 text-sm hover:bg-cyan-50">200%</button>
+                            </div>
+                        </div>
+
+                        <!-- Preset Sizes -->
+                        <div id="resizer-preset-section" class="hidden">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Choose Preset Size</label>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                <button onclick="applyPresetSize(150, 150)" class="border border-gray-300 rounded-lg p-3 text-left hover:bg-cyan-50 hover:border-cyan-300 transition-all">
+                                    <div class="font-semibold text-sm">Thumbnail</div>
+                                    <div class="text-xs text-gray-600">150 × 150</div>
+                                </button>
+                                <button onclick="applyPresetSize(320, 240)" class="border border-gray-300 rounded-lg p-3 text-left hover:bg-cyan-50 hover:border-cyan-300 transition-all">
+                                    <div class="font-semibold text-sm">Small</div>
+                                    <div class="text-xs text-gray-600">320 × 240</div>
+                                </button>
+                                <button onclick="applyPresetSize(640, 480)" class="border border-gray-300 rounded-lg p-3 text-left hover:bg-cyan-50 hover:border-cyan-300 transition-all">
+                                    <div class="font-semibold text-sm">Medium</div>
+                                    <div class="text-xs text-gray-600">640 × 480</div>
+                                </button>
+                                <button onclick="applyPresetSize(1024, 768)" class="border border-gray-300 rounded-lg p-3 text-left hover:bg-cyan-50 hover:border-cyan-300 transition-all">
+                                    <div class="font-semibold text-sm">Large</div>
+                                    <div class="text-xs text-gray-600">1024 × 768</div>
+                                </button>
+                                <button onclick="applyPresetSize(1920, 1080)" class="border border-gray-300 rounded-lg p-3 text-left hover:bg-cyan-50 hover:border-cyan-300 transition-all">
+                                    <div class="font-semibold text-sm">HD</div>
+                                    <div class="text-xs text-gray-600">1920 × 1080</div>
+                                </button>
+                                <button onclick="applyPresetSize(3840, 2160)" class="border border-gray-300 rounded-lg p-3 text-left hover:bg-cyan-50 hover:border-cyan-300 transition-all">
+                                    <div class="font-semibold text-sm">4K</div>
+                                    <div class="text-xs text-gray-600">3840 × 2160</div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Output Quality -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Output Quality</label>
+                            <div class="flex items-center gap-4">
+                                <span class="text-xs text-gray-600">Low</span>
+                                <input type="range" id="resizer-quality-slider" min="10" max="100" value="90" class="flex-1 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer">
+                                <span class="text-xs text-gray-600">High</span>
+                            </div>
+                            <div class="mt-2 text-center">
+                                <span class="text-lg font-bold text-cyan-600" id="resizer-quality-value">90%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Resize Button -->
+                <div id="resizer-resize-section" class="hidden mb-6">
+                    <button onclick="resizeAllImages()" id="resizer-resize-btn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold py-4 px-6 rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+                        📐 Resize Images
+                    </button>
+                </div>
+
+                <!-- Progress Bar -->
+                <div id="resizer-progress" class="hidden mb-6">
+                    <div class="bg-cyan-50 border-2 border-cyan-500 rounded-xl p-4">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="animate-spin">⏳</div>
+                            <span class="font-semibold text-cyan-800" id="resizer-progress-text">Resizing images...</span>
+                        </div>
+                        <div class="w-full bg-cyan-200 rounded-full h-4 overflow-hidden">
+                            <div id="resizer-progress-bar" class="bg-gradient-to-r from-cyan-500 to-blue-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <p class="text-sm text-cyan-700 mt-2" id="resizer-progress-percent">0%</p>
+                    </div>
+                </div>
+
+                <!-- Success Message with Results -->
+                <div id="resizer-success" class="hidden mb-6">
+                    <div class="bg-cyan-50 border-2 border-cyan-500 rounded-xl p-4 mb-4">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-4xl">✅</span>
+                            <div class="flex-1">
+                                <h4 class="text-lg font-bold text-cyan-800 mb-1">Success!</h4>
+                                <p class="text-cyan-700">All images resized successfully</p>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    📊 Resized <span id="resizer-total-count">0</span> images
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Grid -->
+                    <div id="resizer-results-grid" class="space-y-3 mb-4 max-h-96 overflow-y-auto">
+                        <!-- Results will be added here -->
+                    </div>
+
+                    <!-- Download All Button -->
+                    <button onclick="downloadAllResizedAsZip()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold py-3 px-8 rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg mb-3">
+                        📥 Download All as ZIP
+                    </button>
+
+                    <!-- Resize More Button -->
+                    <button onclick="resetResizer()" class="w-full bg-white border-2 border-gray-300 text-gray-700 font-bold py-3 px-8 rounded-xl hover:bg-gray-50 transition-all duration-300">
+                        🔄 Resize More Images
+                    </button>
+                </div>
+
+                <!-- Error Message -->
+                <div id="resizer-error" class="hidden mb-6">
+                    <div class="bg-red-50 border-2 border-red-500 rounded-xl p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-3xl">⚠️</span>
+                            <div>
+                                <h4 class="text-lg font-bold text-red-800 mb-1">Error</h4>
+                                <p id="resizer-error-message" class="text-red-700"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+
+    <!-- Load Header and Footer -->
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    
+    <script>
+        // Image Resizer Variables
+        let resizerFiles = [];
+        let resizedImages = [];
+        let aspectRatioLocked = true;
+        let originalAspectRatio = null;
+
+        // Initialize Image Resizer functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('resizer-drop-zone');
+            const fileInput = document.getElementById('resizer-file-input');
+            const widthInput = document.getElementById('resizer-width');
+            const heightInput = document.getElementById('resizer-height');
+            const qualitySlider = document.getElementById('resizer-quality-slider');
+            const qualityValue = document.getElementById('resizer-quality-value');
+            const percentageSlider = document.getElementById('resizer-percentage-slider');
+            const percentageValue = document.getElementById('resizer-percentage-value');
+            const methodRadios = document.querySelectorAll('input[name="resizer-method"]');
+
+            if (!dropZone || !fileInput) return;
+
+            // Click to browse
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleResizerUpload(Array.from(e.target.files));
+                }
+            });
+
+            // Drag and drop
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-cyan-500', 'bg-cyan-50');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('border-cyan-500', 'bg-cyan-50');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-cyan-500', 'bg-cyan-50');
+                if (e.dataTransfer.files.length > 0) {
+                    handleResizerUpload(Array.from(e.dataTransfer.files));
+                }
+            });
+
+            // Dimension inputs with aspect ratio lock
+            if (widthInput && heightInput) {
+                widthInput.addEventListener('input', (e) => {
+                    if (aspectRatioLocked && originalAspectRatio) {
+                        const newWidth = parseInt(e.target.value) || 1;
+                        const newHeight = Math.round(newWidth / originalAspectRatio);
+                        heightInput.value = newHeight;
+                    }
+                });
+
+                heightInput.addEventListener('input', (e) => {
+                    if (aspectRatioLocked && originalAspectRatio) {
+                        const newHeight = parseInt(e.target.value) || 1;
+                        const newWidth = Math.round(newHeight * originalAspectRatio);
+                        widthInput.value = newWidth;
+                    }
+                });
+            }
+
+            // Quality slider
+            if (qualitySlider && qualityValue) {
+                qualitySlider.addEventListener('input', (e) => {
+                    qualityValue.textContent = e.target.value + '%';
+                });
+            }
+
+            // Percentage slider
+            if (percentageSlider && percentageValue) {
+                percentageSlider.addEventListener('input', (e) => {
+                    percentageValue.textContent = e.target.value + '%';
+                });
+            }
+
+            // Method selection change
+            methodRadios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    updateResizeMethod(e.target.value);
+                });
+            });
+        });
+
+        function updateResizeMethod(method) {
+            const customSection = document.getElementById('resizer-custom-section');
+            const percentageSection = document.getElementById('resizer-percentage-section');
+            const presetSection = document.getElementById('resizer-preset-section');
+
+            // Hide all sections
+            customSection.classList.add('hidden');
+            percentageSection.classList.add('hidden');
+            presetSection.classList.add('hidden');
+
+            // Show selected section
+            if (method === 'custom') {
+                customSection.classList.remove('hidden');
+            } else if (method === 'percentage') {
+                percentageSection.classList.remove('hidden');
+            } else if (method === 'preset') {
+                presetSection.classList.remove('hidden');
+            }
+
+            // Update method card borders
+            document.querySelectorAll('input[name="resizer-method"]').forEach((radio) => {
+                const label = radio.parentElement;
+                if (radio.checked) {
+                    label.classList.remove('border-gray-300');
+                    label.classList.add('border-cyan-300', 'bg-cyan-50');
+                } else {
+                    label.classList.remove('border-cyan-300', 'bg-cyan-50');
+                    label.classList.add('border-gray-300');
+                }
+            });
+        }
+
+        function toggleAspectRatioLock() {
+            aspectRatioLocked = !aspectRatioLocked;
+            const lockIcon = document.getElementById('resizer-lock-icon');
+            const lockStatus = document.getElementById('resizer-lock-status');
+
+            if (aspectRatioLocked) {
+                lockIcon.textContent = '🔒';
+                lockStatus.textContent = '🔒 Aspect ratio locked';
+                // Update aspect ratio based on current values
+                const width = parseInt(document.getElementById('resizer-width').value) || 1920;
+                const height = parseInt(document.getElementById('resizer-height').value) || 1080;
+                originalAspectRatio = width / height;
+            } else {
+                lockIcon.textContent = '🔓';
+                lockStatus.textContent = '🔓 Aspect ratio unlocked';
+            }
+        }
+
+        function setResizePercentage(percent) {
+            document.getElementById('resizer-percentage-slider').value = percent;
+            document.getElementById('resizer-percentage-value').textContent = percent + '%';
+        }
+
+        function applyPresetSize(width, height) {
+            // Switch to custom method
+            document.querySelector('input[name="resizer-method"][value="custom"]').checked = true;
+            updateResizeMethod('custom');
+
+            // Set dimensions
+            document.getElementById('resizer-width').value = width;
+            document.getElementById('resizer-height').value = height;
+
+            // Update aspect ratio
+            originalAspectRatio = width / height;
+        }
+
+        function handleResizerUpload(files) {
+            // Filter only image files
+            const imageFiles = files.filter(file => file.type.startsWith('image/'));
+            
+            if (imageFiles.length === 0) {
+                showResizerError('Please select valid image files (JPG, PNG, WebP, GIF).');
+                return;
+            }
+
+            // Add to array
+            resizerFiles.push(...imageFiles);
+
+            // Set original aspect ratio from first image
+            if (resizerFiles.length > 0 && !originalAspectRatio) {
+                const firstImage = new Image();
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    firstImage.onload = () => {
+                        originalAspectRatio = firstImage.width / firstImage.height;
+                        // Update dimensions to match first image
+                        document.getElementById('resizer-width').value = firstImage.width;
+                        document.getElementById('resizer-height').value = firstImage.height;
+                    };
+                    firstImage.src = e.target.result;
+                };
+                reader.readAsDataURL(resizerFiles[0]);
+            }
+
+            // Update UI
+            displayResizerPreviews();
+            
+            // Show settings and resize sections
+            document.getElementById('resizer-settings-section').classList.remove('hidden');
+            document.getElementById('resizer-resize-section').classList.remove('hidden');
+            document.getElementById('resizer-success').classList.add('hidden');
+            document.getElementById('resizer-error').classList.add('hidden');
+        }
+
+        function displayResizerPreviews() {
+            const previewSection = document.getElementById('resizer-preview-section');
+            const previewGrid = document.getElementById('resizer-preview-grid');
+            const countSpan = document.getElementById('resizer-count');
+
+            previewSection.classList.remove('hidden');
+            countSpan.textContent = resizerFiles.length;
+            previewGrid.innerHTML = '';
+
+            resizerFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const preview = document.createElement('div');
+                        preview.className = 'relative group';
+                        
+                        preview.innerHTML = `
+                            <img src="${e.target.result}" class="w-full h-24 object-cover rounded-lg border-2 border-gray-300 group-hover:border-cyan-500 transition-all">
+                            <div class="absolute top-1 right-1 bg-white rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick="removeResizerImage(${index})" class="text-red-600 hover:text-red-700">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="absolute top-1 left-1 bg-cyan-600 text-white text-xs px-2 py-1 rounded font-semibold">
+                                ${index + 1}
+                            </div>
+                            <div class="absolute bottom-1 left-1 bg-blue-600 text-white text-xs px-2 py-1 rounded font-semibold">
+                                ${img.width}×${img.height}
+                            </div>
+                            <div class="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                                ${(file.size / (1024 * 1024)).toFixed(2)}MB
+                            </div>
+                        `;
+
+                        previewGrid.appendChild(preview);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeResizerImage(index) {
+            resizerFiles.splice(index, 1);
+            
+            if (resizerFiles.length === 0) {
+                document.getElementById('resizer-preview-section').classList.add('hidden');
+                document.getElementById('resizer-settings-section').classList.add('hidden');
+                document.getElementById('resizer-resize-section').classList.add('hidden');
+                originalAspectRatio = null;
+            } else {
+                displayResizerPreviews();
+            }
+        }
+
+        function clearAllResizerImages() {
+            resizerFiles = [];
+            resizedImages = [];
+            originalAspectRatio = null;
+            document.getElementById('resizer-preview-section').classList.add('hidden');
+            document.getElementById('resizer-settings-section').classList.add('hidden');
+            document.getElementById('resizer-resize-section').classList.add('hidden');
+            document.getElementById('resizer-file-input').value = '';
+            document.getElementById('resizer-success').classList.add('hidden');
+            document.getElementById('resizer-error').classList.add('hidden');
+        }
+
+        async function resizeAllImages() {
+            if (resizerFiles.length === 0) {
+                showResizerError('Please upload at least one image.');
+                return;
+            }
+
+            // Get settings
+            const method = document.querySelector('input[name="resizer-method"]:checked').value;
+            const quality = parseInt(document.getElementById('resizer-quality-slider').value) / 100;
+
+            let targetWidth, targetHeight;
+
+            if (method === 'custom') {
+                targetWidth = parseInt(document.getElementById('resizer-width').value) || 1920;
+                targetHeight = parseInt(document.getElementById('resizer-height').value) || 1080;
+            } else if (method === 'percentage') {
+                const percentage = parseInt(document.getElementById('resizer-percentage-slider').value) / 100;
+                targetWidth = percentage; // Will be multiplied by original dimensions
+                targetHeight = percentage;
+            } else if (method === 'preset') {
+                // Should already be set in custom section from preset button click
+                targetWidth = parseInt(document.getElementById('resizer-width').value) || 1920;
+                targetHeight = parseInt(document.getElementById('resizer-height').value) || 1080;
+            }
+
+            // Show progress
+            document.getElementById('resizer-resize-section').classList.add('hidden');
+            document.getElementById('resizer-progress').classList.remove('hidden');
+            document.getElementById('resizer-error').classList.add('hidden');
+            document.getElementById('resizer-success').classList.add('hidden');
+
+            resizedImages = [];
+
+            try {
+                for (let i = 0; i < resizerFiles.length; i++) {
+                    const file = resizerFiles[i];
+                    
+                    // Update progress
+                    const progress = ((i + 1) / resizerFiles.length) * 100;
+                    document.getElementById('resizer-progress-bar').style.width = progress + '%';
+                    document.getElementById('resizer-progress-percent').textContent = Math.round(progress) + '%';
+                    document.getElementById('resizer-progress-text').textContent = 
+                        `Resizing ${file.name} (${i + 1} of ${resizerFiles.length})...`;
+
+                    // Resize the image
+                    const result = await resizeSingleImage(file, targetWidth, targetHeight, quality, method);
+                    
+                    resizedImages.push(result);
+
+                    // Small delay to prevent browser freeze
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+
+                // Display results
+                document.getElementById('resizer-total-count').textContent = resizerFiles.length;
+
+                displayResizeResults();
+
+                document.getElementById('resizer-progress').classList.add('hidden');
+                document.getElementById('resizer-success').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error resizing images:', error);
+                showResizerError('Failed to resize images: ' + error.message);
+                document.getElementById('resizer-resize-section').classList.remove('hidden');
+                document.getElementById('resizer-progress').classList.add('hidden');
+            }
+        }
+
+        async function resizeSingleImage(file, targetWidth, targetHeight, quality, method) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    const img = new Image();
+                    
+                    img.onload = () => {
+                        try {
+                            let newWidth, newHeight;
+
+                            if (method === 'percentage') {
+                                // targetWidth and targetHeight are percentages
+                                newWidth = Math.round(img.width * targetWidth);
+                                newHeight = Math.round(img.height * targetHeight);
+                            } else {
+                                // Custom or preset - use exact dimensions
+                                newWidth = targetWidth;
+                                newHeight = targetHeight;
+                            }
+
+                            const canvas = document.createElement('canvas');
+                            canvas.width = newWidth;
+                            canvas.height = newHeight;
+
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+                            // Determine output format
+                            let mimeType = file.type;
+                            let extension = file.name.split('.').pop();
+
+                            // Convert to blob
+                            canvas.toBlob((blob) => {
+                                if (blob) {
+                                    const url = URL.createObjectURL(blob);
+                                    
+                                    resolve({
+                                        originalFile: file,
+                                        originalWidth: img.width,
+                                        originalHeight: img.height,
+                                        originalSize: file.size,
+                                        resizedBlob: blob,
+                                        resizedWidth: newWidth,
+                                        resizedHeight: newHeight,
+                                        resizedSize: blob.size,
+                                        resizedUrl: url,
+                                        originalUrl: e.target.result,
+                                        filename: file.name.replace(/\.[^/.]+$/, '') + '-resized.' + extension,
+                                        sizeChange: blob.size - file.size,
+                                        sizeChangePercent: Math.round(((blob.size - file.size) / file.size) * 100)
+                                    });
+                                } else {
+                                    reject(new Error('Failed to create blob'));
+                                }
+                            }, mimeType, quality);
+
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+
+                    img.onerror = () => reject(new Error('Failed to load image'));
+                    img.src = e.target.result;
+                };
+
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function displayResizeResults() {
+            const resultsGrid = document.getElementById('resizer-results-grid');
+            resultsGrid.innerHTML = '';
+
+            resizedImages.forEach((result, index) => {
+                const resultCard = document.createElement('div');
+                resultCard.className = 'bg-gray-50 border-2 border-gray-300 rounded-xl p-4 hover:border-cyan-500 transition-all';
+                
+                const sizeChangeText = result.sizeChange >= 0 
+                    ? `+${(result.sizeChange / (1024 * 1024)).toFixed(2)} MB (+${result.sizeChangePercent}%)`
+                    : `${(result.sizeChange / (1024 * 1024)).toFixed(2)} MB (${result.sizeChangePercent}%)`;
+                
+                const sizeChangeColor = result.sizeChange >= 0 ? 'text-orange-600' : 'text-green-600';
+                
+                resultCard.innerHTML = `
+                    <div class="flex items-center justify-between mb-3">
+                        <h5 class="font-semibold text-gray-800 truncate flex-1">${result.filename}</h5>
+                        <button onclick="downloadResizedImage(${index})" class="bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1 rounded-lg text-sm font-semibold ml-2">
+                            📥 Download
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div class="text-center">
+                            <img src="${result.originalUrl}" class="w-full h-32 object-cover rounded-lg border border-gray-300 mb-2">
+                            <p class="text-xs font-semibold text-gray-600">BEFORE</p>
+                            <p class="text-sm font-bold text-gray-800">${result.originalWidth} × ${result.originalHeight}</p>
+                            <p class="text-xs text-gray-600">${(result.originalSize / (1024 * 1024)).toFixed(2)} MB</p>
+                        </div>
+                        <div class="text-center">
+                            <img src="${result.resizedUrl}" class="w-full h-32 object-cover rounded-lg border border-gray-300 mb-2">
+                            <p class="text-xs font-semibold text-gray-600">AFTER</p>
+                            <p class="text-sm font-bold text-cyan-600">${result.resizedWidth} × ${result.resizedHeight}</p>
+                            <p class="text-xs text-gray-600">${(result.resizedSize / (1024 * 1024)).toFixed(2)} MB</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-cyan-100 border border-cyan-500 rounded-lg p-2 text-center">
+                        <p class="text-sm font-bold text-cyan-800">
+                            📐 Dimensions: ${result.originalWidth}×${result.originalHeight} → ${result.resizedWidth}×${result.resizedHeight}
+                        </p>
+                        <p class="text-xs ${sizeChangeColor} mt-1">
+                            Size change: ${sizeChangeText}
+                        </p>
+                    </div>
+                `;
+
+                resultsGrid.appendChild(resultCard);
+            });
+        }
+
+        function downloadResizedImage(index) {
+            if (!resizedImages[index]) {
+                alert('Image not found!');
+                return;
+            }
+
+            const result = resizedImages[index];
+            const url = result.resizedUrl;
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = result.filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        async function downloadAllResizedAsZip() {
+            if (resizedImages.length === 0) {
+                alert('No resized images to download!');
+                return;
+            }
+
+            if (typeof JSZip === 'undefined') {
+                alert('JSZip library not loaded. Please refresh the page.');
+                return;
+            }
+
+            try {
+                const zip = new JSZip();
+
+                // Add all resized images to ZIP
+                for (let i = 0; i < resizedImages.length; i++) {
+                    const result = resizedImages[i];
+                    zip.file(result.filename, result.resizedBlob);
+                }
+
+                // Generate ZIP
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+                // Download ZIP
+                const url = URL.createObjectURL(zipBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                const timestamp = new Date().toISOString().split('T')[0];
+                a.download = `resized-images-${timestamp}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error('Error creating ZIP:', error);
+                alert('Failed to create ZIP file. Please try again.');
+            }
+        }
+
+        function resetResizer() {
+            resizerFiles = [];
+            resizedImages = [];
+            originalAspectRatio = null;
+            aspectRatioLocked = true;
+            
+            // Clear file input
+            document.getElementById('resizer-file-input').value = '';
+            
+            // Reset dimensions
+            document.getElementById('resizer-width').value = 1920;
+            document.getElementById('resizer-height').value = 1080;
+            
+            // Reset quality slider
+            document.getElementById('resizer-quality-slider').value = 90;
+            document.getElementById('resizer-quality-value').textContent = '90%';
+            
+            // Reset percentage slider
+            document.getElementById('resizer-percentage-slider').value = 100;
+            document.getElementById('resizer-percentage-value').textContent = '100%';
+            
+            // Reset method
+            document.querySelector('input[name="resizer-method"][value="custom"]').checked = true;
+            updateResizeMethod('custom');
+            
+            // Reset aspect ratio lock
+            document.getElementById('resizer-lock-icon').textContent = '🔒';
+            document.getElementById('resizer-lock-status').textContent = '🔒 Aspect ratio locked';
+            
+            // Hide all sections
+            document.getElementById('resizer-preview-section').classList.add('hidden');
+            document.getElementById('resizer-settings-section').classList.add('hidden');
+            document.getElementById('resizer-resize-section').classList.add('hidden');
+            document.getElementById('resizer-success').classList.add('hidden');
+            document.getElementById('resizer-error').classList.add('hidden');
+        }
+
+        function showResizerError(message) {
+            document.getElementById('resizer-error-message').textContent = message;
+            document.getElementById('resizer-error').classList.remove('hidden');
+            document.getElementById('resizer-success').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>PDF to Images - FreeToolHub</title>
+    <meta name="description" content="Convert PDF pages to JPG or PNG images with customizable quality and resolution. All processing happens locally in your browser.">
+    <meta property="og:title" content="PDF to Images - FreeToolHub">
+    <meta property="og:description" content="Convert PDF pages to JPG or PNG images">
+    <meta property="og:url" content="https://freetoolhub.in/tools/pdf-to-images.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- PDF.js for PDF rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <!-- JSZip for creating ZIP files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🖼️ PDF to Images</h1>
+                    <p class="text-gray-600 text-lg">Convert PDF pages to JPG or PNG images</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-orange-500 to-yellow-600 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-yellow-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">PDF to Images</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Main PDF to Images Section -->
+                    <div class="lg:col-span-3">
+                        <!-- Privacy Notice -->
+                        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
+                            <div class="flex items-start">
+                                <span class="text-2xl mr-3">🔒</span>
+                                <div>
+                                    <p class="font-semibold text-green-800 mb-1">100% Private & Secure</p>
+                                    <p class="text-sm text-green-700">All processing happens locally in your browser. Your PDF never leaves your device!</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 1: Upload PDF -->
+                        <div class="mb-6">
+                            <label class="block text-lg font-semibold text-gray-700 mb-3">
+                                <span class="text-orange-600">Step 1:</span> Upload PDF
+                            </label>
+                            
+                            <!-- Drop Zone -->
+                            <div id="pdf-to-images-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-orange-500 transition-all cursor-pointer bg-gray-50 hover:bg-orange-50">
+                                <input type="file" id="pdf-to-images-file-input" accept=".pdf" class="hidden">
+                                <div class="text-5xl mb-3">📄</div>
+                                <p class="text-lg font-semibold text-gray-700 mb-2">Drop PDF here or click to browse</p>
+                                <p class="text-sm text-gray-500">Supports all PDF files</p>
+                            </div>
+
+                            <!-- File Info -->
+                            <div id="pdf-to-images-file-info" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-3xl">📄</span>
+                                        <div>
+                                            <p id="pdf-to-images-filename" class="font-semibold text-gray-800"></p>
+                                            <p id="pdf-to-images-filesize" class="text-sm text-gray-600"></p>
+                                        </div>
+                                    </div>
+                                    <button onclick="clearPdfToImagesFile()" class="text-red-600 hover:text-red-700 font-semibold">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Configure Options -->
+                        <div id="pdf-to-images-options-section" class="hidden mb-6">
+                            <label class="block text-lg font-semibold text-gray-700 mb-3">
+                                <span class="text-orange-600">Step 2:</span> Configure Options
+                            </label>
+
+                            <!-- Output Format -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Output Format</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="border-2 border-orange-300 rounded-lg p-4 cursor-pointer hover:bg-orange-50 transition-all">
+                                        <input type="radio" name="pdf-to-images-format" value="jpeg" checked class="mr-2">
+                                        <span class="font-semibold">JPG</span>
+                                        <p class="text-xs text-gray-600 mt-1">Smaller file size</p>
+                                    </label>
+                                    <label class="border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-orange-50 transition-all">
+                                        <input type="radio" name="pdf-to-images-format" value="png" class="mr-2">
+                                        <span class="font-semibold">PNG</span>
+                                        <p class="text-xs text-gray-600 mt-1">Lossless quality</p>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Image Quality -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Image Quality: <span id="pdf-to-images-quality-value" class="text-orange-600">90%</span>
+                                </label>
+                                <input type="range" id="pdf-to-images-quality" min="50" max="100" value="90" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>50%</span>
+                                    <span>65%</span>
+                                    <span>80%</span>
+                                    <span>95%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+
+                            <!-- Resolution Scale -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Resolution Scale: <span id="pdf-to-images-scale-value" class="text-orange-600">2x (High Quality)</span>
+                                </label>
+                                <input type="range" id="pdf-to-images-scale" min="1" max="3" step="0.5" value="2" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>1x</span>
+                                    <span>1.5x</span>
+                                    <span>2x</span>
+                                    <span>2.5x</span>
+                                    <span>3x</span>
+                                </div>
+                            </div>
+
+                            <!-- Page Selection -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Pages to Convert</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" name="pdf-to-images-pages" value="all" checked class="mr-2">
+                                        <span>All pages (<span id="pdf-to-images-total-pages">0</span> pages)</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="pdf-to-images-pages" value="specific" class="mr-2">
+                                        <span>Specific pages</span>
+                                    </label>
+                                    <input type="text" id="pdf-to-images-page-range" placeholder="e.g., 1,3-5,7" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-100" disabled>
+                                    <p class="text-xs text-gray-500">Enter page numbers separated by commas. Use hyphen for ranges.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Convert -->
+                        <div id="pdf-to-images-convert-section" class="hidden mb-6">
+                            <button onclick="convertPdfToImages()" id="pdf-to-images-convert-btn" class="w-full bg-gradient-to-r from-orange-500 to-yellow-600 text-white font-bold py-4 px-6 rounded-xl hover:from-orange-600 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+                                🖼️ Convert PDF to Images
+                            </button>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div id="pdf-to-images-progress" class="hidden mb-6">
+                            <div class="bg-blue-50 border-2 border-blue-500 rounded-xl p-4">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="animate-spin">⏳</div>
+                                    <span class="font-semibold text-blue-800" id="pdf-to-images-progress-text">Processing your PDF...</span>
+                                </div>
+                                <div class="w-full bg-blue-200 rounded-full h-4 overflow-hidden">
+                                    <div id="pdf-to-images-progress-bar" class="bg-gradient-to-r from-orange-500 to-yellow-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                                <p class="text-sm text-blue-700 mt-2" id="pdf-to-images-progress-percent">0%</p>
+                            </div>
+                        </div>
+
+                        <!-- Success Message -->
+                        <div id="pdf-to-images-success" class="hidden mb-6">
+                            <div class="bg-green-50 border-2 border-green-500 rounded-xl p-4">
+                                <div class="flex items-start gap-3 mb-4">
+                                    <span class="text-3xl">✅</span>
+                                    <div class="flex-1">
+                                        <h4 class="text-lg font-bold text-green-800 mb-1">Success!</h4>
+                                        <p class="text-green-700 mb-2"><span id="pdf-to-images-success-count">0</span> images ready</p>
+                                        
+                                        <!-- Preview Thumbnails -->
+                                        <div class="mb-3">
+                                            <p class="text-sm font-semibold text-gray-700 mb-2">Preview:</p>
+                                            <div id="pdf-to-images-preview" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto"></div>
+                                        </div>
+                                        
+                                        <p class="text-sm text-gray-600">Total size: <span id="pdf-to-images-total-size">~0 MB</span></p>
+                                    </div>
+                                </div>
+                                <button onclick="downloadImagesAsZip()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-8 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                    📥 Download All Images as ZIP
+                                </button>
+                            </div>
+                            
+                            <p class="text-xs text-gray-500 mt-3 text-center">
+                                ℹ️ Images will be named: <span id="pdf-to-images-naming-example"></span>
+                            </p>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div id="pdf-to-images-error" class="hidden mb-6">
+                            <div class="bg-red-50 border-2 border-red-500 rounded-xl p-4">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-3xl">⚠️</span>
+                                    <div>
+                                        <h4 class="text-lg font-bold text-red-800 mb-1">Error</h4>
+                                        <p id="pdf-to-images-error-message" class="text-red-700"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Tool Suggestion Card -->
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        // Available tools for suggestions (excluding current tool)
+        const availableTools = [
+            // Student Tools
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', pageUrl: '/tools/age-calculator.html' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', pageUrl: '/tools/bmi-calculator.html' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', pageUrl: '/tools/loan-calculator.html' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', pageUrl: '/tools/investment-calculator.html' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', pageUrl: '/tools/tax-calculator.html' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', pageUrl: '/tools/business-metrics.html' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', pageUrl: '/tools/currency-converter.html' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', pageUrl: '/tools/retirement-calculator.html' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', pageUrl: '/tools/mortgage-calculator.html' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', pageUrl: '/tools/budget-planner.html' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', pageUrl: '/tools/salary-calculator.html' },
+            // Developer Tools
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', pageUrl: '/tools/json-formatter.html' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', pageUrl: '/tools/xml-formatter.html' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', pageUrl: '/tools/base64-encoder.html' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', pageUrl: '/tools/hash-generator.html' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', pageUrl: '/tools/url-encoder.html' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', pageUrl: '/tools/regex-tester.html' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', pageUrl: '/tools/css-js-minifier.html' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', pageUrl: '/tools/color-palette.html' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', pageUrl: '/tools/lorem-ipsum.html' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', pageUrl: '/tools/timestamp-converter.html' },
+            // PDF Tools
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', pageUrl: '/tools/pdf-password-remover.html' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', pageUrl: '/tools/pdf-merger.html' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', pageUrl: '/tools/pdf-splitter.html' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', pageUrl: '/tools/pdf-encryptor.html' },
+            // Image Tools
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            // Utility Tools
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        // Get random tool (excluding current one)
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        // Update tool suggestion card
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            if (tool) {
+                document.getElementById('tool-icon').textContent = tool.icon;
+                document.getElementById('tool-name').textContent = tool.name;
+                document.getElementById('tool-description').textContent = tool.description;
+                
+                const checkoutBtn = document.getElementById('tool-checkout-btn');
+                checkoutBtn.onclick = () => {
+                    if (tool.modalId) {
+                        // If it's a modal, open it
+                        if (typeof openModal === 'function') {
+                            openModal(tool.modalId);
+                        } else {
+                            console.error('openModal function not available for modal tool:', tool.name);
+                            alert(`Tool "${tool.name}" is not yet available as a dedicated page.`);
+                        }
+                    } else if (tool.pageUrl) {
+                        // If it's a page, navigate to it
+                        window.location.href = tool.pageUrl;
+                    } else {
+                        // Fallback to homepage if no specific action
+                        window.location.href = '/#tools';
+                    }
+                };
+            }
+        }
+        
+        // Launch suggested tool (updated to handle both modals and pages)
+        function launchSuggestedTool() {
+            const tool = availableTools[currentToolIndex];
+            if (tool) {
+                if (tool.modalId) {
+                    if (typeof openModal === 'function') {
+                        openModal(tool.modalId);
+                    } else {
+                        console.error('openModal function not available for modal tool:', tool.name);
+                        alert(`Tool "${tool.name}" is not yet available as a dedicated page.`);
+                    }
+                } else if (tool.pageUrl) {
+                    window.location.href = tool.pageUrl;
+                } else {
+                    window.location.href = '/#tools';
+                }
+            }
+        }
+        
+        // Start auto-refreshing suggestions
+        function startSuggestionRefresh() {
+            // Clear any existing interval to prevent duplicates
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            // Refresh every 10 seconds
+            refreshInterval = setInterval(updateToolSuggestion, 10000);
+        }
+        
+        // Initial load and start refresh
+        document.addEventListener('DOMContentLoaded', () => {
+            updateToolSuggestion();
+            startSuggestionRefresh();
+        });
+    </script>
+    
+    <script>
+        // PDF to Images functionality
+        let pdfToImagesFile = null;
+        let pdfToImagesDocument = null;
+        let convertedImages = [];
+        let pdfToImagesFilename = '';
+
+        // Initialize PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // Initialize PDF to Images
+        function initPdfToImages() {
+            const dropZone = document.getElementById('pdf-to-images-drop-zone');
+            const fileInput = document.getElementById('pdf-to-images-file-input');
+            const qualitySlider = document.getElementById('pdf-to-images-quality');
+            const qualityValue = document.getElementById('pdf-to-images-quality-value');
+            const scaleSlider = document.getElementById('pdf-to-images-scale');
+            const scaleValue = document.getElementById('pdf-to-images-scale-value');
+            const pageRangeInput = document.getElementById('pdf-to-images-page-range');
+            const pageRadios = document.querySelectorAll('input[name="pdf-to-images-pages"]');
+
+            if (!dropZone || !fileInput) return;
+
+            // Click to browse
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handlePdfToImagesFile(e.target.files[0]);
+                }
+            });
+
+            // Drag and drop
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-orange-500', 'bg-orange-50');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('border-orange-500', 'bg-orange-50');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-orange-500', 'bg-orange-50');
+                if (e.dataTransfer.files.length > 0) {
+                    handlePdfToImagesFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            // Quality slider
+            if (qualitySlider && qualityValue) {
+                qualitySlider.addEventListener('input', (e) => {
+                    qualityValue.textContent = e.target.value + '%';
+                });
+            }
+
+            // Scale slider
+            if (scaleSlider && scaleValue) {
+                scaleSlider.addEventListener('input', (e) => {
+                    const scale = parseFloat(e.target.value);
+                    scaleValue.textContent = scale + 'x' + (scale >= 2 ? ' (High Quality)' : '');
+                });
+            }
+
+            // Page selection radio
+            pageRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    if (pageRangeInput) {
+                        pageRangeInput.disabled = radio.value === 'all';
+                    }
+                });
+            });
+        }
+
+        function handlePdfToImagesFile(file) {
+            if (file.type !== 'application/pdf') {
+                showPdfToImagesError('Please select a valid PDF file.');
+                return;
+            }
+
+            pdfToImagesFile = file;
+            pdfToImagesFilename = file.name.replace('.pdf', '');
+
+            // Update UI
+            document.getElementById('pdf-to-images-filename').textContent = file.name;
+            document.getElementById('pdf-to-images-filesize').textContent = 
+                'Size: ' + (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+            document.getElementById('pdf-to-images-file-info').classList.remove('hidden');
+
+            // Hide previous results
+            document.getElementById('pdf-to-images-success').classList.add('hidden');
+            document.getElementById('pdf-to-images-error').classList.add('hidden');
+
+            // Load PDF to get page count
+            loadPdfForImages(file);
+        }
+
+        async function loadPdfForImages(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
+                pdfToImagesDocument = await loadingTask.promise;
+
+                const numPages = pdfToImagesDocument.numPages;
+                
+                // Update UI
+                document.getElementById('pdf-to-images-total-pages').textContent = numPages;
+                document.getElementById('pdf-to-images-options-section').classList.remove('hidden');
+                document.getElementById('pdf-to-images-convert-section').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                showPdfToImagesError('Failed to load PDF. Please try another file.');
+            }
+        }
+
+        function clearPdfToImagesFile() {
+            pdfToImagesFile = null;
+            pdfToImagesDocument = null;
+            convertedImages = [];
+            pdfToImagesFilename = '';
+            
+            document.getElementById('pdf-to-images-file-input').value = '';
+            document.getElementById('pdf-to-images-file-info').classList.add('hidden');
+            document.getElementById('pdf-to-images-options-section').classList.add('hidden');
+            document.getElementById('pdf-to-images-convert-section').classList.add('hidden');
+            document.getElementById('pdf-to-images-success').classList.add('hidden');
+            document.getElementById('pdf-to-images-error').classList.add('hidden');
+            document.getElementById('pdf-to-images-progress').classList.add('hidden');
+        }
+
+        async function convertPdfToImages() {
+            if (!pdfToImagesDocument) {
+                showPdfToImagesError('Please upload a PDF file first.');
+                return;
+            }
+
+            // Get options
+            const format = document.querySelector('input[name="pdf-to-images-format"]:checked').value;
+            const quality = parseInt(document.getElementById('pdf-to-images-quality').value) / 100;
+            const scale = parseFloat(document.getElementById('pdf-to-images-scale').value);
+            const pageSelection = document.querySelector('input[name="pdf-to-images-pages"]:checked').value;
+            
+            // Get page numbers to convert
+            let pagesToConvert = [];
+            const totalPages = pdfToImagesDocument.numPages;
+
+            if (pageSelection === 'all') {
+                for (let i = 1; i <= totalPages; i++) {
+                    pagesToConvert.push(i);
+                }
+            } else {
+                const pageRange = document.getElementById('pdf-to-images-page-range').value;
+                pagesToConvert = parsePageRange(pageRange, totalPages);
+                
+                if (pagesToConvert.length === 0) {
+                    showPdfToImagesError('Please enter valid page numbers. Example: 1,3-5,7');
+                    return;
+                }
+            }
+
+            // Show progress
+            document.getElementById('pdf-to-images-convert-section').classList.add('hidden');
+            document.getElementById('pdf-to-images-progress').classList.remove('hidden');
+            document.getElementById('pdf-to-images-error').classList.add('hidden');
+
+            convertedImages = [];
+
+            try {
+                for (let i = 0; i < pagesToConvert.length; i++) {
+                    const pageNum = pagesToConvert[i];
+                    
+                    // Update progress
+                    const progress = ((i + 1) / pagesToConvert.length) * 100;
+                    document.getElementById('pdf-to-images-progress-bar').style.width = progress + '%';
+                    document.getElementById('pdf-to-images-progress-percent').textContent = Math.round(progress) + '%';
+                    document.getElementById('pdf-to-images-progress-text').textContent = 
+                        `Converting page ${pageNum} of ${totalPages}...`;
+
+                    // Render page to canvas
+                    const page = await pdfToImagesDocument.getPage(pageNum);
+                    const viewport = page.getViewport({ scale: scale });
+                    
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    await page.render({
+                        canvasContext: context,
+                        viewport: viewport
+                    }).promise;
+
+                    // Convert to image
+                    const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+                    const imageBlob = await new Promise(resolve => {
+                        canvas.toBlob(resolve, mimeType, quality);
+                    });
+
+                    convertedImages.push({
+                        pageNum: pageNum,
+                        blob: imageBlob,
+                        format: format
+                    });
+
+                    // Small delay to prevent browser freeze
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                }
+
+                // Show success
+                showPdfToImagesSuccess();
+
+            } catch (error) {
+                console.error('Error converting PDF to images:', error);
+                showPdfToImagesError('Failed to convert PDF. Please try again.');
+                document.getElementById('pdf-to-images-convert-section').classList.remove('hidden');
+            } finally {
+                document.getElementById('pdf-to-images-progress').classList.add('hidden');
+            }
+        }
+
+        function parsePageRange(rangeStr, maxPages) {
+            const pages = new Set();
+            const parts = rangeStr.split(',');
+
+            for (let part of parts) {
+                part = part.trim();
+                
+                if (part.includes('-')) {
+                    const [start, end] = part.split('-').map(n => parseInt(n.trim()));
+                    if (isNaN(start) || isNaN(end) || start < 1 || end > maxPages || start > end) {
+                        return [];
+                    }
+                    for (let i = start; i <= end; i++) {
+                        pages.add(i);
+                    }
+                } else {
+                    const num = parseInt(part);
+                    if (isNaN(num) || num < 1 || num > maxPages) {
+                        return [];
+                    }
+                    pages.add(num);
+                }
+            }
+
+            return Array.from(pages).sort((a, b) => a - b);
+        }
+
+        function showPdfToImagesSuccess() {
+            // Calculate total size
+            let totalSize = 0;
+            convertedImages.forEach(img => {
+                totalSize += img.blob.size;
+            });
+
+            // Update UI
+            document.getElementById('pdf-to-images-success-count').textContent = convertedImages.length;
+            document.getElementById('pdf-to-images-total-size').textContent = 
+                '~' + (totalSize / (1024 * 1024)).toFixed(2) + ' MB';
+            document.getElementById('pdf-to-images-naming-example').textContent = 
+                `${pdfToImagesFilename}-page-1.${convertedImages[0].format}, ${pdfToImagesFilename}-page-2.${convertedImages[0].format}, ...`;
+
+            // Create preview thumbnails
+            const previewContainer = document.getElementById('pdf-to-images-preview');
+            previewContainer.innerHTML = '';
+
+            convertedImages.slice(0, 10).forEach((img, index) => {
+                const thumbnail = document.createElement('div');
+                thumbnail.className = 'w-12 h-16 border-2 border-gray-300 rounded flex items-center justify-center text-xs font-semibold bg-gray-100';
+                thumbnail.textContent = img.pageNum;
+                previewContainer.appendChild(thumbnail);
+            });
+
+            if (convertedImages.length > 10) {
+                const more = document.createElement('div');
+                more.className = 'w-12 h-16 border-2 border-gray-300 rounded flex items-center justify-center text-xs font-semibold bg-gray-100';
+                more.textContent = `+${convertedImages.length - 10}`;
+                previewContainer.appendChild(more);
+            }
+
+            document.getElementById('pdf-to-images-success').classList.remove('hidden');
+        }
+
+        async function downloadImagesAsZip() {
+            if (convertedImages.length === 0) {
+                alert('No images to download!');
+                return;
+            }
+
+            try {
+                // Create ZIP file
+                const zip = new JSZip();
+
+                convertedImages.forEach((img, index) => {
+                    const filename = `${pdfToImagesFilename}-page-${img.pageNum}.${img.format}`;
+                    zip.file(filename, img.blob);
+                });
+
+                // Generate ZIP
+                const zipBlob = await zip.generateAsync({
+                    type: 'blob',
+                    compression: 'DEFLATE',
+                    compressionOptions: { level: 6 }
+                });
+
+                // Download
+                const url = URL.createObjectURL(zipBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${pdfToImagesFilename}-images.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error('Error creating ZIP:', error);
+                alert('Failed to create ZIP file. Please try again.');
+            }
+        }
+
+        function showPdfToImagesError(message) {
+            document.getElementById('pdf-to-images-error-message').textContent = message;
+            document.getElementById('pdf-to-images-error').classList.remove('hidden');
+            document.getElementById('pdf-to-images-success').classList.add('hidden');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initPdfToImages();
+        });
+    </script>
+</body>
+</html>
+
+

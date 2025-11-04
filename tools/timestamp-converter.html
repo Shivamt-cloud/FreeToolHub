@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Timestamp Converter - FreeToolHub</title>
+    <meta name="description" content="Convert timestamps between formats, timezones, and calculate time differences with auto-detection.">
+    <meta property="og:title" content="Timestamp Converter - FreeToolHub">
+    <meta property="og:description" content="Advanced timestamp conversion, timezone handling, and date manipulation for developers">
+    <meta property="og:url" content="https://freetoolhub.in/tools/timestamp-converter.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🕐 Timestamp Converter</h1>
+                    <p class="text-gray-600 text-lg">Advanced timestamp conversion, timezone handling, and date manipulation for developers</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Timestamp Converter</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Main Timestamp Converter Section -->
+                    <div class="lg:col-span-3">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Input Section -->
+                            <div class="space-y-6">
+                                <!-- Timestamp Conversion -->
+                                <div class="bg-gray-50 rounded-xl p-6">
+                                    <h4 class="text-lg font-bold mb-4 text-gray-700">Timestamp Conversion</h4>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-600 mb-2">Input Timestamp</label>
+                                            <input type="text" id="timestamp-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="e.g., 1699123456 or 2024-01-15T10:30:00Z">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-600 mb-2">From Format</label>
+                                            <select id="from-format" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500">
+                                                <option value="auto">Auto Detect</option>
+                                                <option value="unix">Unix Timestamp (seconds)</option>
+                                                <option value="unix_ms">Unix Timestamp (ms)</option>
+                                                <option value="iso8601">ISO 8601</option>
+                                                <option value="rfc2822">RFC 2822</option>
+                                                <option value="rfc3339">RFC 3339</option>
+                                                <option value="mysql">MySQL</option>
+                                                <option value="postgresql">PostgreSQL</option>
+                                                <option value="javascript">JavaScript Date</option>
+                                                <option value="human">Human Readable</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-600 mb-2">To Format</label>
+                                            <select id="to-format" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500">
+                                                <option value="unix">Unix Timestamp (seconds)</option>
+                                                <option value="unix_ms">Unix Timestamp (ms)</option>
+                                                <option value="iso8601">ISO 8601</option>
+                                                <option value="rfc2822">RFC 2822</option>
+                                                <option value="rfc3339">RFC 3339</option>
+                                                <option value="mysql">MySQL</option>
+                                                <option value="postgresql">PostgreSQL</option>
+                                                <option value="javascript">JavaScript Date</option>
+                                                <option value="human" selected>Human Readable</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-600 mb-2">Timezone</label>
+                                            <select id="timezone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500">
+                                                <option value="UTC">UTC</option>
+                                                <option value="GMT">GMT</option>
+                                                <option value="EST">EST</option>
+                                                <option value="EDT">EDT</option>
+                                                <option value="CST">CST</option>
+                                                <option value="CDT">CDT</option>
+                                                <option value="MST">MST</option>
+                                                <option value="MDT">MDT</option>
+                                                <option value="PST">PST</option>
+                                                <option value="PDT">PDT</option>
+                                                <option value="CET">CET</option>
+                                                <option value="CEST">CEST</option>
+                                                <option value="EET">EET</option>
+                                                <option value="EEST">EEST</option>
+                                                <option value="JST">JST</option>
+                                                <option value="IST">IST</option>
+                                                <option value="AEST">AEST</option>
+                                                <option value="AEDT">AEDT</option>
+                                            </select>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <button onclick="convertTimestamp()" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                                Convert
+                                            </button>
+                                            <button onclick="getCurrentTimestamp()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                                Current Time
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Time Difference Calculator -->
+                                <div class="bg-blue-50 rounded-xl p-6">
+                                    <h4 class="text-lg font-bold mb-4 text-gray-700">Time Difference</h4>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-600 mb-2">Timestamp 1</label>
+                                            <input type="text" id="diff-timestamp1" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="First timestamp">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-600 mb-2">Timestamp 2</label>
+                                            <input type="text" id="diff-timestamp2" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Second timestamp">
+                                        </div>
+                                        <button onclick="calculateTimeDifference()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                            Calculate Difference
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Output Section -->
+                            <div class="space-y-6">
+                                <!-- Conversion Results -->
+                                <div class="bg-cyan-50 rounded-xl p-6">
+                                    <h4 class="text-lg font-bold mb-4 text-gray-700">Conversion Result</h4>
+                                    <div id="conversion-result" class="space-y-3">
+                                        <div class="text-center text-gray-500 text-sm">Enter a timestamp and click "Convert"</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- All Formats -->
+                                <div class="bg-gray-50 rounded-xl p-6">
+                                    <h4 class="text-lg font-bold mb-4 text-gray-700">All Formats</h4>
+                                    <div id="all-formats" class="space-y-2 text-sm">
+                                        <div class="text-center text-gray-500 text-sm">Convert timestamp to see all formats</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Time Difference Results -->
+                                <div class="bg-blue-50 rounded-xl p-6">
+                                    <h4 class="text-lg font-bold mb-4 text-gray-700">Time Difference</h4>
+                                    <div id="time-difference-result" class="space-y-2 text-sm">
+                                        <div class="text-center text-gray-500 text-sm">Enter two timestamps and click "Calculate Difference"</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button onclick="copyResult()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                        Copy Result
+                                    </button>
+                                    <button onclick="clearAll()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                        Clear All
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Error Display -->
+                        <div id="timestamp-error" class="hidden mt-6">
+                            <div class="bg-red-50 rounded-xl p-6 border border-red-200">
+                                <div class="text-red-700" id="timestamp-error-content"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Tool Suggestion Card -->
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Timestamp Converter Dependencies -->
+    <script src="/src/js/TimestampConverter.js"></script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        // Available tools for suggestions (excluding current tool)
+        const availableTools = [
+            // Student Tools
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', pageUrl: '/tools/age-calculator.html' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', pageUrl: '/tools/bmi-calculator.html' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', pageUrl: '/tools/loan-calculator.html' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', pageUrl: '/tools/investment-calculator.html' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', pageUrl: '/tools/tax-calculator.html' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', pageUrl: '/tools/business-metrics.html' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', pageUrl: '/tools/currency-converter.html' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', pageUrl: '/tools/retirement-calculator.html' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', pageUrl: '/tools/mortgage-calculator.html' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', pageUrl: '/tools/budget-planner.html' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', pageUrl: '/tools/salary-calculator.html' },
+            // Developer Tools
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', pageUrl: '/tools/json-formatter.html' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', pageUrl: '/tools/xml-formatter.html' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', pageUrl: '/tools/base64-encoder.html' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', pageUrl: '/tools/hash-generator.html' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', pageUrl: '/tools/url-encoder.html' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', pageUrl: '/tools/regex-tester.html' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', pageUrl: '/tools/css-js-minifier.html' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', pageUrl: '/tools/color-palette.html' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', pageUrl: '/tools/lorem-ipsum.html' },
+            // PDF Tools
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            // Image Tools
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            // Utility Tools
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        // Get random tool (excluding current one)
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        // Update tool suggestion card
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            if (tool) {
+                document.getElementById('tool-icon').textContent = tool.icon;
+                document.getElementById('tool-name').textContent = tool.name;
+                document.getElementById('tool-description').textContent = tool.description;
+                
+                const checkoutBtn = document.getElementById('tool-checkout-btn');
+                checkoutBtn.onclick = () => {
+                    if (tool.modalId) {
+                        // If it's a modal, open it
+                        if (typeof openModal === 'function') {
+                            openModal(tool.modalId);
+                        } else {
+                            console.error('openModal function not available for modal tool:', tool.name);
+                            alert(`Tool "${tool.name}" is not yet available as a dedicated page.`);
+                        }
+                    } else if (tool.pageUrl) {
+                        // If it's a page, navigate to it
+                        window.location.href = tool.pageUrl;
+                    } else {
+                        // Fallback to homepage if no specific action
+                        window.location.href = '/#tools';
+                    }
+                };
+            }
+        }
+        
+        // Launch suggested tool (updated to handle both modals and pages)
+        function launchSuggestedTool() {
+            const tool = availableTools[currentToolIndex];
+            if (tool) {
+                if (tool.modalId) {
+                    if (typeof openModal === 'function') {
+                        openModal(tool.modalId);
+                    } else {
+                        console.error('openModal function not available for modal tool:', tool.name);
+                        alert(`Tool "${tool.name}" is not yet available as a dedicated page.`);
+                    }
+                } else if (tool.pageUrl) {
+                    window.location.href = tool.pageUrl;
+                } else {
+                    window.location.href = '/#tools';
+                }
+            }
+        }
+        
+        // Start auto-refreshing suggestions
+        function startSuggestionRefresh() {
+            // Clear any existing interval to prevent duplicates
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            // Refresh every 10 seconds
+            refreshInterval = setInterval(updateToolSuggestion, 10000);
+        }
+        
+        // Initial load and start refresh
+        document.addEventListener('DOMContentLoaded', () => {
+            updateToolSuggestion();
+            startSuggestionRefresh();
+        });
+    </script>
+    
+    <script>
+        let timestampConverter = null;
+        let lastConvertedDate = null;
+        
+        function initializeTimestampConverter() {
+            try {
+                if (typeof TimestampConverter !== 'undefined') {
+                    timestampConverter = new TimestampConverter();
+                    console.log('✅ Timestamp Converter initialized successfully');
+                } else {
+                    console.error('❌ TimestampConverter class not found');
+                }
+            } catch (error) {
+                console.error('❌ Timestamp Converter initialization failed:', error);
+            }
+        }
+        
+        function convertTimestamp() {
+            if (!timestampConverter) {
+                alert('Timestamp Converter not initialized. Please refresh the page.');
+                return;
+            }
+            
+            try {
+                const input = document.getElementById('timestamp-input').value.trim();
+                if (!input) {
+                    alert('Please enter a timestamp.');
+                    return;
+                }
+                
+                const fromFormat = document.getElementById('from-format').value;
+                const toFormat = document.getElementById('to-format').value;
+                const timezone = document.getElementById('timezone').value;
+                
+                const result = timestampConverter.convertTimestamp(input, fromFormat, toFormat, timezone);
+                
+                if (result.success) {
+                    lastConvertedDate = new Date(result.parsedDate);
+                    displayConversionResult(result);
+                    displayAllFormats(result.parsedDate, timezone);
+                    document.getElementById('timestamp-error').classList.add('hidden');
+                } else {
+                    showTimestampError(result);
+                }
+            } catch (error) {
+                console.error('Timestamp conversion error:', error);
+                alert('Error converting timestamp: ' + error.message);
+            }
+        }
+        
+        function displayConversionResult(result) {
+            const resultDiv = document.getElementById('conversion-result');
+            resultDiv.innerHTML = `
+                <div class="bg-white p-4 rounded-lg border border-cyan-200">
+                    <div class="text-xs text-gray-500 mb-1">${timestampConverter.formats[result.toFormat]?.name || result.toFormat}</div>
+                    <div class="font-mono text-lg font-bold text-cyan-600 break-all">${result.result}</div>
+                    <div class="text-xs text-gray-500 mt-2">From: ${result.fromFormat} → To: ${result.toFormat}</div>
+                    <div class="text-xs text-gray-500">Timezone: ${result.timezone}</div>
+                </div>
+            `;
+        }
+        
+        function displayAllFormats(isoDateString, timezone) {
+            if (!isoDateString) return;
+            
+            const date = new Date(isoDateString);
+            const formatsDiv = document.getElementById('all-formats');
+            const formats = timestampConverter.formats;
+            
+            let html = '';
+            for (const [key, format] of Object.entries(formats)) {
+                try {
+                    const formatted = timestampConverter.formatTimestamp(date, key, timezone);
+                    html += `
+                        <div class="bg-white p-3 rounded border border-gray-200">
+                            <div class="text-xs text-gray-500 mb-1">${format.name}</div>
+                            <div class="font-mono text-sm text-gray-800 break-all">${formatted}</div>
+                        </div>
+                    `;
+                } catch (error) {
+                    // Skip formats that fail
+                }
+            }
+            
+            formatsDiv.innerHTML = html;
+        }
+        
+        function getCurrentTimestamp() {
+            if (!timestampConverter) {
+                alert('Timestamp Converter not initialized. Please refresh the page.');
+                return;
+            }
+            
+            try {
+                const format = document.getElementById('to-format').value;
+                const timezone = document.getElementById('timezone').value;
+                
+                const current = timestampConverter.getCurrentTimestamp(format, timezone);
+                document.getElementById('timestamp-input').value = current;
+                
+                // Auto-convert
+                const result = timestampConverter.convertTimestamp(current, format, format, timezone);
+                if (result.success) {
+                    lastConvertedDate = new Date();
+                    displayConversionResult(result);
+                    displayAllFormats(new Date().toISOString(), timezone);
+                }
+            } catch (error) {
+                console.error('Error getting current timestamp:', error);
+                alert('Error getting current timestamp: ' + error.message);
+            }
+        }
+        
+        function calculateTimeDifference() {
+            if (!timestampConverter) {
+                alert('Timestamp Converter not initialized. Please refresh the page.');
+                return;
+            }
+            
+            try {
+                const timestamp1 = document.getElementById('diff-timestamp1').value.trim();
+                const timestamp2 = document.getElementById('diff-timestamp2').value.trim();
+                
+                if (!timestamp1 || !timestamp2) {
+                    alert('Please enter both timestamps.');
+                    return;
+                }
+                
+                const result = timestampConverter.calculateTimeDifference(timestamp1, timestamp2, 'auto', 'auto');
+                
+                if (result.success) {
+                    displayTimeDifference(result);
+                } else {
+                    alert('Error calculating time difference: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Time difference calculation error:', error);
+                alert('Error calculating time difference: ' + error.message);
+            }
+        }
+        
+        function displayTimeDifference(result) {
+            const resultDiv = document.getElementById('time-difference-result');
+            resultDiv.innerHTML = `
+                <div class="bg-white p-4 rounded-lg border border-blue-200">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-xs text-gray-500 mb-1">Days</div>
+                            <div class="text-lg font-bold text-blue-600">${result.days.toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 mb-1">Hours</div>
+                            <div class="text-lg font-bold text-blue-600">${result.hours.toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 mb-1">Minutes</div>
+                            <div class="text-lg font-bold text-blue-600">${result.minutes.toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 mb-1">Seconds</div>
+                            <div class="text-lg font-bold text-blue-600">${result.seconds.toLocaleString()}</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-gray-200">
+                        <div class="text-xs text-gray-500 mb-1">Total Milliseconds</div>
+                        <div class="font-mono text-sm text-gray-800">${result.milliseconds.toLocaleString()}</div>
+                    </div>
+                    <div class="mt-2">
+                        <div class="text-xs text-gray-500 mb-1">Human Readable</div>
+                        <div class="text-sm text-gray-700">${result.humanReadable}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function showTimestampError(result) {
+            const errorDiv = document.getElementById('timestamp-error');
+            const errorContent = document.getElementById('timestamp-error-content');
+            errorContent.textContent = result.error || 'An error occurred while converting the timestamp.';
+            errorDiv.classList.remove('hidden');
+        }
+        
+        function copyResult() {
+            const resultDiv = document.getElementById('conversion-result');
+            const resultText = resultDiv.querySelector('.font-mono')?.textContent;
+            if (!resultText) {
+                alert('No result to copy. Please convert a timestamp first.');
+                return;
+            }
+            
+            navigator.clipboard.writeText(resultText).then(() => {
+                alert('Result copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy to clipboard.');
+            });
+        }
+        
+        function clearAll() {
+            document.getElementById('timestamp-input').value = '';
+            document.getElementById('diff-timestamp1').value = '';
+            document.getElementById('diff-timestamp2').value = '';
+            document.getElementById('conversion-result').innerHTML = '<div class="text-center text-gray-500 text-sm">Enter a timestamp and click "Convert"</div>';
+            document.getElementById('all-formats').innerHTML = '<div class="text-center text-gray-500 text-sm">Convert timestamp to see all formats</div>';
+            document.getElementById('time-difference-result').innerHTML = '<div class="text-center text-gray-500 text-sm">Enter two timestamps and click "Calculate Difference"</div>';
+            document.getElementById('timestamp-error').classList.add('hidden');
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeTimestampConverter();
+            }, 200);
+        });
+    </script>
+</body>
+</html>
+
+

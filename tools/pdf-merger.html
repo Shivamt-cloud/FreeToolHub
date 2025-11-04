@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>PDF Merger - FreeToolHub</title>
+    <meta name="description" content="Combine multiple PDF files into one document. All processing happens locally in your browser for maximum privacy.">
+    <meta property="og:title" content="PDF Merger - FreeToolHub">
+    <meta property="og:description" content="Combine multiple PDFs into one document">
+    <meta property="og:url" content="https://freetoolhub.in/tools/pdf-merger.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- PDF-lib for creating PDFs -->
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">📄 PDF Merger</h1>
+                    <p class="text-gray-600 text-lg">Combine multiple PDFs into one document</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">PDF Merger</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Main PDF Merger Section -->
+                    <div class="lg:col-span-3">
+                        <!-- Privacy Notice -->
+                        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
+                            <div class="flex items-start">
+                                <span class="text-2xl mr-3">🔒</span>
+                                <div>
+                                    <p class="font-semibold text-green-800 mb-1">100% Private & Secure</p>
+                                    <p class="text-sm text-green-700">All merging happens locally in your browser. Your PDFs never leave your device!</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 1: Upload PDFs -->
+                        <div class="mb-6">
+                            <label class="block text-lg font-semibold text-gray-700 mb-3">
+                                <span class="text-blue-600">Step 1:</span> Upload PDFs to Merge
+                            </label>
+                            
+                            <!-- Drop Zone -->
+                            <div id="pdf-merger-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-500 transition-all cursor-pointer bg-gray-50 hover:bg-blue-50">
+                                <input type="file" id="pdf-merger-file-input" accept=".pdf" multiple class="hidden">
+                                <div class="text-5xl mb-3">📁</div>
+                                <p class="text-lg font-semibold text-gray-700 mb-2">Drop PDFs here or click to browse</p>
+                                <p class="text-sm text-gray-500">You can select multiple PDF files at once</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: File List -->
+                        <div id="pdf-merger-files-section" class="mb-6 hidden">
+                            <label class="block text-lg font-semibold text-gray-700 mb-3">
+                                <span class="text-blue-600">Step 2:</span> Reorder PDFs (Drag to rearrange)
+                            </label>
+                            
+                            <div id="pdf-merger-file-list" class="space-y-2 mb-4">
+                                <!-- Files will be listed here -->
+                            </div>
+
+                            <div class="flex gap-3">
+                                <button onclick="document.getElementById('pdf-merger-file-input').click()" class="flex-1 bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-200 transition-all">
+                                    ➕ Add More PDFs
+                                </button>
+                                <button onclick="clearAllPdfMergerFiles()" class="bg-red-100 text-red-700 font-semibold py-3 px-6 rounded-xl hover:bg-red-200 transition-all">
+                                    🗑️ Clear All
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Merge Button -->
+                        <div id="pdf-merger-merge-section" class="mb-6 hidden">
+                            <button onclick="mergePdfs()" id="pdf-merger-merge-btn" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+                                🔗 Merge PDFs
+                            </button>
+                        </div>
+
+                        <!-- Progress Indicator -->
+                        <div id="pdf-merger-progress" class="hidden mb-6">
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                                    <span class="font-semibold text-blue-800">Merging PDFs...</span>
+                                </div>
+                                <div class="w-full bg-blue-200 rounded-full h-2">
+                                    <div id="pdf-merger-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+                                </div>
+                                <p id="pdf-merger-progress-text" class="text-sm text-blue-700 mt-2"></p>
+                            </div>
+                        </div>
+
+                        <!-- Success Message -->
+                        <div id="pdf-merger-success" class="hidden mb-6">
+                            <div class="bg-green-50 border-2 border-green-500 rounded-xl p-6 text-center">
+                                <div class="text-6xl mb-4">✅</div>
+                                <h4 class="text-2xl font-bold text-green-800 mb-2">Success!</h4>
+                                <p class="text-green-700 mb-4">Your PDFs have been merged successfully</p>
+                                <button onclick="downloadMergedPdf()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-8 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                    📥 Download Merged PDF
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div id="pdf-merger-error" class="hidden mb-6">
+                            <div class="bg-red-50 border-2 border-red-500 rounded-xl p-4">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-3xl">⚠️</span>
+                                    <div>
+                                        <h4 class="text-lg font-bold text-red-800 mb-1">Error</h4>
+                                        <p id="pdf-merger-error-message" class="text-red-700"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Info -->
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                            <p class="text-sm text-blue-800">
+                                <strong>💡 Tip:</strong> PDFs will be merged in the order shown above. Drag and drop to reorder them before merging.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Tool Suggestion Card -->
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        // Available tools for suggestions (excluding current tool)
+        const availableTools = [
+            // Student Tools
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', pageUrl: '/tools/age-calculator.html' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', pageUrl: '/tools/bmi-calculator.html' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', pageUrl: '/tools/loan-calculator.html' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', pageUrl: '/tools/investment-calculator.html' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', pageUrl: '/tools/tax-calculator.html' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', pageUrl: '/tools/business-metrics.html' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', pageUrl: '/tools/currency-converter.html' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', pageUrl: '/tools/retirement-calculator.html' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', pageUrl: '/tools/mortgage-calculator.html' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', pageUrl: '/tools/budget-planner.html' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', pageUrl: '/tools/salary-calculator.html' },
+            // Developer Tools
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', pageUrl: '/tools/json-formatter.html' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', pageUrl: '/tools/xml-formatter.html' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', pageUrl: '/tools/base64-encoder.html' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', pageUrl: '/tools/hash-generator.html' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', pageUrl: '/tools/url-encoder.html' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', pageUrl: '/tools/regex-tester.html' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', pageUrl: '/tools/css-js-minifier.html' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', pageUrl: '/tools/color-palette.html' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', pageUrl: '/tools/lorem-ipsum.html' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', pageUrl: '/tools/timestamp-converter.html' },
+            // PDF Tools
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', pageUrl: '/tools/pdf-password-remover.html' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            // Image Tools
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            // Utility Tools
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        // Get random tool (excluding current one)
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        // Update tool suggestion card
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            if (tool) {
+                document.getElementById('tool-icon').textContent = tool.icon;
+                document.getElementById('tool-name').textContent = tool.name;
+                document.getElementById('tool-description').textContent = tool.description;
+                
+                const checkoutBtn = document.getElementById('tool-checkout-btn');
+                checkoutBtn.onclick = () => {
+                    if (tool.modalId) {
+                        // If it's a modal, open it
+                        if (typeof openModal === 'function') {
+                            openModal(tool.modalId);
+                        } else {
+                            console.error('openModal function not available for modal tool:', tool.name);
+                            alert(`Tool "${tool.name}" is not yet available as a dedicated page.`);
+                        }
+                    } else if (tool.pageUrl) {
+                        // If it's a page, navigate to it
+                        window.location.href = tool.pageUrl;
+                    } else {
+                        // Fallback to homepage if no specific action
+                        window.location.href = '/#tools';
+                    }
+                };
+            }
+        }
+        
+        // Launch suggested tool (updated to handle both modals and pages)
+        function launchSuggestedTool() {
+            const tool = availableTools[currentToolIndex];
+            if (tool) {
+                if (tool.modalId) {
+                    if (typeof openModal === 'function') {
+                        openModal(tool.modalId);
+                    } else {
+                        console.error('openModal function not available for modal tool:', tool.name);
+                        alert(`Tool "${tool.name}" is not yet available as a dedicated page.`);
+                    }
+                } else if (tool.pageUrl) {
+                    window.location.href = tool.pageUrl;
+                } else {
+                    window.location.href = '/#tools';
+                }
+            }
+        }
+        
+        // Start auto-refreshing suggestions
+        function startSuggestionRefresh() {
+            // Clear any existing interval to prevent duplicates
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            // Refresh every 10 seconds
+            refreshInterval = setInterval(updateToolSuggestion, 10000);
+        }
+        
+        // Initial load and start refresh
+        document.addEventListener('DOMContentLoaded', () => {
+            updateToolSuggestion();
+            startSuggestionRefresh();
+        });
+    </script>
+    
+    <script>
+        // PDF Merger functionality
+        let pdfMergerFiles = [];
+        let mergedPdfBytes = null;
+        let draggedIndex = null;
+
+        // Initialize PDF Merger
+        function initPdfMerger() {
+            const dropZone = document.getElementById('pdf-merger-drop-zone');
+            const fileInput = document.getElementById('pdf-merger-file-input');
+
+            // Click to browse
+            dropZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                handlePdfMergerFiles(Array.from(e.target.files));
+            });
+
+            // Drag and drop
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-blue-500', 'bg-blue-50');
+            });
+
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+                
+                const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
+                if (files.length > 0) {
+                    handlePdfMergerFiles(files);
+                } else {
+                    showPdfMergerError('Please upload valid PDF files.');
+                }
+            });
+        }
+
+        // Handle PDF files upload
+        function handlePdfMergerFiles(files) {
+            // Add new files to the array
+            pdfMergerFiles.push(...files);
+            
+            // Update the display
+            updatePdfMergerFileList();
+            
+            // Show file list and merge button
+            document.getElementById('pdf-merger-files-section').classList.remove('hidden');
+            document.getElementById('pdf-merger-merge-section').classList.remove('hidden');
+            
+            // Hide error and success
+            document.getElementById('pdf-merger-error').classList.add('hidden');
+            document.getElementById('pdf-merger-success').classList.add('hidden');
+        }
+
+        // Update file list display
+        function updatePdfMergerFileList() {
+            const fileList = document.getElementById('pdf-merger-file-list');
+            fileList.innerHTML = '';
+
+            pdfMergerFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'bg-blue-50 p-4 rounded-lg border border-blue-200 flex items-center justify-between cursor-move hover:bg-blue-100 transition-all';
+                fileItem.draggable = true;
+                fileItem.dataset.index = index;
+
+                fileItem.innerHTML = `
+                    <div class="flex items-center gap-3 flex-1">
+                        <div class="cursor-grab active:cursor-grabbing">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+                            </svg>
+                        </div>
+                        <span class="text-2xl">📄</span>
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-800">${index + 1}. ${file.name}</p>
+                            <p class="text-sm text-gray-600">${formatFileSize(file.size)}</p>
+                        </div>
+                    </div>
+                    <button onclick="removePdfMergerFile(${index})" class="text-red-600 hover:text-red-700 font-semibold ml-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                `;
+
+                // Drag events
+                fileItem.addEventListener('dragstart', (e) => {
+                    draggedIndex = index;
+                    fileItem.style.opacity = '0.5';
+                });
+
+                fileItem.addEventListener('dragend', (e) => {
+                    fileItem.style.opacity = '1';
+                });
+
+                fileItem.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    fileItem.style.borderColor = '#3b82f6';
+                });
+
+                fileItem.addEventListener('dragleave', (e) => {
+                    fileItem.style.borderColor = '#93c5fd';
+                });
+
+                fileItem.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    fileItem.style.borderColor = '#93c5fd';
+                    
+                    if (draggedIndex !== null && draggedIndex !== index) {
+                        // Reorder array
+                        const draggedFile = pdfMergerFiles[draggedIndex];
+                        pdfMergerFiles.splice(draggedIndex, 1);
+                        pdfMergerFiles.splice(index, 0, draggedFile);
+                        updatePdfMergerFileList();
+                    }
+                });
+
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        // Remove a file from the list
+        function removePdfMergerFile(index) {
+            pdfMergerFiles.splice(index, 1);
+            
+            if (pdfMergerFiles.length === 0) {
+                document.getElementById('pdf-merger-files-section').classList.add('hidden');
+                document.getElementById('pdf-merger-merge-section').classList.add('hidden');
+            } else {
+                updatePdfMergerFileList();
+            }
+        }
+
+        // Clear all files
+        function clearAllPdfMergerFiles() {
+            pdfMergerFiles = [];
+            mergedPdfBytes = null;
+            document.getElementById('pdf-merger-file-input').value = '';
+            document.getElementById('pdf-merger-files-section').classList.add('hidden');
+            document.getElementById('pdf-merger-merge-section').classList.add('hidden');
+            document.getElementById('pdf-merger-success').classList.add('hidden');
+            document.getElementById('pdf-merger-error').classList.add('hidden');
+        }
+
+        // Merge PDFs
+        async function mergePdfs() {
+            if (pdfMergerFiles.length < 2) {
+                showPdfMergerError('Please upload at least 2 PDF files to merge.');
+                return;
+            }
+
+            try {
+                // Show progress
+                document.getElementById('pdf-merger-progress').classList.remove('hidden');
+                document.getElementById('pdf-merger-error').classList.add('hidden');
+                document.getElementById('pdf-merger-success').classList.add('hidden');
+                document.getElementById('pdf-merger-merge-btn').disabled = true;
+
+                const progressBar = document.getElementById('pdf-merger-progress-bar');
+                const progressText = document.getElementById('pdf-merger-progress-text');
+
+                // Create new PDF document
+                const { PDFDocument } = PDFLib;
+                const mergedPdf = await PDFDocument.create();
+
+                // Process each PDF
+                for (let i = 0; i < pdfMergerFiles.length; i++) {
+                    const file = pdfMergerFiles[i];
+                    
+                    // Update progress
+                    const progress = ((i / pdfMergerFiles.length) * 100).toFixed(0);
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `Processing ${i + 1} of ${pdfMergerFiles.length}: ${file.name}`;
+
+                    // Read PDF file
+                    const fileBytes = await file.arrayBuffer();
+                    
+                    // Load the PDF
+                    const pdf = await PDFDocument.load(fileBytes);
+                    
+                    // Copy all pages from this PDF
+                    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                    copiedPages.forEach((page) => {
+                        mergedPdf.addPage(page);
+                    });
+                }
+
+                // Update progress to 100%
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Finalizing merged PDF...';
+
+                // Save the merged PDF
+                mergedPdfBytes = await mergedPdf.save();
+
+                // Hide progress, show success
+                document.getElementById('pdf-merger-progress').classList.add('hidden');
+                document.getElementById('pdf-merger-success').classList.remove('hidden');
+                document.getElementById('pdf-merger-merge-btn').disabled = false;
+
+            } catch (error) {
+                console.error('PDF merger error:', error);
+                document.getElementById('pdf-merger-progress').classList.add('hidden');
+                document.getElementById('pdf-merger-merge-btn').disabled = false;
+                
+                if (error.message && error.message.includes('password')) {
+                    showPdfMergerError('One or more PDFs are password-protected. Please remove passwords first using the PDF Password Remover tool.');
+                } else if (error.message && error.message.includes('Invalid PDF')) {
+                    showPdfMergerError('One or more files are invalid or corrupted PDF files.');
+                } else {
+                    showPdfMergerError('Failed to merge PDFs: ' + error.message);
+                }
+            }
+        }
+
+        // Download merged PDF
+        function downloadMergedPdf() {
+            if (!mergedPdfBytes) {
+                showPdfMergerError('No merged PDF available. Please merge PDFs first.');
+                return;
+            }
+
+            try {
+                const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'merged_document.pdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Download error:', error);
+                showPdfMergerError('Failed to download merged PDF: ' + error.message);
+            }
+        }
+
+        // Show error message
+        function showPdfMergerError(message) {
+            document.getElementById('pdf-merger-error-message').textContent = message;
+            document.getElementById('pdf-merger-error').classList.remove('hidden');
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initPdfMerger();
+        });
+    </script>
+</body>
+</html>
+
+

@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Note-Taking & Summarizer - FreeToolHub</title>
+    <meta name="description" content="Advanced text summarization, key points extraction, and intelligent note organization. Free online note-taking tool.">
+    <meta property="og:title" content="Note-Taking & Summarizer - FreeToolHub">
+    <meta property="og:description" content="Advanced text summarization, key points extraction, and intelligent note organization">
+    <meta property="og:url" content="https://freetoolhub.in/tools/note-taker.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">📝 Note-Taking & Summarizer</h1>
+                    <p class="text-gray-600 text-lg">Advanced text summarization, key points extraction, and intelligent note organization</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Note Taker</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Input Section -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Text Input -->
+                        <div>
+                            <label class="block text-lg font-semibold text-gray-700 mb-3">Text to Analyze</label>
+                            <textarea id="note-text" rows="12" class="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Paste your text here for summarization, key points extraction, and analysis..."></textarea>
+                        </div>
+                        
+                        <!-- Options -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Summarization Mode</label>
+                                <select id="summary-mode" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <option value="brief">Brief Summary (10%)</option>
+                                    <option value="standard" selected>Standard Summary (20%)</option>
+                                    <option value="detailed">Detailed Summary (30%)</option>
+                                    <option value="comprehensive">Comprehensive Summary (40%)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Key Points Count</label>
+                                <select id="key-points-count" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <option value="3">3 Key Points</option>
+                                    <option value="5" selected>5 Key Points</option>
+                                    <option value="8">8 Key Points</option>
+                                    <option value="10">10 Key Points</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="summarizeText()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                📝 Summarize
+                            </button>
+                            <button onclick="extractKeyPoints()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                🎯 Key Points
+                            </button>
+                            <button onclick="analyzeText()" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                📊 Analyze
+                            </button>
+                            <button onclick="createStructuredNotes()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                📚 Create Notes
+                            </button>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Quick Actions</label>
+                            <div class="flex space-x-2">
+                                <button onclick="clearNoteText()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    Clear
+                                </button>
+                                <button onclick="loadSampleText()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    Load Sample
+                                </button>
+                                <button onclick="copyNoteText()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                    Copy Text
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <!-- Summary Results -->
+                        <div id="summary-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📝 Summary</h4>
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <div id="summary-content" class="text-gray-700 mb-3"></div>
+                                <div id="summary-stats" class="text-sm text-gray-600"></div>
+                                <div class="flex space-x-2 mt-3">
+                                    <button onclick="copySummary()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                        Copy Summary
+                                    </button>
+                                    <button onclick="downloadSummary()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                        Download
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Key Points Results -->
+                        <div id="key-points-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">🎯 Key Points</h4>
+                            <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                <div id="key-points-content" class="space-y-2 mb-3"></div>
+                                <div id="key-points-stats" class="text-sm text-gray-600"></div>
+                                <div class="flex space-x-2 mt-3">
+                                    <button onclick="copyKeyPoints()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                        Copy Points
+                                    </button>
+                                    <button onclick="downloadKeyPoints()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                        Download
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Analysis Results -->
+                        <div id="analysis-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📊 Text Analysis</h4>
+                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                <div id="analysis-content" class="grid grid-cols-2 gap-4 mb-3"></div>
+                                <div id="analysis-stats" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Structured Notes Results -->
+                        <div id="notes-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📚 Structured Notes</h4>
+                            <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+                                <div id="notes-content" class="space-y-4 mb-3"></div>
+                                <div class="flex space-x-2 mt-3">
+                                    <button onclick="saveNotes()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                        Save Notes
+                                    </button>
+                                    <button onclick="downloadNotes()" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300">
+                                        Download
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notes Library -->
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📚 Notes Library</h4>
+                            <div id="notes-library" class="space-y-2 max-h-64 overflow-y-auto bg-gray-50 rounded-lg p-3">
+                                <div class="text-gray-500 text-center py-4">No saved notes yet</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Tool Suggestion Card -->
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Note Taker Dependencies -->
+    <script src="/src/js/NoteTaker.js?v=1&t=1726745000"></script>
+    
+    <!-- Note Taker JavaScript -->
+    <script>
+        // Note-Taking & Summarizer Functions
+        let noteTaker = null;
+
+        // Initialize Note Taker
+        function initializeNoteTaker() {
+            try {
+                if (typeof NoteTaker !== 'undefined') {
+                    noteTaker = new NoteTaker();
+                    console.log('✅ Note Taker initialized successfully');
+                    updateNotesLibrary();
+                } else {
+                    console.error('❌ NoteTaker class not found');
+                }
+            } catch (error) {
+                console.error('❌ Error initializing Note Taker:', error);
+            }
+        }
+
+        // Summarize Text
+        function summarizeText() {
+            if (!noteTaker) {
+                alert('Note Taker not initialized. Please refresh the page.');
+                return;
+            }
+
+            const text = document.getElementById('note-text').value.trim();
+            if (!text) {
+                alert('Please enter text to summarize.');
+                return;
+            }
+
+            const mode = document.getElementById('summary-mode').value;
+            const result = noteTaker.summarizeText(text, mode);
+
+            if (result.success) {
+                showSummaryResults(result);
+            } else {
+                alert('Error summarizing text: ' + result.error);
+            }
+        }
+
+        // Extract Key Points
+        function extractKeyPoints() {
+            if (!noteTaker) {
+                alert('Note Taker not initialized. Please refresh the page.');
+                return;
+            }
+
+            const text = document.getElementById('note-text').value.trim();
+            if (!text) {
+                alert('Please enter text to analyze.');
+                return;
+            }
+
+            const maxPoints = parseInt(document.getElementById('key-points-count').value);
+            const result = noteTaker.extractKeyPoints(text, maxPoints);
+
+            if (result.success) {
+                showKeyPointsResults(result);
+            } else {
+                alert('Error extracting key points: ' + result.error);
+            }
+        }
+
+        // Analyze Text
+        function analyzeText() {
+            if (!noteTaker) {
+                alert('Note Taker not initialized. Please refresh the page.');
+                return;
+            }
+
+            const text = document.getElementById('note-text').value.trim();
+            if (!text) {
+                alert('Please enter text to analyze.');
+                return;
+            }
+
+            const result = noteTaker.analyzeText(text);
+
+            if (result.success) {
+                showAnalysisResults(result);
+            } else {
+                alert('Error analyzing text: ' + result.error);
+            }
+        }
+
+        // Create Structured Notes
+        function createStructuredNotes() {
+            if (!noteTaker) {
+                alert('Note Taker not initialized. Please refresh the page.');
+                return;
+            }
+
+            const text = document.getElementById('note-text').value.trim();
+            if (!text) {
+                alert('Please enter text for notes.');
+                return;
+            }
+
+            const title = prompt('Enter a title for your notes:', 'Untitled Note');
+            if (!title) return;
+
+            const result = noteTaker.createStructuredNotes(text, title);
+
+            if (result.success) {
+                showNotesResults(result);
+                updateNotesLibrary();
+            } else {
+                alert('Error creating notes: ' + result.error);
+            }
+        }
+
+        // Show Summary Results
+        function showSummaryResults(result) {
+            hideAllNoteResults();
+            
+            document.getElementById('summary-content').textContent = result.summary;
+            document.getElementById('summary-stats').innerHTML = `
+                <strong>${result.mode}</strong> | 
+                ${result.originalLength} → ${result.summaryLength} words | 
+                ${Math.round(result.compressionRatio * 100)}% reduction | 
+                ${result.sentencesUsed}/${result.totalSentences} sentences used
+            `;
+            document.getElementById('summary-results').classList.remove('hidden');
+        }
+
+        // Show Key Points Results
+        function showKeyPointsResults(result) {
+            hideAllNoteResults();
+            
+            const container = document.getElementById('key-points-content');
+            container.innerHTML = '';
+            
+            result.keyPoints.forEach((point, index) => {
+                const pointDiv = document.createElement('div');
+                pointDiv.className = 'flex items-start space-x-2';
+                pointDiv.innerHTML = `
+                    <span class="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">${index + 1}</span>
+                    <span class="text-gray-700">${point.text}</span>
+                `;
+                container.appendChild(pointDiv);
+            });
+            
+            document.getElementById('key-points-stats').textContent = 
+                `Extracted ${result.totalPoints} key points from ${result.originalLength} words`;
+            document.getElementById('key-points-results').classList.remove('hidden');
+        }
+
+        // Show Analysis Results
+        function showAnalysisResults(result) {
+            hideAllNoteResults();
+            
+            const analysis = result.analysis;
+            const container = document.getElementById('analysis-content');
+            container.innerHTML = `
+                <div class="bg-white p-3 rounded-lg">
+                    <div class="text-sm font-semibold text-gray-600">Word Count</div>
+                    <div class="text-2xl font-bold text-blue-600">${analysis.wordCount}</div>
+                </div>
+                <div class="bg-white p-3 rounded-lg">
+                    <div class="text-sm font-semibold text-gray-600">Sentences</div>
+                    <div class="text-2xl font-bold text-green-600">${analysis.sentenceCount}</div>
+                </div>
+                <div class="bg-white p-3 rounded-lg">
+                    <div class="text-sm font-semibold text-gray-600">Reading Time</div>
+                    <div class="text-2xl font-bold text-purple-600">${analysis.readingTime.formatted}</div>
+                </div>
+                <div class="bg-white p-3 rounded-lg">
+                    <div class="text-sm font-semibold text-gray-600">Complexity</div>
+                    <div class="text-2xl font-bold text-orange-600">${analysis.complexityScore}/100</div>
+                </div>
+                <div class="bg-white p-3 rounded-lg">
+                    <div class="text-sm font-semibold text-gray-600">Readability</div>
+                    <div class="text-2xl font-bold text-indigo-600">${analysis.readabilityScore.level}</div>
+                </div>
+                <div class="bg-white p-3 rounded-lg">
+                    <div class="text-sm font-semibold text-gray-600">Keywords</div>
+                    <div class="text-sm text-gray-700">${analysis.keywords.slice(0, 5).join(', ')}</div>
+                </div>
+            `;
+            
+            document.getElementById('analysis-stats').textContent = 
+                `Analyzed ${analysis.wordCount} words in ${analysis.sentenceCount} sentences`;
+            document.getElementById('analysis-results').classList.remove('hidden');
+        }
+
+        // Show Notes Results
+        function showNotesResults(result) {
+            hideAllNoteResults();
+            
+            const note = result.note;
+            const container = document.getElementById('notes-content');
+            container.innerHTML = `
+                <div class="bg-white p-4 rounded-lg">
+                    <h5 class="font-bold text-lg text-gray-800 mb-2">${note.title}</h5>
+                    <div class="text-sm text-gray-600 mb-3">Created: ${new Date(note.createdAt).toLocaleString()}</div>
+                    
+                    <div class="mb-3">
+                        <h6 class="font-semibold text-gray-700 mb-1">Summary:</h6>
+                        <p class="text-gray-600 text-sm">${note.summary}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="font-semibold text-gray-700 mb-1">Key Points:</h6>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            ${note.keyPoints.map((point, index) => 
+                                `<li>${index + 1}. ${point.text}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2">
+                        ${note.tags.map(tag => 
+                            `<span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">${tag}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('notes-results').classList.remove('hidden');
+        }
+
+        // Hide All Note Results
+        function hideAllNoteResults() {
+            document.getElementById('summary-results').classList.add('hidden');
+            document.getElementById('key-points-results').classList.add('hidden');
+            document.getElementById('analysis-results').classList.add('hidden');
+            document.getElementById('notes-results').classList.add('hidden');
+        }
+
+        // Clear Note Text
+        function clearNoteText() {
+            document.getElementById('note-text').value = '';
+            hideAllNoteResults();
+        }
+
+        // Load Sample Text
+        function loadSampleText() {
+            const sampleText = `Artificial Intelligence (AI) has revolutionized numerous industries and continues to shape the future of technology. AI refers to the simulation of human intelligence in machines that are programmed to think and learn like humans. The field encompasses machine learning, deep learning, natural language processing, and computer vision.
+
+Machine learning is a subset of AI that enables computers to learn and improve from experience without being explicitly programmed. Deep learning, a subset of machine learning, uses neural networks with multiple layers to process data and make decisions. These technologies have applications in healthcare, finance, transportation, and entertainment.
+
+The benefits of AI include increased efficiency, automation of repetitive tasks, and the ability to process vast amounts of data quickly. However, challenges such as job displacement, ethical concerns, and the need for proper regulation must be addressed. As AI continues to evolve, it will play an increasingly important role in solving complex global problems.`;
+            
+            document.getElementById('note-text').value = sampleText;
+        }
+
+        // Copy Note Text
+        function copyNoteText() {
+            const text = document.getElementById('note-text').value;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Text copied to clipboard!');
+            });
+        }
+
+        // Copy Summary
+        function copySummary() {
+            const summary = document.getElementById('summary-content').textContent;
+            navigator.clipboard.writeText(summary).then(() => {
+                alert('Summary copied to clipboard!');
+            });
+        }
+
+        // Copy Key Points
+        function copyKeyPoints() {
+            const points = Array.from(document.querySelectorAll('#key-points-content .text-gray-700'))
+                .map(el => el.textContent.trim())
+                .join('\n');
+            navigator.clipboard.writeText(points).then(() => {
+                alert('Key points copied to clipboard!');
+            });
+        }
+
+        // Download Summary
+        function downloadSummary() {
+            const summary = document.getElementById('summary-content').textContent;
+            const stats = document.getElementById('summary-stats').textContent;
+            const content = `Summary\n\n${summary}\n\n${stats}`;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'summary.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Download Key Points
+        function downloadKeyPoints() {
+            const points = Array.from(document.querySelectorAll('#key-points-content .text-gray-700'))
+                .map((el, index) => `${index + 1}. ${el.textContent.trim()}`)
+                .join('\n');
+            
+            const blob = new Blob([points], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'key-points.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Save Notes
+        function saveNotes() {
+            alert('Notes saved to library!');
+        }
+
+        // Download Notes
+        function downloadNotes() {
+            const noteContent = document.getElementById('notes-content').innerHTML;
+            const content = `Structured Notes\n\n${noteContent}`;
+            
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'structured-notes.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Update Notes Library
+        function updateNotesLibrary() {
+            if (!noteTaker) return;
+            
+            const notes = noteTaker.getNotes();
+            const container = document.getElementById('notes-library');
+            
+            if (notes.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-4">No saved notes yet</div>';
+                return;
+            }
+            
+            let html = '';
+            notes.forEach(note => {
+                html += `
+                    <div class="bg-white p-3 rounded-lg border border-gray-200">
+                        <div class="font-semibold text-gray-800">${note.title}</div>
+                        <div class="text-sm text-gray-600">${new Date(note.createdAt).toLocaleDateString()}</div>
+                        <div class="text-xs text-gray-500 mt-1">${note.analysis.wordCount} words</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Initialize Note Taker on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeNoteTaker();
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        // Available tools for suggestions (excluding current Note Taker)
+        const availableTools = [
+            // Student Tools
+            {
+                icon: '🧮',
+                name: 'Smart Calculator',
+                description: 'Advanced calculator with scientific functions',
+                modalId: 'calculator-modal'
+            },
+            {
+                icon: '⏰',
+                name: 'Study Timer',
+                description: 'Pomodoro technique with focus sessions',
+                modalId: 'study-timer-modal'
+            },
+            {
+                icon: '🧮',
+                name: 'Math Solver',
+                description: 'Step-by-step math problem solving',
+                modalId: 'math-solver-modal'
+            },
+            {
+                icon: '📊',
+                name: 'Grade Calculator',
+                description: 'GPA tracking & academic analysis',
+                modalId: 'grade-calculator-modal'
+            },
+            {
+                icon: '📖',
+                name: 'Citation Generator',
+                description: 'Multiple citation formats & styles',
+                modalId: 'citation-generator-modal'
+            },
+            {
+                icon: '🎯',
+                name: 'Study Planner',
+                description: 'Study scheduling & time management',
+                modalId: 'study-planner-modal'
+            },
+            {
+                icon: '📚',
+                name: 'Flashcard Generator',
+                description: 'Spaced repetition learning cards',
+                modalId: 'flashcard-generator-modal'
+            },
+            {
+                icon: '📈',
+                name: 'Progress Tracker',
+                description: 'Academic progress & analytics',
+                modalId: 'progress-tracker-modal'
+            },
+            {
+                icon: '🎂',
+                name: 'Age Calculator',
+                description: 'Precise age & date calculations',
+                modalId: 'age-calculator-modal'
+            },
+            {
+                icon: '⚖️',
+                name: 'BMI Calculator',
+                description: 'Health analysis & recommendations',
+                modalId: 'bmi-modal'
+            },
+            // Professional Tools
+            {
+                icon: '🏦',
+                name: 'Loan Calculator',
+                description: 'Professional loan calculation & analysis',
+                modalId: 'loan-calculator-modal'
+            },
+            {
+                icon: '💼',
+                name: 'Investment Calculator',
+                description: 'Investment returns & projections',
+                modalId: 'investment-calculator-modal'
+            },
+            {
+                icon: '💰',
+                name: 'Tax Calculator',
+                description: 'Tax calculation & planning',
+                modalId: 'tax-calculator-modal'
+            },
+            {
+                icon: '📊',
+                name: 'Business Metrics',
+                description: 'Business performance analytics',
+                modalId: 'business-metrics-modal'
+            },
+            {
+                icon: '💱',
+                name: 'Currency Converter',
+                description: 'Real-time currency conversion',
+                modalId: 'currency-converter-modal'
+            },
+            {
+                icon: '🏠',
+                name: 'Retirement Planner',
+                description: 'Retirement savings calculator',
+                modalId: 'retirement-calculator-modal'
+            },
+            {
+                icon: '🏡',
+                name: 'Mortgage Calculator',
+                description: 'Mortgage payment calculations',
+                modalId: 'mortgage-calculator-modal'
+            },
+            {
+                icon: '💳',
+                name: 'Budget Planner',
+                description: 'Personal budget planning tool',
+                modalId: 'budget-planner-modal'
+            },
+            {
+                icon: '💵',
+                name: 'Salary Calculator',
+                description: 'Salary & tax calculations',
+                modalId: 'salary-calculator-modal'
+            },
+            // Developer Tools
+            {
+                icon: '🔧',
+                name: 'JSON Formatter',
+                description: 'Format & validate JSON data',
+                modalId: 'json-formatter-modal'
+            },
+            {
+                icon: '📄',
+                name: 'XML Formatter',
+                description: 'Format & validate XML data',
+                modalId: 'xml-formatter-modal'
+            },
+            {
+                icon: '🔐',
+                name: 'Base64 Encoder',
+                description: 'Encode & decode Base64 data',
+                modalId: 'base64-encoder-modal'
+            },
+            {
+                icon: '🔐',
+                name: 'Hash Generator',
+                description: 'Generate multiple hash types',
+                modalId: 'hash-generator-modal'
+            },
+            {
+                icon: '🌐',
+                name: 'URL Encoder',
+                description: 'Encode & decode URLs',
+                modalId: 'url-encoder-modal'
+            },
+            {
+                icon: '🔍',
+                name: 'Regex Tester',
+                description: 'Test & debug regex patterns',
+                modalId: 'regex-tester-modal'
+            },
+            {
+                icon: '🛠️',
+                name: 'CSS/JS Minifier',
+                description: 'Minify CSS & JavaScript code',
+                modalId: 'css-js-minifier-modal'
+            },
+            {
+                icon: '🎨',
+                name: 'Color Palette',
+                description: 'Generate beautiful color palettes',
+                modalId: 'color-palette-modal'
+            },
+            {
+                icon: '📝',
+                name: 'Lorem Ipsum',
+                description: 'Generate Lorem Ipsum text',
+                modalId: 'lorem-ipsum-modal'
+            },
+            {
+                icon: '🕐',
+                name: 'Timestamp Converter',
+                description: 'Convert timestamps & dates',
+                modalId: 'timestamp-converter-modal'
+            },
+            // PDF Tools
+            {
+                icon: '🔓',
+                name: 'PDF Password Remover',
+                description: 'Remove password from PDFs',
+                modalId: 'pdf-password-remover-modal'
+            },
+            {
+                icon: '📄',
+                name: 'PDF Merger',
+                description: 'Combine multiple PDFs',
+                modalId: 'pdf-merger-modal'
+            },
+            {
+                icon: '✂️',
+                name: 'PDF Splitter',
+                description: 'Split PDFs into separate pages',
+                modalId: 'pdf-splitter-modal'
+            },
+            {
+                icon: '🔒',
+                name: 'PDF Encryptor',
+                description: 'Add password to PDFs',
+                modalId: 'pdf-encryptor-modal'
+            },
+            {
+                icon: '🖼️',
+                name: 'PDF to Images',
+                description: 'Convert PDF pages to images',
+                modalId: 'pdf-to-images-modal'
+            },
+            // Image Tools
+            {
+                icon: '📸',
+                name: 'Image to PDF',
+                description: 'Convert images to PDF documents',
+                modalId: 'image-to-pdf-modal'
+            },
+            {
+                icon: '📏',
+                name: 'Image Compressor',
+                description: 'Reduce image file size',
+                modalId: 'image-compressor-modal'
+            },
+            {
+                icon: '🎨',
+                name: 'Image Converter',
+                description: 'Convert between image formats',
+                modalId: 'image-converter-modal'
+            },
+            {
+                icon: '📐',
+                name: 'Image Resizer',
+                description: 'Resize images to any dimensions',
+                modalId: 'image-resizer-modal'
+            },
+            // Utility Tools
+            {
+                icon: '✍️',
+                name: 'Signature Generator',
+                description: 'Create digital signatures',
+                modalId: 'signature-generator-modal'
+            },
+            {
+                icon: '📊',
+                name: 'CSV to JSON',
+                description: 'Convert CSV to JSON format',
+                modalId: 'csv-json-converter-modal'
+            }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        // Get random tool (excluding current one)
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        // Update tool suggestion display
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            // Store current tool data for button click
+            btnEl.dataset.modalId = tool.modalId;
+            
+            // Fade out animation
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                // Update content
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                
+                // Fade in animation
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        // Launch suggested tool
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            
+            const modalId = btnEl.dataset.modalId;
+            
+            if (modalId && typeof openModal === 'function') {
+                // If we're on homepage, open modal directly
+                if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+                    openModal(modalId);
+                } else {
+                    // Otherwise, navigate to homepage and open modal
+                    window.location.href = `/#${modalId}`;
+                }
+            } else {
+                // Fallback: navigate to tools section
+                window.location.href = '/#tools';
+            }
+        }
+        
+        // Initialize tool suggestions
+        function initToolSuggestions() {
+            // Initial display
+            updateToolSuggestion();
+            
+            // Auto-refresh every 10 seconds (no countdown display)
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        #tool-suggestion-card {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+    </style>
+</body>
+</html>
+
+

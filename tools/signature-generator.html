@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Digital Signature Generator - FreeToolHub</title>
+    <meta name="description" content="Create professional digital signatures. Draw or type your signature with multiple styles, colors, and export options. 100% free, secure, and client-side processing.">
+    <meta property="og:title" content="Digital Signature Generator - FreeToolHub">
+    <meta property="og:description" content="Create professional digital signatures with draw or type options, multiple styles, and export formats">
+    <meta property="og:url" content="https://freetoolhub.in/tools/signature-generator.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts for Signature Styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Allura&family=Pacifico&family=Sacramento&family=Alex+Brush&display=swap" rel="stylesheet">
+    
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">✍️ Digital Signature Generator</h1>
+                    <p class="text-gray-600 text-lg">Create professional digital signatures with draw or type options, multiple styles, and export formats</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Digital Signature Generator</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <!-- Privacy Notice -->
+                <div class="bg-purple-50 border-l-4 border-purple-500 p-4 mb-6 rounded">
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">🔒</span>
+                        <div>
+                            <p class="font-semibold text-purple-800 mb-1">100% Private & Secure</p>
+                            <p class="text-sm text-purple-700">All processing happens locally in your browser. Your signature never leaves your device!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signature Type Selector -->
+                <div class="mb-6">
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">
+                        <span class="text-purple-600">Step 1:</span> Choose Signature Type
+                    </label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="border-2 border-purple-300 rounded-xl p-4 cursor-pointer hover:bg-purple-50 transition-all text-center bg-purple-50" id="draw-signature-selector">
+                            <input type="radio" name="signature-type" value="draw" checked class="mb-2" onchange="switchSignatureType('draw')">
+                            <div class="text-3xl mb-2">✏️</div>
+                            <div class="font-semibold">Draw Signature</div>
+                            <div class="text-xs text-gray-600 mt-1">Draw your signature using mouse or touchscreen</div>
+                        </label>
+                        <label class="border-2 border-gray-300 rounded-xl p-4 cursor-pointer hover:bg-purple-50 transition-all text-center" id="text-signature-selector">
+                            <input type="radio" name="signature-type" value="text" class="mb-2" onchange="switchSignatureType('text')">
+                            <div class="text-3xl mb-2">📝</div>
+                            <div class="font-semibold">Type Signature</div>
+                            <div class="text-xs text-gray-600 mt-1">Type your name and choose a style</div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Draw Signature Section -->
+                <div id="draw-signature-section" class="mb-6">
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">
+                        <span class="text-purple-600">Step 2:</span> Draw Your Signature
+                    </label>
+                    
+                    <!-- Canvas Container -->
+                    <div class="border-2 border-gray-300 rounded-xl overflow-hidden bg-white mb-4">
+                        <canvas id="signature-canvas" 
+                                width="800" 
+                                height="300" 
+                                class="w-full cursor-crosshair touch-none"
+                                style="max-height: 300px;">
+                        </canvas>
+                    </div>
+                    
+                    <!-- Drawing Controls -->
+                    <div class="grid grid-cols-4 gap-3 mb-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Pen Color</label>
+                            <div class="flex gap-2">
+                                <input type="color" id="pen-color" value="#000000" class="w-12 h-10 border border-gray-300 rounded cursor-pointer">
+                                <select id="pen-color-preset" onchange="setPenColorPreset()" class="flex-1 border border-gray-300 rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-purple-500">
+                                    <option value="#000000">Black</option>
+                                    <option value="#0000FF">Blue</option>
+                                    <option value="#000080">Navy</option>
+                                    <option value="#1a1a1a">Dark Gray</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Pen Size</label>
+                            <input type="range" id="pen-size" min="1" max="10" value="2" class="w-full h-10">
+                            <div class="text-xs text-gray-500 text-center mt-1"><span id="pen-size-value">2</span>px</div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Background</label>
+                            <select id="canvas-background" onchange="setCanvasBackground()" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500">
+                                <option value="transparent">Transparent</option>
+                                <option value="#FFFFFF">White</option>
+                                <option value="#F3F4F6">Light Gray</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="clearSignatureCanvas()" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg font-semibold transition-all">
+                                🗑️ Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Type Signature Section -->
+                <div id="text-signature-section" class="hidden mb-6">
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">
+                        <span class="text-purple-600">Step 2:</span> Type Your Name
+                    </label>
+                    
+                    <!-- Text Input -->
+                    <input type="text" 
+                           id="signature-text-input" 
+                           placeholder="Enter your name..." 
+                           class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent mb-4"
+                           oninput="updateTextSignaturePreview()"
+                           maxlength="50">
+                    
+                    <!-- Font Style Selection -->
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">
+                        <span class="text-purple-600">Step 3:</span> Choose Font Style
+                    </label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                        <label class="border-2 border-purple-300 rounded-xl p-4 cursor-pointer hover:bg-purple-50 transition-all text-center bg-purple-50" id="font-style-1">
+                            <input type="radio" name="signature-font" value="Dancing Script" checked class="mb-2" onchange="updateTextSignaturePreview()">
+                            <div class="text-2xl mb-2" style="font-family: 'Dancing Script', cursive;">Signature</div>
+                            <div class="text-xs text-gray-600">Dancing Script</div>
+                        </label>
+                        <label class="border-2 border-gray-300 rounded-xl p-4 cursor-pointer hover:bg-purple-50 transition-all text-center" id="font-style-2">
+                            <input type="radio" name="signature-font" value="Great Vibes" class="mb-2" onchange="updateTextSignaturePreview()">
+                            <div class="text-2xl mb-2" style="font-family: 'Great Vibes', cursive;">Signature</div>
+                            <div class="text-xs text-gray-600">Great Vibes</div>
+                        </label>
+                        <label class="border-2 border-gray-300 rounded-xl p-4 cursor-pointer hover:bg-purple-50 transition-all text-center" id="font-style-3">
+                            <input type="radio" name="signature-font" value="Allura" class="mb-2" onchange="updateTextSignaturePreview()">
+                            <div class="text-2xl mb-2" style="font-family: 'Allura', cursive;">Signature</div>
+                            <div class="text-xs text-gray-600">Allura</div>
+                        </label>
+                        <label class="border-2 border-gray-300 rounded-xl p-4 cursor-pointer hover:bg-purple-50 transition-all text-center" id="font-style-4">
+                            <input type="radio" name="signature-font" value="Pacifico" class="mb-2" onchange="updateTextSignaturePreview()">
+                            <div class="text-2xl mb-2" style="font-family: 'Pacifico', cursive;">Signature</div>
+                            <div class="text-xs text-gray-600">Pacifico</div>
+                        </label>
+                        <label class="border-2 border-gray-300 rounded-xl p-4 cursor-pointer hover:bg-purple-50 transition-all text-center" id="font-style-5">
+                            <input type="radio" name="signature-font" value="Sacramento" class="mb-2" onchange="updateTextSignaturePreview()">
+                            <div class="text-2xl mb-2" style="font-family: 'Sacramento', cursive;">Signature</div>
+                            <div class="text-xs text-gray-600">Sacramento</div>
+                        </label>
+                        <label class="border-2 border-gray-300 rounded-xl p-4 cursor-pointer hover:bg-purple-50 transition-all text-center" id="font-style-6">
+                            <input type="radio" name="signature-font" value="Alex Brush" class="mb-2" onchange="updateTextSignaturePreview()">
+                            <div class="text-2xl mb-2" style="font-family: 'Alex Brush', cursive;">Signature</div>
+                            <div class="text-xs text-gray-600">Alex Brush</div>
+                        </label>
+                    </div>
+
+                    <!-- Text Signature Controls -->
+                    <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Text Color</label>
+                            <div class="flex gap-2">
+                                <input type="color" id="text-signature-color" value="#000000" class="w-12 h-10 border border-gray-300 rounded cursor-pointer" onchange="updateTextSignaturePreview()">
+                                <select id="text-color-preset" onchange="setTextColorPreset()" class="flex-1 border border-gray-300 rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-purple-500">
+                                    <option value="#000000">Black</option>
+                                    <option value="#0000FF">Blue</option>
+                                    <option value="#000080">Navy</option>
+                                    <option value="#1a1a1a">Dark Gray</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Font Size</label>
+                            <input type="range" id="text-signature-size" min="40" max="120" value="72" class="w-full h-10" oninput="updateTextSignaturePreview()">
+                            <div class="text-xs text-gray-500 text-center mt-1"><span id="text-size-value">72</span>px</div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Background</label>
+                            <select id="text-canvas-background" onchange="updateTextSignaturePreview()" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500">
+                                <option value="transparent">Transparent</option>
+                                <option value="#FFFFFF">White</option>
+                                <option value="#F3F4F6">Light Gray</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Text Signature Preview -->
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">Preview</label>
+                    <div class="border-2 border-gray-300 rounded-xl overflow-hidden bg-white mb-4">
+                        <canvas id="text-signature-canvas" 
+                                width="800" 
+                                height="300" 
+                                class="w-full"
+                                style="max-height: 300px;">
+                        </canvas>
+                    </div>
+                </div>
+
+                <!-- Download Section -->
+                <div class="mb-6">
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">
+                        <span class="text-purple-600">Step <span id="download-step-number">3</span>:</span> Download Your Signature
+                    </label>
+                    
+                    <!-- Download Options -->
+                    <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">File Format</label>
+                            <select id="signature-format" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500">
+                                <option value="png">PNG (Recommended)</option>
+                                <option value="jpg">JPG</option>
+                                <option value="svg">SVG (Draw only)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Image Quality</label>
+                            <select id="signature-quality" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500">
+                                <option value="1">Standard</option>
+                                <option value="2" selected>High (2x)</option>
+                                <option value="3">Ultra (3x)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Trim Whitespace</label>
+                            <label class="flex items-center h-10 mt-1">
+                                <input type="checkbox" id="signature-trim" checked class="mr-2 w-5 h-5">
+                                <span class="text-sm">Auto-trim edges</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Download Button -->
+                    <button onclick="downloadSignature()" class="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+                        📥 Download Signature
+                    </button>
+                </div>
+
+                <!-- Success Message -->
+                <div id="signature-success" class="hidden mb-6">
+                    <div class="bg-green-50 border-2 border-green-500 rounded-xl p-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">✓</span>
+                            <div>
+                                <h4 class="text-lg font-bold text-green-800 mb-1">Success!</h4>
+                                <p class="text-green-700">Your signature has been downloaded successfully.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div id="signature-error" class="hidden mb-6">
+                    <div class="bg-red-50 border-2 border-red-500 rounded-xl p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-3xl">⚠️</span>
+                            <div>
+                                <h4 class="text-lg font-bold text-red-800 mb-1">Error</h4>
+                                <p id="signature-error-message" class="text-red-700"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-200">
+                    <h4 class="text-lg font-bold text-purple-900 mb-3 flex items-center gap-2">
+                        <span>💡</span>
+                        <span>Tips for Creating Great Signatures</span>
+                    </h4>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li class="flex items-start gap-2">
+                            <span class="text-purple-600 mt-1">•</span>
+                            <span><strong>Draw Mode:</strong> Use smooth, flowing strokes. Practice a few times before downloading.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-purple-600 mt-1">•</span>
+                            <span><strong>Text Mode:</strong> Choose a font that matches your style. Script fonts work best for signatures.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-purple-600 mt-1">•</span>
+                            <span><strong>Transparent Background:</strong> Use PNG with transparent background for documents and PDFs.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-purple-600 mt-1">•</span>
+                            <span><strong>High Quality:</strong> Select "High (2x)" or "Ultra (3x)" for crisp, professional results.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+
+    <!-- Load Header and Footer -->
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    
+    <script>
+        // DIGITAL SIGNATURE GENERATOR FUNCTIONS
+        // Signature canvas state
+        let signatureCanvas = null;
+        let signatureCtx = null;
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let signatureStrokes = []; // For SVG export
+
+        // Text signature canvas
+        let textSignatureCanvas = null;
+        let textSignatureCtx = null;
+
+        // Initialize Digital Signature Generator
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get canvas elements
+            signatureCanvas = document.getElementById('signature-canvas');
+            textSignatureCanvas = document.getElementById('text-signature-canvas');
+            
+            if (signatureCanvas) {
+                signatureCtx = signatureCanvas.getContext('2d', { willReadFrequently: true });
+                setupDrawingCanvas();
+            }
+            
+            if (textSignatureCanvas) {
+                textSignatureCtx = textSignatureCanvas.getContext('2d', { willReadFrequently: true });
+                updateTextSignaturePreview();
+            }
+
+            // Pen size slider listener
+            const penSizeSlider = document.getElementById('pen-size');
+            if (penSizeSlider) {
+                penSizeSlider.addEventListener('input', (e) => {
+                    document.getElementById('pen-size-value').textContent = e.target.value;
+                });
+            }
+
+            // Text size slider listener
+            const textSizeSlider = document.getElementById('text-signature-size');
+            if (textSizeSlider) {
+                textSizeSlider.addEventListener('input', (e) => {
+                    document.getElementById('text-size-value').textContent = e.target.value;
+                });
+            }
+
+            // Font style change listeners
+            document.querySelectorAll('input[name="signature-font"]').forEach((radio) => {
+                radio.addEventListener('change', () => {
+                    updateFontStyleBorders();
+                });
+            });
+        });
+
+        function setupDrawingCanvas() {
+            if (!signatureCanvas || !signatureCtx) return;
+
+            // Set canvas background
+            setCanvasBackground();
+
+            // Mouse events
+            signatureCanvas.addEventListener('mousedown', startDrawing);
+            signatureCanvas.addEventListener('mousemove', draw);
+            signatureCanvas.addEventListener('mouseup', stopDrawing);
+            signatureCanvas.addEventListener('mouseout', stopDrawing);
+
+            // Touch events for mobile
+            signatureCanvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = signatureCanvas.getBoundingClientRect();
+                const scaleX = signatureCanvas.width / rect.width;
+                const scaleY = signatureCanvas.height / rect.height;
+                lastX = (touch.clientX - rect.left) * scaleX;
+                lastY = (touch.clientY - rect.top) * scaleY;
+                isDrawing = true;
+                signatureStrokes.push({ type: 'start', x: lastX, y: lastY });
+            });
+
+            signatureCanvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isDrawing) return;
+                const touch = e.touches[0];
+                const rect = signatureCanvas.getBoundingClientRect();
+                const scaleX = signatureCanvas.width / rect.width;
+                const scaleY = signatureCanvas.height / rect.height;
+                const x = (touch.clientX - rect.left) * scaleX;
+                const y = (touch.clientY - rect.top) * scaleY;
+                
+                const penColor = document.getElementById('pen-color').value;
+                const penSize = document.getElementById('pen-size').value;
+                
+                signatureCtx.strokeStyle = penColor;
+                signatureCtx.lineWidth = penSize;
+                signatureCtx.lineCap = 'round';
+                signatureCtx.lineJoin = 'round';
+                
+                signatureCtx.beginPath();
+                signatureCtx.moveTo(lastX, lastY);
+                signatureCtx.lineTo(x, y);
+                signatureCtx.stroke();
+                
+                signatureStrokes.push({ type: 'line', x1: lastX, y1: lastY, x2: x, y2: y, color: penColor, width: penSize });
+                
+                lastX = x;
+                lastY = y;
+            });
+
+            signatureCanvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                isDrawing = false;
+            });
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const rect = signatureCanvas.getBoundingClientRect();
+            const scaleX = signatureCanvas.width / rect.width;
+            const scaleY = signatureCanvas.height / rect.height;
+            lastX = (e.clientX - rect.left) * scaleX;
+            lastY = (e.clientY - rect.top) * scaleY;
+            signatureStrokes.push({ type: 'start', x: lastX, y: lastY });
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const rect = signatureCanvas.getBoundingClientRect();
+            const scaleX = signatureCanvas.width / rect.width;
+            const scaleY = signatureCanvas.height / rect.height;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            
+            const penColor = document.getElementById('pen-color').value;
+            const penSize = document.getElementById('pen-size').value;
+            
+            signatureCtx.strokeStyle = penColor;
+            signatureCtx.lineWidth = penSize;
+            signatureCtx.lineCap = 'round';
+            signatureCtx.lineJoin = 'round';
+            
+            signatureCtx.beginPath();
+            signatureCtx.moveTo(lastX, lastY);
+            signatureCtx.lineTo(x, y);
+            signatureCtx.stroke();
+            
+            signatureStrokes.push({ type: 'line', x1: lastX, y1: lastY, x2: x, y2: y, color: penColor, width: penSize });
+            
+            lastX = x;
+            lastY = y;
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function switchSignatureType(type) {
+            const drawSection = document.getElementById('draw-signature-section');
+            const textSection = document.getElementById('text-signature-section');
+            const drawSelector = document.getElementById('draw-signature-selector');
+            const textSelector = document.getElementById('text-signature-selector');
+            const downloadStepNumber = document.getElementById('download-step-number');
+            
+            if (type === 'draw') {
+                drawSection.classList.remove('hidden');
+                textSection.classList.add('hidden');
+                drawSelector.classList.add('border-purple-300', 'bg-purple-50');
+                drawSelector.classList.remove('border-gray-300');
+                textSelector.classList.remove('border-purple-300', 'bg-purple-50');
+                textSelector.classList.add('border-gray-300');
+                downloadStepNumber.textContent = '3';
+            } else {
+                drawSection.classList.add('hidden');
+                textSection.classList.remove('hidden');
+                textSelector.classList.add('border-purple-300', 'bg-purple-50');
+                textSelector.classList.remove('border-gray-300');
+                drawSelector.classList.remove('border-purple-300', 'bg-purple-50');
+                drawSelector.classList.add('border-gray-300');
+                downloadStepNumber.textContent = '4';
+                updateTextSignaturePreview();
+            }
+            
+            // Hide messages
+            document.getElementById('signature-success').classList.add('hidden');
+            document.getElementById('signature-error').classList.add('hidden');
+        }
+
+        function clearSignatureCanvas() {
+            if (!signatureCanvas || !signatureCtx) return;
+            
+            signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            signatureStrokes = [];
+            setCanvasBackground();
+            
+            // Hide messages
+            document.getElementById('signature-success').classList.add('hidden');
+            document.getElementById('signature-error').classList.add('hidden');
+        }
+
+        function setCanvasBackground() {
+            if (!signatureCanvas || !signatureCtx) return;
+            
+            const background = document.getElementById('canvas-background').value;
+            
+            if (background === 'transparent') {
+                signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            } else {
+                signatureCtx.fillStyle = background;
+                signatureCtx.fillRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            }
+        }
+
+        function setPenColorPreset() {
+            const preset = document.getElementById('pen-color-preset').value;
+            document.getElementById('pen-color').value = preset;
+        }
+
+        function setTextColorPreset() {
+            const preset = document.getElementById('text-color-preset').value;
+            document.getElementById('text-signature-color').value = preset;
+            updateTextSignaturePreview();
+        }
+
+        function updateTextSignaturePreview() {
+            if (!textSignatureCanvas || !textSignatureCtx) return;
+            
+            const text = document.getElementById('signature-text-input').value || 'Your Name';
+            const font = document.querySelector('input[name="signature-font"]:checked').value;
+            const color = document.getElementById('text-signature-color').value;
+            const size = document.getElementById('text-signature-size').value;
+            const background = document.getElementById('text-canvas-background').value;
+            
+            // Clear canvas
+            textSignatureCtx.clearRect(0, 0, textSignatureCanvas.width, textSignatureCanvas.height);
+            
+            // Set background
+            if (background !== 'transparent') {
+                textSignatureCtx.fillStyle = background;
+                textSignatureCtx.fillRect(0, 0, textSignatureCanvas.width, textSignatureCanvas.height);
+            }
+            
+            // Draw text
+            textSignatureCtx.font = `${size}px '${font}', cursive`;
+            textSignatureCtx.fillStyle = color;
+            textSignatureCtx.textAlign = 'center';
+            textSignatureCtx.textBaseline = 'middle';
+            textSignatureCtx.fillText(text, textSignatureCanvas.width / 2, textSignatureCanvas.height / 2);
+        }
+
+        function updateFontStyleBorders() {
+            const fonts = ['Dancing Script', 'Great Vibes', 'Allura', 'Pacifico', 'Sacramento', 'Alex Brush'];
+            fonts.forEach((font, index) => {
+                const label = document.getElementById(`font-style-${index + 1}`);
+                const radio = label.querySelector('input[type="radio"]');
+                
+                if (radio.checked) {
+                    label.classList.add('border-purple-300', 'bg-purple-50');
+                    label.classList.remove('border-gray-300');
+                } else {
+                    label.classList.remove('border-purple-300', 'bg-purple-50');
+                    label.classList.add('border-gray-300');
+                }
+            });
+            updateTextSignaturePreview();
+        }
+
+        function downloadSignature() {
+            try {
+                const signatureType = document.querySelector('input[name="signature-type"]:checked').value;
+                const format = document.getElementById('signature-format').value;
+                const quality = parseFloat(document.getElementById('signature-quality').value);
+                const shouldTrim = document.getElementById('signature-trim').checked;
+                
+                let canvas;
+                if (signatureType === 'draw') {
+                    canvas = signatureCanvas;
+                    
+                    // Check if canvas is empty
+                    const imageData = signatureCtx.getImageData(0, 0, canvas.width, canvas.height);
+                    const pixels = imageData.data;
+                    let isEmpty = true;
+                    const background = document.getElementById('canvas-background').value;
+                    
+                    for (let i = 3; i < pixels.length; i += 4) {
+                        if (pixels[i] !== 0) {
+                            isEmpty = false;
+                            break;
+                        }
+                    }
+                    
+                    if (isEmpty && background === 'transparent') {
+                        showSignatureError('Please draw your signature first!');
+                        return;
+                    }
+                } else {
+                    canvas = textSignatureCanvas;
+                    
+                    const text = document.getElementById('signature-text-input').value;
+                    if (!text || text.trim() === '') {
+                        showSignatureError('Please enter your name first!');
+                        return;
+                    }
+                }
+                
+                // Create high-resolution canvas
+                const outputCanvas = document.createElement('canvas');
+                const outputCtx = outputCanvas.getContext('2d');
+                
+                if (shouldTrim) {
+                    // Get trimmed bounds
+                    const bounds = getTrimBounds(canvas);
+                    
+                    if (bounds) {
+                        outputCanvas.width = (bounds.width + 40) * quality; // Add padding
+                        outputCanvas.height = (bounds.height + 40) * quality;
+                        
+                        // Fill background if needed
+                        const background = signatureType === 'draw' 
+                            ? document.getElementById('canvas-background').value 
+                            : document.getElementById('text-canvas-background').value;
+                        
+                        if (background !== 'transparent') {
+                            outputCtx.fillStyle = background;
+                            outputCtx.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
+                        }
+                        
+                        // Draw trimmed signature
+                        outputCtx.drawImage(
+                            canvas,
+                            bounds.left, bounds.top, bounds.width, bounds.height,
+                            20 * quality, 20 * quality, bounds.width * quality, bounds.height * quality
+                        );
+                    } else {
+                        showSignatureError('No signature content found to download.');
+                        return;
+                    }
+                } else {
+                    // Use full canvas
+                    outputCanvas.width = canvas.width * quality;
+                    outputCanvas.height = canvas.height * quality;
+                    outputCtx.drawImage(canvas, 0, 0, outputCanvas.width, outputCanvas.height);
+                }
+                
+                // Export based on format
+                let dataUrl;
+                let filename;
+                
+                if (format === 'svg' && signatureType === 'draw') {
+                    // Generate SVG
+                    const svg = generateSVG();
+                    const blob = new Blob([svg], { type: 'image/svg+xml' });
+                    dataUrl = URL.createObjectURL(blob);
+                    filename = 'signature.svg';
+                    
+                    const link = document.createElement('a');
+                    link.href = dataUrl;
+                    link.download = filename;
+                    link.click();
+                    URL.revokeObjectURL(dataUrl);
+                } else {
+                    // Generate PNG or JPG
+                    const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
+                    dataUrl = outputCanvas.toDataURL(mimeType, 0.95);
+                    filename = `signature.${format}`;
+                    
+                    const link = document.createElement('a');
+                    link.href = dataUrl;
+                    link.download = filename;
+                    link.click();
+                }
+                
+                // Show success message
+                showSignatureSuccess();
+                
+            } catch (error) {
+                console.error('Error downloading signature:', error);
+                showSignatureError('Failed to download signature: ' + error.message);
+            }
+        }
+
+        function getTrimBounds(canvas) {
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+            
+            let minX = canvas.width;
+            let minY = canvas.height;
+            let maxX = 0;
+            let maxY = 0;
+            let found = false;
+            
+            for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
+                    const i = (y * canvas.width + x) * 4;
+                    const alpha = pixels[i + 3];
+                    
+                    if (alpha > 0) {
+                        found = true;
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+            
+            if (!found) return null;
+            
+            return {
+                left: minX,
+                top: minY,
+                width: maxX - minX + 1,
+                height: maxY - minY + 1
+            };
+        }
+
+        function generateSVG() {
+            const background = document.getElementById('canvas-background').value;
+            const shouldTrim = document.getElementById('signature-trim').checked;
+            
+            let svgContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
+            
+            if (shouldTrim && signatureStrokes.length > 0) {
+                const bounds = getTrimBounds(signatureCanvas);
+                if (bounds) {
+                    svgContent += `<svg xmlns="http://www.w3.org/2000/svg" width="${bounds.width + 40}" height="${bounds.height + 40}" viewBox="${bounds.left - 20} ${bounds.top - 20} ${bounds.width + 40} ${bounds.height + 40}">\n`;
+                } else {
+                    svgContent += `<svg xmlns="http://www.w3.org/2000/svg" width="${signatureCanvas.width}" height="${signatureCanvas.height}" viewBox="0 0 ${signatureCanvas.width} ${signatureCanvas.height}">\n`;
+                }
+            } else {
+                svgContent += `<svg xmlns="http://www.w3.org/2000/svg" width="${signatureCanvas.width}" height="${signatureCanvas.height}" viewBox="0 0 ${signatureCanvas.width} ${signatureCanvas.height}">\n`;
+            }
+            
+            // Add background if not transparent
+            if (background !== 'transparent') {
+                svgContent += `  <rect width="100%" height="100%" fill="${background}"/>\n`;
+            }
+            
+            // Add strokes
+            let currentPath = '';
+            let currentColor = '';
+            let currentWidth = '';
+            
+            signatureStrokes.forEach(stroke => {
+                if (stroke.type === 'start') {
+                    if (currentPath) {
+                        svgContent += `  <path d="${currentPath}" stroke="${currentColor}" stroke-width="${currentWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>\n`;
+                    }
+                    currentPath = `M ${stroke.x} ${stroke.y}`;
+                } else if (stroke.type === 'line') {
+                    currentPath += ` L ${stroke.x2} ${stroke.y2}`;
+                    currentColor = stroke.color;
+                    currentWidth = stroke.width;
+                }
+            });
+            
+            if (currentPath) {
+                svgContent += `  <path d="${currentPath}" stroke="${currentColor}" stroke-width="${currentWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>\n`;
+            }
+            
+            svgContent += '</svg>';
+            return svgContent;
+        }
+
+        function showSignatureSuccess() {
+            document.getElementById('signature-success').classList.remove('hidden');
+            document.getElementById('signature-error').classList.add('hidden');
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                document.getElementById('signature-success').classList.add('hidden');
+            }, 3000);
+        }
+
+        function showSignatureError(message) {
+            document.getElementById('signature-error-message').textContent = message;
+            document.getElementById('signature-error').classList.remove('hidden');
+            document.getElementById('signature-success').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>XML Formatter & Validator - FreeToolHub</title>
+    <meta name="description" content="Format, validate, minify, and convert XML data with professional features. Professional XML formatter with syntax validation and structure analysis.">
+    <meta property="og:title" content="XML Formatter & Validator - FreeToolHub">
+    <meta property="og:description" content="Format, validate, minify, and convert XML data with professional features">
+    <meta property="og:url" content="https://freetoolhub.in/tools/xml-formatter.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">📄 XML Formatter & Validator</h1>
+                    <p class="text-gray-600 text-lg">Format, validate, minify, and convert XML data with professional features</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">XML Formatter</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Main XML Formatter Section -->
+                    <div class="lg:col-span-3">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Input Section -->
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="block text-lg font-semibold text-gray-700">📝 XML Input</label>
+                                        <button onclick="clearXml()" class="text-xs text-gray-600 hover:text-gray-800 underline">Clear</button>
+                                    </div>
+                                    <div class="bg-white rounded-lg p-3 border border-gray-200 mb-3">
+                                        <label class="block text-xs font-semibold text-gray-600 mb-2">Quick Templates</label>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <button onclick="loadXmlTemplate('simple')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Simple</button>
+                                            <button onclick="loadXmlTemplate('with-attributes')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Attributes</button>
+                                            <button onclick="loadXmlTemplate('nested')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Nested</button>
+                                            <button onclick="loadXmlTemplate('complex')" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-all">Complex</button>
+                                        </div>
+                                    </div>
+                                    <div class="relative">
+                                        <div class="absolute left-0 top-0 bottom-0 w-8 bg-gray-100 border border-gray-300 rounded-l-xl flex flex-col items-center text-xs text-gray-500 font-mono overflow-hidden" id="xml-input-lines" style="z-index: 1;"></div>
+                                        <textarea id="xml-input" placeholder="Paste your XML data here..." class="w-full h-64 pl-10 pr-4 py-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono text-sm resize-none bg-white" style="font-family: 'Courier New', monospace; line-height: 1.5;" oninput="updateXmlInputLineNumbers()" onscroll="syncXmlInputScroll()" onpaste="setTimeout(updateXmlInputLineNumbers, 10)"></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button onclick="formatXml()" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                        ✨ Format XML
+                                    </button>
+                                    <button onclick="validateXml()" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                        ✓ Validate XML
+                                    </button>
+                                    <button onclick="minifyXml()" class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                        📦 Minify XML
+                                    </button>
+                                    <button onclick="clearXml()" class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                        🗑️ Clear All
+                                    </button>
+                                </div>
+                                
+                                <!-- Convert Options -->
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">🔄 Convert To</label>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <button onclick="convertXml('json')" class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 shadow-md">
+                                            🔧 JSON
+                                        </button>
+                                        <button onclick="convertXml('yaml')" class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 shadow-md">
+                                            📝 YAML
+                                        </button>
+                                        <button onclick="convertXml('csv')" class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 shadow-md">
+                                            📊 CSV
+                                        </button>
+                                        <button onclick="convertXml('html')" class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 shadow-md">
+                                            🌐 HTML
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Output Section -->
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">📤 Output</label>
+                                    <div class="relative">
+                                        <div class="absolute left-0 top-0 bottom-0 w-8 bg-gray-100 border border-gray-300 rounded-l-xl flex flex-col items-center text-xs text-gray-500 font-mono overflow-hidden" id="xml-output-lines" style="z-index: 1;"></div>
+                                        <textarea id="xml-output" placeholder="Formatted, validated, or converted output will appear here..." class="w-full h-64 pl-10 pr-4 py-4 border-2 border-gray-300 rounded-xl bg-gray-50 font-mono text-sm resize-none" style="font-family: 'Courier New', monospace; line-height: 1.5;" readonly onscroll="syncXmlOutputScroll()"></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex space-x-3">
+                                    <button onclick="copyXmlOutput()" class="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 shadow-lg">
+                                        📋 Copy Output
+                                    </button>
+                                    <button onclick="downloadXmlOutput()" class="flex-1 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 shadow-lg">
+                                        ⬇️ Download
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Results Section -->
+                        <div class="mt-8 space-y-6">
+                            <!-- Validation Results -->
+                            <div id="xml-validation-results" class="hidden">
+                                <div class="bg-green-50 rounded-xl p-6 border border-green-200">
+                                    <h4 class="text-lg font-bold mb-4 text-green-800">Validation Results</h4>
+                                    <div id="xml-validation-content" class="space-y-3"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Structure Analysis -->
+                            <div id="xml-structure-analysis" class="hidden">
+                                <div class="bg-blue-50 rounded-xl p-6 border border-blue-200">
+                                    <h4 class="text-lg font-bold mb-4 text-blue-800">Structure Analysis</h4>
+                                    <div id="xml-structure-content" class="space-y-3"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Error Display -->
+                            <div id="xml-error-display" class="hidden">
+                                <div class="bg-red-50 rounded-xl p-6 border border-red-200">
+                                    <h4 class="text-lg font-bold mb-4 text-red-800">Error Details</h4>
+                                    <div id="xml-error-content" class="space-y-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- XML Formatter Dependencies -->
+    <script src="/src/js/XmlFormatter.js?v=1&t=1726745000"></script>
+    
+    <!-- XML Formatter JavaScript -->
+    <script>
+        let xmlFormatter = null;
+
+        // Toast Notification System
+        function showNotification(message, type = 'info', duration = 5000) {
+            const toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) return;
+
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : 
+                          type === 'error' ? 'bg-red-500' : 
+                          type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+            const icon = type === 'success' ? '✅' : 
+                        type === 'error' ? '❌' : 
+                        type === 'warning' ? '⚠️' : 'ℹ️';
+
+            toast.className = `${bgColor} text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 min-w-[300px] max-w-md animate-slide-in`;
+            toast.innerHTML = `
+                <span class="text-xl">${icon}</span>
+                <span class="flex-1 font-medium">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-white hover:text-gray-200 font-bold text-lg">×</button>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.style.animation = 'slide-out 0.3s ease-out';
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+        }
+
+        function initializeXmlFormatter() {
+            try {
+                if (typeof XmlFormatter !== 'undefined') {
+                    xmlFormatter = new XmlFormatter();
+                    console.log('✅ XML Formatter initialized successfully');
+                    updateXmlInputLineNumbers();
+                    updateXmlOutputLineNumbers();
+                } else {
+                    console.error('❌ XmlFormatter class not found');
+                }
+            } catch (error) {
+                console.error('❌ XML Formatter initialization failed:', error);
+            }
+        }
+
+        // Quick Templates
+        function loadXmlTemplate(template) {
+            const templates = {
+                'simple': {
+                    name: 'Simple XML',
+                    xml: `<?xml version="1.0" encoding="UTF-8"?>
+<person>
+    <name>John Doe</name>
+    <age>30</age>
+    <city>New York</city>
+</person>`
+                },
+                'with-attributes': {
+                    name: 'XML with Attributes',
+                    xml: `<?xml version="1.0" encoding="UTF-8"?>
+<bookstore>
+    <book id="1" category="fiction">
+        <title>XML Guide</title>
+        <author>John Smith</author>
+        <price>29.99</price>
+    </book>
+    <book id="2" category="non-fiction">
+        <title>Web Development</title>
+        <author>Jane Doe</author>
+        <price>39.99</price>
+    </book>
+</bookstore>`
+                },
+                'nested': {
+                    name: 'Nested XML',
+                    xml: `<?xml version="1.0" encoding="UTF-8"?>
+<company>
+    <name>Tech Corp</name>
+    <employees>
+        <employee>
+            <id>1</id>
+            <name>Alice</name>
+            <department>Engineering</department>
+        </employee>
+        <employee>
+            <id>2</id>
+            <name>Bob</name>
+            <department>Marketing</department>
+        </employee>
+    </employees>
+</company>`
+                },
+                'complex': {
+                    name: 'Complex XML',
+                    xml: `<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <metadata>
+        <version>1.0</version>
+        <created>2024-01-01</created>
+    </metadata>
+    <data>
+        <item id="1" type="primary">
+            <name>Item One</name>
+            <description>First item description</description>
+            <tags>
+                <tag>important</tag>
+                <tag>urgent</tag>
+            </tags>
+        </item>
+        <item id="2" type="secondary">
+            <name>Item Two</name>
+            <description>Second item description</description>
+        </item>
+    </data>
+</root>`
+                }
+            };
+
+            const preset = templates[template];
+            if (preset) {
+                document.getElementById('xml-input').value = preset.xml;
+                updateXmlInputLineNumbers();
+                showNotification(`Loaded ${preset.name} template`, 'success');
+            }
+        }
+
+        function formatXml() {
+            if (!xmlFormatter) {
+                showNotification('XML Formatter not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const input = document.getElementById('xml-input').value.trim();
+            if (!input) {
+                showNotification('Please enter XML data to format.', 'warning');
+                document.getElementById('xml-input').focus();
+                return;
+            }
+
+            const formatBtn = document.querySelector('button[onclick="formatXml()"]');
+            const originalHTML = formatBtn ? formatBtn.innerHTML : '';
+            if (formatBtn) {
+                formatBtn.disabled = true;
+                formatBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Formatting...</span>';
+            }
+
+            setTimeout(() => {
+                try {
+                    const result = xmlFormatter.formatXml(input);
+                    
+                    if (result.success) {
+                        document.getElementById('xml-output').value = result.formatted;
+                        updateXmlOutputLineNumbers();
+                        hideAllXmlResults();
+                        showXmlValidationResults(result);
+                        showNotification('XML formatted successfully!', 'success');
+                    } else {
+                        document.getElementById('xml-output').value = '';
+                        updateXmlOutputLineNumbers();
+                        hideAllXmlResults();
+                        showXmlErrorResults(result);
+                        showNotification('XML formatting failed: ' + result.error, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error in formatXml:', error);
+                    showNotification('Error formatting XML: ' + (error.message || 'Unknown error'), 'error');
+                } finally {
+                    if (formatBtn) {
+                        formatBtn.disabled = false;
+                        formatBtn.innerHTML = originalHTML;
+                    }
+                }
+            }, 300);
+        }
+
+        function validateXml() {
+            if (!xmlFormatter) {
+                showNotification('XML Formatter not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const input = document.getElementById('xml-input').value.trim();
+            if (!input) {
+                showNotification('Please enter XML data to validate.', 'warning');
+                document.getElementById('xml-input').focus();
+                return;
+            }
+
+            const validateBtn = document.querySelector('button[onclick="validateXml()"]');
+            const originalHTML = validateBtn ? validateBtn.innerHTML : '';
+            if (validateBtn) {
+                validateBtn.disabled = true;
+                validateBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Validating...</span>';
+            }
+
+            setTimeout(() => {
+                try {
+                    const result = xmlFormatter.validateXml(input);
+                    
+                    if (result.success) {
+                        document.getElementById('xml-output').value = result.formatted || input;
+                        updateXmlOutputLineNumbers();
+                        hideAllXmlResults();
+                        showXmlValidationResults(result);
+                        if (result.structure) {
+                            showXmlStructureAnalysis(result.structure);
+                        }
+                        showNotification('XML is valid!', 'success');
+                    } else {
+                        document.getElementById('xml-output').value = '';
+                        updateXmlOutputLineNumbers();
+                        hideAllXmlResults();
+                        showXmlErrorResults(result);
+                        showNotification('XML validation failed: ' + result.error, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error in validateXml:', error);
+                    showNotification('Error validating XML: ' + (error.message || 'Unknown error'), 'error');
+                } finally {
+                    if (validateBtn) {
+                        validateBtn.disabled = false;
+                        validateBtn.innerHTML = originalHTML;
+                    }
+                }
+            }, 300);
+        }
+
+        function minifyXml() {
+            if (!xmlFormatter) {
+                showNotification('XML Formatter not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const input = document.getElementById('xml-input').value.trim();
+            if (!input) {
+                showNotification('Please enter XML data to minify.', 'warning');
+                document.getElementById('xml-input').focus();
+                return;
+            }
+
+            const minifyBtn = document.querySelector('button[onclick="minifyXml()"]');
+            const originalHTML = minifyBtn ? minifyBtn.innerHTML : '';
+            if (minifyBtn) {
+                minifyBtn.disabled = true;
+                minifyBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Minifying...</span>';
+            }
+
+            setTimeout(() => {
+                try {
+                    const result = xmlFormatter.minifyXml(input);
+                    
+                    if (result.success) {
+                        document.getElementById('xml-output').value = result.minified;
+                        updateXmlOutputLineNumbers();
+                        hideAllXmlResults();
+                        showXmlMinifyResults(result);
+                        showNotification('XML minified successfully!', 'success');
+                    } else {
+                        document.getElementById('xml-output').value = '';
+                        updateXmlOutputLineNumbers();
+                        hideAllXmlResults();
+                        showXmlErrorResults(result);
+                        showNotification('XML minification failed: ' + result.error, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error in minifyXml:', error);
+                    showNotification('Error minifying XML: ' + (error.message || 'Unknown error'), 'error');
+                } finally {
+                    if (minifyBtn) {
+                        minifyBtn.disabled = false;
+                        minifyBtn.innerHTML = originalHTML;
+                    }
+                }
+            }, 300);
+        }
+
+        function convertXml(format) {
+            if (!xmlFormatter) {
+                showNotification('XML Formatter not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const input = document.getElementById('xml-input').value.trim();
+            if (!input) {
+                showNotification('Please enter XML data to convert.', 'warning');
+                document.getElementById('xml-input').focus();
+                return;
+            }
+
+            const convertBtns = document.querySelectorAll(`button[onclick="convertXml('${format}')"]`);
+            convertBtns.forEach(btn => {
+                const originalHTML = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="inline-block animate-spin">⏳</span>';
+                
+                setTimeout(() => {
+                    try {
+                        const result = xmlFormatter.convertXml(input, format);
+                        
+                        if (result.success) {
+                            document.getElementById('xml-output').value = result.converted;
+                            updateXmlOutputLineNumbers();
+                            hideAllXmlResults();
+                            showXmlConversionResults(result);
+                            showNotification(`Converted to ${format.toUpperCase()} successfully!`, 'success');
+                        } else {
+                            document.getElementById('xml-output').value = '';
+                            updateXmlOutputLineNumbers();
+                            hideAllXmlResults();
+                            showXmlErrorResults(result);
+                            showNotification(`Conversion to ${format.toUpperCase()} failed: ` + result.error, 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error in convertXml:', error);
+                        showNotification('Error converting XML: ' + (error.message || 'Unknown error'), 'error');
+                    } finally {
+                        btn.disabled = false;
+                        btn.innerHTML = originalHTML;
+                    }
+                }, 300);
+            });
+        }
+
+        function clearXml() {
+            document.getElementById('xml-input').value = '';
+            document.getElementById('xml-output').value = '';
+            document.getElementById('xml-input-lines').innerHTML = '<div class="text-center text-xs" style="height: 24px; line-height: 24px; display: flex; align-items: center; justify-content: center;">1</div>';
+            document.getElementById('xml-output-lines').innerHTML = '<div class="text-center text-xs" style="height: 24px; line-height: 24px; display: flex; align-items: center; justify-content: center;">1</div>';
+            hideAllXmlResults();
+            showNotification('XML inputs cleared', 'info');
+        }
+
+        function copyXmlOutput() {
+            const output = document.getElementById('xml-output').value;
+            if (!output) {
+                showNotification('No output to copy.', 'warning');
+                return;
+            }
+
+            navigator.clipboard.writeText(output).then(() => {
+                showNotification('Output copied to clipboard!', 'success');
+            }).catch(() => {
+                showNotification('Failed to copy to clipboard.', 'error');
+            });
+        }
+
+        function downloadXmlOutput() {
+            const output = document.getElementById('xml-output').value;
+            if (!output) {
+                showNotification('No output to download.', 'warning');
+                return;
+            }
+
+            try {
+                const blob = new Blob([output], { type: 'application/xml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `xml-output-${Date.now()}.xml`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showNotification('XML file downloaded successfully!', 'success');
+            } catch (error) {
+                showNotification('Failed to download file: ' + (error.message || 'Unknown error'), 'error');
+            }
+        }
+
+        function showXmlValidationResults(result) {
+            const resultsDiv = document.getElementById('xml-validation-results');
+            const contentDiv = document.getElementById('xml-validation-content');
+            
+            const size = result.size || 0;
+            const elementCount = result.elementCount || 0;
+            const attributeCount = result.attributeCount || 0;
+            const depth = result.depth || 0;
+            
+            let html = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 border-green-300 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl">✅</span>
+                                <span class="text-xl font-bold text-green-600">Valid XML</span>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-600 mt-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold">Size:</span>
+                                <span class="text-blue-600 font-bold">${size.toLocaleString()} characters</span>
+                            </div>
+                        </div>
+                    </div>
+            `;
+            
+            if (elementCount > 0 || attributeCount > 0 || depth > 0) {
+                html += `
+                    <div class="grid grid-cols-3 gap-3">
+                        ${elementCount > 0 ? `
+                            <div class="bg-white rounded-lg p-3 border-2 border-blue-300 shadow-sm">
+                                <div class="text-xs font-semibold text-gray-600 mb-1">📋 Elements</div>
+                                <div class="text-lg font-bold text-blue-600">${elementCount}</div>
+                            </div>
+                        ` : ''}
+                        ${attributeCount > 0 ? `
+                            <div class="bg-white rounded-lg p-3 border-2 border-purple-300 shadow-sm">
+                                <div class="text-xs font-semibold text-gray-600 mb-1">🔖 Attributes</div>
+                                <div class="text-lg font-bold text-purple-600">${attributeCount}</div>
+                            </div>
+                        ` : ''}
+                        ${depth > 0 ? `
+                            <div class="bg-white rounded-lg p-3 border-2 border-green-300 shadow-sm">
+                                <div class="text-xs font-semibold text-gray-600 mb-1">📊 Depth</div>
+                                <div class="text-lg font-bold text-green-600">${depth} levels</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
+            
+            contentDiv.innerHTML = html;
+            resultsDiv.classList.remove('hidden');
+        }
+
+        function showXmlMinifyResults(result) {
+            const resultsDiv = document.getElementById('xml-validation-results');
+            const contentDiv = document.getElementById('xml-validation-content');
+            
+            const compressionPercent = parseFloat(result.size.compression);
+            const compressionColor = compressionPercent >= 30 ? 'text-green-600' : compressionPercent >= 15 ? 'text-blue-600' : 'text-yellow-600';
+            
+            let html = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 border-green-300 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl">📦</span>
+                                <span class="text-xl font-bold text-green-600">Minified Successfully</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📊 Original Size</span>
+                            <span class="text-lg font-bold text-gray-800">${result.size.original.toLocaleString()} characters</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-purple-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📦 Minified Size</span>
+                            <span class="text-lg font-bold text-purple-600">${result.size.minified.toLocaleString()} characters</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-green-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💾 Space Saved</span>
+                            <span class="text-xl font-bold ${compressionColor}">${result.size.saved.toLocaleString()} characters</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: ${Math.min(compressionPercent, 100)}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">${result.size.compression}% compression</div>
+                    </div>
+                </div>
+            `;
+            
+            contentDiv.innerHTML = html;
+            resultsDiv.classList.remove('hidden');
+        }
+
+        function showXmlConversionResults(result) {
+            const resultsDiv = document.getElementById('xml-validation-results');
+            const contentDiv = document.getElementById('xml-validation-content');
+            
+            const formatName = result.format ? result.format.toUpperCase() : 'Unknown Format';
+            const formatIcon = result.format === 'json' ? '🔧' : result.format === 'yaml' ? '📝' : result.format === 'csv' ? '📊' : result.format === 'html' ? '🌐' : '🔄';
+            
+            let html = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 border-green-300 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl">${formatIcon}</span>
+                                <span class="text-xl font-bold text-green-600">Converted to ${formatName}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📏 Output Size</span>
+                            <span class="text-lg font-bold text-blue-600">${result.converted.length.toLocaleString()} characters</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">${formatName} format</div>
+                    </div>
+                </div>
+            `;
+            
+            contentDiv.innerHTML = html;
+            resultsDiv.classList.remove('hidden');
+        }
+
+        function showXmlStructureAnalysis(structure) {
+            const resultsDiv = document.getElementById('xml-structure-analysis');
+            const contentDiv = document.getElementById('xml-structure-content');
+            
+            let html = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-sm">
+                            <div class="text-sm font-semibold text-gray-600 mb-1">📋 Root Element</div>
+                            <div class="text-lg font-bold text-blue-600">${structure.rootElement || 'N/A'}</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border-2 border-purple-300 shadow-sm">
+                            <div class="text-sm font-semibold text-gray-600 mb-1">📊 Total Elements</div>
+                            <div class="text-lg font-bold text-purple-600">${structure.totalElements || 'N/A'}</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border-2 border-green-300 shadow-sm">
+                            <div class="text-sm font-semibold text-gray-600 mb-1">📏 Max Depth</div>
+                            <div class="text-lg font-bold text-green-600">${structure.maxDepth || 'N/A'} levels</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border-2 border-orange-300 shadow-sm">
+                            <div class="text-sm font-semibold text-gray-600 mb-1">🔖 Has Attributes</div>
+                            <div class="text-lg font-bold ${structure.hasAttributes ? 'text-green-600' : 'text-gray-600'}">${structure.hasAttributes ? 'Yes' : 'No'}</div>
+                        </div>
+                    </div>
+            `;
+            
+            if (structure.elements && structure.elements.length > 0) {
+                html += `
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border-2 border-blue-200 shadow-sm">
+                        <div class="text-sm font-semibold text-gray-700 mb-3">🔑 Elements (${structure.elements.length})</div>
+                        <div class="flex flex-wrap gap-2">
+                            ${structure.elements.slice(0, 20).map(elem => `<span class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm">${elem}</span>`).join('')}
+                            ${structure.elements.length > 20 ? `<span class="text-xs text-gray-500 font-semibold">+${structure.elements.length - 20} more</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
+            
+            contentDiv.innerHTML = html;
+            resultsDiv.classList.remove('hidden');
+        }
+
+        function showXmlErrorResults(result) {
+            const resultsDiv = document.getElementById('xml-error-display');
+            const contentDiv = document.getElementById('xml-error-content');
+            
+            let html = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 border-red-300 shadow-sm">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="text-3xl">❌</span>
+                            <span class="text-xl font-bold text-red-600">XML Syntax Error</span>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-400 font-mono text-sm">
+                            ${result.error || 'Unknown error'}
+                        </div>
+                    </div>
+            `;
+            
+            if (result.line) {
+                html += `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white rounded-lg p-4 border-2 border-red-300 shadow-sm">
+                            <div class="text-sm font-semibold text-gray-600 mb-1">📍 Error Line</div>
+                            <div class="text-xl font-bold text-red-600">Line ${result.line}</div>
+                        </div>
+                        ${result.column ? `
+                            <div class="bg-white rounded-lg p-4 border-2 border-orange-300 shadow-sm">
+                                <div class="text-sm font-semibold text-gray-600 mb-1">📍 Error Column</div>
+                                <div class="text-xl font-bold text-orange-600">Column ${result.column}</div>
+                            </div>
+                        ` : `
+                            <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-sm">
+                                <div class="text-sm font-semibold text-gray-600 mb-1">📏 File Size</div>
+                                <div class="text-lg font-bold text-blue-600">${result.size ? result.size.toLocaleString() : 'N/A'} characters</div>
+                            </div>
+                        `}
+                    </div>
+                `;
+            } else if (result.size) {
+                html += `
+                    <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-sm">
+                        <div class="text-sm font-semibold text-gray-600 mb-1">📏 File Size</div>
+                        <div class="text-lg font-bold text-blue-600">${result.size.toLocaleString()} characters</div>
+                    </div>
+                `;
+            }
+            
+            html += `
+                    <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg p-4 border-2 border-yellow-200 shadow-sm">
+                        <div class="text-sm font-semibold text-yellow-800 mb-3">💡 Common XML Errors:</div>
+                        <ul class="text-sm text-yellow-700 space-y-2">
+                            <li class="flex items-start gap-2"><span>•</span><span>Missing closing tags</span></li>
+                            <li class="flex items-start gap-2"><span>•</span><span>Mismatched tag names</span></li>
+                            <li class="flex items-start gap-2"><span>•</span><span>Invalid characters in tag names</span></li>
+                            <li class="flex items-start gap-2"><span>•</span><span>Unclosed attributes</span></li>
+                            <li class="flex items-start gap-2"><span>•</span><span>Invalid entity references</span></li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            contentDiv.innerHTML = html;
+            resultsDiv.classList.remove('hidden');
+        }
+
+        function hideAllXmlResults() {
+            document.getElementById('xml-validation-results').classList.add('hidden');
+            document.getElementById('xml-structure-analysis').classList.add('hidden');
+            document.getElementById('xml-error-display').classList.add('hidden');
+        }
+
+        function updateXmlInputLineNumbers() {
+            const textarea = document.getElementById('xml-input');
+            const linesDiv = document.getElementById('xml-input-lines');
+            
+            const content = textarea.value;
+            const lines = content.split('\n');
+            let lineCount = lines.length;
+            
+            if (content.trim() === '') {
+                lineCount = 1;
+            }
+            
+            let lineNumbers = '';
+            for (let i = 1; i <= lineCount; i++) {
+                lineNumbers += `<div class="text-center text-xs" style="height: 24px; line-height: 24px; display: flex; align-items: center; justify-content: center;">${i}</div>`;
+            }
+            
+            linesDiv.innerHTML = lineNumbers;
+        }
+
+        function updateXmlOutputLineNumbers() {
+            const textarea = document.getElementById('xml-output');
+            const linesDiv = document.getElementById('xml-output-lines');
+            
+            const content = textarea.value;
+            const lines = content.split('\n');
+            let lineCount = lines.length;
+            
+            if (content.trim() === '') {
+                lineCount = 1;
+            }
+            
+            let lineNumbers = '';
+            for (let i = 1; i <= lineCount; i++) {
+                lineNumbers += `<div class="text-center text-xs" style="height: 24px; line-height: 24px; display: flex; align-items: center; justify-content: center;">${i}</div>`;
+            }
+            
+            linesDiv.innerHTML = lineNumbers;
+        }
+
+        function syncXmlInputScroll() {
+            const textarea = document.getElementById('xml-input');
+            const linesDiv = document.getElementById('xml-input-lines');
+            linesDiv.scrollTop = textarea.scrollTop;
+        }
+
+        function syncXmlOutputScroll() {
+            const textarea = document.getElementById('xml-output');
+            const linesDiv = document.getElementById('xml-output-lines');
+            linesDiv.scrollTop = textarea.scrollTop;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeXmlFormatter();
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        const availableTools = [
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', pageUrl: '/tools/age-calculator.html' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', pageUrl: '/tools/bmi-calculator.html' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', pageUrl: '/tools/loan-calculator.html' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', pageUrl: '/tools/investment-calculator.html' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', pageUrl: '/tools/tax-calculator.html' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', pageUrl: '/tools/business-metrics.html' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', pageUrl: '/tools/currency-converter.html' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', pageUrl: '/tools/retirement-calculator.html' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', pageUrl: '/tools/mortgage-calculator.html' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', pageUrl: '/tools/budget-planner.html' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', pageUrl: '/tools/salary-calculator.html' },
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', pageUrl: '/tools/json-formatter.html' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', modalId: 'base64-encoder-modal' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', modalId: 'hash-generator-modal' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', modalId: 'url-encoder-modal' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', modalId: 'regex-tester-modal' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', modalId: 'css-js-minifier-modal' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', modalId: 'color-palette-modal' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', modalId: 'lorem-ipsum-modal' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            btnEl.dataset.modalId = tool.modalId || '';
+            btnEl.dataset.pageUrl = tool.pageUrl || '';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            const modalId = btnEl.dataset.modalId;
+            const pageUrl = btnEl.dataset.pageUrl;
+            
+            if (pageUrl) {
+                window.location.href = pageUrl;
+            } else if (modalId && typeof openModal === 'function') {
+                window.location.href = `/#${modalId}`;
+            } else {
+                window.location.href = '/#tools';
+            }
+        }
+        
+        function initToolSuggestions() {
+            updateToolSuggestion();
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        #tool-suggestion-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+        
+        @keyframes slide-in {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slide-out {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        .animate-slide-in {
+            animation: slide-in 0.3s ease-out;
+        }
+        
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in {
+            animation: fade-in 0.5s ease-out;
+        }
+    </style>
+</body>
+</html>
+
+

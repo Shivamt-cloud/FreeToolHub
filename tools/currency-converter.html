@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Currency Converter - FreeToolHub</title>
+    <meta name="description" content="Convert between 20+ currencies with real-time exchange rates. Professional currency conversion and travel expense calculator.">
+    <meta property="og:title" content="Currency Converter - FreeToolHub">
+    <meta property="og:description" content="Convert between 20+ currencies with real-time exchange rates">
+    <meta property="og:url" content="https://freetoolhub.in/tools/currency-converter.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">💱 Currency Converter</h1>
+                    <p class="text-gray-600 text-lg">Convert between 20+ currencies with real-time exchange rates</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-cyan-500 to-teal-600 text-white px-6 py-3 rounded-lg hover:from-cyan-600 hover:to-teal-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Currency Converter</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <!-- Toast Notification Container -->
+                <div id="toast-container" class="fixed top-24 right-4 z-50 space-y-2"></div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Input Section -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Quick Amount Templates -->
+                        <div class="bg-gradient-to-r from-cyan-50 to-teal-50 rounded-xl p-6 border-2 border-cyan-200">
+                            <h4 class="text-lg font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>⚡</span> Quick Amount Templates
+                            </h4>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <button onclick="loadAmountTemplate(10)" class="bg-white hover:bg-cyan-100 text-gray-800 font-semibold py-2 px-3 rounded-lg border-2 border-cyan-300 hover:border-cyan-400 transition-all duration-200 transform hover:scale-105 shadow-sm text-sm">
+                                    <div class="text-lg mb-1">💵</div>
+                                    <div class="text-xs">$10</div>
+                                </button>
+                                <button onclick="loadAmountTemplate(50)" class="bg-white hover:bg-cyan-100 text-gray-800 font-semibold py-2 px-3 rounded-lg border-2 border-cyan-300 hover:border-cyan-400 transition-all duration-200 transform hover:scale-105 shadow-sm text-sm">
+                                    <div class="text-lg mb-1">💰</div>
+                                    <div class="text-xs">$50</div>
+                                </button>
+                                <button onclick="loadAmountTemplate(100)" class="bg-white hover:bg-cyan-100 text-gray-800 font-semibold py-2 px-3 rounded-lg border-2 border-cyan-300 hover:border-cyan-400 transition-all duration-200 transform hover:scale-105 shadow-sm text-sm">
+                                    <div class="text-lg mb-1">💼</div>
+                                    <div class="text-xs">$100</div>
+                                </button>
+                                <button onclick="loadAmountTemplate(1000)" class="bg-white hover:bg-cyan-100 text-gray-800 font-semibold py-2 px-3 rounded-lg border-2 border-cyan-300 hover:border-cyan-400 transition-all duration-200 transform hover:scale-105 shadow-sm text-sm">
+                                    <div class="text-lg mb-1">🏆</div>
+                                    <div class="text-xs">$1000</div>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Basic Currency Converter -->
+                        <div class="bg-gradient-to-br from-cyan-50 to-teal-50 rounded-xl p-6 border-2 border-cyan-200 shadow-lg">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-xl font-bold text-gray-700 flex items-center gap-2">
+                                    <span>💱</span> Currency Converter
+                                </h4>
+                                <button onclick="resetConverterForm()" class="text-sm text-gray-600 hover:text-gray-800 font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                    Reset
+                                </button>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>💵</span> Amount
+                                    </label>
+                                    <input type="number" id="convert-amount" min="0" step="0.01" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all" placeholder="100" value="100">
+                                    <p class="text-xs text-gray-500 mt-1">Enter the amount to convert</p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>📍</span> From Currency
+                                        </label>
+                                        <select id="from-currency" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all" onchange="displayExchangeRates(this.value)">
+                                            <option value="USD">🇺🇸 US Dollar ($)</option>
+                                            <option value="EUR">🇪🇺 Euro (€)</option>
+                                            <option value="GBP">🇬🇧 British Pound (£)</option>
+                                            <option value="JPY">🇯🇵 Japanese Yen (¥)</option>
+                                            <option value="CAD">🇨🇦 Canadian Dollar (C$)</option>
+                                            <option value="AUD">🇦🇺 Australian Dollar (A$)</option>
+                                            <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
+                                            <option value="CNY">🇨🇳 Chinese Yuan (¥)</option>
+                                            <option value="INR">🇮🇳 Indian Rupee (₹)</option>
+                                            <option value="BRL">🇧🇷 Brazilian Real (R$)</option>
+                                            <option value="SGD">🇸🇬 Singapore Dollar (S$)</option>
+                                            <option value="AED">🇦🇪 UAE Dirham (د.إ)</option>
+                                            <option value="SAR">🇸🇦 Saudi Riyal (﷼)</option>
+                                            <option value="ZAR">🇿🇦 South African Rand (R)</option>
+                                            <option value="MXN">🇲🇽 Mexican Peso ($)</option>
+                                            <option value="KRW">🇰🇷 South Korean Won (₩)</option>
+                                            <option value="THB">🇹🇭 Thai Baht (฿)</option>
+                                            <option value="NZD">🇳🇿 New Zealand Dollar (NZ$)</option>
+                                            <option value="NOK">🇳🇴 Norwegian Krone (kr)</option>
+                                            <option value="SEK">🇸🇪 Swedish Krona (kr)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>🎯</span> To Currency
+                                        </label>
+                                        <select id="to-currency" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all">
+                                            <option value="EUR">🇪🇺 Euro (€)</option>
+                                            <option value="USD">🇺🇸 US Dollar ($)</option>
+                                            <option value="GBP">🇬🇧 British Pound (£)</option>
+                                            <option value="JPY">🇯🇵 Japanese Yen (¥)</option>
+                                            <option value="CAD">🇨🇦 Canadian Dollar (C$)</option>
+                                            <option value="AUD">🇦🇺 Australian Dollar (A$)</option>
+                                            <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
+                                            <option value="CNY">🇨🇳 Chinese Yuan (¥)</option>
+                                            <option value="INR">🇮🇳 Indian Rupee (₹)</option>
+                                            <option value="BRL">🇧🇷 Brazilian Real (R$)</option>
+                                            <option value="SGD">🇸🇬 Singapore Dollar (S$)</option>
+                                            <option value="AED">🇦🇪 UAE Dirham (د.إ)</option>
+                                            <option value="SAR">🇸🇦 Saudi Riyal (﷼)</option>
+                                            <option value="ZAR">🇿🇦 South African Rand (R)</option>
+                                            <option value="MXN">🇲🇽 Mexican Peso ($)</option>
+                                            <option value="KRW">🇰🇷 South Korean Won (₩)</option>
+                                            <option value="THB">🇹🇭 Thai Baht (฿)</option>
+                                            <option value="NZD">🇳🇿 New Zealand Dollar (NZ$)</option>
+                                            <option value="NOK">🇳🇴 Norwegian Krone (kr)</option>
+                                            <option value="SEK">🇸🇪 Swedish Krona (kr)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button onclick="swapCurrencies()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg border-2 border-gray-300 transition-all duration-200 flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                    </svg>
+                                    <span>Swap Currencies</span>
+                                </button>
+                            </div>
+                            <button onclick="convertCurrency()" id="convert-currency-btn" class="w-full mt-6 bg-gradient-to-r from-cyan-500 to-teal-600 text-white font-bold py-4 px-6 rounded-xl hover:from-cyan-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                </svg>
+                                <span>Convert Currency</span>
+                            </button>
+                        </div>
+
+                        <!-- Travel Expense Calculator -->
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>✈️</span> Travel Expense Calculator
+                            </h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>🏨</span> Hotel Cost
+                                    </label>
+                                    <input type="number" id="hotel-cost" min="0" step="0.01" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="200" value="200">
+                                    <p class="text-xs text-gray-500 mt-1">Accommodation expenses</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>🍽️</span> Food Cost
+                                    </label>
+                                    <input type="number" id="food-cost" min="0" step="0.01" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="100" value="100">
+                                    <p class="text-xs text-gray-500 mt-1">Meal expenses</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>🚗</span> Transportation Cost
+                                    </label>
+                                    <input type="number" id="transport-cost" min="0" step="0.01" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="50" value="50">
+                                    <p class="text-xs text-gray-500 mt-1">Travel/transport expenses</p>
+                                </div>
+                            </div>
+                            <button onclick="calculateTravelExpenses()" id="calculate-travel-btn" class="w-full mt-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-5m-6 5h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span>Calculate Travel Expenses</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <!-- Conversion Results -->
+                        <div class="bg-gradient-to-br from-cyan-50 to-teal-50 rounded-xl p-6 border-2 border-cyan-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>💱</span> Conversion Results
+                            </h4>
+                            <div id="conversion-results" class="space-y-3">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">💡</div>
+                                    <p class="text-sm">Enter amount and currencies to convert</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Travel Expense Results -->
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>✈️</span> Travel Expense Summary
+                            </h4>
+                            <div id="travel-results" class="space-y-3">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">💰</div>
+                                    <p class="text-sm">Enter travel expenses to calculate</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Exchange Rate Table -->
+                        <div class="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-6 border-2 border-gray-200 shadow-lg">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-xl font-bold text-gray-700 flex items-center gap-2">
+                                    <span>📊</span> Exchange Rates
+                                </h4>
+                                <button onclick="refreshExchangeRates()" id="refresh-rates-btn" class="px-3 py-2 bg-cyan-500 hover:bg-cyan-600 text-white text-sm rounded-lg transition-all duration-200 flex items-center gap-2 shadow-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                    Refresh
+                                </button>
+                            </div>
+                            <div id="exchange-rates" class="max-h-96 overflow-y-auto">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">📋</div>
+                                    <p class="text-sm">Select currencies to see exchange rates</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Currency Converter Dependencies -->
+    <script src="/src/js/CurrencyConverter.js?v=1&t=1726745000"></script>
+    
+    <!-- Currency Converter JavaScript -->
+    <script>
+        let currencyConverter = null;
+
+        // Toast notification function
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            toast.className = `${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] max-w-md animate-slide-in`;
+            toast.innerHTML = `
+                <span class="text-xl">${icon}</span>
+                <span class="flex-1">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-white hover:text-gray-200 font-bold">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, type === 'error' ? 5000 : 3000);
+        }
+
+        // Load quick amount templates
+        function loadAmountTemplate(amount) {
+            document.getElementById('convert-amount').value = amount;
+            showNotification(`Loaded $${amount.toLocaleString()} amount`, 'success');
+        }
+
+        // Swap currencies
+        function swapCurrencies() {
+            const fromCurrency = document.getElementById('from-currency').value;
+            const toCurrency = document.getElementById('to-currency').value;
+            
+            document.getElementById('from-currency').value = toCurrency;
+            document.getElementById('to-currency').value = fromCurrency;
+            
+            showNotification('Currencies swapped successfully!', 'success');
+        }
+
+        // Reset form
+        function resetConverterForm() {
+            document.getElementById('convert-amount').value = '';
+            document.getElementById('hotel-cost').value = '';
+            document.getElementById('food-cost').value = '';
+            document.getElementById('transport-cost').value = '';
+            
+            document.getElementById('conversion-results').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">💡</div>
+                    <p class="text-sm">Enter amount and currencies to convert</p>
+                </div>
+            `;
+            document.getElementById('travel-results').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">💰</div>
+                    <p class="text-sm">Enter travel expenses to calculate</p>
+                </div>
+            `;
+            document.getElementById('exchange-rates').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">📋</div>
+                    <p class="text-sm">Select currencies to see exchange rates</p>
+                </div>
+            `;
+            showNotification('Form reset successfully', 'info');
+        }
+
+        async function initializeCurrencyConverter() {
+            try {
+                if (typeof CurrencyConverter !== 'undefined') {
+                    currencyConverter = new CurrencyConverter();
+                    
+                    // Initialize rates
+                    if (typeof currencyConverter.initializeRates === 'function') {
+                        await currencyConverter.initializeRates();
+                    }
+                    
+                    console.log('✅ Currency Converter initialized successfully');
+                } else {
+                    console.error('❌ CurrencyConverter class not found');
+                }
+            } catch (error) {
+                console.error('❌ Error initializing Currency Converter:', error);
+            }
+        }
+
+        function convertCurrency() {
+            if (!currencyConverter) {
+                showNotification('Currency Converter not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const amount = parseFloat(document.getElementById('convert-amount').value);
+            const fromCurrency = document.getElementById('from-currency').value;
+            const toCurrency = document.getElementById('to-currency').value;
+
+            if (!amount || amount <= 0) {
+                showNotification('Please enter a valid amount.', 'warning');
+                document.getElementById('convert-amount').focus();
+                return;
+            }
+
+            if (fromCurrency === toCurrency) {
+                showNotification('Please select different currencies.', 'warning');
+                return;
+            }
+
+            const convertBtn = document.getElementById('convert-currency-btn');
+            const originalHTML = convertBtn.innerHTML;
+            convertBtn.disabled = true;
+            convertBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Converting...</span>';
+
+            setTimeout(() => {
+                const result = currencyConverter.convertCurrency(amount, fromCurrency, toCurrency);
+                if (result.success) {
+                    showConversionResults(result);
+                    displayExchangeRates(fromCurrency);
+                    showNotification('Currency converted successfully!', 'success');
+                } else {
+                    showNotification('Error converting currency: ' + result.error, 'error');
+                }
+                convertBtn.disabled = false;
+                convertBtn.innerHTML = originalHTML;
+            }, 300);
+        }
+
+        function showConversionResults(result) {
+            const fromCurrency = currencyConverter.currencies[result.originalCurrency];
+            const toCurrency = currencyConverter.currencies[result.targetCurrency];
+            const fromSymbol = fromCurrency ? fromCurrency.symbol : '$';
+            const toSymbol = toCurrency ? toCurrency.symbol : '$';
+            
+            // Format amounts based on currency (some currencies don't use decimals)
+            const fromDecimals = ['JPY', 'KRW', 'THB'].includes(result.originalCurrency) ? 0 : 2;
+            const toDecimals = ['JPY', 'KRW', 'THB'].includes(result.targetCurrency) ? 0 : 2;
+            
+            const formattedOriginal = result.originalAmount.toLocaleString('en-US', {minimumFractionDigits: fromDecimals, maximumFractionDigits: fromDecimals});
+            const formattedConverted = result.convertedAmount.toLocaleString('en-US', {minimumFractionDigits: toDecimals, maximumFractionDigits: toDecimals});
+            
+            document.getElementById('conversion-results').innerHTML = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 border-gray-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">${fromCurrency ? fromCurrency.flag : ''} Original Amount</span>
+                            <span class="text-2xl font-bold text-gray-800">${fromSymbol}${formattedOriginal}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">${result.originalCurrency} - ${fromCurrency ? fromCurrency.name : ''}</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-5 border-2 border-cyan-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">${toCurrency ? toCurrency.flag : ''} Converted Amount</span>
+                            <span class="text-2xl font-bold text-cyan-600">${toSymbol}${formattedConverted}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">${result.targetCurrency} - ${toCurrency ? toCurrency.name : ''}</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📊 Exchange Rate</span>
+                            <span class="text-lg font-bold text-blue-600">${result.exchangeRate.toFixed(4)}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">1 ${result.originalCurrency} = ${result.exchangeRate.toFixed(4)} ${result.targetCurrency}</div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-cyan-100 to-teal-100 rounded-lg p-3 border border-cyan-200">
+                        <div class="text-xs font-semibold text-gray-700 mb-2">💡 Quick Info</div>
+                        <div class="text-xs text-gray-600">
+                            ${result.originalAmount >= 1000 ? '💼 Large amount conversion' : '💵 Standard conversion'}
+                        </div>
+                        <div class="text-xs text-gray-600 mt-1">
+                            Rate updated: ${currencyConverter.lastUpdated ? new Date(currencyConverter.lastUpdated).toLocaleTimeString() : 'Just now'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function calculateTravelExpenses() {
+            if (!currencyConverter) {
+                showNotification('Currency Converter not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const hotelCost = parseFloat(document.getElementById('hotel-cost').value) || 0;
+            const foodCost = parseFloat(document.getElementById('food-cost').value) || 0;
+            const transportCost = parseFloat(document.getElementById('transport-cost').value) || 0;
+            const fromCurrency = document.getElementById('from-currency').value;
+            const toCurrency = document.getElementById('to-currency').value;
+
+            if (fromCurrency === toCurrency) {
+                showNotification('Please select different currencies for conversion.', 'warning');
+                return;
+            }
+
+            if (hotelCost === 0 && foodCost === 0 && transportCost === 0) {
+                showNotification('Please enter at least one expense amount.', 'warning');
+                return;
+            }
+
+            const travelBtn = document.getElementById('calculate-travel-btn');
+            const originalHTML = travelBtn.innerHTML;
+            travelBtn.disabled = true;
+            travelBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Calculating...</span>';
+
+            setTimeout(() => {
+                const expenses = [
+                    { category: 'Hotel', amount: hotelCost },
+                    { category: 'Food', amount: foodCost },
+                    { category: 'Transportation', amount: transportCost }
+                ];
+
+                let result;
+                if (typeof currencyConverter.calculateTravelExpenses === 'function') {
+                    result = currencyConverter.calculateTravelExpenses(expenses, fromCurrency, toCurrency);
+                } else {
+                    // Fallback if method doesn't exist
+                    const total = hotelCost + foodCost + transportCost;
+                    const conversion = currencyConverter.convertCurrency(total, fromCurrency, toCurrency);
+                    if (conversion.success) {
+                        const expenseResults = expenses.map(expense => {
+                            const converted = currencyConverter.convertCurrency(expense.amount, fromCurrency, toCurrency);
+                            return {
+                                category: expense.category,
+                                originalAmount: expense.amount,
+                                convertedAmount: converted.success ? converted.convertedAmount : 0
+                            };
+                        });
+                        result = {
+                            success: true,
+                            fromCurrency: fromCurrency,
+                            toCurrency: toCurrency,
+                            originalTotal: total,
+                            convertedTotal: conversion.convertedAmount,
+                            expenses: expenseResults
+                        };
+                    } else {
+                        result = conversion;
+                    }
+                }
+                
+                if (result.success) {
+                    showTravelResults(result);
+                    showNotification('Travel expenses calculated successfully!', 'success');
+                } else {
+                    showNotification('Error calculating travel expenses: ' + result.error, 'error');
+                }
+                travelBtn.disabled = false;
+                travelBtn.innerHTML = originalHTML;
+            }, 300);
+        }
+
+        function showTravelResults(result) {
+            const fromCurrencyObj = currencyConverter.currencies[result.fromCurrency];
+            const toCurrencyObj = currencyConverter.currencies[result.toCurrency];
+            const fromSymbol = fromCurrencyObj ? fromCurrencyObj.symbol : '$';
+            const toSymbol = toCurrencyObj ? toCurrencyObj.symbol : '$';
+            
+            const toDecimals = ['JPY', 'KRW', 'THB'].includes(result.toCurrency) ? 0 : 2;
+            const fromDecimals = ['JPY', 'KRW', 'THB'].includes(result.fromCurrency) ? 0 : 2;
+            
+            const formattedOriginal = result.originalTotal.toLocaleString('en-US', {minimumFractionDigits: fromDecimals, maximumFractionDigits: fromDecimals});
+            const formattedConverted = result.convertedTotal.toLocaleString('en-US', {minimumFractionDigits: toDecimals, maximumFractionDigits: toDecimals});
+            
+            document.getElementById('travel-results').innerHTML = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 border-gray-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">${fromCurrencyObj ? fromCurrencyObj.flag : ''} Total (${result.fromCurrency})</span>
+                            <span class="text-2xl font-bold text-gray-800">${fromSymbol}${formattedOriginal}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Original currency total</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-5 border-2 border-blue-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">${toCurrencyObj ? toCurrencyObj.flag : ''} Total (${result.toCurrency})</span>
+                            <span class="text-2xl font-bold text-blue-600">${toSymbol}${formattedConverted}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Converted currency total</div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="text-xs font-semibold text-gray-700 mb-2">📋 Expense Breakdown</div>
+                        ${result.expenses.filter(e => e.amount > 0).map(expense => {
+                            const expenseIcon = expense.category === 'Hotel' ? '🏨' : expense.category === 'Food' ? '🍽️' : '🚗';
+                            const formattedExpense = expense.convertedAmount.toLocaleString('en-US', {minimumFractionDigits: toDecimals, maximumFractionDigits: toDecimals});
+                            return `
+                                <div class="bg-white rounded-lg p-3 border-2 border-gray-200 shadow-sm">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700 flex items-center gap-2">
+                                            <span>${expenseIcon}</span>
+                                            <span>${expense.category}</span>
+                                        </span>
+                                        <span class="font-bold text-blue-600">${toSymbol}${formattedExpense}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayExchangeRates(baseCurrency) {
+            const ratesDiv = document.getElementById('exchange-rates');
+            const rates = currencyConverter.getAllRates(baseCurrency);
+            
+            if (rates.success) {
+                const baseCurrencyObj = currencyConverter.currencies[baseCurrency];
+                const baseFlag = baseCurrencyObj ? baseCurrencyObj.flag : '';
+                const baseSymbol = baseCurrencyObj ? baseCurrencyObj.symbol : '$';
+                
+                let html = `
+                    <div class="space-y-3">
+                        <div class="bg-gradient-to-r from-cyan-100 to-teal-100 rounded-lg p-3 border border-cyan-200 mb-3">
+                            <div class="text-xs font-semibold text-gray-700 mb-1">Base Currency: ${baseFlag} ${baseCurrency}</div>
+                            <div class="text-xs text-gray-600">1 ${baseCurrency} = rates below</div>
+                        </div>
+                `;
+                
+                const sortedRates = Object.keys(rates.rates)
+                    .map(currency => ({ currency, ...rates.rates[currency] }))
+                    .sort((a, b) => a.currency.localeCompare(b.currency));
+                
+                sortedRates.forEach(({ currency, rate, flag, name }) => {
+                    const rateClass = rate >= 1 ? 'text-green-600' : 'text-blue-600';
+                    html += `
+                        <div class="bg-white rounded-lg p-3 border-2 border-gray-200 shadow-sm hover:border-cyan-300 transition-colors">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg">${flag}</span>
+                                    <div>
+                                        <div class="text-sm font-semibold text-gray-700">${currency}</div>
+                                        <div class="text-xs text-gray-500">${name}</div>
+                                    </div>
+                                </div>
+                                <span class="font-bold ${rateClass}">${rate.toFixed(4)}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                ratesDiv.innerHTML = html;
+            } else {
+                ratesDiv.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <div class="text-4xl mb-2">⚠️</div>
+                        <p class="text-sm">Unable to load exchange rates</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function refreshExchangeRates() {
+            const refreshBtn = document.getElementById('refresh-rates-btn');
+            const originalHTML = refreshBtn.innerHTML;
+            refreshBtn.disabled = true;
+            refreshBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span>';
+            
+            try {
+                if (currencyConverter && typeof currencyConverter.refreshRates === 'function') {
+                    await currencyConverter.refreshRates();
+                }
+                
+                const fromCurrency = document.getElementById('from-currency').value;
+                displayExchangeRates(fromCurrency);
+                showNotification('Exchange rates refreshed!', 'success');
+            } catch (error) {
+                showNotification('Error refreshing rates: ' + error.message, 'error');
+            } finally {
+                refreshBtn.disabled = false;
+                refreshBtn.innerHTML = originalHTML;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(async () => {
+                await initializeCurrencyConverter();
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        const availableTools = [
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', pageUrl: '/tools/age-calculator.html' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', pageUrl: '/tools/bmi-calculator.html' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', pageUrl: '/tools/loan-calculator.html' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', pageUrl: '/tools/investment-calculator.html' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', pageUrl: '/tools/tax-calculator.html' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', pageUrl: '/tools/business-metrics.html' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', modalId: 'retirement-calculator-modal' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', modalId: 'mortgage-calculator-modal' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', modalId: 'budget-planner-modal' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', modalId: 'salary-calculator-modal' },
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', modalId: 'json-formatter-modal' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', modalId: 'xml-formatter-modal' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', modalId: 'base64-encoder-modal' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', modalId: 'hash-generator-modal' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', modalId: 'url-encoder-modal' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', modalId: 'regex-tester-modal' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', modalId: 'css-js-minifier-modal' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', modalId: 'color-palette-modal' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', modalId: 'lorem-ipsum-modal' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            btnEl.dataset.modalId = tool.modalId || '';
+            btnEl.dataset.pageUrl = tool.pageUrl || '';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            const modalId = btnEl.dataset.modalId;
+            const pageUrl = btnEl.dataset.pageUrl;
+            
+            if (pageUrl) {
+                window.location.href = pageUrl;
+            } else if (modalId && typeof openModal === 'function') {
+                window.location.href = `/#${modalId}`;
+            } else {
+                window.location.href = '/#tools';
+            }
+        }
+        
+        function initToolSuggestions() {
+            updateToolSuggestion();
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(100%); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .animate-slide-in { animation: slideIn 0.3s ease-out; }
+        #tool-suggestion-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+        
+        /* Input focus effects */
+        input:focus, select:focus {
+            transform: scale(1.01);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+        
+        /* Button hover effects */
+        button:not(:disabled):hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</body>
+</html>
+
+

@@ -615,6 +615,139 @@
             transform: scale(1.02);
         }
         
+        /* 8-Tile Header Design Styles */
+        .header-tile {
+            perspective: 1000px;
+            width: 100%;
+            height: 120px;
+        }
+        
+        .header-tile-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.6s ease-in-out;
+        }
+        
+        .header-tile-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .header-tile-front,
+        .header-tile-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .header-tile-back {
+            transform: rotateY(180deg);
+        }
+        
+        .header-tile-front:hover,
+        .header-tile-back:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Wave animation effect */
+        @keyframes waveFlip {
+            0% {
+                transform: rotateY(0deg) scale(1);
+            }
+            50% {
+                transform: rotateY(90deg) scale(1.05);
+            }
+            100% {
+                transform: rotateY(180deg) scale(1);
+            }
+        }
+        
+        .header-tile-inner.wave-flipping {
+            animation: waveFlip 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .header-tile-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header-tile-content {
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            line-height: 1.2;
+        }
+        
+        .header-tile-subcontent {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.85);
+            margin-top: 4px;
+            line-height: 1.2;
+        }
+        
+        .header-tiles-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
+            width: 100%;
+        }
+        
+        .navigation-buttons-row {
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 12px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .nav-button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 1024px) {
+            .header-tiles-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .header-tile {
+                height: 100px;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .header-tiles-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .header-tile {
+                height: 90px;
+            }
+        }
+        
         .coffee-icon {
             font-size: 32px;
             animation: coffeeFloat 2s ease-in-out infinite;
@@ -763,7 +896,31 @@
         }
 
         #tool-search-input:focus {
-            transform: scale(1.01);
+            transform: scale(1.02);
+            box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.1), 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Enhanced Search Box Container */
+        .search-box-container {
+            animation: subtleGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes subtleGlow {
+            0%, 100% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.05);
+            }
+        }
+
+        #tool-search-input::placeholder {
+            color: #9ca3af;
+            font-weight: 400;
+        }
+
+        #tool-search-input:hover {
+            background: linear-gradient(to right, #faf5ff, #f0e7ff) !important;
         }
 
         .search-highlight {
@@ -1084,15 +1241,205 @@
         </div>
     </div>
     
-    <!-- Navigation -->
+    <!-- Navigation with 8-Tile Header -->
     <nav class="fixed w-full z-40 bg-white/90 backdrop-blur-lg border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-6 py-4">
-            <div class="flex justify-between items-center">
-                <div class="text-2xl font-bold">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <!-- Logo and 8 Tiles Row -->
+            <div class="flex items-center gap-4 mb-3">
+                <div class="text-2xl font-bold flex-shrink-0">
                     <span class="header-animation">FreeToolHub</span>
                 </div>
-                <!-- Weather Widget -->
-                <div id="weather-widget" class="hidden lg:flex bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg shadow-lg mr-4" style="width: 450px; height: 115px; position: relative; overflow: hidden;">
+                <!-- 8 Tiles Grid -->
+                <div class="header-tiles-grid flex-1 hidden lg:grid">
+                    <!-- Tile 1: Time & Date / Environmental -->
+                    <div class="header-tile">
+                        <div class="header-tile-inner" id="header-tile-1">
+                            <div class="header-tile-front bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                                <div class="header-tile-label">TIME & DATE</div>
+                                <div class="header-tile-content" id="tile-time">--:--</div>
+                                <div class="header-tile-subcontent" id="tile-date">---</div>
+                            </div>
+                            <div class="header-tile-back bg-gradient-to-br from-green-500 to-green-600 text-white">
+                                <div class="header-tile-label">ENVIRONMENTAL</div>
+                                <div class="header-tile-content" id="tile-aqi">--</div>
+                                <div class="header-tile-subcontent">AQI Level</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tile 2: Weather / Air Quality -->
+                    <div class="header-tile">
+                        <div class="header-tile-inner" id="header-tile-2">
+                            <div class="header-tile-front bg-gradient-to-br from-sky-500 to-blue-500 text-white">
+                                <div class="header-tile-label">WEATHER</div>
+                                <div class="header-tile-content" id="tile-weather-icon" style="font-size: 24px;">🌤️</div>
+                                <div class="header-tile-subcontent" id="tile-weather-temp">--°C</div>
+                                <div class="header-tile-subcontent" style="font-size: 9px;" id="tile-weather-desc">Loading...</div>
+                            </div>
+                            <div class="header-tile-back bg-gradient-to-br from-orange-500 to-red-500 text-white">
+                                <div class="header-tile-label">AIR QUALITY</div>
+                                <div class="header-tile-content" id="tile-aqi-detail">--</div>
+                                <div class="header-tile-subcontent">Good</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tile 3: Moon Phase / UV Index -->
+                    <div class="header-tile">
+                        <div class="header-tile-inner" id="header-tile-3">
+                            <div class="header-tile-front bg-gradient-to-br from-indigo-600 to-purple-600 text-white">
+                                <div class="header-tile-label">MOON PHASE</div>
+                                <div class="header-tile-content" style="font-size: 24px;">🌙</div>
+                                <div class="header-tile-subcontent" id="tile-moon-phase">--</div>
+                            </div>
+                            <div class="header-tile-back bg-gradient-to-br from-yellow-500 to-orange-500 text-white">
+                                <div class="header-tile-label">UV INDEX</div>
+                                <div class="header-tile-content" id="tile-uv-index">--</div>
+                                <div class="header-tile-subcontent">Moderate</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tile 4: Sunrise/Sunset / Humidity -->
+                    <div class="header-tile">
+                        <div class="header-tile-inner" id="header-tile-4">
+                            <div class="header-tile-front bg-gradient-to-br from-orange-500 to-pink-500 text-white">
+                                <div class="header-tile-label">SUNRISE/SUNSET</div>
+                                <div class="header-tile-subcontent" style="font-size: 10px;">
+                                    <div>🌅 <span id="tile-sunrise">--:--</span></div>
+                                    <div>🌇 <span id="tile-sunset">--:--</span></div>
+                                </div>
+                            </div>
+                            <div class="header-tile-back bg-gradient-to-br from-teal-500 to-cyan-500 text-white">
+                                <div class="header-tile-label">HUMIDITY</div>
+                                <div class="header-tile-content" id="tile-humidity">--%</div>
+                                <div class="header-tile-subcontent">Comfortable</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tile 5: Location / Space Fact -->
+                    <div class="header-tile">
+                        <div class="header-tile-inner" id="header-tile-5">
+                            <div class="header-tile-front bg-gradient-to-br from-green-500 to-emerald-500 text-white">
+                                <div class="header-tile-label">LOCATION</div>
+                                <div class="header-tile-content" style="font-size: 20px;">📍</div>
+                                <div class="header-tile-subcontent" style="font-size: 9px;" id="tile-location">Getting location...</div>
+                            </div>
+                            <div class="header-tile-back bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                                <div class="header-tile-label">SPACE FACT</div>
+                                <div class="header-tile-subcontent" style="font-size: 9px; line-height: 1.3;" id="tile-space-fact">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tile 6: Word of the Day / Special Day Icon -->
+                    <div class="header-tile">
+                        <div class="header-tile-inner" id="header-tile-6">
+                            <div class="header-tile-front bg-gradient-to-br from-purple-500 to-indigo-600 text-white">
+                                <div class="header-tile-label">WORD OF DAY</div>
+                                <div class="header-tile-content" style="font-size: 16px;" id="tile-word">Loading...</div>
+                                <div class="header-tile-subcontent" style="font-size: 9px;" id="tile-pronunciation"></div>
+                            </div>
+                            <div class="header-tile-back bg-gradient-to-br from-pink-500 to-rose-500 text-white">
+                                <div class="header-tile-label">SPECIAL DAY</div>
+                                <div class="header-tile-content" style="font-size: 28px;" id="tile-special-icon">🎉</div>
+                                <div class="header-tile-subcontent" style="font-size: 9px;">Celebration</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tile 7: Word Definition / Special Day Title -->
+                    <div class="header-tile">
+                        <div class="header-tile-inner" id="header-tile-7">
+                            <div class="header-tile-front bg-gradient-to-br from-indigo-500 to-purple-500 text-white">
+                                <div class="header-tile-label">DEFINITION</div>
+                                <div class="header-tile-subcontent" style="font-size: 10px; line-height: 1.3;" id="tile-definition">Loading...</div>
+                            </div>
+                            <div class="header-tile-back bg-gradient-to-br from-orange-500 to-pink-500 text-white">
+                                <div class="header-tile-label">SPECIAL DAY</div>
+                                <div class="header-tile-subcontent" style="font-size: 11px; line-height: 1.3;" id="tile-special-title">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tile 8: Word Example / Special Day Description -->
+                    <div class="header-tile">
+                        <div class="header-tile-inner" id="header-tile-8">
+                            <div class="header-tile-front bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+                                <div class="header-tile-label">EXAMPLE</div>
+                                <div class="header-tile-subcontent" style="font-size: 9px; line-height: 1.3; font-style: italic;" id="tile-example">Loading...</div>
+                            </div>
+                            <div class="header-tile-back bg-gradient-to-br from-red-500 to-pink-500 text-white">
+                                <div class="header-tile-label">DESCRIPTION</div>
+                                <div class="header-tile-subcontent" style="font-size: 9px; line-height: 1.3;" id="tile-special-desc">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="lg:hidden text-gray-700 hover:text-purple-600 focus:outline-none flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Navigation Buttons Row -->
+        <div class="navigation-buttons-row">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-center items-center gap-3 flex-wrap">
+                    <a href="#home" class="nav-button bg-purple-600 text-white hover:bg-purple-700">Home</a>
+                    <a href="javascript:void(0)" onclick="openModal('calculator-modal')" class="nav-button bg-blue-600 text-white hover:bg-blue-700 cursor-pointer">Calculators</a>
+                    <a href="javascript:void(0)" onclick="openModal('loan-calculator-modal')" class="nav-button bg-green-600 text-white hover:bg-green-700 cursor-pointer">Loan Calculator</a>
+                    <a href="#pdf-tools" class="nav-button bg-orange-600 text-white hover:bg-orange-700 relative">
+                        PDF Tools
+                        <span class="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">NEW</span>
+                    </a>
+                    <a href="#image-tools" class="nav-button bg-pink-600 text-white hover:bg-pink-700 relative">
+                        Image Tools
+                        <span class="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">NEW</span>
+                    </a>
+                    <a href="#utilities" class="nav-button bg-teal-600 text-white hover:bg-teal-700 relative">
+                        Utilities
+                        <span class="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">NEW</span>
+                    </a>
+                    <a href="#about" class="nav-button bg-gray-600 text-white hover:bg-gray-700">About</a>
+                    <a href="#contact" class="nav-button bg-indigo-600 text-white hover:bg-indigo-700">Contact</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 py-4 space-y-2">
+                <!-- Mobile Tiles (2x4 grid) -->
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <!-- Mobile versions of tiles will go here - simplified for mobile -->
+                </div>
+                
+                <a href="#home" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">Home</a>
+                <a href="javascript:void(0)" onclick="openModal('calculator-modal'); toggleMobileMenu();" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2 cursor-pointer">Calculators</a>
+                <a href="javascript:void(0)" onclick="openModal('loan-calculator-modal'); toggleMobileMenu();" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2 cursor-pointer">Loan Calculator</a>
+                <a href="#pdf-tools" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">
+                    PDF Tools <span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold ml-2">NEW</span>
+                </a>
+                <a href="#image-tools" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">
+                    Image Tools <span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold ml-2">NEW</span>
+                </a>
+                <a href="#utilities" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">
+                    Utilities <span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold ml-2">NEW</span>
+                </a>
+                <a href="#about" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">About</a>
+                <a href="#contact" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">Contact</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Old Weather Widget (kept for reference, will be removed after integration) -->
+    <div id="weather-widget" class="hidden" style="display: none;">
                     <div class="weather-widget-container" style="width: 100%; height: 100%;">
                         <div class="weather-widget-flip" id="weather-widget-flip">
                             <!-- Front: Weather & Astronomical Data -->
@@ -1392,7 +1739,7 @@
     </div>
 
     <!-- Main Content -->
-    <main class="pt-20">
+    <main class="pt-32">
     
     <!-- 50+ Tools Milestone Banner -->
     <div id="milestone-banner" class="fixed top-[73px] left-0 right-0 z-[60] bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 text-white py-3 px-4 shadow-lg transform transition-transform duration-500">
@@ -1487,34 +1834,55 @@
                 </div>
 
                 <!-- Search Bar -->
-                <div class="max-w-2xl mx-auto mb-8">
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="max-w-3xl mx-auto mb-8">
+                    <!-- Search Box Header -->
+                    <div class="text-center mb-4">
+                        <div class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 rounded-full shadow-lg mb-2">
+                            <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
+                            <span class="font-bold text-sm">UNIFIED SEARCH</span>
+                            <span class="bg-white bg-opacity-20 px-2 py-0.5 rounded-full text-xs font-semibold">50+ Tools</span>
                         </div>
-                        <input 
-                            type="text" 
-                            id="tool-search-input" 
-                            placeholder="🔍 Search from 50+ professional tools... (e.g., calculator, pdf, converter)" 
-                            class="w-full pl-12 pr-12 py-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all duration-300 shadow-lg hover:shadow-xl"
-                            autocomplete="off"
-                        >
-                        <button 
-                            id="clear-search-btn" 
-                            onclick="clearToolSearch()" 
-                            class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors hidden"
-                        >
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
+                    </div>
+                    
+                    <div class="relative search-box-container">
+                        <!-- Gradient Border Effect -->
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-600 rounded-2xl blur opacity-75 animate-pulse"></div>
+                        
+                        <div class="relative bg-white rounded-2xl p-1">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10">
+                                    <svg class="h-7 w-7 text-purple-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    id="tool-search-input" 
+                                    placeholder="Search from 50+ professional tools... (e.g., calculator, pdf, converter, image, json)" 
+                                    class="w-full pl-16 pr-14 py-5 text-lg border-2 border-transparent bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all duration-300 shadow-inner hover:shadow-lg focus:shadow-xl focus:bg-white font-medium placeholder-gray-400"
+                                    autocomplete="off"
+                                >
+                                <button 
+                                    id="clear-search-btn" 
+                                    onclick="clearToolSearch()" 
+                                    class="absolute inset-y-0 right-0 pr-5 flex items-center text-gray-400 hover:text-red-500 transition-all hidden z-10"
+                                >
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Search Helper Text -->
-                    <div id="search-helper-text" class="text-center mt-3 text-sm text-gray-500">
-                        💡 Try: "calculator", "pdf", "converter", "image", "age", "json", etc.
+                    <div id="search-helper-text" class="text-center mt-4 text-sm text-gray-600">
+                        <div class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-50 to-indigo-50 px-4 py-2 rounded-full border border-purple-200">
+                            <span class="text-purple-600">💡</span>
+                            <span class="font-medium">Try: "calculator", "pdf", "converter", "image", "age", "json", etc.</span>
+                        </div>
                     </div>
                     
                     <!-- Search Results Counter -->
@@ -1600,9 +1968,9 @@
                                         <span>History & Export</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('calculator-modal')" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/calculator.html" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-center block">
                                     Launch Calculator
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -1632,9 +2000,9 @@
                                         <span>Productivity Analytics</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('study-timer-modal')" class="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/study-timer.html" class="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Study Timer
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -1664,9 +2032,9 @@
                                         <span>Structured Notes</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('note-taker-modal')" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/note-taker.html" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Note-Taker
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -1696,9 +2064,9 @@
                                         <span>Problem Recognition</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('math-solver-modal')" class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/math-solver.html" class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Math Solver
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -1728,9 +2096,9 @@
                                         <span>Academic Analytics</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('grade-calculator-modal')" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/grade-calculator.html" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Grade Calculator
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -1760,9 +2128,9 @@
                                         <span>Export Options</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('citation-generator-modal')" class="w-full bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:from-indigo-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/citation-generator.html" class="w-full bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:from-indigo-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Citation Generator
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -1792,9 +2160,9 @@
                                         <span>Progress Analytics</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('study-planner-modal')" class="w-full bg-gradient-to-r from-emerald-500 to-cyan-600 text-white font-bold py-3 px-6 rounded-xl hover:from-emerald-600 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/study-planner.html" class="w-full bg-gradient-to-r from-emerald-500 to-cyan-600 text-white font-bold py-3 px-6 rounded-xl hover:from-emerald-600 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Study Planner
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -1824,9 +2192,9 @@
                                         <span>Progress Tracking</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('flashcard-generator-modal')" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3 px-6 rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/flashcard-generator.html" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3 px-6 rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Flashcard Generator
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -1856,9 +2224,9 @@
                                         <span>Goal Tracking</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('progress-tracker-modal')" class="w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/progress-tracker.html" class="w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Progress Tracker
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -1888,9 +2256,9 @@
                                 <span>Life Stages</span>
                             </div>
                         </div>
-                        <button onclick="openModal('age-calculator-modal')" class="w-full bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold py-3 px-6 rounded-xl hover:from-pink-600 hover:to-rose-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        <a href="/tools/age-calculator.html" class="w-full bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold py-3 px-6 rounded-xl hover:from-pink-600 hover:to-rose-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                             Launch Age Calculator
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -1920,9 +2288,9 @@
                                 <span>Personalized Recommendations</span>
                             </div>
                         </div>
-                        <button onclick="showBMITemporarilyUnavailable()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold py-3 px-6 rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        <a href="/tools/bmi-calculator.html" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold py-3 px-6 rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                             Launch BMI Calculator
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -1964,9 +2332,9 @@
                                         <span>Refinancing Calculator</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('loan-calculator-modal')" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/loan-calculator.html" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Loan Calculator
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2000,9 +2368,9 @@
                                         <span>Inflation-Adjusted Returns</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('investment-calculator-modal')" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/investment-calculator.html" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Investment Calculator
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2036,9 +2404,9 @@
                                         <span>Take-Home Pay Calculator</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('tax-calculator-modal')" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/tax-calculator.html" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Tax Calculator
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2072,9 +2440,9 @@
                                         <span>Financial Ratios</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('business-metrics-modal')" class="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/business-metrics.html" class="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Business Metrics
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2108,9 +2476,9 @@
                                         <span>Historical Conversions</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('currency-converter-modal')" class="w-full bg-gradient-to-r from-cyan-500 to-teal-600 text-white font-bold py-3 px-6 rounded-xl hover:from-cyan-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/currency-converter.html" class="w-full bg-gradient-to-r from-cyan-500 to-teal-600 text-white font-bold py-3 px-6 rounded-xl hover:from-cyan-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Currency Converter
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2144,9 +2512,9 @@
                                         <span>Income Scenarios</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('retirement-calculator-modal')" class="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/retirement-calculator.html" class="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Retirement Planner
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2180,9 +2548,9 @@
                                         <span>Bi-Weekly Payments</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('mortgage-calculator-modal')" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/mortgage-calculator.html" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Mortgage Calculator
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2216,9 +2584,9 @@
                                         <span>Business Budget Analysis</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('budget-planner-modal')" class="w-full bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold py-3 px-6 rounded-xl hover:from-pink-600 hover:to-rose-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/budget-planner.html" class="w-full bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold py-3 px-6 rounded-xl hover:from-pink-600 hover:to-rose-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Budget Planner
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2252,9 +2620,9 @@
                                         <span>Salary Negotiation Guide</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('salary-calculator-modal')" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/salary-calculator.html" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Salary Calculator
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2296,9 +2664,9 @@
                                         <span>Structure Analysis</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('json-formatter-modal')" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/json-formatter.html" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch JSON Formatter
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2332,9 +2700,9 @@
                                         <span>Error Detection & Fixing</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('xml-formatter-modal')" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/xml-formatter.html" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch XML Formatter
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2368,9 +2736,9 @@
                                         <span>Batch Processing</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('base64-encoder-modal')" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/base64-encoder.html" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Base64 Encoder
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2404,9 +2772,9 @@
                                         <span>Batch Processing</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('hash-generator-modal')" class="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/hash-generator.html" class="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Hash Generator
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2440,9 +2808,9 @@
                                         <span>Component Analysis</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('url-encoder-modal')" class="w-full bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold py-3 px-6 rounded-xl hover:from-teal-600 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/url-encoder.html" class="w-full bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold py-3 px-6 rounded-xl hover:from-teal-600 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch URL Encoder
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2476,9 +2844,9 @@
                                         <span>Statistics & Analysis</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('regex-tester-modal')" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/regex-tester.html" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Regex Tester
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2512,9 +2880,9 @@
                                         <span>File Statistics</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('css-js-minifier-modal')" class="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/css-js-minifier.html" class="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch CSS/JS Minifier
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2544,9 +2912,9 @@
                                         <span>WCAG Compliance</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('color-palette-modal')" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/color-palette.html" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Color Palette Generator
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2576,9 +2944,9 @@
                                         <span>Export Formats</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('lorem-ipsum-modal')" class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/lorem-ipsum.html" class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Lorem Ipsum Generator
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2608,9 +2976,9 @@
                                         <span>Auto-Detection</span>
                                     </div>
                                 </div>
-                                <button onclick="openModal('timestamp-converter-modal')" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <a href="/tools/timestamp-converter.html" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                     Launch Timestamp Converter
-                                </button>
+                                </a>
                             </div>
                         </div>
 
@@ -2662,9 +3030,9 @@
                                     <span>No file size limits</span>
                                 </div>
                             </div>
-                            <button onclick="openModal('pdf-password-remover-modal')" class="w-full bg-gradient-to-r from-red-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <a href="/tools/pdf-password-remover.html" class="w-full bg-gradient-to-r from-red-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                 Remove Password
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -2694,9 +3062,9 @@
                                     <span>Preview before merge</span>
                                 </div>
                             </div>
-                            <button onclick="openModal('pdf-merger-modal')" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <a href="/tools/pdf-merger.html" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                 Merge PDFs
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -2726,9 +3094,9 @@
                                     <span>Bulk download</span>
                                 </div>
                             </div>
-                            <button onclick="openModal('pdf-splitter-modal')" class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <a href="/tools/pdf-splitter.html" class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                 Split PDF
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -2758,9 +3126,9 @@
                                     <span>No data upload</span>
                                 </div>
                             </div>
-                            <button onclick="openModal('pdf-encryptor-modal')" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <a href="/tools/pdf-encryptor.html" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                 Encrypt PDF
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -2790,9 +3158,9 @@
                                     <span>Download as ZIP</span>
                                 </div>
                             </div>
-                            <button onclick="openModal('pdf-to-images-modal')" class="w-full bg-gradient-to-r from-orange-500 to-yellow-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <a href="/tools/pdf-to-images.html" class="w-full bg-gradient-to-r from-orange-500 to-yellow-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                 Convert to Images
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -2843,9 +3211,9 @@
                                     <span>Maintain quality</span>
                                 </div>
                             </div>
-                            <button onclick="openModal('image-to-pdf-modal')" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <a href="/tools/image-to-pdf.html" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                 Convert to PDF
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -2875,9 +3243,9 @@
                                     <span>Preview comparison</span>
                                 </div>
                             </div>
-                            <button onclick="openModal('image-compressor-modal')" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <a href="/tools/image-compressor.html" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                 Compress Images
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -2907,9 +3275,9 @@
                                     <span>Fast processing</span>
                                 </div>
                             </div>
-                            <button onclick="openModal('image-converter-modal')" class="w-full bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold py-3 px-6 rounded-xl hover:from-pink-600 hover:to-rose-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <a href="/tools/image-converter.html" class="w-full bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold py-3 px-6 rounded-xl hover:from-pink-600 hover:to-rose-700 transition-all duration-300 transform hover:scale-105 shadow-lg inline-block text-center">
                                 Convert Format
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -2939,9 +3307,9 @@
                                     <span>Batch resize</span>
                                 </div>
                             </div>
-                            <button onclick="openModal('image-resizer-modal')" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <a href="/tools/image-resizer.html" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-center block">
                                 Resize Images
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -2992,9 +3360,9 @@
                                     <span>Instant download</span>
                                 </div>
                             </div>
-                            <button onclick="openModal('signature-generator-modal')" class="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <a href="/tools/signature-generator.html" class="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-center block">
                                 Create Signature
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -3024,9 +3392,9 @@
                                     <span>Copy or download</span>
                                 </div>
                             </div>
-                            <button onclick="openModal('csv-json-converter-modal')" class="w-full bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-amber-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <a href="/tools/csv-json-converter.html" class="w-full bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-amber-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-center block">
                                 Convert Data
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -3565,8 +3933,8 @@
                 <div>
                     <h3 class="text-xl font-bold mb-4 text-yellow-400">🛠️ Popular Tools</h3>
                     <ul class="space-y-2">
-                        <li><a href="#" onclick="openModal('calculator-modal'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Smart Calculator</a></li>
-                        <li><a href="#" onclick="openModal('study-timer-modal'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Study Timer</a></li>
+                        <li><a href="/tools/calculator.html" class="text-gray-300 hover:text-yellow-400 transition-colors">Smart Calculator</a></li>
+                        <li><a href="/tools/study-timer.html" class="text-gray-300 hover:text-yellow-400 transition-colors">Study Timer</a></li>
                         <li><a href="#" onclick="openModal('loan-calculator-modal'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Loan Calculator</a></li>
                         <li><a href="#" onclick="openModal('json-formatter-modal'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">JSON Formatter</a></li>
                         <li><a href="#" onclick="openModal('hash-generator-modal'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Hash Generator</a></li>
@@ -29686,6 +30054,343 @@ Charlie Brown,42,Phoenix,USA`;
                 }
             }
         });
+
+        // ============================================
+        // 8-TILE HEADER FUNCTIONALITY
+        // ============================================
+        
+        let tileFlipInterval = null;
+        let isWaveInProgress = false;
+        
+        // Initialize tile flip functionality
+        function initHeaderTiles() {
+            // Update time every second
+            updateTileTime();
+            setInterval(updateTileTime, 1000);
+            
+            // Start automatic wave flip animation
+            startWaveFlipAnimation();
+        }
+        
+        // Wave flip animation - sequential flip like a wave
+        function startWaveFlipAnimation() {
+            // Clear any existing interval
+            if (tileFlipInterval) {
+                clearInterval(tileFlipInterval);
+            }
+            
+            // Start wave animation every 10 seconds
+            tileFlipInterval = setInterval(() => {
+                if (!isWaveInProgress) {
+                    performWaveFlip();
+                }
+            }, 10000);
+            
+            // Perform initial wave after 2 seconds
+            setTimeout(() => {
+                performWaveFlip();
+            }, 2000);
+        }
+        
+        // Perform wave flip animation
+        function performWaveFlip() {
+            if (isWaveInProgress) return;
+            
+            isWaveInProgress = true;
+            
+            // Randomly decide wave direction (left to right or right to left)
+            const direction = Math.random() > 0.5 ? 'forward' : 'reverse';
+            
+            // Create array of tile numbers based on direction
+            let tileOrder = [];
+            if (direction === 'forward') {
+                tileOrder = [1, 2, 3, 4, 5, 6, 7, 8];
+            } else {
+                tileOrder = [8, 7, 6, 5, 4, 3, 2, 1];
+            }
+            
+            // Randomly decide if we should skip some tiles or add randomness
+            const useRandom = Math.random() > 0.7; // 30% chance of random flow
+            
+            if (useRandom) {
+                // Random flow - shuffle tiles but keep wave-like feel
+                tileOrder = shuffleWithWaveFeel(tileOrder);
+            }
+            
+            // Flip tiles sequentially with delay (wave effect)
+            tileOrder.forEach((tileNum, index) => {
+                setTimeout(() => {
+                    const tileInner = document.getElementById(`header-tile-${tileNum}`);
+                    if (tileInner) {
+                        // Add glow effect before flip
+                        tileInner.style.filter = 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.5))';
+                        
+                        // Add flip animation with bounce
+                        tileInner.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease';
+                        tileInner.classList.toggle('flipped');
+                        
+                        // Remove glow and reset transition after animation
+                        setTimeout(() => {
+                            tileInner.style.filter = 'none';
+                            tileInner.style.transition = 'transform 0.6s ease-in-out';
+                        }, 600);
+                    }
+                }, index * 150); // 150ms delay between each tile creates wave effect
+            });
+            
+            // Reset wave in progress flag after animation completes
+            setTimeout(() => {
+                isWaveInProgress = false;
+            }, tileOrder.length * 150 + 1000);
+        }
+        
+        // Shuffle with wave feel - keeps some sequential elements
+        function shuffleWithWaveFeel(array) {
+            const shuffled = [...array];
+            // Shuffle but keep some adjacent pairs together for wave effect
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                // Only swap if not breaking too many adjacent pairs
+                if (Math.abs(i - j) <= 2) {
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+            }
+            return shuffled;
+        }
+        
+        // Update time in tile
+        function updateTileTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const dateStr = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            
+            const timeEl = document.getElementById('tile-time');
+            const dateEl = document.getElementById('tile-date');
+            
+            if (timeEl) timeEl.textContent = timeStr;
+            if (dateEl) dateEl.textContent = dateStr;
+        }
+        
+        // Sync tile data with existing widget data - improved version with validation
+        function syncTileData() {
+            // Helper function to check if value is valid (not default/loading state)
+            function isValidValue(value, defaultValues = []) {
+                if (!value) return false;
+                const val = value.textContent || value;
+                if (!val || val.trim() === '') return false;
+                const invalidValues = ['--', '--:--', '---', 'Loading...', 'Getting location...', 'Location unavailable', 'Loading space fact...', '🌤️', '❓', ...defaultValues];
+                return !invalidValues.includes(val.trim());
+            }
+            
+            // Helper function to get element with fallback to mobile version
+            function getWidgetElement(desktopId, mobileId) {
+                const desktop = document.getElementById(desktopId);
+                const mobile = document.getElementById(mobileId);
+                return desktop || mobile;
+            }
+            
+            // Sync weather data - check both desktop and mobile
+            const weatherIcon = getWidgetElement('weather-icon', 'mobile-weather-icon');
+            const weatherTemp = getWidgetElement('weather-temp', 'mobile-weather-temp');
+            const weatherDesc = getWidgetElement('weather-desc', 'mobile-weather-desc');
+            
+            const tileWeatherIcon = document.getElementById('tile-weather-icon');
+            const tileWeatherTemp = document.getElementById('tile-weather-temp');
+            const tileWeatherDesc = document.getElementById('tile-weather-desc');
+            
+            if (weatherIcon && tileWeatherIcon && isValidValue(weatherIcon, ['🌤️'])) {
+                const iconText = weatherIcon.textContent.trim();
+                if (iconText && iconText !== '🌤️' && iconText !== '❓') {
+                    tileWeatherIcon.textContent = iconText;
+                }
+            }
+            if (weatherTemp && tileWeatherTemp && isValidValue(weatherTemp, ['--°C'])) {
+                const tempText = weatherTemp.textContent.trim();
+                if (tempText && tempText !== '--°C') {
+                    tileWeatherTemp.textContent = tempText;
+                }
+            }
+            if (weatherDesc && tileWeatherDesc && isValidValue(weatherDesc)) {
+                const descText = weatherDesc.textContent.trim();
+                if (descText && descText !== 'Loading...' && descText !== 'Location unavailable') {
+                    tileWeatherDesc.textContent = descText;
+                }
+            }
+            
+            // Sync moon phase
+            const moonPhase = getWidgetElement('moon-phase', 'mobile-moon-phase');
+            const tileMoonPhase = document.getElementById('tile-moon-phase');
+            if (moonPhase && tileMoonPhase && isValidValue(moonPhase)) {
+                tileMoonPhase.textContent = moonPhase.textContent;
+            }
+            
+            // Sync sunrise/sunset
+            const sunrise = getWidgetElement('sunrise-time', 'mobile-sunrise-time');
+            const sunset = getWidgetElement('sunset-time', 'mobile-sunset-time');
+            const tileSunrise = document.getElementById('tile-sunrise');
+            const tileSunset = document.getElementById('tile-sunset');
+            if (sunrise && tileSunrise && isValidValue(sunrise, ['--:--'])) {
+                tileSunrise.textContent = sunrise.textContent;
+            }
+            if (sunset && tileSunset && isValidValue(sunset, ['--:--'])) {
+                tileSunset.textContent = sunset.textContent;
+            }
+            
+            // Sync location
+            const location = getWidgetElement('location-name', 'mobile-location-name');
+            const tileLocation = document.getElementById('tile-location');
+            if (location && tileLocation) {
+                const locText = location.textContent.trim();
+                if (locText && locText !== 'Getting location...' && locText !== 'Location unavailable' && locText !== '--') {
+                    tileLocation.textContent = locText;
+                }
+            }
+            
+            // Sync AQI
+            const aqi = getWidgetElement('aqi-value', 'mobile-aqi-value');
+            const tileAqi = document.getElementById('tile-aqi');
+            const tileAqiDetail = document.getElementById('tile-aqi-detail');
+            if (aqi && isValidValue(aqi)) {
+                const aqiText = aqi.textContent.trim();
+                if (aqiText && aqiText !== '--') {
+                    if (tileAqi) tileAqi.textContent = aqiText;
+                    if (tileAqiDetail) tileAqiDetail.textContent = aqiText;
+                }
+            }
+            
+            // Sync UV Index
+            const uvIndex = getWidgetElement('uv-index', 'mobile-uv-index');
+            const tileUvIndex = document.getElementById('tile-uv-index');
+            if (uvIndex && tileUvIndex && isValidValue(uvIndex)) {
+                tileUvIndex.textContent = uvIndex.textContent;
+            }
+            
+            // Sync Humidity
+            const humidity = getWidgetElement('humidity-value', 'mobile-humidity-value');
+            const tileHumidity = document.getElementById('tile-humidity');
+            if (humidity && tileHumidity && isValidValue(humidity, ['--%'])) {
+                const humidityText = humidity.textContent.trim();
+                if (humidityText && humidityText !== '--%') {
+                    tileHumidity.textContent = humidityText;
+                }
+            }
+            
+            // Sync Space Fact
+            const spaceFact = getWidgetElement('space-fact-display', 'mobile-space-fact-display');
+            const tileSpaceFact = document.getElementById('tile-space-fact');
+            if (spaceFact && tileSpaceFact && isValidValue(spaceFact)) {
+                const factText = spaceFact.textContent.trim();
+                if (factText && factText !== 'Loading space fact...') {
+                    tileSpaceFact.textContent = factText;
+                }
+            }
+            
+            // Sync Word of the Day
+            const word = getWidgetElement('word-of-day-word', 'mobile-word-of-day-word');
+            const pronunciation = getWidgetElement('word-of-day-pronunciation', 'mobile-word-of-day-pronunciation');
+            const definition = getWidgetElement('word-of-day-definition', 'mobile-word-of-day-definition');
+            const example = getWidgetElement('word-of-day-example', 'mobile-word-of-day-example');
+            
+            const tileWord = document.getElementById('tile-word');
+            const tilePronunciation = document.getElementById('tile-pronunciation');
+            const tileDefinition = document.getElementById('tile-definition');
+            const tileExample = document.getElementById('tile-example');
+            
+            if (word && tileWord && isValidValue(word)) {
+                tileWord.textContent = word.textContent;
+            }
+            if (pronunciation && tilePronunciation && isValidValue(pronunciation)) {
+                tilePronunciation.textContent = pronunciation.textContent;
+            }
+            if (definition && tileDefinition && isValidValue(definition)) {
+                tileDefinition.textContent = definition.textContent;
+            }
+            if (example && tileExample && isValidValue(example)) {
+                tileExample.textContent = example.textContent;
+            }
+            
+            // Sync Special Day
+            const specialIcon = getWidgetElement('special-day-icon', 'mobile-special-day-icon');
+            const specialTitle = getWidgetElement('special-day-title', 'mobile-special-day-title');
+            const specialDesc = getWidgetElement('special-day-desc', 'mobile-special-day-desc');
+            
+            const tileSpecialIcon = document.getElementById('tile-special-icon');
+            const tileSpecialTitle = document.getElementById('tile-special-title');
+            const tileSpecialDesc = document.getElementById('tile-special-desc');
+            
+            if (specialIcon && tileSpecialIcon) {
+                tileSpecialIcon.textContent = specialIcon.textContent;
+            }
+            if (specialTitle && tileSpecialTitle && isValidValue(specialTitle)) {
+                tileSpecialTitle.textContent = specialTitle.textContent;
+            }
+            if (specialDesc && tileSpecialDesc && isValidValue(specialDesc)) {
+                tileSpecialDesc.textContent = specialDesc.textContent;
+            }
+        }
+        
+        // Sync data periodically - more frequent for better responsiveness
+        setInterval(syncTileData, 1500);
+        
+        // Initialize on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initHeaderTiles);
+        } else {
+            initHeaderTiles();
+        }
+        
+        // Enhanced initialization with multiple sync attempts to ensure widgets load
+        // Widgets need time to fetch data from APIs, so we sync multiple times
+        setTimeout(() => syncTileData(), 500);
+        setTimeout(() => syncTileData(), 1000);
+        setTimeout(() => syncTileData(), 2000);
+        setTimeout(() => syncTileData(), 3000);
+        setTimeout(() => syncTileData(), 5000);
+        setTimeout(() => syncTileData(), 8000);
+        
+        // Also ensure widgets are initialized
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                // Ensure widgets are initialized if they haven't been
+                setTimeout(() => {
+                    if (typeof initWeatherWidget === 'function' && !window.weatherWidgetInitialized) {
+                        try {
+                            initWeatherWidget();
+                            window.weatherWidgetInitialized = true;
+                        } catch (e) {
+                            console.error('Error initializing weather widget:', e);
+                        }
+                    }
+                    if (typeof initWordWidget === 'function' && !window.wordWidgetInitialized) {
+                        try {
+                            initWordWidget();
+                            window.wordWidgetInitialized = true;
+                        } catch (e) {
+                            console.error('Error initializing word widget:', e);
+                        }
+                    }
+                }, 100);
+            });
+        } else {
+            setTimeout(() => {
+                if (typeof initWeatherWidget === 'function' && !window.weatherWidgetInitialized) {
+                    try {
+                        initWeatherWidget();
+                        window.weatherWidgetInitialized = true;
+                    } catch (e) {
+                        console.error('Error initializing weather widget:', e);
+                    }
+                }
+                if (typeof initWordWidget === 'function' && !window.wordWidgetInitialized) {
+                    try {
+                        initWordWidget();
+                        window.wordWidgetInitialized = true;
+                    } catch (e) {
+                        console.error('Error initializing word widget:', e);
+                    }
+                }
+            }, 100);
+        }
 
 
     </script>

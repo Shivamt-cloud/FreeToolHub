@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Business Metrics Calculator - FreeToolHub</title>
+    <meta name="description" content="Calculate business performance metrics, profitability, and financial ratios. Professional business analytics and break-even analysis.">
+    <meta property="og:title" content="Business Metrics Calculator - FreeToolHub">
+    <meta property="og:description" content="Calculate business performance metrics, profitability, and financial ratios">
+    <meta property="og:url" content="https://freetoolhub.in/tools/business-metrics.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">📊 Business Metrics Calculator</h1>
+                    <p class="text-gray-600 text-lg">Calculate business performance metrics, profitability, and financial ratios</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Business Metrics Calculator</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <!-- Toast Notification Container -->
+                <div id="toast-container" class="fixed top-24 right-4 z-50 space-y-2"></div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Input Section -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Quick Business Templates -->
+                        <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-200">
+                            <h4 class="text-lg font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>⚡</span> Quick Business Templates
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <button onclick="loadBusinessTemplate('small')" class="bg-white hover:bg-orange-100 text-gray-800 font-semibold py-3 px-4 rounded-lg border-2 border-orange-300 hover:border-orange-400 transition-all duration-200 transform hover:scale-105 shadow-sm">
+                                    <div class="text-2xl mb-1">🏪</div>
+                                    <div class="text-sm">Small Business</div>
+                                    <div class="text-xs text-gray-500">$50k revenue</div>
+                                </button>
+                                <button onclick="loadBusinessTemplate('medium')" class="bg-white hover:bg-orange-100 text-gray-800 font-semibold py-3 px-4 rounded-lg border-2 border-orange-300 hover:border-orange-400 transition-all duration-200 transform hover:scale-105 shadow-sm">
+                                    <div class="text-2xl mb-1">🏢</div>
+                                    <div class="text-sm">Medium Business</div>
+                                    <div class="text-xs text-gray-500">$250k revenue</div>
+                                </button>
+                                <button onclick="loadBusinessTemplate('large')" class="bg-white hover:bg-orange-100 text-gray-800 font-semibold py-3 px-4 rounded-lg border-2 border-orange-300 hover:border-orange-400 transition-all duration-200 transform hover:scale-105 shadow-sm">
+                                    <div class="text-2xl mb-1">🏛️</div>
+                                    <div class="text-sm">Large Business</div>
+                                    <div class="text-xs text-gray-500">$1M revenue</div>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Basic Business Metrics -->
+                        <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-200 shadow-lg">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-xl font-bold text-gray-700 flex items-center gap-2">
+                                    <span>📊</span> Business Performance Metrics
+                                </h4>
+                                <button onclick="resetBusinessForm()" class="text-sm text-gray-600 hover:text-gray-800 font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-white transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                    Reset
+                                </button>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>💱</span> Currency
+                                    </label>
+                                    <select id="business-currency" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all" onchange="updateBusinessCurrencyDisplay()">
+                                        <option value="USD">🇺🇸 US Dollar ($)</option>
+                                        <option value="EUR">🇪🇺 Euro (€)</option>
+                                        <option value="GBP">🇬🇧 British Pound (£)</option>
+                                        <option value="JPY">🇯🇵 Japanese Yen (¥)</option>
+                                        <option value="CAD">🇨🇦 Canadian Dollar (C$)</option>
+                                        <option value="AUD">🇦🇺 Australian Dollar (A$)</option>
+                                        <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
+                                        <option value="CNY">🇨🇳 Chinese Yuan (¥)</option>
+                                        <option value="INR">🇮🇳 Indian Rupee (₹)</option>
+                                        <option value="BRL">🇧🇷 Brazilian Real (R$)</option>
+                                        <option value="SGD">🇸🇬 Singapore Dollar (S$)</option>
+                                        <option value="AED">🇦🇪 UAE Dirham (د.إ)</option>
+                                        <option value="SAR">🇸🇦 Saudi Riyal (﷼)</option>
+                                        <option value="ZAR">🇿🇦 South African Rand (R)</option>
+                                        <option value="MXN">🇲🇽 Mexican Peso ($)</option>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">Currency for display purposes</p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>💰</span> Revenue
+                                        </label>
+                                        <div class="relative">
+                                            <span id="revenue-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                            <input type="number" id="revenue" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all" placeholder="100000" value="100000" oninput="formatBusinessCurrency()">
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Total sales</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>📉</span> Cost of Goods Sold
+                                        </label>
+                                        <div class="relative">
+                                            <span id="costs-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                            <input type="number" id="costs" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all" placeholder="60000" value="60000" oninput="formatBusinessCurrency()">
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Direct costs</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>💸</span> Operating Expenses
+                                        </label>
+                                        <div class="relative">
+                                            <span id="expenses-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                            <input type="number" id="expenses" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all" placeholder="25000" value="25000" oninput="formatBusinessCurrency()">
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Operating costs</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>🏦</span> Total Assets
+                                        </label>
+                                        <div class="relative">
+                                            <span id="assets-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                            <input type="number" id="assets" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all" placeholder="200000" value="200000" oninput="formatBusinessCurrency()">
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Company assets</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>📋</span> Total Liabilities
+                                        </label>
+                                        <div class="relative">
+                                            <span id="liabilities-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                            <input type="number" id="liabilities" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all" placeholder="80000" value="80000" oninput="formatBusinessCurrency()">
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Total debts</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>💼</span> Total Equity
+                                        </label>
+                                        <div class="relative">
+                                            <span id="equity-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                            <input type="number" id="equity" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all" placeholder="120000" value="120000" oninput="formatBusinessCurrency()">
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Owner's equity</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="calculateBusinessMetrics()" id="calculate-metrics-btn" class="w-full mt-6 bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-4 px-6 rounded-xl hover:from-orange-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                <span>Calculate Business Metrics</span>
+                            </button>
+                        </div>
+
+                        <!-- Break-Even Analysis -->
+                        <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>⚖️</span> Break-Even Analysis
+                            </h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                        <span>💵</span> Fixed Costs
+                                    </label>
+                                    <div class="relative">
+                                        <span id="fixed-costs-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                        <input type="number" id="fixed-costs" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="15000" value="15000" oninput="formatBusinessCurrency()">
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Fixed monthly/annual costs</p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>📦</span> Variable Cost per Unit
+                                        </label>
+                                        <div class="relative">
+                                            <span id="variable-cost-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                            <input type="number" id="variable-cost" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="20" value="20" oninput="formatBusinessCurrency()">
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Cost per unit</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                            <span>🏷️</span> Selling Price per Unit
+                                        </label>
+                                        <div class="relative">
+                                            <span id="selling-price-currency-prefix" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">$</span>
+                                            <input type="number" id="selling-price" min="0" class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="50" value="50" oninput="formatBusinessCurrency()">
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Price per unit</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="calculateBreakEven()" id="calculate-breakeven-btn" class="w-full mt-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                <span>Calculate Break-Even</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <!-- Business Metrics Results -->
+                        <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>📊</span> Business Performance
+                            </h4>
+                            <div id="business-results" class="space-y-3">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">💡</div>
+                                    <p class="text-sm">Enter business details and click "Calculate Business Metrics"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Break-Even Results -->
+                        <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>⚖️</span> Break-Even Analysis
+                            </h4>
+                            <div id="break-even-results" class="space-y-3">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">📈</div>
+                                    <p class="text-sm">Enter break-even details and click "Calculate Break-Even"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Financial Ratios -->
+                        <div class="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-6 border-2 border-gray-200 shadow-lg">
+                            <h4 class="text-xl font-bold mb-4 text-gray-700 flex items-center gap-2">
+                                <span>📈</span> Financial Ratios
+                            </h4>
+                            <div id="financial-ratios" class="space-y-3">
+                                <div class="text-center text-gray-500 py-8">
+                                    <div class="text-4xl mb-2">📋</div>
+                                    <p class="text-sm">Calculate business metrics to see financial ratios</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Business Metrics Calculator Dependencies -->
+    <script src="/src/js/BusinessMetricsCalculator.js?v=1&t=1726745000"></script>
+    
+    <!-- Business Metrics Calculator JavaScript -->
+    <script>
+        let businessMetricsCalculator = null;
+
+        function initializeBusinessMetricsCalculator() {
+            try {
+                if (typeof BusinessMetricsCalculator !== 'undefined') {
+                    businessMetricsCalculator = new BusinessMetricsCalculator();
+                    console.log('✅ Business Metrics Calculator initialized successfully');
+                    updateBusinessCurrencyDisplay();
+                } else {
+                    console.error('❌ BusinessMetricsCalculator class not found');
+                }
+            } catch (error) {
+                console.error('❌ Error initializing Business Metrics Calculator:', error);
+            }
+        }
+
+        // Toast notification function
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            toast.className = `${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] max-w-md animate-slide-in`;
+            toast.innerHTML = `
+                <span class="text-xl">${icon}</span>
+                <span class="flex-1">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-white hover:text-gray-200 font-bold">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, type === 'error' ? 5000 : 3000);
+        }
+
+        // Format currency display
+        function formatBusinessCurrency() {
+            if (!businessMetricsCalculator) return;
+            const currency = businessMetricsCalculator.currencies[businessMetricsCalculator.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            document.getElementById('revenue-currency-prefix').textContent = symbol;
+            document.getElementById('costs-currency-prefix').textContent = symbol;
+            document.getElementById('expenses-currency-prefix').textContent = symbol;
+            document.getElementById('assets-currency-prefix').textContent = symbol;
+            document.getElementById('liabilities-currency-prefix').textContent = symbol;
+            document.getElementById('equity-currency-prefix').textContent = symbol;
+            document.getElementById('fixed-costs-currency-prefix').textContent = symbol;
+            document.getElementById('variable-cost-currency-prefix').textContent = symbol;
+            document.getElementById('selling-price-currency-prefix').textContent = symbol;
+        }
+
+        function updateBusinessCurrencyDisplay() {
+            if (!businessMetricsCalculator) return;
+            const currency = document.getElementById('business-currency').value;
+            businessMetricsCalculator.selectedCurrency = currency;
+            formatBusinessCurrency();
+        }
+
+        // Load quick templates
+        function loadBusinessTemplate(type) {
+            const templates = {
+                small: { revenue: 50000, costs: 30000, expenses: 12000, assets: 80000, liabilities: 35000, equity: 45000 },
+                medium: { revenue: 250000, costs: 150000, expenses: 60000, assets: 400000, liabilities: 180000, equity: 220000 },
+                large: { revenue: 1000000, costs: 600000, expenses: 250000, assets: 2000000, liabilities: 800000, equity: 1200000 }
+            };
+            
+            const template = templates[type];
+            if (!template) return;
+            
+            document.getElementById('revenue').value = template.revenue;
+            document.getElementById('costs').value = template.costs;
+            document.getElementById('expenses').value = template.expenses;
+            document.getElementById('assets').value = template.assets;
+            document.getElementById('liabilities').value = template.liabilities;
+            document.getElementById('equity').value = template.equity;
+            
+            formatBusinessCurrency();
+            showNotification(`Loaded ${type.charAt(0).toUpperCase() + type.slice(1)} business template`, 'success');
+        }
+
+        // Reset form
+        function resetBusinessForm() {
+            document.getElementById('revenue').value = '';
+            document.getElementById('costs').value = '';
+            document.getElementById('expenses').value = '';
+            document.getElementById('assets').value = '';
+            document.getElementById('liabilities').value = '';
+            document.getElementById('equity').value = '';
+            document.getElementById('fixed-costs').value = '';
+            document.getElementById('variable-cost').value = '';
+            document.getElementById('selling-price').value = '';
+            
+            document.getElementById('business-results').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">💡</div>
+                    <p class="text-sm">Enter business details and click "Calculate Business Metrics"</p>
+                </div>
+            `;
+            document.getElementById('break-even-results').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">📈</div>
+                    <p class="text-sm">Enter break-even details and click "Calculate Break-Even"</p>
+                </div>
+            `;
+            document.getElementById('financial-ratios').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">📋</div>
+                    <p class="text-sm">Calculate business metrics to see financial ratios</p>
+                </div>
+            `;
+            showNotification('Form reset successfully', 'info');
+        }
+
+        function calculateBusinessMetrics() {
+            if (!businessMetricsCalculator) {
+                showNotification('Business Metrics Calculator not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const revenue = parseFloat(document.getElementById('revenue').value);
+            const costs = parseFloat(document.getElementById('costs').value);
+            const expenses = parseFloat(document.getElementById('expenses').value);
+            const assets = parseFloat(document.getElementById('assets').value);
+            const liabilities = parseFloat(document.getElementById('liabilities').value);
+            const equity = parseFloat(document.getElementById('equity').value);
+
+            if (!revenue || revenue <= 0) {
+                showNotification('Please enter a valid revenue amount.', 'warning');
+                document.getElementById('revenue').focus();
+                return;
+            }
+
+            if (!costs || costs < 0) {
+                showNotification('Please enter a valid cost of goods sold (can be 0).', 'warning');
+                document.getElementById('costs').focus();
+                return;
+            }
+
+            if (!expenses || expenses < 0) {
+                showNotification('Please enter valid operating expenses (can be 0).', 'warning');
+                document.getElementById('expenses').focus();
+                return;
+            }
+
+            if (!assets || assets <= 0) {
+                showNotification('Please enter a valid total assets amount.', 'warning');
+                document.getElementById('assets').focus();
+                return;
+            }
+
+            if (!liabilities || liabilities < 0) {
+                showNotification('Please enter valid total liabilities (can be 0).', 'warning');
+                document.getElementById('liabilities').focus();
+                return;
+            }
+
+            if (!equity || equity <= 0) {
+                showNotification('Please enter a valid total equity amount.', 'warning');
+                document.getElementById('equity').focus();
+                return;
+            }
+
+            const calculateBtn = document.getElementById('calculate-metrics-btn');
+            const originalHTML = calculateBtn.innerHTML;
+            calculateBtn.disabled = true;
+            calculateBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Calculating...</span>';
+
+            setTimeout(() => {
+                const result = businessMetricsCalculator.calculateBusinessMetrics(revenue, costs, expenses, assets, liabilities, equity);
+                if (result.success) {
+                    showBusinessResults(result);
+                    showFinancialRatios(result);
+                    showNotification('Business metrics calculated successfully!', 'success');
+                } else {
+                    showNotification('Error calculating business metrics: ' + result.error, 'error');
+                }
+                calculateBtn.disabled = false;
+                calculateBtn.innerHTML = originalHTML;
+            }, 300);
+        }
+
+        function showBusinessResults(result) {
+            const currency = businessMetricsCalculator.currencies[businessMetricsCalculator.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            
+            // Calculate percentages for visualization
+            const grossMarginPercent = result.grossMargin;
+            const netMarginPercent = result.netMargin;
+            const operatingMarginPercent = result.operatingMargin;
+            
+            // Determine health indicators
+            const getMarginHealth = (margin) => {
+                if (margin >= 20) return { color: 'green', label: 'Excellent' };
+                if (margin >= 10) return { color: 'blue', label: 'Good' };
+                if (margin >= 5) return { color: 'yellow', label: 'Fair' };
+                return { color: 'red', label: 'Poor' };
+            };
+            
+            const grossHealth = getMarginHealth(grossMarginPercent);
+            const netHealth = getMarginHealth(netMarginPercent);
+            
+            // Helper function to get border and text classes
+            const getBorderClass = (color) => {
+                const classes = {
+                    green: 'border-green-300',
+                    blue: 'border-blue-300',
+                    yellow: 'border-yellow-300',
+                    red: 'border-red-300'
+                };
+                return classes[color] || 'border-gray-300';
+            };
+            
+            const getTextClass = (color) => {
+                const classes = {
+                    green: 'text-green-600',
+                    blue: 'text-blue-600',
+                    yellow: 'text-yellow-600',
+                    red: 'text-red-600'
+                };
+                return classes[color] || 'text-gray-600';
+            };
+            
+            const getBgClass = (color) => {
+                const classes = {
+                    green: 'bg-green-500',
+                    blue: 'bg-blue-500',
+                    yellow: 'bg-yellow-500',
+                    red: 'bg-red-500'
+                };
+                return classes[color] || 'bg-gray-500';
+            };
+            
+            document.getElementById('business-results').innerHTML = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 border-green-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💰 Gross Profit</span>
+                            <span class="text-2xl font-bold text-green-600">${symbol}${result.grossProfit.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Revenue - COGS</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💵 Net Profit</span>
+                            <span class="text-xl font-bold ${result.netProfit >= 0 ? 'text-blue-600' : 'text-red-600'}">${symbol}${result.netProfit.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">After all expenses</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 ${getBorderClass(grossHealth.color)} shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📊 Gross Margin</span>
+                            <span class="text-xl font-bold ${getTextClass(grossHealth.color)}">${result.grossMargin.toFixed(2)}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="${getBgClass(grossHealth.color)} h-2 rounded-full" style="width: ${Math.min(grossMarginPercent, 100)}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">${grossHealth.label} • ${grossMarginPercent.toFixed(1)}%</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 ${getBorderClass(netHealth.color)} shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📈 Net Margin</span>
+                            <span class="text-xl font-bold ${getTextClass(netHealth.color)}">${result.netMargin.toFixed(2)}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="${getBgClass(netHealth.color)} h-2 rounded-full" style="width: ${Math.min(Math.abs(netMarginPercent), 100)}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">${netHealth.label} • ${netMarginPercent.toFixed(1)}%</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-purple-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💼 Return on Equity (ROE)</span>
+                            <span class="text-xl font-bold text-purple-600">${result.roe.toFixed(2)}%</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Profitability of equity</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-indigo-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">🏦 Return on Assets (ROA)</span>
+                            <span class="text-xl font-bold text-indigo-600">${result.roa.toFixed(2)}%</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Asset efficiency</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showFinancialRatios(result) {
+            const currency = businessMetricsCalculator.currencies[businessMetricsCalculator.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            
+            // Determine health indicators for ratios
+            const getCurrentRatioHealth = (ratio) => {
+                if (ratio >= 2.0) return { color: 'green', label: 'Strong' };
+                if (ratio >= 1.0) return { color: 'blue', label: 'Good' };
+                return { color: 'red', label: 'Weak' };
+            };
+            
+            const getDebtToEquityHealth = (ratio) => {
+                if (ratio <= 30) return { color: 'green', label: 'Low Debt' };
+                if (ratio <= 60) return { color: 'blue', label: 'Moderate' };
+                if (ratio <= 100) return { color: 'yellow', label: 'High Debt' };
+                return { color: 'red', label: 'Very High' };
+            };
+            
+            const currentRatioHealth = getCurrentRatioHealth(result.currentRatio);
+            const debtHealth = getDebtToEquityHealth(result.debtToEquity);
+            
+            // Helper functions for dynamic classes
+            const getBorderClass = (color) => {
+                const classes = {
+                    green: 'border-green-300',
+                    blue: 'border-blue-300',
+                    yellow: 'border-yellow-300',
+                    red: 'border-red-300'
+                };
+                return classes[color] || 'border-gray-300';
+            };
+            
+            const getTextClass = (color) => {
+                const classes = {
+                    green: 'text-green-600',
+                    blue: 'text-blue-600',
+                    yellow: 'text-yellow-600',
+                    red: 'text-red-600'
+                };
+                return classes[color] || 'text-gray-600';
+            };
+            
+            const getBgClass = (color) => {
+                const classes = {
+                    green: 'bg-green-500',
+                    blue: 'bg-blue-500',
+                    yellow: 'bg-yellow-500',
+                    red: 'bg-red-500'
+                };
+                return classes[color] || 'bg-gray-500';
+            };
+            
+            document.getElementById('financial-ratios').innerHTML = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-4 border-2 ${getBorderClass(currentRatioHealth.color)} shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">⚖️ Current Ratio</span>
+                            <span class="text-xl font-bold ${getTextClass(currentRatioHealth.color)}">${result.currentRatio.toFixed(2)}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="${getBgClass(currentRatioHealth.color)} h-2 rounded-full" style="width: ${Math.min((result.currentRatio / 3) * 100, 100)}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">${currentRatioHealth.label} • Assets / Liabilities</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 ${getBorderClass(debtHealth.color)} shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📋 Debt to Equity</span>
+                            <span class="text-xl font-bold ${getTextClass(debtHealth.color)}">${result.debtToEquity.toFixed(2)}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="${getBgClass(debtHealth.color)} h-2 rounded-full" style="width: ${Math.min(result.debtToEquity, 100)}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">${debtHealth.label} • Financial leverage</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-orange-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📊 Operating Margin</span>
+                            <span class="text-xl font-bold text-orange-600">${result.operatingMargin.toFixed(2)}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-orange-500 h-2 rounded-full" style="width: ${Math.min(Math.abs(result.operatingMargin), 100)}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Operating efficiency</div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-orange-100 to-red-100 rounded-lg p-3 border border-orange-200">
+                        <div class="text-xs font-semibold text-gray-700 mb-2">💡 Quick Insights</div>
+                        <div class="text-xs text-gray-600 space-y-1">
+                            ${result.currentRatio >= 1.0 ? '✅ Good liquidity position' : '⚠️ Low liquidity - consider increasing assets'}
+                        </div>
+                        <div class="text-xs text-gray-600 mt-1">
+                            ${result.debtToEquity <= 60 ? '✅ Healthy debt level' : '⚠️ High debt - consider reducing liabilities'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function calculateBreakEven() {
+            if (!businessMetricsCalculator) {
+                showNotification('Business Metrics Calculator not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const fixedCosts = parseFloat(document.getElementById('fixed-costs').value);
+            const variableCost = parseFloat(document.getElementById('variable-cost').value);
+            const sellingPrice = parseFloat(document.getElementById('selling-price').value);
+
+            if (!fixedCosts || fixedCosts <= 0) {
+                showNotification('Please enter a valid fixed costs amount.', 'warning');
+                document.getElementById('fixed-costs').focus();
+                return;
+            }
+
+            if (variableCost === undefined || variableCost < 0) {
+                showNotification('Please enter a valid variable cost per unit.', 'warning');
+                document.getElementById('variable-cost').focus();
+                return;
+            }
+
+            if (!sellingPrice || sellingPrice <= 0) {
+                showNotification('Please enter a valid selling price per unit.', 'warning');
+                document.getElementById('selling-price').focus();
+                return;
+            }
+
+            if (sellingPrice <= variableCost) {
+                showNotification('Selling price must be greater than variable cost per unit to break even.', 'warning');
+                document.getElementById('selling-price').focus();
+                return;
+            }
+
+            const breakEvenBtn = document.getElementById('calculate-breakeven-btn');
+            const originalHTML = breakEvenBtn.innerHTML;
+            breakEvenBtn.disabled = true;
+            breakEvenBtn.innerHTML = '<span class="inline-block animate-spin">⏳</span><span> Calculating...</span>';
+
+            setTimeout(() => {
+                const result = businessMetricsCalculator.calculateBreakEven(fixedCosts, variableCost, sellingPrice);
+                if (result.success) {
+                    showBreakEvenResults(result);
+                    showNotification('Break-even analysis completed!', 'success');
+                } else {
+                    showNotification('Error calculating break-even: ' + result.error, 'error');
+                }
+                breakEvenBtn.disabled = false;
+                breakEvenBtn.innerHTML = originalHTML;
+            }, 300);
+        }
+
+        function showBreakEvenResults(result) {
+            const currency = businessMetricsCalculator.currencies[businessMetricsCalculator.selectedCurrency];
+            const symbol = currency ? currency.symbol : '$';
+            
+            const breakEvenUnits = Math.ceil(result.breakEvenUnits);
+            const contributionMarginPercent = result.contributionMarginRatio;
+            
+            document.getElementById('break-even-results').innerHTML = `
+                <div class="space-y-4 animate-fade-in">
+                    <div class="bg-white rounded-lg p-5 border-2 border-blue-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">⚖️ Break-Even Units</span>
+                            <span class="text-2xl font-bold text-blue-600">${breakEvenUnits.toLocaleString('en-US')} units</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Units needed to break even</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-green-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💰 Break-Even Revenue</span>
+                            <span class="text-xl font-bold text-green-600">${symbol}${result.breakEvenRevenue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Revenue needed to break even</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-purple-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">💵 Contribution Margin</span>
+                            <span class="text-xl font-bold text-purple-600">${symbol}${result.contributionMargin.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Price - Variable Cost</div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-4 border-2 border-indigo-300 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-gray-600">📊 Contribution Margin Ratio</span>
+                            <span class="text-xl font-bold text-indigo-600">${result.contributionMarginRatio.toFixed(2)}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-indigo-500 h-2 rounded-full" style="width: ${Math.min(contributionMarginPercent, 100)}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">Margin percentage</div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-blue-100 to-cyan-100 rounded-lg p-3 border border-blue-200">
+                        <div class="text-xs font-semibold text-gray-700 mb-2">💡 Break-Even Insights</div>
+                        <div class="text-xs text-gray-600 space-y-1">
+                            <div>• Sell ${breakEvenUnits} units to cover all costs</div>
+                            <div>• Each unit contributes ${symbol}${result.contributionMargin.toFixed(2)} to profit after break-even</div>
+                            <div>• ${contributionMarginPercent.toFixed(1)}% of each sale is profit margin</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeBusinessMetricsCalculator();
+                formatBusinessCurrency();
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        const availableTools = [
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', pageUrl: '/tools/age-calculator.html' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', pageUrl: '/tools/bmi-calculator.html' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', pageUrl: '/tools/loan-calculator.html' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', pageUrl: '/tools/investment-calculator.html' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', pageUrl: '/tools/tax-calculator.html' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', modalId: 'currency-converter-modal' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', modalId: 'retirement-calculator-modal' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', modalId: 'mortgage-calculator-modal' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', modalId: 'budget-planner-modal' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', modalId: 'salary-calculator-modal' },
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', modalId: 'json-formatter-modal' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', modalId: 'xml-formatter-modal' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', modalId: 'base64-encoder-modal' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', modalId: 'hash-generator-modal' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', modalId: 'url-encoder-modal' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', modalId: 'regex-tester-modal' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', modalId: 'css-js-minifier-modal' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', modalId: 'color-palette-modal' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', modalId: 'lorem-ipsum-modal' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            btnEl.dataset.modalId = tool.modalId || '';
+            btnEl.dataset.pageUrl = tool.pageUrl || '';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            const modalId = btnEl.dataset.modalId;
+            const pageUrl = btnEl.dataset.pageUrl;
+            
+            if (pageUrl) {
+                window.location.href = pageUrl;
+            } else if (modalId && typeof openModal === 'function') {
+                window.location.href = `/#${modalId}`;
+            } else {
+                window.location.href = '/#tools';
+            }
+        }
+        
+        function initToolSuggestions() {
+            updateToolSuggestion();
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(100%); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .animate-slide-in { animation: slideIn 0.3s ease-out; }
+        #tool-suggestion-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+        
+        /* Input focus effects */
+        input:focus, select:focus {
+            transform: scale(1.01);
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+        
+        /* Button hover effects */
+        button:not(:disabled):hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</body>
+</html>
+
+

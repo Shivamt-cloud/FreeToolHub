@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Lorem Ipsum Generator - FreeToolHub</title>
+    <meta name="description" content="Generate Lorem Ipsum text in multiple languages with custom lengths, formats, and export options.">
+    <meta property="og:title" content="Lorem Ipsum Generator - FreeToolHub">
+    <meta property="og:description" content="Generate Lorem Ipsum text in multiple languages with custom lengths">
+    <meta property="og:url" content="https://freetoolhub.in/tools/lorem-ipsum.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">📝 Lorem Ipsum Generator</h1>
+                    <p class="text-gray-600 text-lg">Generate Lorem Ipsum text in multiple languages with custom lengths</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-green-500 to-teal-600 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-teal-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Lorem Ipsum Generator</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Main Lorem Ipsum Generator Section -->
+                    <div class="lg:col-span-3">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Input Section -->
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Language</label>
+                                    <select id="lorem-language" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                        <option value="latin">Latin (Classic Lorem Ipsum)</option>
+                                        <option value="english">English (Pangrams)</option>
+                                        <option value="spanish">Spanish (Pangrams)</option>
+                                        <option value="french">French (Pangrams)</option>
+                                        <option value="german">German (Pangrams)</option>
+                                        <option value="japanese">Japanese (Iroha)</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Output Type</label>
+                                    <select id="lorem-type" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                        <option value="words">Words</option>
+                                        <option value="sentences">Sentences</option>
+                                        <option value="paragraphs">Paragraphs</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Count</label>
+                                    <input type="number" id="lorem-count" value="50" min="1" max="1000" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Format</label>
+                                    <select id="lorem-format" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                        <option value="plain">Plain Text</option>
+                                        <option value="html">HTML</option>
+                                        <option value="markdown">Markdown</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="start-with-lorem" checked class="mr-2">
+                                        <span class="text-gray-700">Start with "Lorem" (for Latin only)</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button onclick="generateLoremIpsum()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                        Generate
+                                    </button>
+                                    <button onclick="copyLoremIpsum()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                        Copy Text
+                                    </button>
+                                    <button onclick="downloadLoremIpsum()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                        Download
+                                    </button>
+                                    <button onclick="clearLoremIpsum()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105">
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Output Section -->
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Generated Text</label>
+                                    <div class="relative">
+                                        <textarea id="lorem-output" readonly class="w-full h-96 p-4 border border-gray-300 rounded-xl bg-gray-50 font-mono text-sm resize-none" placeholder="Generated Lorem Ipsum text will appear here..."></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-700 mb-3">Statistics</label>
+                                    <div id="lorem-stats" class="bg-green-50 rounded-xl p-4 space-y-2">
+                                        <div class="text-gray-500 text-sm">Generate text to see statistics</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Error Display -->
+                        <div id="lorem-error" class="hidden mt-6">
+                            <div class="bg-red-50 rounded-xl p-6 border border-red-200">
+                                <div class="text-red-700" id="lorem-error-content"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Tool Suggestion Card -->
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Lorem Ipsum Generator Dependencies -->
+    <script src="/src/js/LoremIpsumGenerator.js"></script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        // Available tools for suggestions (excluding current tool)
+        const availableTools = [
+            // Student Tools
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', pageUrl: '/tools/calculator.html' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '🎯', name: 'Study Planner', description: 'Study scheduling & time management', pageUrl: '/tools/study-planner.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', pageUrl: '/tools/flashcard-generator.html' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', pageUrl: '/tools/progress-tracker.html' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', pageUrl: '/tools/age-calculator.html' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', pageUrl: '/tools/bmi-calculator.html' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', pageUrl: '/tools/loan-calculator.html' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', pageUrl: '/tools/investment-calculator.html' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', pageUrl: '/tools/tax-calculator.html' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', pageUrl: '/tools/business-metrics.html' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', pageUrl: '/tools/currency-converter.html' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', pageUrl: '/tools/retirement-calculator.html' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', pageUrl: '/tools/mortgage-calculator.html' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', pageUrl: '/tools/budget-planner.html' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', pageUrl: '/tools/salary-calculator.html' },
+            // Developer Tools
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', pageUrl: '/tools/json-formatter.html' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', pageUrl: '/tools/xml-formatter.html' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', pageUrl: '/tools/base64-encoder.html' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', pageUrl: '/tools/hash-generator.html' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', pageUrl: '/tools/url-encoder.html' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', pageUrl: '/tools/regex-tester.html' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', pageUrl: '/tools/css-js-minifier.html' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', pageUrl: '/tools/color-palette.html' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            // PDF Tools
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            // Image Tools
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            // Utility Tools
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        // Get random tool (excluding current one)
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        // Update tool suggestion card
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            if (tool) {
+                document.getElementById('tool-icon').textContent = tool.icon;
+                document.getElementById('tool-name').textContent = tool.name;
+                document.getElementById('tool-description').textContent = tool.description;
+                
+                const checkoutBtn = document.getElementById('tool-checkout-btn');
+                checkoutBtn.onclick = () => {
+                    if (tool.modalId) {
+                        // If it's a modal, open it
+                        if (typeof openModal === 'function') {
+                            openModal(tool.modalId);
+                        } else {
+                            console.error('openModal function not available for modal tool:', tool.name);
+                            alert(`Tool "${tool.name}" is not yet available as a dedicated page.`);
+                        }
+                    } else if (tool.pageUrl) {
+                        // If it's a page, navigate to it
+                        window.location.href = tool.pageUrl;
+                    } else {
+                        // Fallback to homepage if no specific action
+                        window.location.href = '/#tools';
+                    }
+                };
+            }
+        }
+        
+        // Launch suggested tool (updated to handle both modals and pages)
+        function launchSuggestedTool() {
+            const tool = availableTools[currentToolIndex];
+            if (tool) {
+                if (tool.modalId) {
+                    if (typeof openModal === 'function') {
+                        openModal(tool.modalId);
+                    } else {
+                        console.error('openModal function not available for modal tool:', tool.name);
+                        alert(`Tool "${tool.name}" is not yet available as a dedicated page.`);
+                    }
+                } else if (tool.pageUrl) {
+                    window.location.href = tool.pageUrl;
+                } else {
+                    window.location.href = '/#tools';
+                }
+            }
+        }
+        
+        // Start auto-refreshing suggestions
+        function startSuggestionRefresh() {
+            // Clear any existing interval to prevent duplicates
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            // Refresh every 10 seconds
+            refreshInterval = setInterval(updateToolSuggestion, 10000);
+        }
+        
+        // Initial load and start refresh
+        document.addEventListener('DOMContentLoaded', () => {
+            updateToolSuggestion();
+            startSuggestionRefresh();
+        });
+    </script>
+    
+    <script>
+        let loremIpsumGenerator = null;
+        
+        function initializeLoremIpsumGenerator() {
+            try {
+                if (typeof LoremIpsumGenerator !== 'undefined') {
+                    loremIpsumGenerator = new LoremIpsumGenerator();
+                    console.log('✅ Lorem Ipsum Generator initialized successfully');
+                    // Generate initial text on load
+                    generateLoremIpsum();
+                } else {
+                    console.error('❌ LoremIpsumGenerator class not found');
+                }
+            } catch (error) {
+                console.error('❌ Lorem Ipsum Generator initialization failed:', error);
+            }
+        }
+        
+        function generateLoremIpsum() {
+            if (!loremIpsumGenerator) {
+                alert('Lorem Ipsum Generator not initialized. Please refresh the page.');
+                return;
+            }
+            
+            try {
+                const language = document.getElementById('lorem-language').value;
+                const type = document.getElementById('lorem-type').value;
+                const count = parseInt(document.getElementById('lorem-count').value) || 50;
+                const format = document.getElementById('lorem-format').value;
+                const startWithLorem = document.getElementById('start-with-lorem').checked;
+                
+                if (isNaN(count) || count < 1 || count > 1000) {
+                    alert('Please enter a valid count between 1 and 1000.');
+                    return;
+                }
+                
+                const result = loremIpsumGenerator.generateText({
+                    language: language,
+                    type: type,
+                    count: count,
+                    startWithLorem: startWithLorem && language === 'latin',
+                    format: format
+                });
+                
+                if (result.success) {
+                    displayLoremIpsum(result);
+                    displayStats(result.stats);
+                    loremIpsumGenerator.addToHistory({
+                        type: 'generate',
+                        language: language,
+                        textType: type,
+                        count: count,
+                        format: format,
+                        result: result
+                    });
+                } else {
+                    showLoremIpsumError(result);
+                }
+            } catch (error) {
+                console.error('Lorem Ipsum generation error:', error);
+                alert('Error generating Lorem Ipsum: ' + error.message);
+            }
+        }
+        
+        function displayLoremIpsum(result) {
+            const outputTextarea = document.getElementById('lorem-output');
+            outputTextarea.value = result.text;
+            document.getElementById('lorem-error').classList.add('hidden');
+        }
+        
+        function displayStats(stats) {
+            const statsDiv = document.getElementById('lorem-stats');
+            statsDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-gray-500 mb-1">Characters</div>
+                        <div class="text-lg font-bold text-green-600">${stats.characters.toLocaleString()}</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-gray-500 mb-1">Characters (no spaces)</div>
+                        <div class="text-lg font-bold text-blue-600">${stats.charactersNoSpaces.toLocaleString()}</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-gray-500 mb-1">Words</div>
+                        <div class="text-lg font-bold text-purple-600">${stats.words.toLocaleString()}</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-gray-500 mb-1">Sentences</div>
+                        <div class="text-lg font-bold text-indigo-600">${stats.sentences.toLocaleString()}</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-gray-500 mb-1">Paragraphs</div>
+                        <div class="text-lg font-bold text-teal-600">${stats.paragraphs.toLocaleString()}</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-gray-500 mb-1">Average Words/Sentence</div>
+                        <div class="text-lg font-bold text-orange-600">${stats.averageWordsPerSentence.toFixed(1)}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function showLoremIpsumError(result) {
+            const errorDiv = document.getElementById('lorem-error');
+            const errorContent = document.getElementById('lorem-error-content');
+            errorContent.textContent = result.error || 'An error occurred while generating Lorem Ipsum text.';
+            errorDiv.classList.remove('hidden');
+        }
+        
+        function copyLoremIpsum() {
+            const output = document.getElementById('lorem-output').value;
+            if (!output.trim()) {
+                alert('No text to copy. Please generate text first.');
+                return;
+            }
+            
+            navigator.clipboard.writeText(output).then(() => {
+                alert('Text copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy to clipboard.');
+            });
+        }
+        
+        function downloadLoremIpsum() {
+            const output = document.getElementById('lorem-output').value;
+            if (!output.trim()) {
+                alert('No text to download. Please generate text first.');
+                return;
+            }
+            
+            const format = document.getElementById('lorem-format').value;
+            const extension = format === 'html' ? 'html' : format === 'markdown' ? 'md' : 'txt';
+            
+            const blob = new Blob([output], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `lorem-ipsum.${extension}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        function clearLoremIpsum() {
+            document.getElementById('lorem-output').value = '';
+            document.getElementById('lorem-stats').innerHTML = '<div class="text-gray-500 text-sm">Generate text to see statistics</div>';
+            document.getElementById('lorem-error').classList.add('hidden');
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeLoremIpsumGenerator();
+            }, 200);
+        });
+    </script>
+</body>
+</html>
+
+

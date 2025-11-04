@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Study Planner & Schedule - FreeToolHub</title>
+    <meta name="description" content="Advanced study planning, scheduling, and time management for students. Plan your study sessions and track your academic goals.">
+    <meta property="og:title" content="Study Planner & Schedule - FreeToolHub">
+    <meta property="og:description" content="Advanced study planning, scheduling, and time management for students">
+    <meta property="og:url" content="https://freetoolhub.in/tools/study-planner.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🎯 Study Planner & Schedule</h1>
+                    <p class="text-gray-600 text-lg">Advanced study planning, scheduling, and time management for students</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-emerald-500 to-cyan-600 text-white px-6 py-3 rounded-lg hover:from-emerald-600 hover:to-cyan-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Study Planner</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Input Section -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Study Session -->
+                        <div class="bg-gradient-to-r from-emerald-50 to-cyan-50 p-6 rounded-xl border-2 border-emerald-200">
+                            <label class="block text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span>📚</span>
+                                <span>Add Study Session</span>
+                            </label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Session Title</label>
+                                    <input type="text" id="session-title" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" placeholder="e.g., Math Review">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Subject</label>
+                                    <input type="text" id="session-subject" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" placeholder="e.g., Mathematics">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Session Type</label>
+                                    <select id="session-type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                        <option value="focused">Focused Study</option>
+                                        <option value="review">Review Session</option>
+                                        <option value="practice">Practice Problems</option>
+                                        <option value="reading">Reading Session</option>
+                                        <option value="group">Group Study</option>
+                                        <option value="exam_prep">Exam Preparation</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Duration (minutes)</label>
+                                    <input type="number" id="session-duration" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" placeholder="45" min="15" max="240">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Date</label>
+                                    <input type="date" id="session-date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Start Time</label>
+                                    <input type="time" id="session-start-time" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Priority</label>
+                                    <select id="session-priority" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                        <option value="high">High Priority</option>
+                                        <option value="medium">Medium Priority</option>
+                                        <option value="low">Low Priority</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+                                    <input type="text" id="session-location" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" placeholder="e.g., Library, Home">
+                                </div>
+                            </div>
+                            <button onclick="addStudySession()" class="w-full mt-4 bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                ➕ Add Study Session
+                            </button>
+                        </div>
+                        
+                        <!-- Study Goal -->
+                        <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border-2 border-purple-200">
+                            <label class="block text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span>🎯</span>
+                                <span>Add Study Goal</span>
+                            </label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Goal Title</label>
+                                    <input type="text" id="goal-title" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" placeholder="e.g., Complete Math Chapter 5">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Subject</label>
+                                    <input type="text" id="goal-subject" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" placeholder="e.g., Mathematics">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Goal Type</label>
+                                    <select id="goal-type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                        <option value="daily">Daily Goal</option>
+                                        <option value="weekly">Weekly Goal</option>
+                                        <option value="monthly">Monthly Goal</option>
+                                        <option value="semester">Semester Goal</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Target</label>
+                                    <input type="number" id="goal-target" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" placeholder="1" min="1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Unit</label>
+                                    <select id="goal-unit" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                        <option value="hours">Hours</option>
+                                        <option value="sessions">Sessions</option>
+                                        <option value="chapters">Chapters</option>
+                                        <option value="pages">Pages</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Deadline</label>
+                                    <input type="date" id="goal-deadline" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                            </div>
+                            <button onclick="addStudyGoal()" class="w-full mt-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                🎯 Add Study Goal
+                            </button>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200">
+                            <label class="block text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span>⚡</span>
+                                <span>Quick Actions</span>
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="generateSchedule()" class="bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                    📅 Generate Schedule
+                                </button>
+                                <button onclick="getStudyStats()" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                    📊 Study Stats
+                                </button>
+                                <button onclick="getRecommendations()" class="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                    💡 Recommendations
+                                </button>
+                                <button onclick="exportStudyData()" class="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                    📤 Export Data
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Templates -->
+                        <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">🚀 Quick Templates</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="loadQuickSession('Math Review', 'Mathematics', '09:00', 60)" class="bg-white hover:bg-yellow-100 p-3 rounded-lg border border-yellow-300 text-left transition-all duration-200">
+                                    <div class="font-semibold text-sm text-gray-800">Math Review</div>
+                                    <div class="text-xs text-gray-600">60 min • 9:00 AM</div>
+                                </button>
+                                <button onclick="loadQuickSession('English Reading', 'English', '14:00', 45)" class="bg-white hover:bg-yellow-100 p-3 rounded-lg border border-yellow-300 text-left transition-all duration-200">
+                                    <div class="font-semibold text-sm text-gray-800">English Reading</div>
+                                    <div class="text-xs text-gray-600">45 min • 2:00 PM</div>
+                                </button>
+                                <button onclick="loadQuickSession('Science Practice', 'Science', '16:00', 90)" class="bg-white hover:bg-yellow-100 p-3 rounded-lg border border-yellow-300 text-left transition-all duration-200">
+                                    <div class="font-semibold text-sm text-gray-800">Science Practice</div>
+                                    <div class="text-xs text-gray-600">90 min • 4:00 PM</div>
+                                </button>
+                                <button onclick="loadQuickGoal('Complete Chapter 5', 'Mathematics', 7)" class="bg-white hover:bg-yellow-100 p-3 rounded-lg border border-yellow-300 text-left transition-all duration-200">
+                                    <div class="font-semibold text-sm text-gray-800">Complete Chapter</div>
+                                    <div class="text-xs text-gray-600">7 days goal</div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <!-- Study Statistics -->
+                        <div id="study-stats-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📊 Study Statistics</h4>
+                            <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                                <div id="study-stats-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Study Recommendations -->
+                        <div id="study-recommendations-results" class="hidden">
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">💡 Study Recommendations</h4>
+                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                <div id="study-recommendations-content" class="text-sm text-gray-600"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Upcoming Sessions -->
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">📅 Upcoming Sessions</h4>
+                            <div id="upcoming-sessions" class="space-y-2 max-h-64 overflow-y-auto bg-gray-50 rounded-lg p-3">
+                                <div class="text-gray-500 text-center py-4">No upcoming sessions</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Study Goals -->
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-800 mb-3">🎯 Study Goals</h4>
+                            <div id="study-goals" class="space-y-2 max-h-64 overflow-y-auto bg-gray-50 rounded-lg p-3">
+                                <div class="text-gray-500 text-center py-4">No study goals set</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tool Suggestions Widget -->
+                    <div class="lg:col-span-1 hidden lg:block">
+                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg h-fit sticky top-28">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="text-xl font-bold text-gray-800">✨ Explore Tools</h4>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-gray-500 font-medium">Live</span>
+                                </div>
+                            </div>
+                            
+                            <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in">
+                                <div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div>
+                                <h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5>
+                                <p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p>
+                                <button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg">
+                                    <span>Check it out</span>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+    
+    <!-- Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+    
+    <!-- Study Planner Dependencies -->
+    <script src="/src/js/StudyPlanner.js?v=1&t=1726745000"></script>
+    
+    <!-- Study Planner JavaScript -->
+    <script>
+        let studyPlanner = null;
+
+        function initializeStudyPlanner() {
+            try {
+                if (typeof StudyPlanner !== 'undefined') {
+                    studyPlanner = new StudyPlanner();
+                    console.log('✅ Study Planner initialized successfully');
+                    updateUpcomingSessions();
+                    updateStudyGoals();
+                } else {
+                    console.error('❌ StudyPlanner class not found');
+                }
+            } catch (error) {
+                console.error('❌ Error initializing Study Planner:', error);
+            }
+        }
+
+        function addStudySession() {
+            if (!studyPlanner) {
+                showNotification('Study Planner not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const sessionData = {
+                title: document.getElementById('session-title').value.trim(),
+                subject: document.getElementById('session-subject').value.trim(),
+                type: document.getElementById('session-type').value,
+                duration: parseInt(document.getElementById('session-duration').value) || 45,
+                date: document.getElementById('session-date').value,
+                startTime: document.getElementById('session-start-time').value,
+                priority: document.getElementById('session-priority').value,
+                location: document.getElementById('session-location').value.trim()
+            };
+
+            if (!sessionData.title || !sessionData.date || !sessionData.startTime) {
+                showNotification('Please fill in title, date, and start time.', 'warning');
+                // Highlight missing fields
+                if (!sessionData.title) document.getElementById('session-title').focus();
+                else if (!sessionData.date) document.getElementById('session-date').focus();
+                else if (!sessionData.startTime) document.getElementById('session-start-time').focus();
+                return;
+            }
+
+            const result = studyPlanner.addStudySession(sessionData);
+            if (result.success) {
+                clearSessionForm();
+                updateUpcomingSessions();
+                showNotification('✅ Study session added successfully!', 'success');
+            } else {
+                showNotification('Error adding study session: ' + result.error, 'error');
+            }
+        }
+
+        function addStudyGoal() {
+            if (!studyPlanner) {
+                showNotification('Study Planner not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const goalData = {
+                title: document.getElementById('goal-title').value.trim(),
+                subject: document.getElementById('goal-subject').value.trim(),
+                type: document.getElementById('goal-type').value,
+                target: parseInt(document.getElementById('goal-target').value) || 1,
+                unit: document.getElementById('goal-unit').value,
+                deadline: document.getElementById('goal-deadline').value
+            };
+
+            if (!goalData.title || !goalData.deadline) {
+                showNotification('Please fill in goal title and deadline.', 'warning');
+                if (!goalData.title) document.getElementById('goal-title').focus();
+                else if (!goalData.deadline) document.getElementById('goal-deadline').focus();
+                return;
+            }
+
+            const result = studyPlanner.addGoal(goalData);
+            if (result.success) {
+                clearGoalForm();
+                updateStudyGoals();
+                showNotification('✅ Study goal added successfully!', 'success');
+            } else {
+                showNotification('Error adding study goal: ' + result.error, 'error');
+            }
+        }
+
+        function clearSessionForm() {
+            document.getElementById('session-title').value = '';
+            document.getElementById('session-subject').value = '';
+            document.getElementById('session-duration').value = '';
+            document.getElementById('session-date').value = '';
+            document.getElementById('session-start-time').value = '';
+            document.getElementById('session-location').value = '';
+        }
+
+        function clearGoalForm() {
+            document.getElementById('goal-title').value = '';
+            document.getElementById('goal-subject').value = '';
+            document.getElementById('goal-target').value = '';
+            document.getElementById('goal-deadline').value = '';
+        }
+
+        function loadQuickSession(title, subject, startTime, duration) {
+            const today = new Date();
+            document.getElementById('session-title').value = title;
+            document.getElementById('session-subject').value = subject;
+            document.getElementById('session-start-time').value = startTime;
+            document.getElementById('session-duration').value = duration;
+            document.getElementById('session-date').value = today.toISOString().split('T')[0];
+            document.getElementById('session-title').focus();
+        }
+
+        function loadQuickGoal(title, subject, days) {
+            const today = new Date();
+            const deadline = new Date(today);
+            deadline.setDate(today.getDate() + days);
+            
+            document.getElementById('goal-title').value = title;
+            document.getElementById('goal-subject').value = subject;
+            document.getElementById('goal-deadline').value = deadline.toISOString().split('T')[0];
+            document.getElementById('goal-title').focus();
+        }
+
+        function generateSchedule() {
+            if (!studyPlanner) {
+                showNotification('Study Planner not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            // Check if there are any sessions or goals to work with
+            const sessions = studyPlanner.studySessions || [];
+            const goals = studyPlanner.goals || [];
+            
+            if (sessions.length === 0 && goals.length === 0) {
+                showNotification('Please add at least one study session or goal before generating a schedule.', 'warning');
+                return;
+            }
+
+            // Show schedule generation modal
+            showScheduleGeneratorModal();
+        }
+
+        function showScheduleGeneratorModal() {
+            const modal = document.getElementById('schedule-generator-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                return;
+            }
+
+            // Get available subjects from existing sessions
+            const sessions = studyPlanner.studySessions || [];
+            const subjects = [...new Set(sessions.map(s => s.subject).filter(s => s))];
+            
+            // Set default dates (next 7 days)
+            const today = new Date();
+            const nextWeek = new Date(today);
+            nextWeek.setDate(today.getDate() + 7);
+            
+            const modalDiv = document.createElement('div');
+            modalDiv.id = 'schedule-generator-modal';
+            modalDiv.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            modalDiv.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="sticky top-0 bg-gradient-to-r from-emerald-500 to-cyan-600 text-white p-6 rounded-t-2xl flex justify-between items-center">
+                        <h3 class="text-2xl font-bold">📅 Generate Study Schedule</h3>
+                        <button onclick="closeScheduleModal()" class="text-white hover:text-gray-200 text-2xl font-bold">×</button>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Schedule Name</label>
+                            <input type="text" id="schedule-name" class="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g., Weekly Study Plan" value="Weekly Study Plan">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date</label>
+                                <input type="date" id="schedule-start-date" class="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500" value="${today.toISOString().split('T')[0]}">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">End Date</label>
+                                <input type="date" id="schedule-end-date" class="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500" value="${nextWeek.toISOString().split('T')[0]}">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Study Hours Per Day</label>
+                            <input type="number" id="study-hours-per-day" class="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500" placeholder="4" value="4" min="1" max="12" step="0.5">
+                            <p class="text-xs text-gray-500 mt-1">Recommended: 4-6 hours per day</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Subjects to Include</label>
+                            <div id="subjects-checklist" class="space-y-2 max-h-40 overflow-y-auto border-2 border-gray-200 rounded-xl p-3">
+                                ${subjects.length > 0 ? subjects.map(subject => `
+                                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                        <input type="checkbox" class="schedule-subject-checkbox" value="${subject}" checked>
+                                        <span class="text-gray-700">${subject}</span>
+                                    </label>
+                                `).join('') : '<p class="text-gray-500 text-sm">No subjects found. Add study sessions first.</p>'}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Preferences</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" id="skip-weekends" class="rounded">
+                                    <span class="text-gray-700">Skip weekends</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" id="include-breaks" class="rounded" checked>
+                                    <span class="text-gray-700">Include break times</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" id="prioritize-goals" class="rounded" checked>
+                                    <span class="text-gray-700">Prioritize active goals</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 border-t bg-gray-50 rounded-b-2xl flex gap-3">
+                        <button onclick="executeGenerateSchedule()" class="flex-1 bg-gradient-to-r from-emerald-500 to-cyan-600 text-white font-bold py-3 px-6 rounded-xl hover:from-emerald-600 hover:to-cyan-700 transition-all duration-300">
+                            ✨ Generate Schedule
+                        </button>
+                        <button onclick="closeScheduleModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modalDiv);
+            
+            // Close on outside click
+            modalDiv.addEventListener('click', (e) => {
+                if (e.target === modalDiv) {
+                    closeScheduleModal();
+                }
+            });
+        }
+
+        function closeScheduleModal() {
+            const modal = document.getElementById('schedule-generator-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function executeGenerateSchedule() {
+            const name = document.getElementById('schedule-name').value.trim();
+            const startDate = document.getElementById('schedule-start-date').value;
+            const endDate = document.getElementById('schedule-end-date').value;
+            const hoursPerDay = parseFloat(document.getElementById('study-hours-per-day').value) || 4;
+            
+            if (!name || !startDate || !endDate) {
+                showNotification('Please fill in all required fields.', 'error');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                showNotification('Start date must be before end date.', 'error');
+                return;
+            }
+
+            // Get selected subjects
+            const checkboxes = document.querySelectorAll('.schedule-subject-checkbox:checked');
+            const selectedSubjects = Array.from(checkboxes).map(cb => cb.value);
+            
+            if (selectedSubjects.length === 0) {
+                showNotification('Please select at least one subject.', 'error');
+                return;
+            }
+
+            const preferences = {
+                skipWeekends: document.getElementById('skip-weekends').checked,
+                includeBreaks: document.getElementById('include-breaks').checked,
+                prioritizeGoals: document.getElementById('prioritize-goals').checked
+            };
+            
+            const days = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24));
+            const totalHours = hoursPerDay * days;
+            
+            const scheduleData = {
+                name: name,
+                subjects: selectedSubjects,
+                startDate: startDate,
+                endDate: endDate,
+                studyHours: totalHours,
+                preferences: preferences
+            };
+            
+            // Show loading
+            const generateBtn = document.querySelector('#schedule-generator-modal button[onclick="executeGenerateSchedule()"]');
+            if (generateBtn) {
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<span class="animate-spin">⏳</span> Generating...';
+            }
+            
+            setTimeout(() => {
+                try {
+                    const result = studyPlanner.generateSchedule(scheduleData);
+                    
+            if (result.success) {
+                        closeScheduleModal();
+                        showScheduleResults(result);
+                updateUpcomingSessions();
+                        showNotification('Schedule generated successfully!', 'success');
+            } else {
+                        showNotification('Error generating schedule: ' + result.error, 'error');
+                        if (generateBtn) {
+                            generateBtn.disabled = false;
+                            generateBtn.innerHTML = '✨ Generate Schedule';
+                        }
+                    }
+                } catch (error) {
+                    showNotification('An error occurred: ' + error.message, 'error');
+                    if (generateBtn) {
+                        generateBtn.disabled = false;
+                        generateBtn.innerHTML = '✨ Generate Schedule';
+                    }
+                }
+            }, 200);
+        }
+
+        function showScheduleResults(result) {
+            // Hide existing results
+            document.getElementById('study-stats-results')?.classList.add('hidden');
+            document.getElementById('study-recommendations-results')?.classList.add('hidden');
+            
+            // Create or update schedule results display
+            let scheduleResultsDiv = document.getElementById('schedule-results');
+            if (!scheduleResultsDiv) {
+                scheduleResultsDiv = document.createElement('div');
+                scheduleResultsDiv.id = 'schedule-results';
+                scheduleResultsDiv.className = 'space-y-6';
+                const resultsSection = document.querySelector('.lg\\:col-span-1');
+                if (resultsSection) {
+                    resultsSection.insertBefore(scheduleResultsDiv, resultsSection.firstChild);
+                }
+            }
+            
+            scheduleResultsDiv.innerHTML = `
+                <div class="bg-gradient-to-r from-emerald-50 to-cyan-50 rounded-xl p-6 border-2 border-emerald-200">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span>📅</span>
+                        <span>Generated Schedule: ${result.schedule?.[0]?.sessions?.length ? result.schedule[0].sessions.length : 0} Days</span>
+                    </h4>
+                    <div class="space-y-3 max-h-96 overflow-y-auto">
+                        ${result.schedule && result.schedule.length > 0 ? result.schedule.map((day, dayIndex) => `
+                            <div class="bg-white p-4 rounded-lg border border-emerald-200 shadow-sm">
+                                <div class="font-bold text-emerald-700 mb-2 flex items-center justify-between">
+                                    <span>${day.date} (${day.dayOfWeek})</span>
+                                    <span class="text-xs text-gray-500">${day.sessions.length} session${day.sessions.length !== 1 ? 's' : ''}</span>
+                                </div>
+                                <div class="space-y-2">
+                                    ${day.sessions.map((session, idx) => `
+                                        <div class="bg-gray-50 p-2 rounded border-l-4 border-emerald-500">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex-1">
+                                                    <div class="font-semibold text-gray-800 text-sm">${session.subject}</div>
+                                                    <div class="text-xs text-gray-600">${session.startTime} - ${session.endTime} (${session.duration} min)</div>
+                                                    <div class="text-xs text-gray-500">${session.type.replace('_', ' ')} • ${session.priority} priority</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('') : '<p class="text-gray-500 text-center py-4">No schedule generated</p>'}
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <button onclick="downloadSchedule()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300">
+                            📥 Download Schedule
+                        </button>
+                        <button onclick="clearScheduleResults()" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function downloadSchedule() {
+            const scheduleResults = document.getElementById('schedule-results');
+            if (!scheduleResults) return;
+            
+            const scheduleText = scheduleResults.innerText;
+            const blob = new Blob([scheduleText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `study-schedule-${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('Schedule downloaded successfully!', 'success');
+        }
+
+        function clearScheduleResults() {
+            const scheduleResults = document.getElementById('schedule-results');
+            if (scheduleResults) {
+                scheduleResults.remove();
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const existing = document.getElementById('study-notification');
+            if (existing) existing.remove();
+            
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-yellow-500',
+                info: 'bg-blue-500'
+            };
+            
+            const notification = document.createElement('div');
+            notification.id = 'study-notification';
+            notification.className = `fixed top-20 right-4 ${colors[type]} text-white px-6 py-4 rounded-lg shadow-xl z-50 animate-slide-in`;
+            notification.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+                    <div class="font-semibold">${message}</div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">✕</button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        function getStudyStats() {
+            if (!studyPlanner) {
+                showNotification('Study Planner not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const result = studyPlanner.getStudyStatistics('week');
+            if (!result.success) {
+                showNotification('Error getting statistics: ' + result.error, 'error');
+                return;
+            }
+
+            const stats = result.statistics;
+            
+            // Hide schedule results if showing
+            document.getElementById('schedule-results')?.classList.add('hidden');
+            document.getElementById('study-recommendations-results')?.classList.add('hidden');
+            
+            document.getElementById('study-stats-content').innerHTML = `
+                <div class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-white p-3 rounded-lg border border-emerald-200 text-center">
+                            <div class="text-2xl font-bold text-emerald-600">${stats.totalSessions || 0}</div>
+                            <div class="text-xs text-gray-600">Total Sessions</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-emerald-200 text-center">
+                            <div class="text-2xl font-bold text-emerald-600">${stats.totalHours || 0}</div>
+                            <div class="text-xs text-gray-600">Total Hours</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-emerald-200 text-center">
+                            <div class="text-2xl font-bold text-cyan-600">${stats.completedSessions || 0}</div>
+                            <div class="text-xs text-gray-600">Completed</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-emerald-200 text-center">
+                            <div class="text-2xl font-bold text-cyan-600">${stats.completionRate?.toFixed(1) || 0}%</div>
+                            <div class="text-xs text-gray-600">Completion Rate</div>
+                        </div>
+                    </div>
+                    ${stats.subjectStats && Object.keys(stats.subjectStats).length > 0 ? `
+                        <div class="mt-3">
+                            <div class="font-semibold text-gray-700 mb-2 text-sm">By Subject:</div>
+                            ${Object.entries(stats.subjectStats).map(([subject, data]) => `
+                                <div class="bg-white p-2 rounded border border-gray-200 mb-1 text-xs">
+                                    <div class="font-semibold text-gray-800">${subject}</div>
+                                    <div class="text-gray-600">${data.hours.toFixed(1)}h • ${data.sessions} sessions</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('study-stats-results').classList.remove('hidden');
+        }
+
+        function getRecommendations() {
+            if (!studyPlanner) {
+                showNotification('Study Planner not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const recommendations = studyPlanner.getStudyRecommendations();
+            
+            // Hide other results
+            document.getElementById('study-stats-results')?.classList.add('hidden');
+            document.getElementById('schedule-results')?.classList.add('hidden');
+            
+            if (!recommendations || recommendations.length === 0) {
+                document.getElementById('study-recommendations-content').innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="text-4xl mb-2">🎉</div>
+                        <div class="text-gray-600 font-semibold">You're doing great!</div>
+                        <div class="text-sm text-gray-500 mt-1">No recommendations at this time.</div>
+                    </div>
+                `;
+            } else {
+            document.getElementById('study-recommendations-content').innerHTML = `
+                    <div class="space-y-3">
+                        ${recommendations.map(rec => `
+                            <div class="bg-white p-3 rounded-lg border-l-4 ${rec.type === 'urgent' ? 'border-red-500' : rec.type === 'warning' ? 'border-yellow-500' : 'border-blue-500'}">
+                                <div class="font-semibold text-gray-800 text-sm mb-1">${rec.title}</div>
+                                <div class="text-xs text-gray-600 mb-1">${rec.message}</div>
+                                <div class="text-xs text-gray-500">💡 ${rec.action}</div>
+                            </div>
+                        `).join('')}
+                </div>
+            `;
+            }
+            document.getElementById('study-recommendations-results').classList.remove('hidden');
+        }
+
+        function exportStudyData() {
+            if (!studyPlanner) {
+                showNotification('Study Planner not initialized. Please refresh the page.', 'error');
+                return;
+            }
+
+            const result = studyPlanner.exportSchedule('json');
+            if (result.success) {
+                const dataStr = JSON.stringify(result.data, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `study-data-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showNotification('✅ Data exported successfully!', 'success');
+            } else {
+                showNotification('Error exporting data: ' + result.error, 'error');
+            }
+        }
+
+        function updateUpcomingSessions() {
+            if (!studyPlanner) return;
+            
+            const sessions = studyPlanner.getUpcomingSessions(10);
+            const container = document.getElementById('upcoming-sessions');
+            
+            if (sessions.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-4">No upcoming sessions</div>';
+                return;
+            }
+            
+            let html = '';
+            sessions.forEach(session => {
+                const priorityColors = {
+                    high: 'border-red-500 bg-red-50',
+                    medium: 'border-yellow-500 bg-yellow-50',
+                    low: 'border-green-500 bg-green-50'
+                };
+                const typeEmojis = {
+                    focused: '🎯',
+                    review: '📖',
+                    practice: '✏️',
+                    reading: '📚',
+                    group: '👥',
+                    exam_prep: '📝'
+                };
+                
+                html += `
+                    <div class="bg-white p-3 rounded-lg border-l-4 ${priorityColors[session.priority] || 'border-gray-300'} mb-2 shadow-sm hover:shadow-md transition-all cursor-pointer" onclick="viewSessionDetails(${session.id})">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="font-semibold text-gray-800 text-sm flex items-center gap-1">
+                                    <span>${typeEmojis[session.type] || '📅'}</span>
+                                    <span>${session.title}</span>
+                                </div>
+                                <div class="text-xs text-gray-600 mt-1">${session.subject}</div>
+                                <div class="text-xs text-gray-500 mt-1">${session.date} • ${session.startTime} (${session.duration} min)</div>
+                                ${session.location ? `<div class="text-xs text-gray-500">📍 ${session.location}</div>` : ''}
+                            </div>
+                            <button onclick="event.stopPropagation(); markSessionComplete(${session.id})" class="ml-2 text-green-600 hover:text-green-700 text-sm">
+                                ✓
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function viewSessionDetails(sessionId) {
+            const session = studyPlanner.studySessions.find(s => s.id === sessionId);
+            if (!session) return;
+            
+            showNotification(`Session: ${session.title} on ${session.date} at ${session.startTime}`, 'info');
+        }
+
+        function markSessionComplete(sessionId) {
+            if (!studyPlanner) return;
+            
+            const result = studyPlanner.markSessionCompleted(sessionId);
+            if (result.success) {
+                updateUpcomingSessions();
+                showNotification('✅ Session marked as completed!', 'success');
+            } else {
+                showNotification('Error: ' + result.error, 'error');
+            }
+        }
+
+        function updateStudyGoals() {
+            if (!studyPlanner) return;
+            
+            const goals = studyPlanner.goals || [];
+            const container = document.getElementById('study-goals');
+            
+            if (goals.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-4">No study goals set</div>';
+                return;
+            }
+            
+            let html = '';
+            goals.forEach(goal => {
+                const progress = goal.target > 0 ? (goal.progress / goal.target) * 100 : 0;
+                const progressColor = progress >= 100 ? 'bg-green-500' : progress >= 50 ? 'bg-yellow-500' : 'bg-blue-500';
+                
+                html += `
+                    <div class="bg-white p-3 rounded-lg border border-gray-200 mb-2 shadow-sm hover:shadow-md transition-all">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex-1">
+                                <div class="font-semibold text-gray-800 text-sm">${goal.title}</div>
+                                <div class="text-xs text-gray-600 mt-1">${goal.subject} • ${goal.type}</div>
+                                <div class="text-xs text-gray-500 mt-1">Target: ${goal.target} ${goal.unit}${goal.deadline ? ` • Due: ${goal.deadline}` : ''}</div>
+                            </div>
+                            ${goal.isCompleted ? '<span class="text-green-600 text-lg">✓</span>' : ''}
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
+                            <div class="${progressColor} h-2 rounded-full transition-all duration-300" style="width: ${Math.min(progress, 100)}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-600 text-right">${progress.toFixed(0)}% Complete</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeStudyPlanner();
+            }, 500);
+        });
+    </script>
+    
+    <!-- Tool Suggestions Widget Script -->
+    <script>
+        const availableTools = [
+            { icon: '🧮', name: 'Smart Calculator', description: 'Advanced calculator with scientific functions', modalId: 'calculator-modal' },
+            { icon: '⏰', name: 'Study Timer', description: 'Pomodoro technique with focus sessions', pageUrl: '/tools/study-timer.html' },
+            { icon: '📝', name: 'Note Taker', description: 'Advanced text summarization & notes', pageUrl: '/tools/note-taker.html' },
+            { icon: '🧮', name: 'Math Solver', description: 'Step-by-step math problem solving', pageUrl: '/tools/math-solver.html' },
+            { icon: '📊', name: 'Grade Calculator', description: 'GPA tracking & academic analysis', pageUrl: '/tools/grade-calculator.html' },
+            { icon: '📖', name: 'Citation Generator', description: 'Multiple citation formats & styles', pageUrl: '/tools/citation-generator.html' },
+            { icon: '📚', name: 'Flashcard Generator', description: 'Spaced repetition learning cards', modalId: 'flashcard-generator-modal' },
+            { icon: '📈', name: 'Progress Tracker', description: 'Academic progress & analytics', modalId: 'progress-tracker-modal' },
+            { icon: '🎂', name: 'Age Calculator', description: 'Precise age & date calculations', modalId: 'age-calculator-modal' },
+            { icon: '⚖️', name: 'BMI Calculator', description: 'Health analysis & recommendations', modalId: 'bmi-modal' },
+            { icon: '🏦', name: 'Loan Calculator', description: 'Professional loan calculation & analysis', modalId: 'loan-calculator-modal' },
+            { icon: '💼', name: 'Investment Calculator', description: 'Investment returns & projections', modalId: 'investment-calculator-modal' },
+            { icon: '💰', name: 'Tax Calculator', description: 'Tax calculation & planning', modalId: 'tax-calculator-modal' },
+            { icon: '📊', name: 'Business Metrics', description: 'Business performance analytics', modalId: 'business-metrics-modal' },
+            { icon: '💱', name: 'Currency Converter', description: 'Real-time currency conversion', modalId: 'currency-converter-modal' },
+            { icon: '🏠', name: 'Retirement Planner', description: 'Retirement savings calculator', modalId: 'retirement-calculator-modal' },
+            { icon: '🏡', name: 'Mortgage Calculator', description: 'Mortgage payment calculations', modalId: 'mortgage-calculator-modal' },
+            { icon: '💳', name: 'Budget Planner', description: 'Personal budget planning tool', modalId: 'budget-planner-modal' },
+            { icon: '💵', name: 'Salary Calculator', description: 'Salary & tax calculations', modalId: 'salary-calculator-modal' },
+            { icon: '🔧', name: 'JSON Formatter', description: 'Format & validate JSON data', modalId: 'json-formatter-modal' },
+            { icon: '📄', name: 'XML Formatter', description: 'Format & validate XML data', modalId: 'xml-formatter-modal' },
+            { icon: '🔐', name: 'Base64 Encoder', description: 'Encode & decode Base64 data', modalId: 'base64-encoder-modal' },
+            { icon: '🔐', name: 'Hash Generator', description: 'Generate multiple hash types', modalId: 'hash-generator-modal' },
+            { icon: '🌐', name: 'URL Encoder', description: 'Encode & decode URLs', modalId: 'url-encoder-modal' },
+            { icon: '🔍', name: 'Regex Tester', description: 'Test & debug regex patterns', modalId: 'regex-tester-modal' },
+            { icon: '🛠️', name: 'CSS/JS Minifier', description: 'Minify CSS & JavaScript code', modalId: 'css-js-minifier-modal' },
+            { icon: '🎨', name: 'Color Palette', description: 'Generate beautiful color palettes', modalId: 'color-palette-modal' },
+            { icon: '📝', name: 'Lorem Ipsum', description: 'Generate Lorem Ipsum text', modalId: 'lorem-ipsum-modal' },
+            { icon: '🕐', name: 'Timestamp Converter', description: 'Convert timestamps & dates', modalId: 'timestamp-converter-modal' },
+            { icon: '🔓', name: 'PDF Password Remover', description: 'Remove password from PDFs', modalId: 'pdf-password-remover-modal' },
+            { icon: '📄', name: 'PDF Merger', description: 'Combine multiple PDFs', modalId: 'pdf-merger-modal' },
+            { icon: '✂️', name: 'PDF Splitter', description: 'Split PDFs into separate pages', modalId: 'pdf-splitter-modal' },
+            { icon: '🔒', name: 'PDF Encryptor', description: 'Add password to PDFs', modalId: 'pdf-encryptor-modal' },
+            { icon: '🖼️', name: 'PDF to Images', description: 'Convert PDF pages to images', modalId: 'pdf-to-images-modal' },
+            { icon: '📸', name: 'Image to PDF', description: 'Convert images to PDF documents', modalId: 'image-to-pdf-modal' },
+            { icon: '📏', name: 'Image Compressor', description: 'Reduce image file size', modalId: 'image-compressor-modal' },
+            { icon: '🎨', name: 'Image Converter', description: 'Convert between image formats', modalId: 'image-converter-modal' },
+            { icon: '📐', name: 'Image Resizer', description: 'Resize images to any dimensions', modalId: 'image-resizer-modal' },
+            { icon: '✍️', name: 'Signature Generator', description: 'Create digital signatures', modalId: 'signature-generator-modal' },
+            { icon: '📊', name: 'CSV to JSON', description: 'Convert CSV to JSON format', modalId: 'csv-json-converter-modal' }
+        ];
+        
+        let currentToolIndex = -1;
+        let refreshInterval = null;
+        
+        function getRandomTool() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * availableTools.length);
+            } while (newIndex === currentToolIndex && availableTools.length > 1);
+            currentToolIndex = newIndex;
+            return availableTools[newIndex];
+        }
+        
+        function updateToolSuggestion() {
+            const tool = getRandomTool();
+            const card = document.getElementById('tool-suggestion-card');
+            const iconEl = document.getElementById('tool-icon');
+            const nameEl = document.getElementById('tool-name');
+            const descEl = document.getElementById('tool-description');
+            const btnEl = document.getElementById('tool-checkout-btn');
+            
+            if (!card || !iconEl || !nameEl || !descEl || !btnEl) return;
+            
+            btnEl.dataset.modalId = tool.modalId || '';
+            btnEl.dataset.pageUrl = tool.pageUrl || '';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                iconEl.textContent = tool.icon;
+                nameEl.textContent = tool.name;
+                descEl.textContent = tool.description;
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300);
+        }
+        
+        function launchSuggestedTool() {
+            const btnEl = document.getElementById('tool-checkout-btn');
+            if (!btnEl) return;
+            const modalId = btnEl.dataset.modalId;
+            const pageUrl = btnEl.dataset.pageUrl;
+            
+            if (pageUrl) {
+                window.location.href = pageUrl;
+            } else if (modalId && typeof openModal === 'function') {
+                window.location.href = `/#${modalId}`;
+            } else {
+                window.location.href = '/#tools';
+            }
+        }
+        
+        function initToolSuggestions() {
+            updateToolSuggestion();
+            refreshInterval = setInterval(() => {
+                updateToolSuggestion();
+            }, 10000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initToolSuggestions, 1000);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        #tool-suggestion-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+        
+        @keyframes slide-in {
+            from { 
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to { 
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .animate-slide-in {
+            animation: slide-in 0.3s ease-out;
+        }
+        
+        /* Input field focus effects */
+        input:focus, select:focus, textarea:focus {
+            transform: scale(1.01);
+            transition: transform 0.2s ease;
+        }
+        
+        /* Button hover effects */
+        button {
+            transition: all 0.2s ease;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+    </style>
+</body>
+</html>
+
+
