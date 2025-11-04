@@ -1,0 +1,98 @@
+<!-- Simple Navigation Header -->
+<nav class="fixed w-full z-40 bg-white/90 backdrop-blur-lg border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="flex justify-between items-center">
+            <!-- Logo -->
+            <div class="text-2xl font-bold">
+                <a href="/" class="text-purple-600 hover:text-purple-700 transition-colors">FreeToolHub</a>
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <div class="hidden lg:flex items-center space-x-6">
+                <a href="/" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">Home</a>
+                <a href="/tools/calculator.html" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">Calculators</a>
+                <a href="/tools/loan-calculator.html" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">Loan Calculator</a>
+                <a href="/#pdf-tools" class="text-gray-700 hover:text-purple-600 transition-colors font-medium relative">
+                    PDF Tools
+                    <span class="absolute -top-2 -right-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">NEW</span>
+                </a>
+                <a href="/#image-tools" class="text-gray-700 hover:text-purple-600 transition-colors font-medium relative">
+                    Image Tools
+                    <span class="absolute -top-2 -right-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">NEW</span>
+                </a>
+                <a href="/#utilities" class="text-gray-700 hover:text-purple-600 transition-colors font-medium relative">
+                    Utilities
+                    <span class="absolute -top-2 -right-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">NEW</span>
+                </a>
+                <a href="/#about" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">About</a>
+                <a href="/#contact" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">Contact</a>
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <button onclick="toggleMobileMenu()" class="lg:hidden text-gray-700 hover:text-purple-600 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden mt-4 pb-4 space-y-2">
+            <a href="/" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">Home</a>
+            <a href="/tools/calculator.html" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">Calculators</a>
+            <a href="/tools/loan-calculator.html" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">Loan Calculator</a>
+            <a href="/#pdf-tools" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">
+                PDF Tools <span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold ml-2">NEW</span>
+            </a>
+            <a href="/#image-tools" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">
+                Image Tools <span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold ml-2">NEW</span>
+            </a>
+            <a href="/#utilities" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">
+                Utilities <span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold ml-2">NEW</span>
+            </a>
+            <a href="/#about" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">About</a>
+            <a href="/#contact" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">Contact</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+// Mobile menu toggle function
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    if (menu) {
+        menu.classList.toggle('hidden');
+    }
+}
+
+// Fix main content spacing for tools pages
+function fixMainSpacing() {
+    const header = document.querySelector('nav');
+    if (!header) return;
+    
+    const mainElements = document.querySelectorAll('main, #app-header + main, #app-header ~ main');
+    mainElements.forEach(main => {
+        if (main) {
+            const headerHeight = header.offsetHeight;
+            const paddingTop = headerHeight + 20;
+            main.style.setProperty('padding-top', paddingTop + 'px', 'important');
+            main.style.setProperty('margin-top', '0', 'important');
+        }
+    });
+}
+
+// Run spacing fix
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(fixMainSpacing, 100);
+        setTimeout(fixMainSpacing, 500);
+    });
+} else {
+    setTimeout(fixMainSpacing, 100);
+    setTimeout(fixMainSpacing, 500);
+}
+
+// Also run after header loads
+setTimeout(fixMainSpacing, 1000);
+</script>
+
