@@ -13,6 +13,7 @@
   NODE_VERSION = "18"
 
 # Redirect rules for SPA (Single Page Application) behavior
+# Note: Netlify automatically serves .html files directly, so this redirect only affects non-HTML paths
 [[redirects]]
   from = "/*"
   to = "/index.html"
