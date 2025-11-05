@@ -615,6 +615,21 @@
             transform: scale(1.02);
         }
         
+        /* Ensure mobile widgets are visible on mobile */
+        @media (max-width: 1023px) {
+            div.lg\\:hidden.bg-white.border-b.border-gray-200 {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            div.lg\\:hidden.bg-white.border-b.border-gray-200 {
+                display: none !important;
+            }
+        }
+        
         /* 8-Tile Header Design Styles */
         .header-tile {
             perspective: 1000px;

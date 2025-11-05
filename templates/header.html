@@ -464,7 +464,20 @@ function toggleMobileMenu() {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-@media (max-width: 1024px) {
+/* Hide desktop widget grid on mobile (tools pages) */
+@media (max-width: 1023px) {
+    .header-tiles-grid {
+        display: none !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    .header-tiles-grid {
+        grid-template-columns: repeat(8, 1fr);
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1280px) {
     .header-tiles-grid {
         grid-template-columns: repeat(4, 1fr);
     }
@@ -473,12 +486,9 @@ function toggleMobileMenu() {
     }
 }
 
-@media (max-width: 640px) {
+@media (min-width: 1281px) {
     .header-tiles-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .header-tile {
-        height: 90px;
+        grid-template-columns: repeat(8, 1fr);
     }
 }
 
@@ -3383,7 +3393,7 @@ setTimeout(() => updateTileTime(), 2000);
            const mainElements = document.querySelectorAll('main, #app-header + main, #app-header ~ main');
            mainElements.forEach(main => {
                if (main) {
-                   // Calculate header height (tiles + navigation buttons)
+                   // Calculate header height (desktop widgets are hidden on mobile now)
                    let headerHeight = header.offsetHeight;
                    
                    // Account for mobile menu if it's open
@@ -3392,8 +3402,10 @@ setTimeout(() => updateTileTime(), 2000);
                        headerHeight += mobileMenu.offsetHeight;
                    }
                    
-                   // Add extra spacing for better UX
-                   const paddingTop = headerHeight + 40;
+                   // Add extra spacing - larger buffer on mobile for wrapped navigation buttons
+                   const isMobile = window.innerWidth < 1024;
+                   const buffer = isMobile ? 60 : 40; // Larger buffer on mobile
+                   const paddingTop = headerHeight + buffer;
 
                    // Set padding using style attribute with !important equivalent
                    main.style.setProperty('padding-top', paddingTop + 'px', 'important');
