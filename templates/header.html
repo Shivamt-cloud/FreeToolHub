@@ -471,24 +471,14 @@ function toggleMobileMenu() {
     }
 }
 
+/* Desktop: Always use 1 row (8 columns) for all desktop sizes */
 @media (min-width: 1024px) {
     .header-tiles-grid {
         grid-template-columns: repeat(8, 1fr);
     }
-}
-
-@media (min-width: 1024px) and (max-width: 1280px) {
-    .header-tiles-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
+    /* Make tiles slightly smaller on laptop to fit in 1 row */
     .header-tile {
         height: 100px;
-    }
-}
-
-@media (min-width: 1281px) {
-    .header-tiles-grid {
-        grid-template-columns: repeat(8, 1fr);
     }
 }
 

@@ -1392,13 +1392,115 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Widgets (Always Visible on Mobile) - Moved above navigation -->
+        <div class="lg:hidden bg-white border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 py-3 space-y-3">
+                <!-- Mobile Weather Widget -->
+                <div id="mobile-weather-widget" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg shadow-lg" style="width: 100%; height: 140px; position: relative; overflow: hidden;">
+                    <div class="weather-widget-container" style="width: 100%; height: 100%;">
+                        <div class="weather-widget-flip" id="mobile-weather-widget-flip">
+                            <!-- Front: Weather & Astronomical Data -->
+                            <div class="weather-widget-front bg-gradient-to-r from-blue-500 to-purple-600">
+                                <div class="weather-widget-label">🌍 Weather & Astronomical</div>
+                                <div class="flex items-center justify-between w-full" style="gap: 8px; margin-top: 3px;">
+                                    <div class="flex items-center space-x-1.5" style="min-width: 0; flex: 1;">
+                                        <div class="text-center" style="min-width: 48px; flex-shrink: 0;">
+                                            <div id="mobile-current-time" class="text-xs font-bold" style="line-height: 1.2;">--:--</div>
+                                            <div id="mobile-current-date" class="text-xs opacity-90" style="font-size: 8px; line-height: 1.2;">---</div>
+                                        </div>
+                                        <div class="w-px h-5 bg-white/30" style="flex-shrink: 0;"></div>
+                                        <div class="flex items-center space-x-1" style="min-width: 0; flex: 1;">
+                                            <div id="mobile-weather-icon" class="text-lg" style="flex-shrink: 0;">🌤️</div>
+                                            <div style="min-width: 0; flex: 1;">
+                                                <div id="mobile-weather-temp" class="text-xs font-bold" style="line-height: 1.2;">--°C</div>
+                                                <div id="mobile-weather-desc" class="text-xs opacity-90" style="font-size: 8px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Loading...</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col items-end" style="min-width: 95px; flex-shrink: 0;">
+                                        <div class="weather-info-row">
+                                            <span class="weather-info-label">🌙</span>
+                                            <span id="mobile-moon-phase" class="weather-info-value" style="font-size: 14px;">--</span>
+                                        </div>
+                                        <div class="weather-info-row">
+                                            <span class="weather-info-label">🌅</span>
+                                            <span id="mobile-sunrise-time" class="weather-info-value" style="font-size: 10px; white-space: nowrap;">--:--</span>
+                                        </div>
+                                        <div class="weather-info-row">
+                                            <span class="weather-info-label">🌇</span>
+                                            <span id="mobile-sunset-time" class="weather-info-value" style="font-size: 10px; white-space: nowrap;">--:--</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Location Row -->
+                                <div id="mobile-weather-location" class="w-full mt-2 flex items-center opacity-80" style="padding-top: 2px; border-top: 1px solid rgba(255, 255, 255, 0.2);">
+                                    <span class="mr-1" style="font-size: 9px;">📍</span>
+                                    <span id="mobile-location-name" class="text-xs" style="font-size: 8px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">Getting location...</span>
+                                </div>
+                            </div>
+                            <!-- Back: Environmental Data & Space Fact -->
+                            <div class="weather-widget-back bg-gradient-to-r from-blue-500 to-purple-600">
+                                <div class="env-widget-label" style="text-align: left; margin-bottom: 4px;">🌱 Environmental & Space</div>
+                                <div class="flex flex-col items-start w-full" style="margin-top: 3px;">
+                                    <div class="env-metric" style="width: 100%; justify-content: space-between;">
+                                        <span class="env-metric-label">AQI:</span>
+                                        <span id="mobile-aqi-value" class="env-metric-value">--</span>
+                                    </div>
+                                    <div class="env-metric" style="width: 100%; justify-content: space-between;">
+                                        <span class="env-metric-label">UV Index:</span>
+                                        <span id="mobile-uv-index" class="env-metric-value">--</span>
+                                    </div>
+                                    <div class="env-metric" style="width: 100%; justify-content: space-between;">
+                                        <span class="env-metric-label">Humidity:</span>
+                                        <span id="mobile-humidity-value" class="env-metric-value">--%</span>
+                                    </div>
+                                    <div class="space-fact-text" id="mobile-space-fact-display" style="text-align: left; margin-top: 3px; max-height: 50px;">Loading space fact...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Indicator dots -->
+                        <div class="weather-widget-indicator">
+                            <div class="weather-widget-dot active" id="mobile-weather-dot-1"></div>
+                            <div class="weather-widget-dot" id="mobile-weather-dot-2"></div>
+                        </div>
+                    </div>
+                </div>
                 
-                <!-- Mobile Menu Button -->
-                <button onclick="toggleMobileMenu()" class="lg:hidden text-gray-700 hover:text-purple-600 focus:outline-none flex-shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
+                <!-- Word of the Day Widget (Mobile) -->
+                <div id="mobile-word-widget" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg shadow-lg" style="width: 100%; height: 140px; position: relative; overflow: hidden;">
+                    <div class="word-widget-container" style="width: 100%; height: 100%;">
+                        <div class="word-widget-flip" id="mobile-word-widget-flip">
+                            <!-- Front: Word of the Day -->
+                            <div class="word-widget-front bg-gradient-to-r from-purple-500 to-indigo-600">
+                                <div class="word-widget-label">📚 Today's Vocabulary for Learning</div>
+                                <div class="word-widget-word" id="mobile-word-of-day-word">Loading...</div>
+                                <div class="word-widget-pronunciation" id="mobile-word-of-day-pronunciation"></div>
+                                <div class="word-widget-definition" id="mobile-word-of-day-definition"></div>
+                                <div class="word-widget-example" id="mobile-word-of-day-example"></div>
+                                <span class="word-widget-badge" id="mobile-word-of-day-badge"></span>
+                                <div class="word-widget-indicator">
+                                    <div class="word-widget-dot active" id="mobile-word-dot-1"></div>
+                                    <div class="word-widget-dot" id="mobile-word-dot-2"></div>
+                                </div>
+                            </div>
+                            <!-- Back: Today's Special Day -->
+                            <div class="word-widget-back bg-gradient-to-r from-orange-500 to-pink-600">
+                                <div class="special-day-label">🎉 Today's Special Day</div>
+                                <div class="special-day-icon" id="mobile-special-day-icon">🎉</div>
+                                <div class="special-day-title" id="mobile-special-day-title">Loading...</div>
+                                <div class="special-day-desc" id="mobile-special-day-desc"></div>
+                                <div class="special-day-type" id="mobile-special-day-type"></div>
+                                <div class="word-widget-indicator">
+                                    <div class="word-widget-dot" id="mobile-special-dot-1"></div>
+                                    <div class="word-widget-dot active" id="mobile-special-dot-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -1452,115 +1554,6 @@
             </div>
         </div>
     </nav>
-    
-    <!-- Mobile Widgets (Always Visible on Mobile) -->
-    <div class="lg:hidden bg-white border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 py-3 space-y-3">
-            <!-- Mobile Weather Widget -->
-            <div id="mobile-weather-widget" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg shadow-lg" style="width: 100%; height: 140px; position: relative; overflow: hidden;">
-                <div class="weather-widget-container" style="width: 100%; height: 100%;">
-                    <div class="weather-widget-flip" id="mobile-weather-widget-flip">
-                        <!-- Front: Weather & Astronomical Data -->
-                        <div class="weather-widget-front bg-gradient-to-r from-blue-500 to-purple-600">
-                            <div class="weather-widget-label">🌍 Weather & Astronomical</div>
-                            <div class="flex items-center justify-between w-full" style="gap: 8px; margin-top: 3px;">
-                                <div class="flex items-center space-x-1.5" style="min-width: 0; flex: 1;">
-                                    <div class="text-center" style="min-width: 48px; flex-shrink: 0;">
-                                        <div id="mobile-current-time" class="text-xs font-bold" style="line-height: 1.2;">--:--</div>
-                                        <div id="mobile-current-date" class="text-xs opacity-90" style="font-size: 8px; line-height: 1.2;">---</div>
-                                    </div>
-                                    <div class="w-px h-5 bg-white/30" style="flex-shrink: 0;"></div>
-                                    <div class="flex items-center space-x-1" style="min-width: 0; flex: 1;">
-                                        <div id="mobile-weather-icon" class="text-lg" style="flex-shrink: 0;">🌤️</div>
-                                        <div style="min-width: 0; flex: 1;">
-                                            <div id="mobile-weather-temp" class="text-xs font-bold" style="line-height: 1.2;">--°C</div>
-                                            <div id="mobile-weather-desc" class="text-xs opacity-90" style="font-size: 8px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Loading...</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col items-end" style="min-width: 95px; flex-shrink: 0;">
-                                    <div class="weather-info-row">
-                                        <span class="weather-info-label">🌙</span>
-                                        <span id="mobile-moon-phase" class="weather-info-value" style="font-size: 14px;">--</span>
-                                    </div>
-                                    <div class="weather-info-row">
-                                        <span class="weather-info-label">🌅</span>
-                                        <span id="mobile-sunrise-time" class="weather-info-value" style="font-size: 10px; white-space: nowrap;">--:--</span>
-                                    </div>
-                                    <div class="weather-info-row">
-                                        <span class="weather-info-label">🌇</span>
-                                        <span id="mobile-sunset-time" class="weather-info-value" style="font-size: 10px; white-space: nowrap;">--:--</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Location Row -->
-                            <div id="mobile-weather-location" class="w-full mt-2 flex items-center opacity-80" style="padding-top: 2px; border-top: 1px solid rgba(255, 255, 255, 0.2);">
-                                <span class="mr-1" style="font-size: 9px;">📍</span>
-                                <span id="mobile-location-name" class="text-xs" style="font-size: 8px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">Getting location...</span>
-                            </div>
-                        </div>
-                        <!-- Back: Environmental Data & Space Fact -->
-                        <div class="weather-widget-back bg-gradient-to-r from-blue-500 to-purple-600">
-                            <div class="env-widget-label" style="text-align: left; margin-bottom: 4px;">🌱 Environmental & Space</div>
-                            <div class="flex flex-col items-start w-full" style="margin-top: 3px;">
-                                <div class="env-metric" style="width: 100%; justify-content: space-between;">
-                                    <span class="env-metric-label">AQI:</span>
-                                    <span id="mobile-aqi-value" class="env-metric-value">--</span>
-                                </div>
-                                <div class="env-metric" style="width: 100%; justify-content: space-between;">
-                                    <span class="env-metric-label">UV Index:</span>
-                                    <span id="mobile-uv-index" class="env-metric-value">--</span>
-                                </div>
-                                <div class="env-metric" style="width: 100%; justify-content: space-between;">
-                                    <span class="env-metric-label">Humidity:</span>
-                                    <span id="mobile-humidity-value" class="env-metric-value">--%</span>
-                                </div>
-                                <div class="space-fact-text" id="mobile-space-fact-display" style="text-align: left; margin-top: 3px; max-height: 50px;">Loading space fact...</div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Indicator dots -->
-                    <div class="weather-widget-indicator">
-                        <div class="weather-widget-dot active" id="mobile-weather-dot-1"></div>
-                        <div class="weather-widget-dot" id="mobile-weather-dot-2"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Word of the Day Widget (Mobile) -->
-            <div id="mobile-word-widget" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg shadow-lg" style="width: 100%; height: 140px; position: relative; overflow: hidden;">
-                <div class="word-widget-container" style="width: 100%; height: 100%;">
-                    <div class="word-widget-flip" id="mobile-word-widget-flip">
-                        <!-- Front: Word of the Day -->
-                        <div class="word-widget-front bg-gradient-to-r from-purple-500 to-indigo-600">
-                            <div class="word-widget-label">📚 Today's Vocabulary for Learning</div>
-                            <div class="word-widget-word" id="mobile-word-of-day-word">Loading...</div>
-                            <div class="word-widget-pronunciation" id="mobile-word-of-day-pronunciation"></div>
-                            <div class="word-widget-definition" id="mobile-word-of-day-definition"></div>
-                            <div class="word-widget-example" id="mobile-word-of-day-example"></div>
-                            <span class="word-widget-badge" id="mobile-word-of-day-badge"></span>
-                            <div class="word-widget-indicator">
-                                <div class="word-widget-dot active" id="mobile-word-dot-1"></div>
-                                <div class="word-widget-dot" id="mobile-word-dot-2"></div>
-                            </div>
-                        </div>
-                        <!-- Back: Today's Special Day -->
-                        <div class="word-widget-back bg-gradient-to-r from-orange-500 to-pink-600">
-                            <div class="special-day-label">🎉 Today's Special Day</div>
-                            <div class="special-day-icon" id="mobile-special-day-icon">🎉</div>
-                            <div class="special-day-title" id="mobile-special-day-title">Loading...</div>
-                            <div class="special-day-desc" id="mobile-special-day-desc"></div>
-                            <div class="special-day-type" id="mobile-special-day-type"></div>
-                            <div class="word-widget-indicator">
-                                <div class="word-widget-dot" id="mobile-special-dot-1"></div>
-                                <div class="word-widget-dot active" id="mobile-special-dot-2"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     
     <!-- Old Weather Widget (kept for reference, will be removed after integration) -->
     <div id="weather-widget" class="hidden" style="display: none;">
