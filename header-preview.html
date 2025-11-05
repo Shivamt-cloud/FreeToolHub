@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header Design Preview - 8 Vertical Tiles</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f3f4f6;
+        }
+        
+        .tile {
+            perspective: 1000px;
+            width: 100%;
+            height: 150px;
+        }
+        
+        .tile-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+        
+        .tile-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .tile-front,
+        .tile-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+        
+        .tile-back {
+            transform: rotateY(180deg);
+        }
+        
+        .auto-flip-indicator {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            font-size: 10px;
+            opacity: 0.7;
+        }
+        
+        .header-container {
+            background: white;
+            border-bottom: 2px solid #e5e7eb;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-buttons {
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 12px 0;
+        }
+        
+        .nav-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .nav-btn:hover {
+            background: #f3f4f6;
+            transform: translateY(-2px);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .live-indicator {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header Section -->
+        <div class="header-container mb-4 rounded-lg overflow-hidden">
+            <div class="flex items-center justify-between p-4 bg-gradient-to-r from-purple-600 to-indigo-600">
+                <div class="text-2xl font-bold text-white">
+                    FreeToolHub
+                </div>
+                <div class="text-white text-sm">
+                    <span class="live-indicator">●</span> Live Preview
+                </div>
+            </div>
+            
+            <!-- 8 Tiles Row -->
+            <div class="grid grid-cols-8 gap-2 p-4 bg-gray-50">
+                <!-- Tile 1: Time & Date -->
+                <div class="tile">
+                    <div class="tile-inner" id="tile1">
+                        <div class="tile-front bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">TIME & DATE</div>
+                            <div class="text-2xl font-bold mb-1" id="preview-time">14:35</div>
+                            <div class="text-xs opacity-90" id="preview-date">Mon, Dec 16</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                        <div class="tile-back bg-gradient-to-br from-green-500 to-green-600 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">ENVIRONMENTAL</div>
+                            <div class="text-3xl font-bold mb-1">42</div>
+                            <div class="text-xs opacity-90">AQI Level</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tile 2: Weather -->
+                <div class="tile">
+                    <div class="tile-inner" id="tile2">
+                        <div class="tile-front bg-gradient-to-br from-sky-500 to-blue-500 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">WEATHER</div>
+                            <div class="text-3xl mb-1">☀️</div>
+                            <div class="text-xl font-bold mb-1">22°C</div>
+                            <div class="text-xs opacity-90">Sunny</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                        <div class="tile-back bg-gradient-to-br from-orange-500 to-red-500 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">AIR QUALITY</div>
+                            <div class="text-2xl font-bold mb-1">85</div>
+                            <div class="text-xs opacity-90">Good</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tile 3: Moon Phase -->
+                <div class="tile">
+                    <div class="tile-inner" id="tile3">
+                        <div class="tile-front bg-gradient-to-br from-indigo-600 to-purple-600 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">MOON PHASE</div>
+                            <div class="text-3xl mb-1">🌙</div>
+                            <div class="text-sm font-bold">Waxing</div>
+                            <div class="text-xs opacity-90">Crescent</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                        <div class="tile-back bg-gradient-to-br from-yellow-500 to-orange-500 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">UV INDEX</div>
+                            <div class="text-3xl font-bold mb-1">6</div>
+                            <div class="text-xs opacity-90">Moderate</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tile 4: Sunrise/Sunset -->
+                <div class="tile">
+                    <div class="tile-inner" id="tile4">
+                        <div class="tile-front bg-gradient-to-br from-orange-500 to-pink-500 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">SUNRISE/SUNSET</div>
+                            <div class="flex items-center justify-center gap-1 mb-1">
+                                <span class="text-sm">🌅</span>
+                                <span class="text-sm font-bold">06:45</span>
+                            </div>
+                            <div class="flex items-center justify-center gap-1">
+                                <span class="text-sm">🌇</span>
+                                <span class="text-sm font-bold">17:30</span>
+                            </div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                        <div class="tile-back bg-gradient-to-br from-teal-500 to-cyan-500 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">HUMIDITY</div>
+                            <div class="text-3xl font-bold mb-1">65%</div>
+                            <div class="text-xs opacity-90">Comfortable</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tile 5: Location -->
+                <div class="tile">
+                    <div class="tile-inner" id="tile5">
+                        <div class="tile-front bg-gradient-to-br from-green-500 to-emerald-500 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">LOCATION</div>
+                            <div class="text-2xl mb-1">📍</div>
+                            <div class="text-xs font-bold">New York</div>
+                            <div class="text-xs opacity-90">NY, USA</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                        <div class="tile-back bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">SPACE FACT</div>
+                            <div class="text-xs leading-tight">Jupiter has 95 moons</div>
+                            <div class="text-xs leading-tight mt-1 opacity-90">Most in solar system</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tile 6: Word of the Day -->
+                <div class="tile">
+                    <div class="tile-inner" id="tile6">
+                        <div class="tile-front bg-gradient-to-br from-purple-500 to-indigo-600 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">WORD OF DAY</div>
+                            <div class="text-xl font-bold mb-1">Serendipity</div>
+                            <div class="text-xs opacity-90">/ser-ən-dip-i-tee/</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                        <div class="tile-back bg-gradient-to-br from-pink-500 to-rose-500 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">SPECIAL DAY</div>
+                            <div class="text-3xl mb-1">🎉</div>
+                            <div class="text-xs font-bold">Celebration</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tile 7: Word Definition -->
+                <div class="tile">
+                    <div class="tile-inner" id="tile7">
+                        <div class="tile-front bg-gradient-to-br from-indigo-500 to-purple-500 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">DEFINITION</div>
+                            <div class="text-xs leading-tight">Finding something good</div>
+                            <div class="text-xs leading-tight mt-1 opacity-90">by accident</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                        <div class="tile-back bg-gradient-to-br from-orange-500 to-pink-500 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">SPECIAL DAY</div>
+                            <div class="text-sm font-bold leading-tight">International</div>
+                            <div class="text-sm font-bold leading-tight">Day of...</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tile 8: Word Example -->
+                <div class="tile">
+                    <div class="tile-inner" id="tile8">
+                        <div class="tile-front bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">EXAMPLE</div>
+                            <div class="text-xs leading-tight italic">"A serendipitous</div>
+                            <div class="text-xs leading-tight italic">discovery"</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                        <div class="tile-back bg-gradient-to-br from-red-500 to-pink-500 text-white">
+                            <div class="text-xs font-semibold mb-2 opacity-90">DESCRIPTION</div>
+                            <div class="text-xs leading-tight">A day to celebrate</div>
+                            <div class="text-xs leading-tight mt-1 opacity-90">achievements</div>
+                            <div class="auto-flip-indicator">Click to flip</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation Buttons Row -->
+        <div class="nav-buttons rounded-lg shadow-sm mb-4">
+            <div class="flex justify-center items-center gap-3 flex-wrap p-4">
+                <button class="nav-btn bg-purple-600 text-white hover:bg-purple-700">Home</button>
+                <button class="nav-btn bg-blue-600 text-white hover:bg-blue-700">Calculators</button>
+                <button class="nav-btn bg-green-600 text-white hover:bg-green-700">Loan Calculator</button>
+                <button class="nav-btn bg-orange-600 text-white hover:bg-orange-700">PDF Tools</button>
+                <button class="nav-btn bg-pink-600 text-white hover:bg-pink-700">Image Tools</button>
+                <button class="nav-btn bg-teal-600 text-white hover:bg-teal-700">Utilities</button>
+                <button class="nav-btn bg-gray-600 text-white hover:bg-gray-700">About</button>
+                <button class="nav-btn bg-indigo-600 text-white hover:bg-indigo-700">Contact</button>
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+            <h3 class="font-bold mb-3">Controls</h3>
+            <div class="flex gap-3 flex-wrap">
+                <button onclick="flipAll()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">Flip All Tiles</button>
+                <button onclick="resetAll()" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">Reset All</button>
+                <button onclick="toggleAutoFlip()" id="autoFlipBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Start Auto-Flip</button>
+                <span class="px-4 py-2 text-gray-700">Auto-flip: <span id="autoFlipStatus">Off</span></span>
+            </div>
+        </div>
+        
+        <!-- Info Panel -->
+        <div class="bg-white rounded-lg shadow-sm p-4">
+            <h3 class="font-bold mb-2">Design Details</h3>
+            <ul class="text-sm text-gray-700 space-y-1">
+                <li>✓ 8 vertical tiles in full height</li>
+                <li>✓ Each tile shows 1 widget (front side)</li>
+                <li>✓ Click any tile to flip and see back side widget</li>
+                <li>✓ 16 total widgets (8 front + 8 back)</li>
+                <li>✓ Smooth 3D flip animation</li>
+                <li>✓ Navigation buttons row below header</li>
+                <li>✓ Real-time data updates (simulated)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Update time every second
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const dateStr = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            
+            const timeEl = document.getElementById('preview-time');
+            const dateEl = document.getElementById('preview-date');
+            
+            if (timeEl) timeEl.textContent = timeStr;
+            if (dateEl) dateEl.textContent = dateStr;
+        }
+        
+        // Update time every second
+        setInterval(updateTime, 1000);
+        updateTime();
+        
+        // Flip individual tiles
+        for (let i = 1; i <= 8; i++) {
+            document.getElementById(`tile${i}`).addEventListener('click', function() {
+                this.classList.toggle('flipped');
+            });
+        }
+        
+        // Flip all tiles
+        function flipAll() {
+            for (let i = 1; i <= 8; i++) {
+                document.getElementById(`tile${i}`).classList.toggle('flipped');
+            }
+        }
+        
+        // Reset all tiles
+        function resetAll() {
+            for (let i = 1; i <= 8; i++) {
+                document.getElementById(`tile${i}`).classList.remove('flipped');
+            }
+        }
+        
+        // Auto-flip functionality
+        let autoFlipInterval = null;
+        let autoFlipEnabled = false;
+        
+        function toggleAutoFlip() {
+            const btn = document.getElementById('autoFlipBtn');
+            const status = document.getElementById('autoFlipStatus');
+            
+            if (autoFlipEnabled) {
+                clearInterval(autoFlipInterval);
+                autoFlipEnabled = false;
+                btn.textContent = 'Start Auto-Flip';
+                btn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                status.textContent = 'Off';
+            } else {
+                autoFlipInterval = setInterval(() => {
+                    flipAll();
+                }, 5000); // Flip every 5 seconds
+                autoFlipEnabled = true;
+                btn.textContent = 'Stop Auto-Flip';
+                btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                btn.classList.add('bg-red-600', 'hover:bg-red-700');
+                status.textContent = 'On (5s)';
+            }
+        }
+    </script>
+</body>
+</html>
+

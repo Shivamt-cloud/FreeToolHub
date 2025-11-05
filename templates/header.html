@@ -163,6 +163,7 @@
                     Utilities
                     <span class="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">NEW</span>
                 </a>
+                <a href="/tools/internet-speed-test.html" class="nav-button bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700">Internet Speed</a>
                 <a href="/#about" class="nav-button bg-gray-600 text-white hover:bg-gray-700">About</a>
                 <a href="/#contact" class="nav-button bg-indigo-600 text-white hover:bg-indigo-700">Contact</a>
             </div>
@@ -479,6 +480,89 @@ function toggleMobileMenu() {
     /* Make tiles slightly smaller on laptop to fit in 1 row */
     .header-tile {
         height: 100px;
+    }
+}
+
+/* Scroll-to-Hide Header for Mobile */
+@media (max-width: 1023px) {
+    nav {
+        transition: transform 0.3s ease-in-out;
+        will-change: transform;
+    }
+    
+    /* Hide navigation buttons when scrolled down, keep logo visible */
+    nav.header-scrolled-down .navigation-buttons-row {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease-in-out;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin: 0;
+    }
+    
+    /* Logo row always visible - ensure it stays at top */
+    nav > div.max-w-7xl:first-child {
+        position: relative;
+        z-index: 50;
+    }
+}
+
+/* Scroll-to-Hide Widgets for Desktop/Tablet */
+@media (min-width: 1024px) {
+    /* Widget Grid Container - Hide on scroll down */
+    .header-tiles-grid {
+        max-height: 100px; /* Initial height for transition (matches header-tile height) */
+        transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, margin 0.4s ease-in-out;
+        overflow: hidden;
+    }
+    
+    nav.header-widgets-hidden .header-tiles-grid {
+        max-height: 0 !important;
+        opacity: 0;
+        margin-bottom: 0;
+        pointer-events: none;
+    }
+    
+    /* Logo + Widgets Row Container - Keep logo visible */
+    nav > div.max-w-7xl:first-child {
+        transition: padding 0.4s ease-in-out, margin-bottom 0.4s ease-in-out;
+    }
+    
+    nav.header-widgets-hidden > div.max-w-7xl:first-child {
+        padding-bottom: 0.75rem; /* Keep minimal padding for logo spacing */
+        margin-bottom: 0; /* Remove margin when widgets hidden */
+    }
+    
+    /* Navigation Buttons Row - Hide when scrolling down (same as widgets) */
+    nav .navigation-buttons-row {
+        transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, padding 0.4s ease-in-out, margin 0.4s ease-in-out;
+        max-height: 60px; /* Initial height for navigation row */
+        opacity: 1;
+        overflow: hidden;
+    }
+    
+    nav.header-widgets-hidden .navigation-buttons-row {
+        /* Hide navigation completely when scrolling down */
+        max-height: 0 !important;
+        opacity: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        margin: 0 !important;
+        pointer-events: none !important;
+        overflow: hidden !important;
+    }
+    
+    /* Ensure nav container adjusts properly */
+    nav {
+        overflow: visible !important;
+        min-height: auto !important;
+    }
+    
+    /* Reduce nav container height when widgets and navigation are hidden */
+    nav.header-widgets-hidden {
+        min-height: fit-content !important;
     }
 }
 
@@ -1187,7 +1271,7 @@ function updateLocationDisplay(locationText) {
         // Add slide-in animation
         if (weatherLocationElement) {
             weatherLocationElement.classList.add('location-slide-in');
-            setTimeout(() => {
+setTimeout(() => {
                 weatherLocationElement.classList.remove('location-slide-in');
             }, 500);
         }
@@ -3373,16 +3457,16 @@ setTimeout(() => updateTileTime(), 500);
 setTimeout(() => updateTileTime(), 1000);
 setTimeout(() => updateTileTime(), 2000);
 
-       // Fix main content spacing for tools pages
-       function fixMainSpacing() {
-           // Find main element after header
-           const header = document.querySelector('nav');
-           if (!header) return;
-
-           // Find main element
-           const mainElements = document.querySelectorAll('main, #app-header + main, #app-header ~ main');
-           mainElements.forEach(main => {
-               if (main) {
+// Fix main content spacing for tools pages
+function fixMainSpacing() {
+    // Find main element after header
+    const header = document.querySelector('nav');
+    if (!header) return;
+    
+    // Find main element
+    const mainElements = document.querySelectorAll('main, #app-header + main, #app-header ~ main');
+    mainElements.forEach(main => {
+        if (main) {
                    // Calculate header height (desktop widgets are hidden on mobile now)
                    let headerHeight = header.offsetHeight;
                    
@@ -3396,13 +3480,13 @@ setTimeout(() => updateTileTime(), 2000);
                    const isMobile = window.innerWidth < 1024;
                    const buffer = isMobile ? 60 : 40; // Larger buffer on mobile
                    const paddingTop = headerHeight + buffer;
-
-                   // Set padding using style attribute with !important equivalent
-                   main.style.setProperty('padding-top', paddingTop + 'px', 'important');
-                   main.style.setProperty('margin-top', '0', 'important');
-               }
-           });
-       }
+            
+            // Set padding using style attribute with !important equivalent
+            main.style.setProperty('padding-top', paddingTop + 'px', 'important');
+            main.style.setProperty('margin-top', '0', 'important');
+        }
+    });
+}
        
        // Update spacing when mobile menu opens/closes
        function updateSpacingOnMenuToggle() {
@@ -3418,24 +3502,121 @@ setTimeout(() => updateTileTime(), 2000);
                    attributeFilter: ['class']
                });
            }
-       }
+}
 
-       // Run spacing fix
-       if (document.readyState === 'loading') {
-document.addEventListener('DOMContentLoaded', () => {
-           setTimeout(fixMainSpacing, 100);
-           setTimeout(fixMainSpacing, 500);
+// Run spacing fix
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(fixMainSpacing, 100);
+        setTimeout(fixMainSpacing, 500);
            updateSpacingOnMenuToggle();
-       });
-       } else {
-           setTimeout(fixMainSpacing, 100);
-           setTimeout(fixMainSpacing, 500);
+    });
+} else {
+    setTimeout(fixMainSpacing, 100);
+    setTimeout(fixMainSpacing, 500);
            updateSpacingOnMenuToggle();
-       }
-       
-       // Also run after header loads
-       setTimeout(fixMainSpacing, 1000);
-       setTimeout(fixMainSpacing, 2000);
-       setTimeout(fixMainSpacing, 3000);
+}
+
+// Also run after header loads
+setTimeout(fixMainSpacing, 1000);
+setTimeout(fixMainSpacing, 2000);
+setTimeout(fixMainSpacing, 3000);
        setTimeout(updateSpacingOnMenuToggle, 1000);
+       
+       // Scroll-to-Hide Header for Mobile (Tools Pages)
+       (function() {
+           if (window.innerWidth >= 1024) return; // Desktop - no scroll hide
+           
+           let lastScroll = 0;
+           const header = document.querySelector('nav');
+           const scrollThreshold = 50; // Hide after scrolling 50px
+           
+           if (!header) return;
+           
+           function handleScroll() {
+               if (window.innerWidth >= 1024) return; // Don't apply on desktop
+               
+               const currentScroll = window.pageYOffset;
+               
+               // Hide header when scrolling down (past threshold)
+               if (currentScroll > lastScroll && currentScroll > scrollThreshold) {
+                   header.classList.add('header-scrolled-down');
+               } 
+               // Show header when scrolling up or at top
+               else if (currentScroll < lastScroll || currentScroll <= scrollThreshold) {
+                   header.classList.remove('header-scrolled-down');
+               }
+               
+               lastScroll = currentScroll;
+           }
+           
+           // Throttle scroll events for better performance
+           let ticking = false;
+           window.addEventListener('scroll', function() {
+               if (!ticking) {
+                   window.requestAnimationFrame(function() {
+                       handleScroll();
+                       ticking = false;
+                   });
+                   ticking = true;
+               }
+           });
+           
+           // Handle window resize (disable on desktop)
+           window.addEventListener('resize', function() {
+               if (window.innerWidth >= 1024) {
+                   header.classList.remove('header-scrolled-down');
+               }
+           });
+       })();
+       
+       // Scroll-to-Hide Widgets for Desktop/Tablet (Tools Pages)
+       (function() {
+           if (window.innerWidth < 1024) return; // Mobile - no widget hide
+           
+           let lastScroll = 0;
+           const header = document.querySelector('nav');
+           const scrollThreshold = 100; // Hide widgets after scrolling 100px
+           
+           if (!header) return;
+           
+           function handleDesktopScroll() {
+               if (window.innerWidth < 1024) return; // Don't apply on mobile
+               
+               const currentScroll = window.pageYOffset;
+               
+               // Hide widgets when scrolling down (past threshold)
+               if (currentScroll > lastScroll && currentScroll > scrollThreshold) {
+                   header.classList.add('header-widgets-hidden');
+               } 
+               // Show widgets when scrolling up or at top
+               else if (currentScroll < lastScroll || currentScroll <= scrollThreshold) {
+                   header.classList.remove('header-widgets-hidden');
+               }
+               
+               lastScroll = currentScroll;
+           }
+           
+           // Throttle scroll events for better performance
+           let ticking = false;
+           window.addEventListener('scroll', function() {
+               if (!ticking) {
+                   window.requestAnimationFrame(function() {
+                       handleDesktopScroll();
+                       ticking = false;
+                   });
+                   ticking = true;
+               }
+           });
+           
+           // Handle window resize (enable/disable based on screen size)
+           window.addEventListener('resize', function() {
+               if (window.innerWidth < 1024) {
+                   header.classList.remove('header-widgets-hidden');
+               } else {
+                   // Re-check scroll position on resize
+                   handleDesktopScroll();
+               }
+           });
+       })();
 </script>
