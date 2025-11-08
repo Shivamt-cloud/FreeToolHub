@@ -617,15 +617,13 @@
         
         /* Ensure mobile widgets are visible on mobile */
         @media (max-width: 1023px) {
-            div.lg\\:hidden.bg-white.border-b.border-gray-200 {
+            .mobile-widgets-container {
                 display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
             }
         }
         
         @media (min-width: 1024px) {
-            div.lg\\:hidden.bg-white.border-b.border-gray-200 {
+            .mobile-widgets-container {
                 display: none !important;
             }
         }
@@ -637,17 +635,38 @@
                 will-change: transform;
             }
             
-            /* Hide widgets and navigation when scrolled down, keep logo visible */
-            nav.header-scrolled-down .lg\\:hidden.bg-white.border-b,
-            nav.header-scrolled-down .navigation-buttons-row {
-                max-height: 0;
+            /* Mobile widgets container - set initial height for smooth transition */
+            .mobile-widgets-container {
+                max-height: 320px; /* Initial height: 2 widgets (140px each) + padding (24px) + gap (12px) = ~316px */
+                opacity: 1;
+                transform: translateY(0);
+                transition: max-height 0.2s ease-out, opacity 0.2s ease-out, transform 0.2s ease-out, padding 0.2s ease-out, margin 0.2s ease-out;
                 overflow: hidden;
-                opacity: 0;
-                pointer-events: none;
-                transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease-in-out;
-                padding-top: 0;
-                padding-bottom: 0;
-                margin: 0;
+                visibility: visible;
+            }
+            
+            /* Navigation buttons row - set initial height for smooth transition */
+            .navigation-buttons-row {
+                max-height: 80px; /* Initial height for navigation row */
+                opacity: 1;
+                transform: translateY(0);
+                transition: max-height 0.2s ease-out, opacity 0.2s ease-out, transform 0.2s ease-out, padding 0.2s ease-out, margin 0.2s ease-out;
+                overflow: hidden;
+                visibility: visible;
+            }
+            
+            /* Hide widgets and navigation when scrolled down, keep logo visible */
+            nav.header-scrolled-down .mobile-widgets-container,
+            nav.header-scrolled-down .navigation-buttons-row {
+                max-height: 0 !important;
+                overflow: hidden !important;
+                opacity: 0 !important;
+                visibility: hidden !important;
+                pointer-events: none !important;
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
+                margin: 0 !important;
+                transform: translateY(-10px) !important; /* Slight upward movement for better visual effect */
             }
             
             /* Logo row always visible - ensure it stays at top */
@@ -1480,7 +1499,7 @@
                 </div>
                 
         <!-- Mobile Widgets (Always Visible on Mobile) - Moved above navigation -->
-        <div class="lg:hidden bg-white border-b border-gray-200">
+        <div class="mobile-widgets-container lg:hidden bg-white border-b border-gray-200">
             <div class="max-w-7xl mx-auto px-4 py-3 space-y-3">
                 <!-- Mobile Weather Widget -->
                 <div id="mobile-weather-widget" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg shadow-lg" style="width: 100%; height: 140px; position: relative; overflow: hidden;">
@@ -30543,49 +30562,110 @@ Charlie Brown,42,Phoenix,USA`;
             }, 100);
         }
 
-        // Scroll-to-Hide Header for Mobile
+        // Scroll-to-Hide Header for Mobile - AGGRESSIVE VERSION
         (function() {
-            if (window.innerWidth >= 1024) return; // Desktop - no scroll hide
+            // Only run on mobile devices
+            if (window.innerWidth >= 1024) {
+                return; // Skip on desktop
+            }
             
             let lastScroll = 0;
+            let scrollTimeout = null;
             const header = document.querySelector('nav');
-            const scrollThreshold = 50; // Hide after scrolling 50px
+            const scrollThreshold = 20; // Hide after scrolling just 20px (very aggressive)
             
-            if (!header) return;
+            if (!header) {
+                console.error('❌ Mobile scroll-to-hide: nav element not found');
+                return;
+            }
+            
+            // Verify elements exist
+            const mobileWidgets = header.querySelector('.mobile-widgets-container');
+            const navButtons = header.querySelector('.navigation-buttons-row');
+            
+            if (!mobileWidgets || !navButtons) {
+                console.warn('⚠️ Mobile scroll-to-hide: Elements not found');
+                return;
+            }
+            
+            console.log('✅ Mobile scroll-to-hide: Initialized (threshold: 20px)');
             
             function handleScroll() {
-                if (window.innerWidth >= 1024) return; // Don't apply on desktop
+                // Don't apply on desktop
+                if (window.innerWidth >= 1024) {
+                    header.classList.remove('header-scrolled-down');
+                    return;
+                }
                 
-                const currentScroll = window.pageYOffset;
+                const currentScroll = window.pageYOffset || window.scrollY || document.documentElement.scrollTop || 0;
                 
-                // Hide header when scrolling down (past threshold)
+                // Clear any pending timeout
+                if (scrollTimeout) {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = null;
+                }
+                
+                // Hide header when scrolling down (past threshold) - IMMEDIATELY
                 if (currentScroll > lastScroll && currentScroll > scrollThreshold) {
+                    // Add class immediately for instant hiding
                     header.classList.add('header-scrolled-down');
                 } 
                 // Show header when scrolling up or at top
                 else if (currentScroll < lastScroll || currentScroll <= scrollThreshold) {
+                    // Remove class immediately for instant showing
                     header.classList.remove('header-scrolled-down');
                 }
                 
                 lastScroll = currentScroll;
             }
             
-            // Throttle scroll events for better performance
-            let ticking = false;
-            window.addEventListener('scroll', function() {
-                if (!ticking) {
-                    window.requestAnimationFrame(function() {
-                        handleScroll();
-                        ticking = false;
-                    });
-                    ticking = true;
+            // Use both scroll and touchmove events for better mobile detection
+            function setupScrollListener() {
+                let ticking = false;
+                
+                function onScroll() {
+                    if (!ticking) {
+                        window.requestAnimationFrame(function() {
+                            handleScroll();
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
                 }
-            });
+                
+                // Multiple event listeners for better mobile support
+                window.addEventListener('scroll', onScroll, { passive: true });
+                window.addEventListener('touchmove', onScroll, { passive: true });
+                
+                // Also listen to wheel events for trackpad scrolling
+                window.addEventListener('wheel', onScroll, { passive: true });
+            }
+            
+            setupScrollListener();
             
             // Handle window resize (disable on desktop)
             window.addEventListener('resize', function() {
                 if (window.innerWidth >= 1024) {
                     header.classList.remove('header-scrolled-down');
+                } else {
+                    // Re-check scroll position on mobile resize
+                    handleScroll();
+                }
+            });
+            
+            // Initial check on page load - wait for DOM to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(handleScroll, 100);
+                });
+            } else {
+                setTimeout(handleScroll, 100);
+            }
+            
+            // Also check on page visibility change (when user returns to tab)
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    setTimeout(handleScroll, 50);
                 }
             });
         })();
