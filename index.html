@@ -615,9 +615,12 @@
             transform: scale(1.02);
         }
         
-        /* Ensure mobile widgets are visible on mobile */
+        /* Mobile widgets: hidden by default, shown when hamburger is clicked */
         @media (max-width: 1023px) {
-            .mobile-widgets-container {
+            .mobile-widgets-container.hidden {
+                display: none !important;
+            }
+            .mobile-widgets-container:not(.hidden) {
                 display: block !important;
             }
         }
@@ -635,8 +638,8 @@
                 will-change: transform;
             }
             
-            /* Mobile widgets container - set initial height for smooth transition */
-            .mobile-widgets-container {
+            /* Mobile widgets container - set initial height for smooth transition (only when not hidden) */
+            .mobile-widgets-container:not(.hidden) {
                 max-height: 320px; /* Initial height: 2 widgets (140px each) + padding (24px) + gap (12px) = ~316px */
                 opacity: 1;
                 transform: translateY(0);
@@ -645,8 +648,8 @@
                 visibility: visible;
             }
             
-            /* Navigation buttons row - set initial height for smooth transition */
-            .navigation-buttons-row {
+            /* Navigation buttons row - set initial height for smooth transition (only when not hidden) */
+            .navigation-buttons-row:not(.hidden) {
                 max-height: 80px; /* Initial height for navigation row */
                 opacity: 1;
                 transform: translateY(0);
@@ -1498,8 +1501,8 @@
                     </div>
                 </div>
                 
-        <!-- Mobile Widgets (Always Visible on Mobile) - Moved above navigation -->
-        <div class="mobile-widgets-container lg:hidden bg-white border-b border-gray-200">
+        <!-- Mobile Widgets (Hidden by default on mobile, toggle with hamburger) - Moved above navigation -->
+        <div class="mobile-widgets-container hidden lg:hidden bg-white border-b border-gray-200">
             <div class="max-w-7xl mx-auto px-4 py-3 space-y-3">
                 <!-- Mobile Weather Widget -->
                 <div id="mobile-weather-widget" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg shadow-lg" style="width: 100%; height: 140px; position: relative; overflow: hidden;">
@@ -1607,8 +1610,8 @@
             </div>
         </div>
         
-        <!-- Navigation Buttons Row -->
-        <div class="navigation-buttons-row">
+        <!-- Navigation Buttons Row (Hidden by default on mobile, toggle with hamburger) -->
+        <div class="navigation-buttons-row hidden lg:flex">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="flex justify-center items-center gap-3 flex-wrap">
                     <a href="#home" class="nav-button bg-purple-600 text-white hover:bg-purple-700">Home</a>
@@ -15184,11 +15187,38 @@
         // Mobile Menu Toggle
         function toggleMobileMenu() {
             const mobileMenu = document.getElementById('mobile-menu');
-            if (mobileMenu.classList.contains('hidden')) {
-                mobileMenu.classList.remove('hidden');
-            } else {
-                mobileMenu.classList.add('hidden');
+            const mobileWidgets = document.querySelector('.mobile-widgets-container');
+            const navButtons = document.querySelector('.navigation-buttons-row');
+            
+            // Toggle mobile menu (navigation links)
+            if (mobileMenu) {
+                if (mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.remove('hidden');
+                } else {
+                    mobileMenu.classList.add('hidden');
+                }
             }
+            
+            // Toggle widgets visibility (only on mobile)
+            if (mobileWidgets && window.innerWidth < 1024) {
+                if (mobileWidgets.classList.contains('hidden')) {
+                    mobileWidgets.classList.remove('hidden');
+                } else {
+                    mobileWidgets.classList.add('hidden');
+                }
+            }
+            
+            // Toggle navigation buttons visibility (only on mobile)
+            if (navButtons && window.innerWidth < 1024) {
+                if (navButtons.classList.contains('hidden')) {
+                    navButtons.classList.remove('hidden');
+                } else {
+                    navButtons.classList.add('hidden');
+                }
+            }
+            
+            // Update spacing when menu/widgets/nav toggle
+            setTimeout(fixMainSpacing, 100);
         }
 
         // ============================================
