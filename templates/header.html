@@ -136,13 +136,13 @@
             </div>
             
             <!-- Mobile Menu Button -->
-            <button onclick="toggleMobileMenu()" class="lg:hidden text-gray-700 hover:text-purple-600 focus:outline-none flex-shrink-0">
+            <button onclick="toggleMobileMenu()" class="lg:hidden text-gray-700 hover:text-purple-600 focus:outline-none flex-shrink-0 ml-auto">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </button>
-                </div>
-            </div>
+        </div>
+    </div>
             
     <!-- Navigation Buttons Row (Hidden by default on mobile, toggle with hamburger) -->
     <div class="navigation-buttons-row hidden lg:flex">
@@ -164,6 +164,10 @@
                     <span class="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">NEW</span>
                 </a>
                 <a href="/tools/internet-speed-test.html" class="nav-button bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700">Internet Speed</a>
+                <a href="/tools/sql-query-tool.html" class="nav-button bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-600 hover:to-blue-700 relative">
+                    SQL Query Tool
+                    <span class="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">NEW</span>
+                </a>
                 <a href="/#about" class="nav-button bg-gray-600 text-white hover:bg-gray-700">About</a>
                 <a href="/#contact" class="nav-button bg-indigo-600 text-white hover:bg-indigo-700">Contact</a>
             </div>
@@ -347,6 +351,10 @@
             <a href="/#utilities" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">
                 Utilities <span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold ml-2">NEW</span>
             </a>
+            <a href="/tools/internet-speed-test.html" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">Internet Speed</a>
+            <a href="/tools/sql-query-tool.html" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">
+                SQL Query Tool <span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-0.5 rounded-full font-bold ml-2">NEW</span>
+            </a>
             <a href="/#about" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">About</a>
             <a href="/#contact" onclick="toggleMobileMenu()" class="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2">Contact</a>
             </div>
@@ -374,8 +382,10 @@ function toggleMobileMenu() {
         }
     }
     
-    // Update spacing when menu/widgets/nav toggle
-    setTimeout(fixMainSpacing, 100);
+    // Update spacing when menu/widgets/nav toggle (if function exists)
+    if (typeof fixMainSpacing === 'function') {
+        setTimeout(fixMainSpacing, 100);
+    }
 }
 </script>
 
@@ -558,6 +568,7 @@ function toggleMobileMenu() {
     
     nav.header-widgets-hidden .navigation-buttons-row {
         /* Hide navigation completely when scrolling down */
+        display: none !important;
         max-height: 0 !important;
         opacity: 0 !important;
         padding-top: 0 !important;
@@ -565,6 +576,11 @@ function toggleMobileMenu() {
         margin: 0 !important;
         pointer-events: none !important;
         overflow: hidden !important;
+    }
+    
+    /* Show navigation when not hidden (override display: none) */
+    nav:not(.header-widgets-hidden) .navigation-buttons-row {
+        display: flex !important;
     }
     
     /* Ensure nav container adjusts properly */
