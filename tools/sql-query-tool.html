@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>SQL Query Tool - FreeToolHub</title>
+    <meta name="description" content="Validate, format, build, and enhance SQL queries. Natural language to SQL converter with support for MySQL, PostgreSQL, Oracle, SQLite, and more.">
+    <meta property="og:title" content="SQL Query Tool - FreeToolHub">
+    <meta property="og:description" content="Comprehensive SQL tool with validator, builder, formatter, and natural language to SQL conversion">
+    <meta property="og:url" content="https://freetoolhub.in/tools/sql-query-tool.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- SQL Formatter -->
+    <script src="https://cdn.jsdelivr.net/npm/sql-formatter@15.1.2/dist/sql-formatter.min.js"></script>
+    
+    <style>
+        .CodeMirror {
+            height: 300px;
+            font-size: 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+        }
+        .CodeMirror-focused {
+            border-color: #3b82f6;
+        }
+        .error-line {
+            background-color: #fee2e2;
+        }
+        .suggestion-box {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🗄️ SQL Query Tool</h1>
+                    <p class="text-gray-600 text-lg">Validate, format, build, and convert natural language to SQL queries</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">SQL Query Tool</span>
+            </nav>
+            
+            <!-- Database Selector -->
+            <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Select Database Type:</label>
+                <select id="database-type" class="w-full md:w-auto px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="mysql">MySQL</option>
+                    <option value="postgresql">PostgreSQL</option>
+                    <option value="oracle">Oracle</option>
+                    <option value="sqlite">SQLite</option>
+                    <option value="mssql">SQL Server</option>
+                    <option value="mariadb">MariaDB</option>
+                </select>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="bg-white rounded-xl shadow-lg mb-6">
+                <div class="flex flex-wrap border-b border-gray-200">
+                    <button onclick="switchTab('validator')" id="tab-validator" class="tab-button px-6 py-3 font-semibold text-blue-600 border-b-2 border-blue-600">
+                        ✓ Validator
+                    </button>
+                    <button onclick="switchTab('builder')" id="tab-builder" class="tab-button px-6 py-3 font-semibold text-gray-600 hover:text-blue-600">
+                        🏗️ Query Builder
+                    </button>
+                    <button onclick="switchTab('enhancer')" id="tab-enhancer" class="tab-button px-6 py-3 font-semibold text-gray-600 hover:text-blue-600">
+                        ⚡ Enhancer
+                    </button>
+                </div>
+                
+                <!-- Validator Tab -->
+                <div id="panel-validator" class="tab-panel p-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Enter SQL Query:</label>
+                            <textarea id="validator-input" placeholder="Paste your SQL query here..." class="w-full h-64 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm resize-none"></textarea>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="validateSQL()" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                ✓ Validate Query
+                            </button>
+                            <button onclick="formatSQL()" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                ✨ Format & Fix Query
+                            </button>
+                            <button onclick="validateAndFormat()" class="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                🔄 Validate & Format
+                            </button>
+                            <button onclick="clearValidator()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition-all">
+                                Clear
+                            </button>
+                        </div>
+                        <div id="validator-results" class="mt-4"></div>
+                    </div>
+                </div>
+                
+                <!-- Query Builder Tab -->
+                <div id="panel-builder" class="tab-panel hidden p-6">
+                    <div class="space-y-6">
+                        <!-- SELECT -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">SELECT Columns:</label>
+                            <div id="select-columns" class="space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <input type="text" placeholder="Column name (e.g., id, name, email)" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg">
+                                    <button onclick="removeSelectColumn(this)" class="text-red-500 hover:text-red-700">✕</button>
+                                </div>
+                            </div>
+                            <button onclick="addSelectColumn()" class="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium">+ Add Column</button>
+                        </div>
+                        
+                        <!-- FROM -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">FROM Table:</label>
+                            <input type="text" id="from-table" placeholder="Table name (e.g., users, orders)" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        </div>
+                        
+                        <!-- WHERE -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">WHERE Conditions:</label>
+                            <div id="where-conditions" class="space-y-2"></div>
+                            <button onclick="addWhereCondition()" class="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium">+ Add Condition</button>
+                        </div>
+                        
+                        <!-- JOIN -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">JOIN:</label>
+                            <div id="join-clauses" class="space-y-2"></div>
+                            <button onclick="addJoin()" class="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium">+ Add JOIN</button>
+                        </div>
+                        
+                        <!-- GROUP BY -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">GROUP BY:</label>
+                            <input type="text" id="group-by" placeholder="Column name" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        </div>
+                        
+                        <!-- ORDER BY -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">ORDER BY:</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="order-by" placeholder="Column name" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg">
+                                <select id="order-direction" class="px-3 py-2 border border-gray-300 rounded-lg">
+                                    <option value="ASC">ASC</option>
+                                    <option value="DESC">DESC</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- LIMIT -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">LIMIT:</label>
+                            <input type="number" id="limit-value" placeholder="Number of rows" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="buildQuery()" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                🏗️ Build Query
+                            </button>
+                            <button onclick="clearBuilder()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition-all">
+                                Clear All
+                            </button>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Generated SQL:</label>
+                            <textarea id="builder-output" readonly class="w-full h-48 px-4 py-3 border-2 border-gray-300 rounded-lg bg-gray-50 font-mono text-sm resize-none"></textarea>
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                <button onclick="copyToClipboard('builder-output')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Copy SQL</button>
+                                <button onclick="validateBuilderSQL()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Validate</button>
+                                <button onclick="formatBuilderSQL()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm">Format</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Enhancer Tab -->
+                <div id="panel-enhancer" class="tab-panel hidden p-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Enter SQL Query to Enhance:</label>
+                            <textarea id="enhancer-input" placeholder="Paste your SQL query here..." class="w-full h-64 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm resize-none"></textarea>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="enhanceSQL()" class="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                ⚡ Enhance Query
+                            </button>
+                            <button onclick="clearEnhancer()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition-all">
+                                Clear
+                            </button>
+                        </div>
+                        <div id="enhancer-results" class="mt-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <div id="app-footer"></div>
+    
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+    
+    <script>
+        // Tab Management
+        function switchTab(tabName) {
+            // Hide all panels
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.add('hidden');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                btn.classList.add('text-gray-600');
+            });
+            
+            // Show selected panel
+            document.getElementById(`panel-${tabName}`).classList.remove('hidden');
+            
+            // Add active class to selected tab
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            activeTab.classList.remove('text-gray-600');
+            activeTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+        }
+        
+        // Query Builder Functions
+        function addSelectColumn() {
+            const container = document.getElementById('select-columns');
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2';
+            div.innerHTML = `
+                <input type="text" placeholder="Column name" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg">
+                <button onclick="removeSelectColumn(this)" class="text-red-500 hover:text-red-700">✕</button>
+            `;
+            container.appendChild(div);
+        }
+        
+        function removeSelectColumn(btn) {
+            btn.parentElement.remove();
+        }
+        
+        function addWhereCondition() {
+            const container = document.getElementById('where-conditions');
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2 flex-wrap';
+            div.innerHTML = `
+                <select class="px-3 py-2 border border-gray-300 rounded-lg">
+                    <option value="AND">AND</option>
+                    <option value="OR">OR</option>
+                </select>
+                <input type="text" placeholder="Column" class="px-3 py-2 border border-gray-300 rounded-lg" style="min-width: 120px;">
+                <select class="px-3 py-2 border border-gray-300 rounded-lg">
+                    <option value="=">=</option>
+                    <option value=">">&gt;</option>
+                    <option value="<">&lt;</option>
+                    <option value=">=">&gt;=</option>
+                    <option value="<=">&lt;=</option>
+                    <option value="!=">!=</option>
+                    <option value="LIKE">LIKE</option>
+                    <option value="IN">IN</option>
+                    <option value="BETWEEN">BETWEEN</option>
+                </select>
+                <input type="text" placeholder="Value" class="px-3 py-2 border border-gray-300 rounded-lg" style="min-width: 120px;">
+                <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700">✕</button>
+            `;
+            container.appendChild(div);
+        }
+        
+        function addJoin() {
+            const container = document.getElementById('join-clauses');
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2 flex-wrap';
+            div.innerHTML = `
+                <select class="px-3 py-2 border border-gray-300 rounded-lg">
+                    <option value="INNER JOIN">INNER JOIN</option>
+                    <option value="LEFT JOIN">LEFT JOIN</option>
+                    <option value="RIGHT JOIN">RIGHT JOIN</option>
+                    <option value="FULL OUTER JOIN">FULL OUTER JOIN</option>
+                </select>
+                <input type="text" placeholder="Table name" class="px-3 py-2 border border-gray-300 rounded-lg">
+                <span class="text-gray-600">ON</span>
+                <input type="text" placeholder="table1.id" class="px-3 py-2 border border-gray-300 rounded-lg">
+                <span class="text-gray-600">=</span>
+                <input type="text" placeholder="table2.id" class="px-3 py-2 border border-gray-300 rounded-lg">
+                <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700">✕</button>
+            `;
+            container.appendChild(div);
+        }
+        
+        function buildQuery() {
+            const dbType = document.getElementById('database-type').value;
+            let sql = 'SELECT ';
+            
+            // SELECT columns
+            const columns = Array.from(document.querySelectorAll('#select-columns input'))
+                .map(input => input.value.trim())
+                .filter(val => val);
+            
+            if (columns.length === 0) {
+                sql += '*';
+            } else {
+                sql += columns.join(', ');
+            }
+            
+            // FROM
+            const fromTable = document.getElementById('from-table').value.trim();
+            if (!fromTable) {
+                alert('Please specify a table name in the FROM section.');
+                return;
+            }
+            sql += ` FROM ${fromTable}`;
+            
+            // JOINs
+            const joins = Array.from(document.querySelectorAll('#join-clauses > div'));
+            joins.forEach(joinDiv => {
+                const joinType = joinDiv.querySelector('select').value;
+                const table = joinDiv.querySelectorAll('input')[0].value.trim();
+                const leftCol = joinDiv.querySelectorAll('input')[1].value.trim();
+                const rightCol = joinDiv.querySelectorAll('input')[2].value.trim();
+                
+                if (table && leftCol && rightCol) {
+                    sql += ` ${joinType} ${table} ON ${leftCol} = ${rightCol}`;
+                }
+            });
+            
+            // WHERE
+            const whereConditions = Array.from(document.querySelectorAll('#where-conditions > div'));
+            if (whereConditions.length > 0) {
+                sql += ' WHERE ';
+                const conditions = [];
+                whereConditions.forEach((condDiv, index) => {
+                    if (index > 0) {
+                        const operator = condDiv.querySelector('select').value;
+                        conditions.push(operator);
+                    }
+                    const column = condDiv.querySelectorAll('input')[0].value.trim();
+                    const op = condDiv.querySelectorAll('select')[1].value;
+                    const value = condDiv.querySelectorAll('input')[1].value.trim();
+                    
+                    if (column && value) {
+                        let condition = `${column} ${op}`;
+                        if (op === 'IN' || op === 'BETWEEN') {
+                            condition += ` (${value})`;
+                        } else if (op === 'LIKE') {
+                            condition += ` '${value}'`;
+                        } else if (isNaN(value)) {
+                            condition += ` '${value}'`;
+                        } else {
+                            condition += ` ${value}`;
+                        }
+                        conditions.push(condition);
+                    }
+                });
+                sql += conditions.join(' ');
+            }
+            
+            // GROUP BY
+            const groupBy = document.getElementById('group-by').value.trim();
+            if (groupBy) {
+                sql += ` GROUP BY ${groupBy}`;
+            }
+            
+            // ORDER BY
+            const orderBy = document.getElementById('order-by').value.trim();
+            if (orderBy) {
+                sql += ` ORDER BY ${orderBy}`;
+                const direction = document.getElementById('order-direction').value;
+                sql += ` ${direction}`;
+            }
+            
+            // LIMIT (database-specific)
+            const limit = document.getElementById('limit-value').value.trim();
+            if (limit) {
+                if (dbType === 'oracle') {
+                    sql += ` FETCH FIRST ${limit} ROWS ONLY`;
+                } else if (dbType === 'mssql') {
+                    sql += ` TOP ${limit}`;
+                } else {
+                    sql += ` LIMIT ${limit}`;
+                }
+            }
+            
+            sql += ';';
+            
+            document.getElementById('builder-output').value = sql;
+        }
+        
+        function clearBuilder() {
+            document.getElementById('select-columns').innerHTML = '<div class="flex items-center gap-2"><input type="text" placeholder="Column name" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg"><button onclick="removeSelectColumn(this)" class="text-red-500 hover:text-red-700">✕</button></div>';
+            document.getElementById('from-table').value = '';
+            document.getElementById('where-conditions').innerHTML = '';
+            document.getElementById('join-clauses').innerHTML = '';
+            document.getElementById('group-by').value = '';
+            document.getElementById('order-by').value = '';
+            document.getElementById('limit-value').value = '';
+            document.getElementById('builder-output').value = '';
+        }
+        
+        // SQL Validator
+        function validateSQL() {
+            const sql = document.getElementById('validator-input').value.trim();
+            const dbType = document.getElementById('database-type').value;
+            const resultsDiv = document.getElementById('validator-results');
+            
+            if (!sql) {
+                resultsDiv.innerHTML = '<div class="p-4 bg-red-100 text-red-700 rounded-lg">Please enter a SQL query to validate.</div>';
+                return;
+            }
+            
+            // Use comprehensive validation
+            const validation = comprehensiveSQLValidation(sql, dbType);
+            resultsDiv.innerHTML = validation;
+        }
+        
+        function comprehensiveSQLValidation(sql, dbType) {
+            const errors = [];
+            const warnings = [];
+            const suggestions = [];
+            
+            // Remove comments for validation
+            const sqlClean = sql.replace(/--.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+            
+            // Check for empty query
+            if (!sqlClean.trim()) {
+                errors.push('Query is empty');
+            }
+            
+            // Check for SELECT, INSERT, UPDATE, DELETE
+            const queryType = sqlClean.match(/^\s*(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\s+/i);
+            if (!queryType) {
+                errors.push('Query must start with a valid SQL keyword (SELECT, INSERT, UPDATE, DELETE, etc.)');
+            }
+            
+            // Check for FROM in SELECT
+            if (sqlClean.match(/^\s*SELECT/i) && !sqlClean.match(/\bFROM\s+[\w\.]+/i)) {
+                errors.push('SELECT query must include a FROM clause with a table name');
+            }
+            
+            // Check for unmatched quotes
+            const singleQuotes = (sqlClean.match(/'/g) || []).length;
+            const doubleQuotes = (sqlClean.match(/"/g) || []).length;
+            if (singleQuotes % 2 !== 0) {
+                errors.push('Unmatched single quotes (apostrophes) found');
+            }
+            if (doubleQuotes % 2 !== 0) {
+                errors.push('Unmatched double quotes found');
+            }
+            
+            // Check for unmatched parentheses
+            const openParens = (sqlClean.match(/\(/g) || []).length;
+            const closeParens = (sqlClean.match(/\)/g) || []).length;
+            if (openParens !== closeParens) {
+                errors.push(`Unmatched parentheses found (${openParens} open, ${closeParens} close)`);
+            }
+            
+            // Check for common syntax errors
+            if (sqlClean.match(/,\s*,/)) {
+                errors.push('Multiple consecutive commas found');
+            }
+            
+            if (sqlClean.match(/WHERE\s+$/i) || sqlClean.match(/WHERE\s+AND/i) || sqlClean.match(/WHERE\s+OR/i)) {
+                errors.push('WHERE clause is incomplete');
+            }
+            
+            // Database-specific checks
+            if (dbType === 'oracle') {
+                if (sqlClean.match(/\bLIMIT\b/i)) {
+                    warnings.push('Oracle uses FETCH FIRST ... ROWS ONLY instead of LIMIT');
+                }
+                if (sqlClean.match(/\bAUTO_INCREMENT\b/i)) {
+                    warnings.push('Oracle uses SEQUENCE instead of AUTO_INCREMENT');
+                }
+            }
+            
+            if (dbType === 'mssql') {
+                if (sqlClean.match(/\bLIMIT\b/i)) {
+                    warnings.push('SQL Server uses TOP instead of LIMIT');
+                }
+            }
+            
+            // Warnings
+            if (sqlClean.match(/SELECT\s+\*/i)) {
+                warnings.push('Using SELECT * is not recommended. Specify column names for better performance and clarity.');
+            }
+            
+            if (sqlClean.match(/^\s*SELECT/i) && !sqlClean.match(/\bLIMIT\b|\bTOP\b|\bFETCH\s+FIRST\b|\bROWNUM\b/i)) {
+                warnings.push('Consider adding LIMIT/TOP clause to restrict result set size');
+            }
+            
+            if (sqlClean.match(/DELETE\s+FROM/i) && !sqlClean.match(/\bWHERE\b/i)) {
+                warnings.push('⚠️ DELETE without WHERE clause will delete all rows!');
+            }
+            
+            if (sqlClean.match(/UPDATE\s+\w+\s+SET/i) && !sqlClean.match(/\bWHERE\b/i)) {
+                warnings.push('⚠️ UPDATE without WHERE clause will update all rows!');
+            }
+            
+            // Suggestions
+            if (sqlClean.match(/^\s*SELECT/i) && !sqlClean.match(/\bORDER BY\b/i)) {
+                suggestions.push('Consider adding ORDER BY for consistent result ordering');
+            }
+            
+            if (sqlClean.match(/\bJOIN\b/i)) {
+                suggestions.push('Ensure JOIN conditions use indexed columns for better performance');
+            }
+            
+            // Check GROUP BY consistency with SELECT (for SELECT queries)
+            if (sqlClean.match(/^\s*SELECT/i) && sqlClean.match(/\bGROUP BY\b/i)) {
+                // Extract SELECT columns
+                const selectMatch = sqlClean.match(/SELECT\s+(.*?)\s+FROM/i);
+                if (selectMatch) {
+                    const selectClause = selectMatch[1];
+                    // Extract GROUP BY columns
+                    const groupByMatch = sqlClean.match(/\bGROUP BY\s+(.*?)(?:\s+ORDER BY|\s+HAVING|\s+LIMIT|\s+FETCH|\s+TOP|\s*;|\s*$)/i);
+                    if (groupByMatch) {
+                        const groupByClause = groupByMatch[1].trim();
+                        const groupByColumns = groupByClause.split(',').map(col => col.trim());
+                        
+                        // Extract column names from SELECT (non-aggregate columns)
+                        const selectColumns = selectClause.split(',')
+                            .map(col => col.trim())
+                            .filter(col => {
+                                // Skip aggregate functions
+                                return !col.match(/\b(COUNT|SUM|AVG|MAX|MIN|GROUP_CONCAT|STRING_AGG)\s*\(/i);
+                            })
+                            .map(col => {
+                                // Extract column name (handle aliases)
+                                const aliasMatch = col.match(/\bAS\s+(\w+)$/i);
+                                if (aliasMatch) {
+                                    return aliasMatch[1];
+                                }
+                                // Extract column name (with or without table alias)
+                                const colMatch = col.match(/(?:[\w\.]+\.)?(\w+)$/);
+                                return colMatch ? colMatch[1] : col;
+                            });
+                        
+                        // Check for inconsistent table aliases
+                        groupByColumns.forEach(groupCol => {
+                            const groupColName = groupCol.split('.').pop().toLowerCase();
+                            
+                            // Find matching columns in SELECT clause
+                            const selectColMatches = selectClause.match(new RegExp(`(\\w+\\.)?${groupColName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'gi'));
+                            
+                            if (selectColMatches) {
+                                selectColMatches.forEach(match => {
+                                    const matchTrimmed = match.trim();
+                                    const hasAliasInSelect = matchTrimmed.includes('.');
+                                    const hasAliasInGroupBy = groupCol.includes('.');
+                                    
+                                    // Case 1: SELECT has alias (e.g., tc.CustomerName) but GROUP BY doesn't (e.g., CustomerName)
+                                    if (hasAliasInSelect && !hasAliasInGroupBy) {
+                                        errors.push(`Inconsistent table alias: SELECT uses "${matchTrimmed}" but GROUP BY uses "${groupCol}". Use consistent aliases (e.g., use "${matchTrimmed}" in GROUP BY).`);
+                                    }
+                                    
+                                    // Case 2: GROUP BY has alias but SELECT doesn't (less common but still an issue)
+                                    if (!hasAliasInSelect && hasAliasInGroupBy) {
+                                        errors.push(`Inconsistent table alias: GROUP BY uses "${groupCol}" but SELECT uses "${matchTrimmed}". Use consistent aliases.`);
+                                    }
+                                    
+                                    // Case 3: Both have aliases but they don't match
+                                    if (hasAliasInSelect && hasAliasInGroupBy && matchTrimmed.toLowerCase() !== groupCol.toLowerCase()) {
+                                        errors.push(`Mismatched table aliases: SELECT uses "${matchTrimmed}" but GROUP BY uses "${groupCol}". Use the same alias in both clauses.`);
+                                    }
+                                });
+                            }
+                        });
+                        
+                        // Check for missing columns in GROUP BY (non-aggregate columns in SELECT)
+                        selectColumns.forEach(selectCol => {
+                            const colName = selectCol.toLowerCase();
+                            const inGroupBy = groupByColumns.some(groupCol => {
+                                const groupColName = groupCol.split('.').pop().toLowerCase();
+                                return groupColName === colName || groupCol.toLowerCase() === colName;
+                            });
+                            if (!inGroupBy && !colName.match(/^(as|count|sum|avg|max|min)$/i)) {
+                                // This might be okay if it's an aggregate, but flag as warning
+                                const isAggregate = selectClause.match(new RegExp(`\\b(COUNT|SUM|AVG|MAX|MIN)\\s*\\([^)]*\\b${selectCol}\\b`, 'i'));
+                                if (!isAggregate) {
+                                    warnings.push(`Column "${selectCol}" in SELECT may need to be in GROUP BY clause (if not an aggregate function)`);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+            
+            // Build result HTML
+            let html = '';
+            
+            if (errors.length === 0) {
+                html += '<div class="p-4 bg-green-100 text-green-700 rounded-lg mb-4">';
+                html += '<strong>✅ Query Syntax is Valid!</strong>';
+                html += `<p class="mt-2 text-sm">The SQL syntax appears correct for ${dbType.toUpperCase()}.</p>`;
+                html += '</div>';
+            } else {
+                html += '<div class="p-4 bg-red-100 text-red-700 rounded-lg mb-4">';
+                html += '<strong>❌ Syntax Errors Found:</strong>';
+                html += '<ul class="list-disc list-inside mt-2 space-y-1">';
+                errors.forEach(err => {
+                    html += `<li>${err}</li>`;
+                });
+                html += '</ul>';
+                html += '</div>';
+            }
+            
+            if (warnings.length > 0) {
+                html += '<div class="p-4 bg-yellow-100 text-yellow-700 rounded-lg mb-4">';
+                html += '<strong>⚠️ Warnings:</strong>';
+                html += '<ul class="list-disc list-inside mt-2 space-y-1">';
+                warnings.forEach(warn => {
+                    html += `<li>${warn}</li>`;
+                });
+                html += '</ul>';
+                html += '</div>';
+            }
+            
+            if (suggestions.length > 0 && errors.length === 0) {
+                html += '<div class="p-4 bg-blue-50 text-blue-800 rounded-lg">';
+                html += '<strong>💡 Suggestions:</strong>';
+                html += '<ul class="list-disc list-inside mt-2 space-y-1">';
+                suggestions.forEach(sugg => {
+                    html += `<li>${sugg}</li>`;
+                });
+                html += '</ul>';
+                html += '</div>';
+            }
+            
+            // Query structure analysis
+            if (errors.length === 0) {
+                const structure = analyzeQueryStructure(sqlClean);
+                html += '<div class="p-4 bg-gray-50 rounded-lg mt-4">';
+                html += '<strong>📊 Query Structure:</strong>';
+                html += '<div class="mt-2 text-sm space-y-1">';
+                html += `<div>Type: <strong>${structure.type}</strong></div>`;
+                if (structure.tables.length > 0) {
+                    html += `<div>Tables: <strong>${structure.tables.join(', ')}</strong></div>`;
+                }
+                if (structure.joins > 0) {
+                    html += `<div>JOINs: <strong>${structure.joins}</strong></div>`;
+                }
+                if (structure.hasWhere) {
+                    html += '<div>Has WHERE clause: <strong>Yes</strong></div>';
+                }
+                if (structure.hasOrderBy) {
+                    html += '<div>Has ORDER BY: <strong>Yes</strong></div>';
+                }
+                html += '</div>';
+                html += '</div>';
+            }
+            
+            return html;
+        }
+        
+        function analyzeQueryStructure(sql) {
+            const structure = {
+                type: 'SELECT',
+                tables: [],
+                joins: 0,
+                hasWhere: false,
+                hasOrderBy: false
+            };
+            
+            const typeMatch = sql.match(/^\s*(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)/i);
+            if (typeMatch) {
+                structure.type = typeMatch[1].toUpperCase();
+            }
+            
+            // Extract tables
+            const fromMatch = sql.match(/\bFROM\s+([\w\.]+)/i);
+            if (fromMatch) {
+                structure.tables.push(fromMatch[1]);
+            }
+            
+            // Count JOINs
+            const joinMatches = sql.match(/\b(INNER|LEFT|RIGHT|FULL)\s+JOIN\b/gi);
+            if (joinMatches) {
+                structure.joins = joinMatches.length;
+            }
+            
+            // Check for WHERE
+            structure.hasWhere = /\bWHERE\b/i.test(sql);
+            
+            // Check for ORDER BY
+            structure.hasOrderBy = /\bORDER\s+BY\b/i.test(sql);
+            
+            return structure;
+        }
+        
+        function getErrorSuggestions(errorMsg) {
+            const suggestions = {
+                'syntax': 'Check for missing commas, quotes, or parentheses',
+                'table': 'Verify table name is correct and exists',
+                'column': 'Check column names for typos',
+                'keyword': 'Ensure SQL keywords are spelled correctly'
+            };
+            
+            for (const [key, suggestion] of Object.entries(suggestions)) {
+                if (errorMsg.toLowerCase().includes(key)) {
+                    return suggestion;
+                }
+            }
+            return 'Review your SQL syntax carefully. Check for typos, missing keywords, or incorrect operators.';
+        }
+        
+        function formatSQL() {
+            const sql = document.getElementById('validator-input').value.trim();
+            if (!sql) {
+                alert('Please enter a SQL query to format.');
+                return;
+            }
+            
+            try {
+                let formatted;
+                if (typeof sqlFormatter !== 'undefined') {
+                    formatted = sqlFormatter.format(sql, {
+                        language: document.getElementById('database-type').value,
+                        indent: '  ',
+                        uppercase: true
+                    });
+                } else {
+                    // Enhanced formatting
+                    formatted = basicFormatSQL(sql);
+                }
+                
+                // Update the textarea with formatted SQL
+                document.getElementById('validator-input').value = formatted;
+                
+                // Show success message
+                const resultsDiv = document.getElementById('validator-results');
+                resultsDiv.innerHTML = '<div class="p-4 bg-green-100 text-green-700 rounded-lg"><strong>✅ SQL Formatted Successfully!</strong><p class="mt-2 text-sm">Your query has been formatted with proper indentation and spacing.</p></div>';
+                
+                // Scroll to results
+                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } catch (error) {
+                // Fallback to basic formatting
+                try {
+                    const formatted = basicFormatSQL(sql);
+                    document.getElementById('validator-input').value = formatted;
+                    const resultsDiv = document.getElementById('validator-results');
+                    resultsDiv.innerHTML = '<div class="p-4 bg-blue-100 text-blue-700 rounded-lg"><strong>ℹ️ SQL Formatted</strong><p class="mt-2 text-sm">Query formatted using basic formatter.</p></div>';
+                } catch (e) {
+                    alert('Error formatting SQL: ' + error.message);
+                }
+            }
+        }
+        
+        function basicFormatSQL(sql) {
+            if (!sql || !sql.trim()) return sql;
+            
+            // Step 1: Normalize whitespace and operators
+            let formatted = sql
+                .replace(/\s+/g, ' ')  // Multiple spaces to single
+                .replace(/\s*,\s*/g, ', ')  // Normalize commas
+                .replace(/\s*=\s*/g, ' = ')  // Normalize equals
+                .replace(/\s*>\s*/g, ' > ')  // Normalize >
+                .replace(/\s*<\s*/g, ' < ')  // Normalize <
+                .replace(/\s*>=\s*/g, ' >= ')  // Normalize >=
+                .replace(/\s*<=\s*/g, ' <= ')  // Normalize <=
+                .replace(/\s*!=\s*/g, ' != ')  // Normalize !=
+                .replace(/\s*<>\s*/g, ' <> ')  // Normalize <>
+                .replace(/\s*\(\s*/g, ' (')  // Normalize (
+                .replace(/\s*\)\s*/g, ') ')  // Normalize )
+                .trim();
+            
+            // Step 2: Add line breaks before major keywords
+            const keywords = [
+                'SELECT', 'FROM', 'WHERE', 'JOIN', 'INNER JOIN', 'LEFT JOIN', 
+                'RIGHT JOIN', 'FULL OUTER JOIN', 'FULL JOIN', 'GROUP BY', 
+                'ORDER BY', 'HAVING', 'UNION', 'UNION ALL', 'LIMIT', 
+                'OFFSET', 'FETCH', 'ON', 'AND', 'OR'
+            ];
+            
+            // Add newlines before keywords (case insensitive)
+            keywords.forEach(keyword => {
+                const regex = new RegExp(`\\s+${keyword.replace(/\s+/g, '\\s+')}\\s+`, 'gi');
+                formatted = formatted.replace(regex, `\n${keyword.toUpperCase()} `);
+            });
+            
+            // Step 3: Format SELECT clause - put each column on new line
+            if (formatted.match(/^SELECT\s+/i)) {
+                const selectMatch = formatted.match(/^SELECT\s+(.*?)\s+FROM/i);
+                if (selectMatch) {
+                    const columns = selectMatch[1].split(',').map(c => c.trim()).filter(c => c);
+                    if (columns.length > 1) {
+                        const formattedColumns = columns.map((col, idx) => 
+                            idx === 0 ? `    ${col}` : `    , ${col}`
+                        ).join('\n');
+                        formatted = formatted.replace(
+                            /^SELECT\s+.*?\s+FROM/i,
+                            `SELECT\n${formattedColumns}\nFROM`
+                        );
+                    }
+                }
+            }
+            
+            // Step 4: Format GROUP BY and ORDER BY - put each column on new line if multiple
+            ['GROUP BY', 'ORDER BY'].forEach(clause => {
+                const regex = new RegExp(`\\b${clause}\\s+([^\\n]+?)(?=\\s+(?:ORDER BY|LIMIT|HAVING|;|$))`, 'gi');
+                formatted = formatted.replace(regex, (match, columns) => {
+                    const cols = columns.split(',').map(c => c.trim()).filter(c => c);
+                    if (cols.length > 1) {
+                        return `${clause}\n${cols.map((col, idx) => 
+                            idx === 0 ? `    ${col}` : `    , ${col}`
+                        ).join('\n')}`;
+                    }
+                    return match;
+                });
+            });
+            
+            // Step 5: Indent JOIN conditions (ON clause)
+            formatted = formatted.replace(/\n(ON\s+[^\n]+)/gi, '\n    $1');
+            
+            // Step 6: Indent WHERE conditions (AND/OR)
+            formatted = formatted.replace(/\n((?:AND|OR)\s+[^\n]+)/gi, '\n    $1');
+            
+            // Step 7: Clean up and ensure proper spacing
+            formatted = formatted
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0)
+                .join('\n');
+            
+            // Step 8: Ensure semicolon at end
+            if (formatted && !formatted.trim().endsWith(';')) {
+                formatted += ';';
+            }
+            
+            return formatted;
+        }
+        
+        function validateAndFormat() {
+            const sql = document.getElementById('validator-input').value.trim();
+            if (!sql) {
+                alert('Please enter a SQL query.');
+                return;
+            }
+            
+            // First format the query
+            formatSQL();
+            
+            // Then validate it after a short delay to allow formatting to complete
+            setTimeout(() => {
+                validateSQL();
+            }, 100);
+        }
+        
+        function clearValidator() {
+            document.getElementById('validator-input').value = '';
+            document.getElementById('validator-results').innerHTML = '';
+        }
+        
+        // SQL Enhancer
+        function enhanceSQL() {
+            const sql = document.getElementById('enhancer-input').value.trim();
+            const dbType = document.getElementById('database-type').value;
+            const resultsDiv = document.getElementById('enhancer-results');
+            
+            if (!sql) {
+                resultsDiv.innerHTML = '<div class="p-4 bg-red-100 text-red-700 rounded-lg">Please enter a SQL query to enhance.</div>';
+                return;
+            }
+            
+            const suggestions = analyzeQuery(sql, dbType);
+            let html = '<div class="space-y-4">';
+            
+            if (suggestions.enhanced) {
+                html += `
+                    <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <strong class="text-green-800">✨ Enhanced Query:</strong>
+                        <pre class="mt-2 p-3 bg-white rounded border font-mono text-sm overflow-x-auto">${suggestions.enhanced}</pre>
+                        <button onclick="copyEnhancedSQL()" class="mt-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm">Copy Enhanced SQL</button>
+                    </div>
+                `;
+            }
+            
+            if (suggestions.recommendations.length > 0) {
+                html += '<div class="p-4 bg-blue-50 border border-blue-200 rounded-lg"><strong class="text-blue-800">💡 Recommendations:</strong><ul class="list-disc list-inside mt-2 space-y-1">';
+                suggestions.recommendations.forEach(rec => {
+                    html += `<li class="text-sm">${rec}</li>`;
+                });
+                html += '</ul></div>';
+            }
+            
+            if (suggestions.performance.length > 0) {
+                html += '<div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg"><strong class="text-yellow-800">⚡ Performance Tips:</strong><ul class="list-disc list-inside mt-2 space-y-1">';
+                suggestions.performance.forEach(tip => {
+                    html += `<li class="text-sm">${tip}</li>`;
+                });
+                html += '</ul></div>';
+            }
+            
+            if (suggestions.security.length > 0) {
+                html += '<div class="p-4 bg-red-50 border border-red-200 rounded-lg"><strong class="text-red-800">🔒 Security Warnings:</strong><ul class="list-disc list-inside mt-2 space-y-1">';
+                suggestions.security.forEach(warn => {
+                    html += `<li class="text-sm">${warn}</li>`;
+                });
+                html += '</ul></div>';
+            }
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+            
+            // Store enhanced SQL for copy function
+            window.enhancedSQL = suggestions.enhanced || sql;
+        }
+        
+        function analyzeQuery(sql, dbType) {
+            const suggestions = {
+                enhanced: null,
+                recommendations: [],
+                performance: [],
+                security: []
+            };
+            
+            let enhancedSQL = sql;
+            
+            // Check for SELECT *
+            if (sql.match(/SELECT\s+\*/i)) {
+                suggestions.recommendations.push('Replace SELECT * with specific column names for better performance and clarity');
+            }
+            
+            // Check for missing WHERE in DELETE/UPDATE
+            if (sql.match(/^(DELETE|UPDATE)\s+.*?(?!WHERE)/i)) {
+                suggestions.security.push('⚠️ DELETE or UPDATE without WHERE clause can affect all rows. Add a WHERE condition.');
+            }
+            
+            // Check for SQL injection risks
+            if (sql.includes("'") && sql.match(/'.*\+.*'/)) {
+                suggestions.security.push('Potential SQL injection risk detected. Use parameterized queries instead of string concatenation.');
+            }
+            
+            // Performance: Check for missing indexes hints
+            if (sql.match(/\bWHERE\s+\w+\s*=\s*'[^']+'/i) && !sql.match(/\bINDEX\b/i)) {
+                suggestions.performance.push('Consider adding indexes on columns used in WHERE clauses');
+            }
+            
+            // Performance: Check for missing LIMIT
+            if (!sql.match(/\bLIMIT\b|\bTOP\b|\bFETCH\s+FIRST\b|\bROWNUM\b/i) && sql.match(/^SELECT/i)) {
+                suggestions.performance.push('Add LIMIT clause to restrict result set size');
+                if (dbType === 'oracle') {
+                    enhancedSQL = enhancedSQL.replace(/;?\s*$/, ' FETCH FIRST 100 ROWS ONLY;');
+                } else if (dbType === 'mssql') {
+                    enhancedSQL = enhancedSQL.replace(/^SELECT/i, 'SELECT TOP 100');
+                } else {
+                    enhancedSQL = enhancedSQL.replace(/;?\s*$/, ' LIMIT 100;');
+                }
+            }
+            
+            // Format the enhanced SQL
+            try {
+                if (typeof sqlFormatter !== 'undefined') {
+                    enhancedSQL = sqlFormatter.format(enhancedSQL, {
+                        language: dbType,
+                        indent: '  ',
+                        uppercase: true
+                    });
+                }
+            } catch (e) {
+                // Use basic formatting
+                enhancedSQL = basicFormatSQL(enhancedSQL);
+            }
+            
+            suggestions.enhanced = enhancedSQL;
+            
+            // Add ORDER BY suggestion if missing
+            if (sql.match(/^SELECT/i) && !sql.match(/\bORDER BY\b/i)) {
+                suggestions.recommendations.push('Consider adding ORDER BY for consistent result ordering');
+            }
+            
+            // Check for JOIN optimization
+            if (sql.match(/\bJOIN\b/i)) {
+                suggestions.performance.push('Ensure JOIN conditions use indexed columns for better performance');
+            }
+            
+            return suggestions;
+        }
+        
+        function copyEnhancedSQL() {
+            if (window.enhancedSQL) {
+                copyToClipboardText(window.enhancedSQL);
+            }
+        }
+        
+        function clearEnhancer() {
+            document.getElementById('enhancer-input').value = '';
+            document.getElementById('enhancer-results').innerHTML = '';
+        }
+        
+        // Utility Functions
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            copyToClipboardText(element.value);
+        }
+        
+        function copyToClipboardText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('SQL copied to clipboard!');
+            }).catch(() => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('SQL copied to clipboard!');
+            });
+        }
+        
+        function validateBuilderSQL() {
+            const sql = document.getElementById('builder-output').value;
+            if (sql) {
+                document.getElementById('validator-input').value = sql;
+                switchTab('validator');
+                setTimeout(validateSQL, 100);
+            }
+        }
+        
+        function formatBuilderSQL() {
+            const sql = document.getElementById('builder-output').value;
+            if (sql) {
+                try {
+                    if (typeof sqlFormatter !== 'undefined') {
+                        const formatted = sqlFormatter.format(sql, {
+                            language: document.getElementById('database-type').value,
+                            indent: '  ',
+                            uppercase: true
+                        });
+                        document.getElementById('builder-output').value = formatted;
+                    } else {
+                        document.getElementById('builder-output').value = basicFormatSQL(sql);
+                    }
+                } catch (e) {
+                    document.getElementById('builder-output').value = basicFormatSQL(sql);
+                }
+            }
+        }
+        
+        // Share Tool
+        function shareTool() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'SQL Query Tool - FreeToolHub',
+                    text: 'Check out this amazing SQL Query Tool!',
+                    url: window.location.href
+                });
+            } else {
+                copyToClipboardText(window.location.href);
+                alert('Link copied to clipboard!');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add first select column
+            addSelectColumn();
+        });
+    </script>
+    
+    <!-- Widget and Navigation Scripts -->
+    <script src="/js/common-functions.js"></script>
+    <script src="/js/widgets.js"></script>
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    <script src="/js/widgets-init.js"></script>
+</body>
+</html>
+
