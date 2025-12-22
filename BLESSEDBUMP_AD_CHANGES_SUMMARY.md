@@ -130,3 +130,8 @@ feat: Add BlessedBump advertisement section with animated logo
 - The pink transparent bubble background was specifically adjusted to match the reference screenshot
 
 
+
+
+
+
+
