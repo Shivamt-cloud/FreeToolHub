@@ -10,70 +10,13 @@ async function loadFooter() {
             return;
         }
 
-        // Add cache-busting parameter to ensure fresh content
-        const cacheBuster = new Date().getTime();
-        const url = `/templates/footer.html?t=${cacheBuster}&v=2`;
-        console.log('Loading footer from:', url);
-        
-        const response = await fetch(url, {
-            cache: 'no-store',
-            headers: {
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
-            }
-        });
+        const response = await fetch('/templates/footer.html');
         if (!response.ok) {
             throw new Error(`Failed to load footer: ${response.status}`);
         }
 
-        // Check if we got the full response (should be at least 9000 bytes)
-        const contentLength = response.headers.get('content-length');
         const footerHTML = await response.text();
-        
-        if (footerHTML.length < 9000) {
-            console.warn('⚠️ Footer response seems truncated. Length:', footerHTML.length);
-        }
-        
-        // Verify footer contains expected links
-        const hasLinkedIn = footerHTML.includes('LinkedIn');
-        const hasTwitter = footerHTML.includes('Twitter');
-        const hasWhatsApp = footerHTML.includes('WhatsApp');
-        const hasSendFeedback = footerHTML.includes('Send Feedback');
-        
-        console.log('Footer verification:', {
-            hasLinkedIn,
-            hasTwitter,
-            hasWhatsApp,
-            hasSendFeedback,
-            length: footerHTML.length
-        });
-        
-        if (hasLinkedIn && hasTwitter && hasWhatsApp && hasSendFeedback) {
-            console.log('✅ Footer contains all social links');
-        } else {
-            console.warn('⚠️ Footer might be missing some links. Retrying...');
-            // Retry once
-            const retryResponse = await fetch(`/templates/footer.html?t=${Date.now()}&v=3`, {
-                cache: 'no-store',
-                headers: {
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache'
-                }
-            });
-            const retryHTML = await retryResponse.text();
-            if (retryHTML.includes('WhatsApp') && retryHTML.includes('Send Feedback')) {
-                footerContainer.innerHTML = retryHTML;
-                console.log('✅ Footer loaded successfully on retry');
-                return;
-            }
-        }
-        
         footerContainer.innerHTML = footerHTML;
-
-        // Force re-render to ensure updates are visible
-        footerContainer.style.display = 'none';
-        footerContainer.offsetHeight; // Trigger reflow
-        footerContainer.style.display = '';
 
         console.log('✅ Footer loaded successfully');
     } catch (error) {
