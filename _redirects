@@ -1,0 +1,5 @@
+# SPA fallback - redirect all non-file requests to index.html
+# Note: Netlify serves actual files (sitemap.xml, robots.txt, etc.) directly
+# This redirect only applies to paths that don't match actual files
+/*    /index.html   200
+

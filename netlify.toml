@@ -12,12 +12,8 @@
   # Node.js version
   NODE_VERSION = "18"
 
-# Redirect rules for SPA (Single Page Application) behavior
-# Note: Netlify automatically serves .html files directly, so this redirect only affects non-HTML paths
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# Redirect rules are handled in _redirects file for better control
+# This ensures sitemap.xml and robots.txt are served correctly
 
 # Headers for security and performance
 [[headers]]
@@ -40,6 +36,13 @@
   for = "/*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+# Set correct content type for XML files (sitemap)
+[[headers]]
+  for = "/*.xml"
+  [headers.values]
+    Content-Type = "application/xml; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
 
 # Form handling for contact form
 [build.processing]
