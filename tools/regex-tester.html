@@ -12,18 +12,6 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7327960019798694"
-     crossorigin="anonymous"></script>
-    
-    <!-- Automated Ads -->
-    <script>
-    (adsbygoogle = window.adsbygoogle || []).push({
-        google_ad_client: "ca-pub-7327960019798694",
-        enable_page_level_ads: true
-    });
-    </script>
 </head>
 <body class="bg-gray-50 text-gray-800">
     <!-- Header Container -->
@@ -175,6 +163,147 @@
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Detailed Description Section -->
+            <div class="mt-12 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Understanding Regex Testing</h2>
+                <div class="prose max-w-none text-gray-700 leading-relaxed">
+                    <p class="mb-4">
+                        Regular expressions (regex) are powerful pattern-matching tools used to search, validate, and manipulate text based on specific patterns. Our regex tester allows you to write, test, and debug regular expression patterns against sample text, making it essential for developers, data analysts, and anyone working with text processing. Whether you're validating user input, extracting data from strings, searching for patterns in text, or learning regex, this tool provides an interactive environment to perfect your patterns.
+                    </p>
+                    <p class="mb-4">
+                        Regex patterns use special characters and syntax to define search patterns, such as matching email addresses, phone numbers, dates, or custom text formats. The tester provides real-time matching, highlighting matches in your test text, showing capture groups, and providing detailed explanations of how your pattern works. This interactive feedback helps you understand regex behavior, debug complex patterns, and ensure your expressions work correctly before implementing them in code.
+                    </p>
+                    <p class="mb-4">
+                        All regex testing happens locally in your browser, ensuring complete privacy and security. Your test strings and patterns never leave your device, and no data is uploaded to any server. This client-side processing means you can test patterns with sensitive data safely. The tool supports various regex flavors and provides flags for case-insensitive matching, global matching, multiline mode, and more.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- How to Use Section -->
+            <div class="mt-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">📖 How to Use the Regex Tester</h2>
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">1️⃣</span> Enter Your Regex Pattern
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Type your regular expression pattern in the pattern input field. You can use standard regex syntax including character classes ([a-z]), quantifiers (*, +, ?), anchors (^, $), groups ((...)), and special characters. The tool provides syntax highlighting and error detection to help you write valid patterns.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">2️⃣</span> Enter Test Text
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Paste or type the text you want to test your regex pattern against. This can be sample data, actual text you're working with, or example strings. The tool will show matches in real-time as you type, making it easy to see how your pattern performs.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">3️⃣</span> Configure Flags and Review Matches
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">
+                            Set regex flags as needed:
+                        </p>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                            <li><strong>Global (g):</strong> Find all matches, not just the first</li>
+                            <li><strong>Case-insensitive (i):</strong> Ignore case differences</li>
+                            <li><strong>Multiline (m):</strong> Match across multiple lines</li>
+                            <li><strong>Sticky (y):</strong> Match from lastIndex position</li>
+                        </ul>
+                        <p class="text-gray-700 leading-relaxed mt-3">
+                            Review highlighted matches, see capture groups, and analyze pattern behavior. Adjust your pattern and test text until you achieve the desired matching behavior.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Examples & Use Cases -->
+            <div class="mt-8 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">💡 Examples & Use Cases</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border-l-4 border-blue-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Email Validation</h3>
+                        <p class="text-gray-700 mb-2"><strong>Pattern:</strong> ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$</p>
+                        <p class="text-gray-600 text-sm">Validate email addresses in forms or data processing. Test if email format is correct before accepting user input.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-green-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Phone Number Extraction</h3>
+                        <p class="text-gray-700 mb-2"><strong>Pattern:</strong> \d{3}-\d{3}-\d{4} or \(\d{3}\)\s?\d{3}-\d{4}</p>
+                        <p class="text-gray-600 text-sm">Extract phone numbers from text documents. Match various phone number formats and extract them for processing.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-purple-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">URL Pattern Matching</h3>
+                        <p class="text-gray-700 mb-2"><strong>Pattern:</strong> https?://[^\s]+</p>
+                        <p class="text-gray-600 text-sm">Find and extract URLs from text. Match HTTP/HTTPS URLs in documents or strings for link extraction or validation.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-orange-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Data Extraction</h3>
+                        <p class="text-gray-700 mb-2">Extract specific data patterns from text. Use capture groups to extract dates, IDs, codes, or structured information from unstructured text.</p>
+                        <p class="text-gray-600 text-sm">Example: Extract dates in format MM/DD/YYYY or credit card numbers (with proper security).</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-teal-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Text Replacement</h3>
+                        <p class="text-gray-700 mb-2">Find patterns for text replacement operations. Test patterns before using them in find-and-replace operations in code editors or scripts.</p>
+                        <p class="text-gray-600 text-sm">Example: Replace multiple spaces with single space, format dates consistently.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-pink-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Input Validation</h3>
+                        <p class="text-gray-700 mb-2">Validate user input format. Test regex patterns for form validation before implementing in web applications or APIs.</p>
+                        <p class="text-gray-600 text-sm">Example: Validate postal codes, credit card formats, or custom ID patterns.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FAQ Section -->
+            <div class="mt-8 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">❓ Frequently Asked Questions</h2>
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">What regex flavor does the tester support?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            The tester typically supports JavaScript regex (ECMAScript), which is widely used in web development. JavaScript regex is similar to Perl-style regex with some differences. Common features include character classes, quantifiers, anchors, groups, lookaheads, and most standard regex constructs. For other flavors (PCRE, Python, etc.), syntax may vary slightly.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">How do I learn regex syntax?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Start with basic patterns: . (any character), * (zero or more), + (one or more), ? (zero or one), [a-z] (character class), ^ (start), $ (end). Practice with simple patterns and gradually learn advanced features like groups, lookaheads, and backreferences. The tester helps you experiment and see results immediately, which is excellent for learning. Many online tutorials and regex cheat sheets are available for reference.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Why isn't my regex pattern matching?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Common issues include: not escaping special characters (use \. for literal dot), missing anchors (^ for start, $ for end), incorrect quantifiers, or case sensitivity. The tester shows errors and highlights issues. Test with simple patterns first, then add complexity. Use the match highlighting to see exactly what matches and what doesn't.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">What are capture groups?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Capture groups (parentheses: (...)) allow you to extract specific parts of a match. The first group is captured as $1, second as $2, etc. They're useful for extracting data from matches, like extracting area code from phone numbers or date components from date strings. The tester shows captured groups separately, helping you understand what each group matches.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Is my test data secure?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Absolutely! All regex testing happens entirely in your browser. Your regex patterns and test strings never leave your device, are not uploaded to any server, and are not stored anywhere. Your privacy and security are completely protected, even when testing patterns with sensitive data.
+                        </p>
                     </div>
                 </div>
             </div>

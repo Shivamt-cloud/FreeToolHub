@@ -13,18 +13,6 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7327960019798694"
-     crossorigin="anonymous"></script>
-    
-    <!-- Automated Ads -->
-    <script>
-    (adsbygoogle = window.adsbygoogle || []).push({
-        google_ad_client: "ca-pub-7327960019798694",
-        enable_page_level_ads: true
-    });
-    </script>
-    
     <!-- JSZip for ZIP file generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     
@@ -298,6 +286,138 @@
                                 <p id="resizer-error-message" class="text-red-700"></p>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Detailed Description Section -->
+            <div class="mt-12 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Understanding Image Resizing</h2>
+                <div class="prose max-w-none text-gray-700 leading-relaxed">
+                    <p class="mb-4">
+                        Image resizing is the process of changing the dimensions of an image while maintaining or adjusting its aspect ratio. Our image resizer tool allows you to resize images to specific widths and heights, resize by percentage, or maintain aspect ratios while changing dimensions. Whether you need to resize photos for social media, adjust images for websites, create thumbnails, or optimize images for specific requirements, this tool provides a simple, secure, and efficient solution.
+                    </p>
+                    <p class="mb-4">
+                        The tool supports multiple image formats including JPEG, PNG, GIF, WebP, and BMP. You can resize single images or batch process multiple images at once, saving time when working with large collections. All resizing happens locally in your browser, ensuring complete privacy - your images never leave your device, are not uploaded to any server, and are not stored anywhere. This client-side processing provides instant results while maintaining complete security and confidentiality.
+                    </p>
+                    <p class="mb-4">
+                        The resizer offers flexible sizing options: specify exact dimensions, resize by percentage, or maintain aspect ratios automatically. You can also adjust image quality during resizing, allowing you to balance file size and visual quality based on your needs. The tool preserves image quality as much as possible while achieving your desired dimensions, making it perfect for web optimization, print preparation, or social media formatting.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- How to Use Section -->
+            <div class="mt-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">📖 How to Use the Image Resizer</h2>
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">1️⃣</span> Upload Your Images
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Click the upload area or drag and drop your image files. You can select multiple images for batch resizing. Supported formats include JPEG, PNG, GIF, WebP, and BMP. All processing happens in your browser, so your images stay private and secure.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">2️⃣</span> Set Resize Options
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">
+                            Choose your resizing method:
+                        </p>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                            <li><strong>Exact Dimensions:</strong> Enter specific width and height in pixels</li>
+                            <li><strong>Percentage:</strong> Resize by percentage (e.g., 50% = half size, 200% = double size)</li>
+                            <li><strong>Maintain Aspect Ratio:</strong> Keep original proportions while resizing</li>
+                            <li><strong>Quality:</strong> Adjust image quality (affects file size)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">3️⃣</span> Resize and Download
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Click "Resize Images" to process your files. The tool will resize all images according to your specifications. Preview resized images to verify dimensions, then download individual files or all resized images as a ZIP file. Each resized image maintains quality while meeting your size requirements.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Examples & Use Cases -->
+            <div class="mt-8 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">💡 Examples & Use Cases</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border-l-4 border-blue-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Social Media Optimization</h3>
+                        <p class="text-gray-700 mb-2">Resize images to meet platform requirements: Instagram (1080x1080), Facebook cover (1200x630), Twitter header (1500x500). Ensure perfect fit for each platform.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-green-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Website Images</h3>
+                        <p class="text-gray-700 mb-2">Resize images for faster website loading. Create optimized images for hero sections, thumbnails, or product images that load quickly without quality loss.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-purple-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Email Attachments</h3>
+                        <p class="text-gray-700 mb-2">Reduce image sizes to fit email attachment limits. Resize photos before sending to avoid file size issues or slow uploads.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-orange-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Thumbnail Creation</h3>
+                        <p class="text-gray-700 mb-2">Create thumbnails from large images for galleries or listings. Resize to small dimensions (e.g., 150x150, 200x200) while maintaining quality.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-teal-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Print Preparation</h3>
+                        <p class="text-gray-700 mb-2">Resize images for specific print dimensions. Adjust images to match paper sizes or print requirements (e.g., 4x6, 8x10 inches) before printing.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-pink-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Profile Pictures</h3>
+                        <p class="text-gray-700 mb-2">Resize photos to standard profile picture dimensions for websites, forums, or applications. Create square or specific aspect ratio images for profiles.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FAQ Section -->
+            <div class="mt-8 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">❓ Frequently Asked Questions</h2>
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Will resizing reduce image quality?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Resizing may slightly affect quality depending on the method used. Reducing image size (downscaling) typically maintains good quality, while increasing size (upscaling) may result in some quality loss. The tool uses high-quality resizing algorithms to minimize quality degradation. Adjust the quality slider to optimize the balance between file size and visual quality.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">What's the difference between resizing and cropping?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Resizing changes the entire image dimensions while preserving all content (may change aspect ratio). Cropping removes parts of the image to change dimensions. Our resizer maintains aspect ratios by default, so the entire image is scaled proportionally. Use our image cropper tool if you need to remove parts of the image.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Can I resize multiple images at once?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Yes, you can upload and resize multiple images simultaneously. The tool processes them in batch using the same resize settings, saving time when working with large collections. All resized images can be downloaded individually or as a ZIP file containing all processed images.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">What image formats are supported?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            The resizer supports JPEG, PNG, GIF, WebP, and BMP formats. You can resize images in their original format or convert them during the resize process. JPEG is best for photos, PNG for images with transparency, and WebP for modern web use with excellent compression.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Are my images safe and private?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Absolutely! All resizing happens entirely in your browser. Your images never leave your device, are not uploaded to any server, and are not stored anywhere. Your privacy and security are completely protected throughout the resizing process.
+                        </p>
                     </div>
                 </div>
             </div>

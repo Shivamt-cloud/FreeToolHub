@@ -10,18 +10,6 @@
     <meta property="og:url" content="https://freetoolhub.in/tools/css-js-minifier.html">
     <meta property="og:type" content="website">
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7327960019798694"
-     crossorigin="anonymous"></script>
-    
-    <!-- Automated Ads -->
-    <script>
-    (adsbygoogle = window.adsbygoogle || []).push({
-        google_ad_client: "ca-pub-7327960019798694",
-        enable_page_level_ads: true
-    });
-    </script>
 </head>
 <body class="bg-gray-50 text-gray-800">
     <div id="app-header"></div>
@@ -120,6 +108,132 @@
                             <div id="tool-suggestion-card" class="bg-white rounded-xl p-6 shadow-lg transition-all duration-500 fade-in"><div id="tool-icon" class="text-6xl mb-4 text-center">🧮</div><h5 id="tool-name" class="text-2xl font-bold text-gray-800 mb-3 text-center">Loading...</h5><p id="tool-description" class="text-base text-gray-600 mb-6 text-center leading-relaxed">Discover amazing tools</p><button id="tool-checkout-btn" onclick="launchSuggestedTool()" class="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-purple-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2 text-lg"><span>Check it out</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></button></div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Detailed Description Section -->
+        <div class="mt-12 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">Understanding CSS/JS Minification</h2>
+            <div class="prose max-w-none text-gray-700 leading-relaxed">
+                <p class="mb-4">
+                    CSS and JavaScript minification is the process of removing unnecessary characters (whitespace, comments, line breaks) from code files to reduce file size without changing functionality. Our CSS/JS minifier compresses your code by removing comments, extra spaces, and formatting, resulting in smaller files that load faster on websites. Whether you're optimizing website performance, reducing bandwidth usage, or preparing code for production deployment, this tool provides efficient minification while preserving code functionality.
+                </p>
+                <p class="mb-4">
+                    Minified files are significantly smaller than their original versions, often reducing file size by 30-70%, which improves page load times and reduces bandwidth costs. The minifier removes comments, unnecessary whitespace, and line breaks while maintaining code functionality. This is essential for production websites where every kilobyte matters for performance and user experience. Minified code is harder to read but executes identically to the original.
+                </p>
+                <p class="mb-4">
+                    All minification happens locally in your browser, ensuring complete privacy and security. Your code never leaves your device, and no files are uploaded to any server. This client-side processing means even proprietary or sensitive code can be minified safely. The tool supports both CSS and JavaScript, handles syntax correctly, and provides instant minification results for immediate use in production environments.
+                </p>
+            </div>
+        </div>
+        
+        <!-- How to Use Section -->
+        <div class="mt-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-xl p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">📖 How to Use the CSS/JS Minifier</h2>
+            <div class="space-y-6">
+                <div class="bg-white rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <span class="text-2xl">1️⃣</span> Select File Type
+                    </h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Choose whether you're minifying CSS or JavaScript. The tool handles both file types with appropriate syntax rules. CSS minification removes comments and whitespace, while JavaScript minification also handles more complex optimizations while preserving functionality.
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <span class="text-2xl">2️⃣</span> Paste or Upload Code
+                    </h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Paste your CSS or JavaScript code into the input area, or upload a file. The tool accepts formatted code with comments, whitespace, and proper indentation. All processing happens in your browser, so your code stays private and secure.
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <span class="text-2xl">3️⃣</span> Minify and Download
+                    </h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Click "Minify" to compress your code. The tool removes all unnecessary characters while preserving functionality. Copy the minified code or download it as a file. Use minified code in production to improve website performance and reduce load times.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Examples & Use Cases -->
+        <div class="mt-8 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">💡 Examples & Use Cases</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="border-l-4 border-blue-500 pl-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Website Performance</h3>
+                    <p class="text-gray-700 mb-2">Minify CSS and JavaScript files to reduce file sizes by 30-70%. Smaller files load faster, improving page speed scores and user experience, especially on mobile devices.</p>
+                </div>
+                
+                <div class="border-l-4 border-green-500 pl-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Production Deployment</h3>
+                    <p class="text-gray-700 mb-2">Prepare code for production by minifying before deployment. Reduce bandwidth costs and improve server performance with smaller file sizes.</p>
+                </div>
+                
+                <div class="border-l-4 border-purple-500 pl-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">CDN Optimization</h3>
+                    <p class="text-gray-700 mb-2">Minify files before uploading to CDNs. Smaller files reduce CDN bandwidth usage and costs while improving global content delivery speed.</p>
+                </div>
+                
+                <div class="border-l-4 border-orange-500 pl-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Mobile Optimization</h3>
+                    <p class="text-gray-700 mb-2">Reduce file sizes for mobile users with limited data plans. Minified code loads faster on slower connections, improving mobile user experience.</p>
+                </div>
+                
+                <div class="border-l-4 border-teal-500 pl-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Bundle Optimization</h3>
+                    <p class="text-gray-700 mb-2">Minify code before bundling with webpack, rollup, or other bundlers. Combine minification with bundling for maximum file size reduction.</p>
+                </div>
+                
+                <div class="border-l-4 border-pink-500 pl-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">SEO Benefits</h3>
+                    <p class="text-gray-700 mb-2">Faster page loads improve SEO rankings. Minified code contributes to better Core Web Vitals scores, which Google uses for search rankings.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FAQ Section -->
+        <div class="mt-8 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl shadow-xl p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">❓ Frequently Asked Questions</h2>
+            <div class="space-y-6">
+                <div class="bg-white rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Will minification break my code?</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Proper minification should not break code functionality. The minifier removes only unnecessary characters (whitespace, comments) while preserving code logic. However, some edge cases or poorly written code might have issues. Always test minified code before deploying to production. Keep original formatted code for development and use minified versions only in production.
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">How much file size reduction can I expect?</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        File size reduction varies based on original code formatting. Typically, you can expect 30-70% reduction. Code with many comments, extensive whitespace, and detailed formatting sees larger reductions. Well-formatted code with minimal comments might see 20-40% reduction. The exact savings depend on your code structure and formatting style.
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Can I reverse minification?</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Minification is generally irreversible because comments and formatting are permanently removed. However, you can use code formatters/beautifiers to add back whitespace and basic formatting, though comments cannot be recovered. Always keep original unminified code as your source. Use version control to maintain both formatted and minified versions.
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Should I minify during development?</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        No, keep code formatted and readable during development. Minify only for production builds. Formatted code is easier to debug, read, and maintain. Use build tools or this minifier to create minified versions only when deploying to production. Many build tools (webpack, gulp, etc.) can automate minification as part of the build process.
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Is my code secure when minifying?</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Absolutely! All minification happens entirely in your browser. Your code never leaves your device, is not uploaded to any server, and is not stored anywhere. Your privacy and security are completely protected, even when minifying proprietary or sensitive code.
+                    </p>
                 </div>
             </div>
         </div>

@@ -82,6 +82,32 @@
             scroll-behavior: smooth;
         }
         
+        /* PWA Install Banner Styles */
+        #pwa-install-banner {
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        #pwa-install-banner button:hover {
+            transform: translateY(-1px);
+        }
+        
+        @media (max-width: 768px) {
+            #pwa-install-banner .flex {
+                flex-direction: column;
+                align-items: flex-start !important;
+            }
+            
+            #pwa-install-banner .flex > div:last-child {
+                width: 100%;
+                margin-top: 12px;
+            }
+            
+            #pwa-install-banner-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
         /* Heartbeat Animation */
         @keyframes heartbeat {
             0%, 100% { 
@@ -1070,9 +1096,172 @@
             }
         }
 
+        /* BlessedBump Logo Animations */
+        @keyframes glow-pulse {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.05);
+            }
+        }
+        
+        @keyframes shimmer {
+            0%, 100% {
+                opacity: 0.6;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes sparkle-twinkle {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+        
+        @keyframes heartbeat {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            25% {
+                transform: scale(1.1);
+                opacity: 0.9;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+            75% {
+                transform: scale(1.1);
+                opacity: 0.9;
+            }
+        }
+        
+        @keyframes baby-bob {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        @keyframes breathe {
+            0%, 100% {
+                transform: scaleY(1);
+            }
+            50% {
+                transform: scaleY(1.05);
+            }
+        }
+        
+        @keyframes arm-sway {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            50% {
+                transform: rotate(10deg);
+            }
+        }
+        
+        .glow-pulse {
+            animation: glow-pulse 3s ease-in-out infinite;
+        }
+        
+        .shimmer {
+            animation: shimmer 2s ease-in-out infinite;
+        }
+        
+        .sparkle-twinkle {
+            animation: sparkle-twinkle 2s ease-in-out infinite;
+        }
+        
+        .heartbeat {
+            animation: heartbeat 1.5s ease-in-out infinite;
+            transform-origin: center;
+        }
+        
+        .baby-bob {
+            animation: baby-bob 2s ease-in-out infinite;
+            transform-origin: center bottom;
+        }
+        
+        .breathe {
+            animation: breathe 3s ease-in-out infinite;
+            transform-origin: center;
+        }
+        
+        .arm-sway {
+            animation: arm-sway 2s ease-in-out infinite;
+            transform-origin: top center;
+        }
+
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
+    <!-- PWA Install Suggestion Box -->
+    <div id="pwa-install-banner" class="hidden fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-2xl transform transition-transform duration-300 ease-in-out" style="transform: translateY(100%);">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4 flex-1">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-bold mb-1">📱 Install FreeToolHub</h3>
+                        <p class="text-sm text-blue-100 leading-relaxed">
+                            Install our app for quick access, offline use, and a better experience. Works on desktop, laptop, and mobile devices.
+                        </p>
+                        <div class="mt-2 flex flex-wrap gap-2 text-xs text-blue-200">
+                            <span class="flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                Quick Access
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                Offline Support
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                No Downloads
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                100% Free
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <button id="pwa-install-banner-btn" class="px-6 py-2.5 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors duration-200 shadow-lg hover:shadow-xl flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Install Now
+                    </button>
+                    <button id="pwa-install-dismiss" class="text-white/80 hover:text-white transition-colors duration-200 p-2 rounded-lg hover:bg-white/10" aria-label="Dismiss">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     
     <!-- Admin Password Modal -->
@@ -1370,6 +1559,13 @@
                 <div class="text-2xl font-bold flex-shrink-0">
                     <span class="header-animation">FreeToolHub</span>
                 </div>
+                <!-- PWA Install Button -->
+                <button id="pwa-install-btn" class="hidden items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-md transition-colors duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    Install App
+                </button>
                 <!-- 8 Tiles Grid -->
                 <div class="header-tiles-grid flex-1 hidden lg:grid">
                     <!-- Tile 1: Time & Date / Environmental -->
@@ -1960,8 +2156,72 @@
         </div>
     </section>
 
-
-
+    <!-- BlessedBump Advertisement Section -->
+    <section id="blessedbump-ad" class="py-12 md:py-16 bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100 border-y-2 border-pink-200">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-pink-200 hover:shadow-3xl transition-shadow duration-300">
+                <div class="flex flex-col md:flex-row items-center md:items-center gap-8 md:gap-12 p-8 md:p-12">
+                    <!-- Logo Section -->
+                    <div class="flex-shrink-0 flex items-center justify-center">
+                        <img src="/images/blessedbump/20260101_1231_Elegant Motherhood Emblem_simple_compose_01kdw5s0wvfb186tpm2m5t92dj.png" 
+                             alt="BlessedBump Logo" 
+                             class="w-72 h-72 md:w-96 md:h-96 object-contain">
+                    </div>
+                    
+                    <!-- Content Section -->
+                    <div class="flex-1 text-center md:text-left">
+                        <h2 class="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+                            BlessedBump
+                        </h2>
+                        <p class="text-lg md:text-xl text-pink-700 font-semibold mb-4">
+                            BECAUSE EVERY PREGNANCY STORY DESERVES TO BE CELEBRATED
+                        </p>
+                        
+                        <!-- Feature Badges -->
+                        <div class="flex flex-wrap gap-3 mb-6 justify-center md:justify-start">
+                            <span class="bg-pink-100 text-pink-700 px-4 py-2 rounded-full text-sm font-semibold border border-pink-300">
+                                📅 Due Date Calculator
+                            </span>
+                            <span class="bg-pink-100 text-pink-700 px-4 py-2 rounded-full text-sm font-semibold border border-pink-300">
+                                📊 Week-by-Week Tracking
+                            </span>
+                            <span class="bg-pink-100 text-pink-700 px-4 py-2 rounded-full text-sm font-semibold border border-pink-300">
+                                🌸 Fertility Tracker
+                            </span>
+                            <span class="bg-pink-100 text-pink-700 px-4 py-2 rounded-full text-sm font-semibold border border-pink-300">
+                                💬 Community Support
+                            </span>
+                        </div>
+                        
+                        <p class="text-gray-700 mb-6 leading-relaxed text-base md:text-lg">
+                            Track your pregnancy journey with personalized insights, week-by-week baby development updates, and connect with a supportive community of expecting mothers. Your trusted companion for a healthy and informed pregnancy experience.
+                        </p>
+                        
+                        <!-- Baby Says Section -->
+                        <div class="bg-gradient-to-br from-pink-100 to-rose-100 rounded-2xl p-6 mb-6 border-2 border-pink-300">
+                            <div class="flex items-center justify-center md:justify-start gap-2 mb-3">
+                                <span class="text-2xl">🍇</span>
+                                <span class="text-2xl">👶</span>
+                                <h3 class="text-xl font-bold text-pink-800">BABY SAYS</h3>
+                            </div>
+                            <div class="bg-white bg-opacity-60 rounded-lg p-4 border border-pink-200">
+                                <div class="text-sm font-semibold text-pink-600 mb-2">Trimester 1</div>
+                                <div class="text-lg font-bold text-pink-800 mb-1">Look Mumma, I'm as big as a grape! 🍇</div>
+                                <div class="text-sm text-pink-700">I'm roughly 2.54 cm long and weigh about 2 g.</div>
+                            </div>
+                        </div>
+                        
+                        <!-- CTA Button -->
+                        <div class="text-center md:text-left">
+                            <a href="https://blessedbump.in" target="_blank" rel="noopener noreferrer" class="inline-block bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-xl text-lg font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                                🎉 Now Live!
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
         <!-- Tools Section - Clean Structure with Categories -->
         <section id="tools" class="py-20 bg-gray-50">
@@ -3512,7 +3772,7 @@
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
                     
                     <!-- Digital Signature Generator -->
                     <div class="tool-card utility-tool bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
@@ -3574,6 +3834,70 @@
                             </div>
                             <a href="/tools/csv-json-converter.html" class="w-full bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold py-3 px-6 rounded-xl hover:from-orange-600 hover:to-amber-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-center block">
                                 Convert Data
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Excel to JSON Converter -->
+                    <div class="tool-card utility-tool bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
+                            <div class="text-4xl mb-4">📊</div>
+                            <h4 class="text-2xl font-bold mb-2">Excel to JSON Converter</h4>
+                            <p class="text-green-100">Convert Excel files (.xlsx, .xls) to JSON format</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3 mb-6">
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Upload .xlsx and .xls files</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Multiple sheet support</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Data preview table</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>100% client-side processing</span>
+                                </div>
+                            </div>
+                            <a href="/tools/excel-to-json.html" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-center block">
+                                Convert Excel
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- SQL Result to JSON Converter -->
+                    <div class="tool-card utility-tool bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
+                            <div class="text-4xl mb-4">🗄️</div>
+                            <h4 class="text-2xl font-bold mb-2">SQL Result to JSON</h4>
+                            <p class="text-blue-100">Convert SQL query results to JSON format</p>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3 mb-6">
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Paste SQL results</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Auto-detect delimiter</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Works with SQL Server, MySQL, etc.</span>
+                                </div>
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-green-500 mr-2">✓</span>
+                                    <span>Data preview & download</span>
+                                </div>
+                            </div>
+                            <a href="/tools/sql-result-to-json.html" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-center block">
+                                Convert SQL Results
                             </a>
                         </div>
                     </div>
@@ -4065,6 +4389,179 @@
                     </div>
                 </div>
                 
+                <!-- Mission & Vision -->
+                <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">🎯 Our Mission</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            At FreeToolHub, our mission is to democratize access to professional-grade tools by providing a comprehensive suite of utilities that work seamlessly across all devices. We believe that powerful tools should be free, accessible, and respect user privacy. Whether you're a student working on assignments, a professional managing daily tasks, or a developer building projects, we provide the tools you need without barriers.
+                        </p>
+                        <p class="text-gray-700 leading-relaxed">
+                            We're committed to continuous improvement, regularly adding new tools based on community feedback and emerging needs. Our platform grows with our users, ensuring we always provide relevant and cutting-edge solutions.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">✨ Our Vision</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            We envision a world where anyone can access professional tools without financial constraints or technical complexity. FreeToolHub aims to become the go-to platform for students, professionals, and creators worldwide, offering an ever-expanding library of tools that empower productivity and creativity.
+                        </p>
+                        <p class="text-gray-700 leading-relaxed">
+                            Our vision extends beyond just providing tools - we're building a community-driven platform where users can discover, learn, and create with confidence, knowing their data is safe and their tools are always free.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- How It Works -->
+                <div class="mt-16">
+                    <h3 class="text-3xl font-bold text-gray-800 mb-8 text-center">How FreeToolHub Works</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span class="text-4xl">🔍</span>
+                            </div>
+                            <h4 class="text-xl font-bold text-gray-800 mb-3">Discover Tools</h4>
+                            <p class="text-gray-600 leading-relaxed">
+                                Browse our comprehensive collection of 50+ tools organized by category. Use our powerful search feature to find exactly what you need instantly. Each tool is clearly categorized for easy navigation.
+                            </p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span class="text-4xl">⚡</span>
+                            </div>
+                            <h4 class="text-xl font-bold text-gray-800 mb-3">Use Instantly</h4>
+                            <p class="text-gray-600 leading-relaxed">
+                                Click on any tool and start using it immediately. No downloads, no installations, no sign-ups required. All processing happens in your browser for maximum speed and privacy. Get results in seconds.
+                            </p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span class="text-4xl">💾</span>
+                            </div>
+                            <h4 class="text-xl font-bold text-gray-800 mb-3">Save & Share</h4>
+                            <p class="text-gray-600 leading-relaxed">
+                                Export your results, share tools with colleagues, or bookmark your favorites. All tools support export functionality, and you can easily share any tool via direct links. Your data stays private and secure.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Features Overview -->
+                <div class="mt-16 bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-8">
+                    <h3 class="text-3xl font-bold text-gray-800 mb-8 text-center">What Makes FreeToolHub Special</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl p-6 shadow-md">
+                            <h4 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                <span>🌐</span> Universal Accessibility
+                            </h4>
+                            <p class="text-gray-600 leading-relaxed">
+                                Our tools work on any device - desktop, laptop, tablet, or mobile phone. No platform restrictions, no compatibility issues. Access your tools from anywhere, at any time, using any modern web browser.
+                            </p>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 shadow-md">
+                            <h4 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                <span>🔐</span> Complete Privacy
+                            </h4>
+                            <p class="text-gray-600 leading-relaxed">
+                                All processing happens locally in your browser. Your files, data, and calculations never leave your device. No servers, no cloud storage, no data collection. Complete peace of mind for sensitive information.
+                            </p>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 shadow-md">
+                            <h4 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                <span>🎨</span> Professional Quality
+                            </h4>
+                            <p class="text-gray-600 leading-relaxed">
+                                Every tool is built with professional standards in mind. Accurate calculations, reliable conversions, and polished interfaces. Suitable for personal use, education, and professional projects alike.
+                            </p>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 shadow-md">
+                            <h4 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                <span>📚</span> Educational Value
+                            </h4>
+                            <p class="text-gray-600 leading-relaxed">
+                                Our tools aren't just functional - they're educational. Each tool includes detailed instructions, examples, and helpful tips. Learn as you use, whether you're a beginner or advanced user.
+                            </p>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 shadow-md">
+                            <h4 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                <span>🔄</span> Regular Updates
+                            </h4>
+                            <p class="text-gray-600 leading-relaxed">
+                                We continuously improve existing tools and add new ones based on user feedback. Our platform evolves with user needs, ensuring you always have access to the latest features and improvements.
+                            </p>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 shadow-md">
+                            <h4 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                <span>👥</span> Community Driven
+                            </h4>
+                            <p class="text-gray-600 leading-relaxed">
+                                FreeToolHub is built for the community, by the community. We listen to user suggestions, implement requested features, and prioritize tools that provide real value to our users worldwide.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tool Categories Overview -->
+                <div class="mt-16">
+                    <h3 class="text-3xl font-bold text-gray-800 mb-8 text-center">Comprehensive Tool Categories</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl p-6 text-center">
+                            <div class="text-4xl mb-3">🧮</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Calculators</h4>
+                            <p class="text-sm text-gray-700">Financial, scientific, health, and business calculators for all your calculation needs.</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl p-6 text-center">
+                            <div class="text-4xl mb-3">📄</div>
+                            <h4 class="font-bold text-gray-800 mb-2">PDF Tools</h4>
+                            <p class="text-sm text-gray-700">Merge, split, encrypt, convert, and manipulate PDF files with ease.</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-green-100 to-green-200 rounded-xl p-6 text-center">
+                            <div class="text-4xl mb-3">🖼️</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Image Tools</h4>
+                            <p class="text-sm text-gray-700">Resize, compress, convert, and optimize images for web or print.</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl p-6 text-center">
+                            <div class="text-4xl mb-3">🔄</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Converters</h4>
+                            <p class="text-sm text-gray-700">Convert between formats, units, and data types effortlessly.</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-pink-100 to-pink-200 rounded-xl p-6 text-center">
+                            <div class="text-4xl mb-3">🔧</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Utilities</h4>
+                            <p class="text-sm text-gray-700">Code formatters, generators, validators, and developer utilities.</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-teal-100 to-teal-200 rounded-xl p-6 text-center">
+                            <div class="text-4xl mb-3">📊</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Data Tools</h4>
+                            <p class="text-sm text-gray-700">JSON formatters, CSV converters, data validators, and analyzers.</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-xl p-6 text-center">
+                            <div class="text-4xl mb-3">✏️</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Text Tools</h4>
+                            <p class="text-sm text-gray-700">Lorem ipsum generators, text analyzers, and writing utilities.</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-xl p-6 text-center">
+                            <div class="text-4xl mb-3">🎓</div>
+                            <h4 class="font-bold text-gray-800 mb-2">Educational</h4>
+                            <p class="text-sm text-gray-700">Study planners, flashcard generators, and learning tools for students.</p>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Contact Information -->
                 <div class="mt-16 text-center">
                     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 max-w-4xl mx-auto">
@@ -4162,7 +4659,7 @@
                         <li><a href="#contact" class="text-gray-300 hover:text-yellow-400 transition-colors">Contact</a></li>
                         <li><a href="?admin=freetoolhub2024" class="text-gray-300 hover:text-yellow-400 transition-colors font-semibold">📊 Analytics Dashboard</a></li>
                         <li><a href="?admin=freetoolhub2024&logout=true" class="text-gray-300 hover:text-red-400 transition-colors text-sm">🔓 Force Logout</a></li>
-                        <li><a href="#" onclick="alert('FAQ Coming Soon!'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">FAQ</a></li>
+                        <li><a href="/faq.html" class="text-gray-300 hover:text-yellow-400 transition-colors">FAQ</a></li>
                         <li><a href="#" onclick="alert('Blog Coming Soon!'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Blog</a></li>
                         <li><a href="#" onclick="alert('API Coming Soon!'); return false;" class="text-gray-300 hover:text-yellow-400 transition-colors">Developer API</a></li>
                     </ul>
@@ -13783,35 +14280,143 @@
             });
         }
         
-        // Initialize PWA analytics
+        // PWA Install Prompt Handler
+        let deferredPrompt = null;
+        
+        // Show install banner
+        function showInstallBanner() {
+            const banner = document.getElementById('pwa-install-banner');
+            
+            // Always show if app is installable (no dismissal memory)
+            if (banner && deferredPrompt) {
+                banner.classList.remove('hidden');
+                // Trigger slide-up animation
+                setTimeout(() => {
+                    banner.style.transform = 'translateY(0)';
+                }, 100);
+            }
+        }
+        
+        // Hide install banner
+        function hideInstallBanner() {
+            const banner = document.getElementById('pwa-install-banner');
+            if (banner) {
+                banner.style.transform = 'translateY(100%)';
+                setTimeout(() => {
+                    banner.classList.add('hidden');
+                }, 300);
+            }
+        }
+        
+        // Initialize PWA analytics and install button
         function initPWAAnalytics() {
-            // Track install prompts
-            window.addEventListener('beforeinstallprompt', (e) => {
-                trackPWAEvent('install_prompt_shown');
-                
-                e.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        trackPWAEvent('install_prompt_accepted');
-                    } else {
-                        trackPWAEvent('install_prompt_dismissed');
-                    }
-                });
-            });
+            const installButton = document.getElementById('pwa-install-btn');
+            const bannerInstallBtn = document.getElementById('pwa-install-banner-btn');
+            const dismissBtn = document.getElementById('pwa-install-dismiss');
             
-            // Track successful installs
-            window.addEventListener('appinstalled', (e) => {
-                trackPWAEvent('app_installed', {
-                    timestamp: new Date().toISOString()
-                });
-            });
-            
-            // Track app usage (if running as PWA)
+            // Check if already installed (running as PWA)
             if (window.matchMedia('(display-mode: standalone)').matches) {
                 trackPWAEvent('app_usage', {
                     displayMode: 'standalone',
                     timestamp: new Date().toISOString()
                 });
+                // Hide install button and banner if already installed
+                if (installButton) {
+                    installButton.style.display = 'none';
+                    installButton.classList.add('hidden');
+                }
+                hideInstallBanner();
+                return;
             }
+            
+            // Handle install prompt event
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Prevent the default mini-infobar from appearing
+                e.preventDefault();
+                
+                // Store the event so it can be triggered later
+                deferredPrompt = e;
+                
+                // Show the install button in header
+                if (installButton) {
+                    installButton.style.display = 'flex';
+                    installButton.classList.remove('hidden');
+                }
+                
+                // Show the install banner
+                showInstallBanner();
+                
+                // Track analytics
+                trackPWAEvent('install_prompt_shown');
+                console.log('✅ Install prompt available - Install button and banner shown');
+            });
+            
+            // Handle install button click (header button)
+            if (installButton) {
+                installButton.addEventListener('click', async () => {
+                    await triggerInstall();
+                });
+            }
+            
+            // Handle install button click (banner button)
+            if (bannerInstallBtn) {
+                bannerInstallBtn.addEventListener('click', async () => {
+                    await triggerInstall();
+                });
+            }
+            
+            // Handle dismiss button (only closes for current session)
+            if (dismissBtn) {
+                dismissBtn.addEventListener('click', () => {
+                    hideInstallBanner();
+                    trackPWAEvent('install_banner_dismissed');
+                    // Banner will show again on next page load/refresh
+                });
+            }
+            
+            // Track successful installs
+            window.addEventListener('appinstalled', (e) => {
+                console.log('✅ PWA installed successfully');
+                trackPWAEvent('app_installed', {
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Hide install button and banner
+                const btn = document.getElementById('pwa-install-btn');
+                if (btn) {
+                    btn.style.display = 'none';
+                    btn.classList.add('hidden');
+                }
+                hideInstallBanner();
+                
+                deferredPrompt = null;
+            });
+        }
+        
+        // Trigger install prompt
+        async function triggerInstall() {
+            if (!deferredPrompt) {
+                console.log('Install prompt not available');
+                return;
+            }
+            
+            // Show the install prompt
+            deferredPrompt.prompt();
+            
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('✅ User accepted the install prompt');
+                trackPWAEvent('install_prompt_accepted');
+                // Banner will be hidden by appinstalled event
+            } else {
+                console.log('❌ User dismissed the install prompt');
+                trackPWAEvent('install_prompt_dismissed');
+            }
+            
+            // Clear the deferredPrompt variable
+            deferredPrompt = null;
         }
         
         // Admin password configuration
@@ -15086,6 +15691,18 @@
                 icon: '📊',
                 name: 'CSV to JSON Converter',
                 description: 'Convert between CSV and JSON formats',
+                sectionId: 'utilities'
+            },
+            {
+                icon: '📊',
+                name: 'Excel to JSON Converter',
+                description: 'Convert Excel files (.xlsx, .xls) to JSON format',
+                sectionId: 'utilities'
+            },
+            {
+                icon: '🗄️',
+                name: 'SQL Result to JSON',
+                description: 'Convert SQL query results to JSON format',
                 sectionId: 'utilities'
             }
         ];

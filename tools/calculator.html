@@ -13,18 +13,6 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7327960019798694"
-     crossorigin="anonymous"></script>
-    
-    <!-- Automated Ads -->
-    <script>
-    (adsbygoogle = window.adsbygoogle || []).push({
-        google_ad_client: "ca-pub-7327960019798694",
-        enable_page_level_ads: true
-    });
-    </script>
-    
     <style>
         /* Calculator Button Styles */
         .calc-btn-number {
@@ -179,6 +167,141 @@
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Detailed Description Section -->
+            <div class="mt-12 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">About the Smart Calculator</h2>
+                <div class="prose max-w-none text-gray-700 leading-relaxed">
+                    <p class="mb-4">
+                        Our Smart Calculator is a powerful, feature-rich calculator that goes beyond basic arithmetic operations. It provides advanced scientific functions, supports complex mathematical expressions, handles variables, and evaluates mathematical formulas with precision. Whether you're a student working on homework, a professional performing calculations, or a developer needing quick math computations, this calculator delivers accurate results instantly.
+                    </p>
+                    <p class="mb-4">
+                        The calculator supports a wide range of mathematical operations including basic arithmetic (addition, subtraction, multiplication, division), advanced functions (trigonometry, logarithms, exponentials), and scientific notation. It can handle complex expressions with parentheses, evaluate multiple operations in the correct order, and provide real-time calculation results as you type. All calculations are performed locally in your browser, ensuring privacy and instant results without network delays.
+                    </p>
+                    <p class="mb-4">
+                        One of the standout features is the ability to use variables in calculations, making it ideal for scientific computations and formula evaluations. The calculator maintains calculation history, allowing you to review previous computations, and supports both degrees and radians for trigonometric functions. The intuitive interface makes it easy to use for both simple calculations and complex mathematical expressions.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- How to Use Section -->
+            <div class="mt-8 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">📖 How to Use the Smart Calculator</h2>
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">1️⃣</span> Basic Calculations
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">
+                            Enter numbers and operators directly using the on-screen buttons or your keyboard. The calculator supports standard operations:
+                        </p>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                            <li><strong>Basic:</strong> +, -, ×, ÷ for addition, subtraction, multiplication, and division</li>
+                            <li><strong>Advanced:</strong> Use parentheses ( ) to group operations and control order</li>
+                            <li><strong>Powers:</strong> Use ^ or x^y button for exponentiation (e.g., 2^3 = 8)</li>
+                            <li><strong>Square Root:</strong> Use √ button or sqrt() function</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">2️⃣</span> Scientific Functions
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">
+                            Access advanced mathematical functions using the function buttons:
+                        </p>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                            <li><strong>Trigonometry:</strong> sin, cos, tan for sine, cosine, and tangent</li>
+                            <li><strong>Logarithms:</strong> log (base 10) and ln (natural logarithm)</li>
+                            <li><strong>Constants:</strong> π (pi) and e (Euler's number) are available</li>
+                            <li><strong>Powers:</strong> x² for square, x^y for any power</li>
+                        </ul>
+                        <p class="text-gray-700 leading-relaxed mt-3">
+                            Functions work with degrees or radians - use the DEG/RAD toggle to switch modes.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">3️⃣</span> Complex Expressions
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Build complex mathematical expressions using parentheses and multiple operations. The calculator follows standard mathematical order of operations (PEMDAS). You can type expressions like "2*(3+5)^2" or "sin(30)*cos(60)". The result is calculated automatically and displayed instantly. Use the history panel to review previous calculations or copy results for use elsewhere.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Examples & Use Cases -->
+            <div class="mt-8 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">💡 Examples & Use Cases</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border-l-4 border-blue-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Student Homework</h3>
+                        <p class="text-gray-700 mb-2"><strong>Example:</strong> Calculate area of a circle: π × r²</p>
+                        <p class="text-gray-600 text-sm">Type: 3.14159 * 5^2 to get the area for radius 5</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-green-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Scientific Calculations</h3>
+                        <p class="text-gray-700 mb-2"><strong>Example:</strong> Calculate compound interest</p>
+                        <p class="text-gray-600 text-sm">Use: P * (1 + r/n)^(n*t) where P=principal, r=rate, n=periods, t=time</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-purple-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Trigonometric Problems</h3>
+                        <p class="text-gray-700 mb-2"><strong>Example:</strong> Find sine of 30 degrees</p>
+                        <p class="text-gray-600 text-sm">Type: sin(30) in DEG mode to get 0.5</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-orange-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Engineering Calculations</h3>
+                        <p class="text-gray-700 mb-2"><strong>Example:</strong> Complex formulas with multiple operations</p>
+                        <p class="text-gray-600 text-sm">Build expressions like: (a+b)*c/(d-e) for engineering formulas</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FAQ Section -->
+            <div class="mt-8 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">❓ Frequently Asked Questions</h2>
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">What mathematical functions are supported?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            The calculator supports basic arithmetic (+, -, ×, ÷), trigonometric functions (sin, cos, tan), logarithms (log, ln), square roots, powers and exponents, parentheses for grouping, and mathematical constants (π, e). It handles complex expressions with proper order of operations.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Can I use variables in calculations?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Yes, the calculator supports variables. You can assign values to variables and use them in expressions. This is particularly useful for scientific calculations where you need to use the same value multiple times or work with formulas.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">What's the difference between DEG and RAD modes?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            DEG mode calculates trigonometric functions using degrees (0-360°), while RAD mode uses radians (0-2π). For example, sin(30) in DEG mode equals 0.5, but sin(30) in RAD mode equals approximately -0.99. Use DEG for most everyday calculations and RAD for advanced mathematics and programming.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Can I view my calculation history?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Yes, the calculator maintains a history of your recent calculations. You can scroll through previous expressions and results, and even reuse them in new calculations. This is helpful for checking your work or building upon previous calculations.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Is the calculator accurate for complex calculations?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Yes, the calculator uses JavaScript's built-in Math library which provides high-precision floating-point arithmetic. It's accurate for most practical purposes, though very large numbers or extremely precise calculations may have floating-point limitations. For financial calculations, results are typically accurate to multiple decimal places.
+                        </p>
                     </div>
                 </div>
             </div>

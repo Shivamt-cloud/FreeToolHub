@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>SQL Result to JSON Converter - FreeToolHub</title>
+    <meta name="description" content="Convert SQL query results (text/copy-paste) to JSON format. Paste SQL results from SQL Server Management Studio, MySQL, or any database and convert to JSON.">
+    <meta property="og:title" content="SQL Result to JSON Converter - FreeToolHub">
+    <meta property="og:description" content="Convert SQL query results to JSON format">
+    <meta property="og:url" content="https://freetoolhub.in/tools/sql-result-to-json.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">🗄️ SQL Result to JSON Converter</h1>
+                    <p class="text-gray-600 text-lg">Convert SQL query results (copy-paste text) to JSON format. Works with SQL Server, MySQL, PostgreSQL, and more.</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">SQL Result to JSON Converter</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <!-- Info Notice -->
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">ℹ️</span>
+                        <div>
+                            <p class="font-semibold text-blue-800 mb-1">How to Use This Tool</p>
+                            <p class="text-sm text-blue-700 mb-2">After restoring your SQL Server backup and running a query, copy the results from SQL Server Management Studio and paste them here.</p>
+                            <p class="text-sm text-blue-700">
+                                <strong>Tip:</strong> In SQL Server Management Studio, right-click on the query results grid → "Copy with Headers" or "Copy" → Paste here.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Privacy Notice -->
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">🔒</span>
+                        <div>
+                            <p class="font-semibold text-green-800 mb-1">100% Private & Secure</p>
+                            <p class="text-sm text-green-700">All processing happens locally in your browser. Your data never leaves your device!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Section -->
+                <div class="mb-6">
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">
+                        <span class="text-blue-600">Step 1:</span> Paste SQL Query Results
+                    </label>
+                    <textarea id="sql-input" rows="12" placeholder="Paste your SQL query results here...&#10;&#10;Example (tab-separated or space-separated):&#10;Name          Age    City&#10;John Doe      30     New York&#10;Jane Smith    25     Los Angeles&#10;&#10;Or paste results from SQL Server Management Studio (copy with headers)" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"></textarea>
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-xs text-gray-500">
+                            <span id="input-chars">0</span> characters
+                        </p>
+                        <button onclick="loadSampleData()" class="text-blue-600 hover:text-blue-700 text-xs font-semibold">
+                            📋 Load Sample Data
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Settings Section -->
+                <div class="mb-6">
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">
+                        <span class="text-blue-600">Step 2:</span> Conversion Settings
+                    </label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Delimiter</label>
+                            <select id="delimiter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                                <option value="auto">Auto-detect</option>
+                                <option value="\t">Tab (recommended)</option>
+                                <option value="  ">Multiple Spaces</option>
+                                <option value="|">Pipe (|)</option>
+                                <option value=",">Comma (,)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                <input type="checkbox" id="has-header" checked class="mr-2 w-5 h-5">
+                                First row is header
+                            </label>
+                            <p class="text-xs text-gray-500">Use first row as JSON keys</p>
+                        </div>
+                        <div>
+                            <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                <input type="checkbox" id="pretty-print" checked class="mr-2 w-5 h-5">
+                                Pretty print JSON
+                            </label>
+                            <p class="text-xs text-gray-500">Format JSON with indentation</p>
+                        </div>
+                        <div>
+                            <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                <input type="checkbox" id="convert-numbers" checked class="mr-2 w-5 h-5">
+                                Auto-convert numbers
+                            </label>
+                            <p class="text-xs text-gray-500">Convert numeric strings to numbers</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Convert Button -->
+                <div class="mb-6">
+                    <button onclick="convertSqlToJson()" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+                        🔄 Convert to JSON
+                    </button>
+                </div>
+
+                <!-- Output Section -->
+                <div id="output-section" class="hidden mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="block text-lg font-semibold text-gray-700">
+                            <span class="text-blue-600">Step 3:</span> Output JSON
+                        </label>
+                        <div class="flex gap-2">
+                            <button onclick="copyToClipboard()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+                                📋 Copy to Clipboard
+                            </button>
+                            <button onclick="downloadJson()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+                                📥 Download JSON
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="json-output" rows="15" readonly class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-gray-50 font-mono text-sm"></textarea>
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-xs text-gray-500">
+                            <span id="output-chars">0</span> characters • 
+                            <span id="output-lines">0</span> lines • 
+                            <span id="output-rows">0</span> rows
+                        </p>
+                        <p class="text-xs text-green-600 font-semibold" id="success-msg"></p>
+                    </div>
+                </div>
+
+                <!-- Preview Table Section -->
+                <div id="preview-section" class="hidden mb-6">
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">Data Preview</label>
+                    <div class="overflow-x-auto max-h-96 border border-gray-300 rounded-lg">
+                        <table id="preview-table" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50 sticky top-0">
+                                <tr id="preview-header"></tr>
+                            </thead>
+                            <tbody id="preview-body" class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2 text-center" id="preview-info">
+                        Showing first 20 rows
+                    </p>
+                </div>
+
+                <!-- Error Message -->
+                <div id="error-section" class="hidden mb-6">
+                    <div class="bg-red-50 border-2 border-red-500 rounded-xl p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-3xl">⚠️</span>
+                            <div>
+                                <h4 class="text-lg font-bold text-red-800 mb-1">Error</h4>
+                                <p id="error-message" class="text-red-700"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Detailed Description Section -->
+            <div class="mt-12 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Understanding SQL Result to JSON Conversion</h2>
+                <div class="prose max-w-none text-gray-700 leading-relaxed">
+                    <p class="mb-4">
+                        SQL result to JSON conversion transforms database query results (typically displayed as tables) into JSON (JavaScript Object Notation) format, enabling SQL data to be easily used in web applications, APIs, and modern development environments. Our SQL result to JSON converter takes SQL query output and converts it into well-structured JSON, with each row becoming a JSON object and column values mapped to object properties. Whether you're building web applications that need database data, creating APIs that return SQL results, or integrating SQL databases with modern JavaScript applications, this tool provides seamless conversion between database formats and JSON.
+                    </p>
+                    <p class="mb-4">
+                        JSON is the preferred format for web APIs and JavaScript applications because it's lightweight, easy to parse, and universally supported. Converting SQL results to JSON allows you to work with database data in web development projects, send query results through REST APIs, store data in NoSQL databases, or process data using JavaScript tools and frameworks. The converter preserves data relationships, handles null values appropriately, and creates clean JSON structures that are easy to work with in web applications.
+                    </p>
+                    <p class="mb-4">
+                        All conversion happens locally in your browser, ensuring complete privacy and security. Your SQL results and data never leave your device, and no information is uploaded to any server. This client-side processing means even sensitive database data can be converted safely. The converter provides instant JSON output with proper formatting, making it easy to integrate SQL data into modern web applications and APIs.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- How to Use Section -->
+            <div class="mt-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">📖 How to Use the SQL Result to JSON Converter</h2>
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">1️⃣</span> Input SQL Results
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Paste your SQL query results into the input area. This can be table data, CSV-formatted query output, or tabular data from database queries. The converter automatically detects the structure and converts it to JSON format. You can also input data from SQL export files or copy-paste results directly from database tools.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">2️⃣</span> Configure Conversion (Optional)
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">
+                            Adjust conversion settings if needed:
+                        </p>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                            <li><strong>First Row as Headers:</strong> Use first row as JSON property names</li>
+                            <li><strong>Array Format:</strong> Output as array of objects or nested structure</li>
+                            <li><strong>Null Handling:</strong> How to handle NULL values in JSON</li>
+                            <li><strong>Data Types:</strong> Preserve or convert data types appropriately</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">3️⃣</span> Convert and Use JSON
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Click "Convert to JSON" to transform your SQL results. The converter creates JSON objects for each row, using column names as keys. Copy the resulting JSON to use in your web applications, APIs, or JavaScript code. The JSON is properly formatted and ready for integration into modern development workflows.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Examples & Use Cases -->
+            <div class="mt-8 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">💡 Examples & Use Cases</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border-l-4 border-blue-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">API Development</h3>
+                        <p class="text-gray-700 mb-2">Convert SQL query results to JSON for REST API responses. Transform database data into JSON format for API endpoints, making SQL data accessible to frontend applications or mobile apps.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-green-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Web Application Integration</h3>
+                        <p class="text-gray-700 mb-2">Integrate SQL database data into JavaScript applications. Convert SQL results to JSON for use in React, Vue, Angular, or vanilla JavaScript apps without server-side processing.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-purple-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Data Migration</h3>
+                        <p class="text-gray-700 mb-2">Convert SQL exports to JSON for modern databases. Transform relational database exports into JSON format for importing into NoSQL databases or document stores that use JSON.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-orange-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Data Processing</h3>
+                        <p class="text-gray-700 mb-2">Process SQL data with JavaScript tools. Convert query results to JSON for analysis, transformation, or manipulation using JavaScript libraries and modern data processing tools.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-teal-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Frontend Data Display</h3>
+                        <p class="text-gray-700 mb-2">Display SQL data in web interfaces. Convert database query results to JSON for rendering in tables, charts, or other frontend components in web applications.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-pink-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Testing and Development</h3>
+                        <p class="text-gray-700 mb-2">Create JSON mock data from SQL results. Convert SQL query outputs to JSON for use as test data, mock API responses, or development mockups in web development workflows.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FAQ Section -->
+            <div class="mt-8 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">❓ Frequently Asked Questions</h2>
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">How are SQL NULL values handled in JSON?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            NULL values from SQL are typically converted to JSON `null` (not the string "null"). JSON natively supports null values, so SQL NULL becomes JSON null appropriately. Some converters may allow you to choose how NULL values are handled (null, empty string, or omitted from JSON). Check the converter options for NULL handling preferences.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Can I convert SQL results with relationships/JOINs?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Yes, SQL results from JOINs are converted to JSON as flat objects (all columns in one object) or nested structures depending on the converter options. JOIN results typically create objects with columns from all joined tables. For complex relationships, you may need to restructure the JSON manually or use specialized tools that handle relational data transformation.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">What format should my SQL results be in?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            SQL results are typically provided as tabular data (table format) or CSV. The converter can handle data pasted from SQL query tools, exported CSV files, or tabular text formats. Ensure your data has clear column headers (first row) and consistent row formatting. Most SQL tools allow copying results as tab-separated or CSV format, which the converter can process.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Can I convert large SQL result sets?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            File size limits depend on your device's memory since all processing happens locally. You can typically convert result sets with thousands of rows without issues. Very large result sets (tens of thousands of rows) may require more memory. For very large datasets, consider processing in chunks or using server-side conversion tools. JSON files can become large, so consider this when working with big datasets.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Is my SQL data secure?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Absolutely! All conversion happens entirely in your browser. Your SQL results and data never leave your device, are not uploaded to any server, and are not stored anywhere. Your privacy and security are completely protected, even when converting sensitive database data or proprietary query results.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+
+    <!-- Load Header and Footer -->
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    
+    <script>
+        function loadSampleData() {
+            const sampleData = `Name	Age	City	Country
+John Doe	30	New York	USA
+Jane Smith	25	Los Angeles	USA
+Bob Johnson	35	Chicago	USA
+Alice Williams	28	Houston	USA
+Charlie Brown	42	Phoenix	USA`;
+            document.getElementById('sql-input').value = sampleData;
+            document.getElementById('input-chars').textContent = sampleData.length;
+        }
+
+        function detectDelimiter(text) {
+            const firstLine = text.split('\n')[0];
+            const delimiters = [
+                { char: '\t', name: 'Tab' },
+                { char: '  ', name: 'Multiple Spaces' },
+                { char: '|', name: 'Pipe' },
+                { char: ',', name: 'Comma' }
+            ];
+
+            let maxCount = 0;
+            let detectedDelimiter = '\t';
+
+            delimiters.forEach(({ char }) => {
+                if (char === '  ') {
+                    // Count multiple spaces (2+)
+                    const matches = firstLine.match(/\s{2,}/g);
+                    const count = matches ? matches.length : 0;
+                    if (count > maxCount) {
+                        maxCount = count;
+                        detectedDelimiter = '  ';
+                    }
+                } else {
+                    const count = firstLine.split(char).length;
+                    if (count > maxCount) {
+                        maxCount = count;
+                        detectedDelimiter = char;
+                    }
+                }
+            });
+
+            return detectedDelimiter;
+        }
+
+        function parseSqlResults(text, delimiter, hasHeader, convertNumbers) {
+            const lines = text.trim().split('\n').filter(line => line.trim());
+            if (lines.length === 0) return [];
+
+            // Handle delimiter
+            if (delimiter === 'auto') {
+                delimiter = detectDelimiter(text);
+            }
+
+            // Parse header
+            const firstLine = lines[0];
+            let headers = [];
+            let startLine = 0;
+
+            if (delimiter === '  ') {
+                // Handle multiple spaces as delimiter
+                headers = firstLine.split(/\s{2,}/).map(h => h.trim());
+            } else {
+                headers = firstLine.split(delimiter).map(h => h.trim());
+            }
+
+            if (hasHeader) {
+                startLine = 1;
+            } else {
+                // Generate column headers
+                headers = headers.map((_, i) => `Column${i + 1}`);
+                startLine = 0;
+            }
+
+            // Parse data rows
+            const result = [];
+            for (let i = startLine; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+
+                let values = [];
+                if (delimiter === '  ') {
+                    values = lines[i].split(/\s{2,}/).map(v => v.trim());
+                } else {
+                    values = lines[i].split(delimiter).map(v => v.trim());
+                }
+
+                const row = {};
+                headers.forEach((header, index) => {
+                    let value = values[index] || '';
+                    
+                    // Try to convert to number if enabled
+                    if (convertNumbers && value && !isNaN(value) && value !== '') {
+                        // Check if it's an integer or float
+                        if (value.includes('.') || value.includes(',')) {
+                            value = parseFloat(value.replace(',', ''));
+                        } else {
+                            value = parseInt(value);
+                        }
+                    }
+                    
+                    row[header] = value;
+                });
+                
+                result.push(row);
+            }
+
+            return result;
+        }
+
+        function convertSqlToJson() {
+            const inputText = document.getElementById('sql-input').value.trim();
+            
+            // Hide previous results and errors
+            document.getElementById('output-section').classList.add('hidden');
+            document.getElementById('preview-section').classList.add('hidden');
+            document.getElementById('error-section').classList.add('hidden');
+
+            if (!inputText) {
+                showError('Please paste your SQL query results.');
+                return;
+            }
+
+            try {
+                const delimiter = document.getElementById('delimiter').value;
+                const hasHeader = document.getElementById('has-header').checked;
+                const prettyPrint = document.getElementById('pretty-print').checked;
+                const convertNumbers = document.getElementById('convert-numbers').checked;
+
+                const jsonData = parseSqlResults(inputText, delimiter, hasHeader, convertNumbers);
+                
+                if (jsonData.length === 0) {
+                    showError('No data found. Please check your input format.');
+                    return;
+                }
+
+                const jsonOutput = prettyPrint 
+                    ? JSON.stringify(jsonData, null, 2)
+                    : JSON.stringify(jsonData);
+
+                // Display output
+                document.getElementById('json-output').value = jsonOutput;
+                document.getElementById('output-chars').textContent = jsonOutput.length.toLocaleString();
+                document.getElementById('output-lines').textContent = jsonOutput.split('\n').length.toLocaleString();
+                document.getElementById('output-rows').textContent = jsonData.length.toLocaleString();
+                document.getElementById('success-msg').textContent = `✓ Converted ${jsonData.length} rows to JSON`;
+                
+                document.getElementById('output-section').classList.remove('hidden');
+
+                // Display preview table
+                displayPreviewTable(jsonData);
+
+                hideError();
+
+            } catch (error) {
+                console.error('Conversion error:', error);
+                showError('Conversion failed: ' + error.message);
+            }
+        }
+
+        function displayPreviewTable(data) {
+            if (!data || data.length === 0) return;
+
+            const previewHeader = document.getElementById('preview-header');
+            const previewBody = document.getElementById('preview-body');
+
+            // Clear previous content
+            previewHeader.innerHTML = '';
+            previewBody.innerHTML = '';
+
+            // Get headers from first object
+            const headers = Object.keys(data[0]);
+
+            // Create header
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.className = 'px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider';
+                th.textContent = header;
+                previewHeader.appendChild(th);
+            });
+
+            // Create rows (max 20)
+            const maxRows = Math.min(data.length, 20);
+            for (let i = 0; i < maxRows; i++) {
+                const tr = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.className = 'px-4 py-2 text-sm text-gray-900 whitespace-nowrap';
+                    td.textContent = data[i][header] !== undefined ? String(data[i][header]) : '';
+                    tr.appendChild(td);
+                });
+                previewBody.appendChild(tr);
+            }
+
+            // Update preview info
+            document.getElementById('preview-info').textContent = 
+                `Showing first ${maxRows} rows of ${data.length} total rows`;
+
+            document.getElementById('preview-section').classList.remove('hidden');
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('json-output').value;
+            if (!output) {
+                showError('No output to copy.');
+                return;
+            }
+
+            navigator.clipboard.writeText(output).then(() => {
+                const successMsg = document.getElementById('success-msg');
+                const originalText = successMsg.textContent;
+                successMsg.textContent = '✓ Copied to clipboard!';
+                setTimeout(() => {
+                    successMsg.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                showError('Failed to copy to clipboard: ' + err.message);
+            });
+        }
+
+        function downloadJson() {
+            const output = document.getElementById('json-output').value;
+            if (!output) {
+                showError('No output to download.');
+                return;
+            }
+
+            try {
+                const blob = new Blob([output], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const timestamp = new Date().toISOString().split('T')[0];
+                a.download = `sql-result-to-json-${timestamp}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                const successMsg = document.getElementById('success-msg');
+                const originalText = successMsg.textContent;
+                successMsg.textContent = '✓ Downloaded successfully!';
+                setTimeout(() => {
+                    successMsg.textContent = originalText;
+                }, 2000);
+            } catch (error) {
+                showError('Failed to download file: ' + error.message);
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-section').classList.remove('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('error-section').classList.add('hidden');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Input character counter
+            const textInput = document.getElementById('sql-input');
+            if (textInput) {
+                textInput.addEventListener('input', (e) => {
+                    document.getElementById('input-chars').textContent = e.target.value.length;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+

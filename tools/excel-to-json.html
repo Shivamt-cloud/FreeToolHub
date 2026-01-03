@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Excel to JSON Converter - FreeToolHub</title>
+    <meta name="description" content="Convert Excel files (.xlsx, .xls) to JSON format with sheet selection, data preview, and format validation. 100% free, secure, and client-side processing.">
+    <meta property="og:title" content="Excel to JSON Converter - FreeToolHub">
+    <meta property="og:description" content="Convert Excel files (.xlsx, .xls) to JSON format with sheet selection and data preview">
+    <meta property="og:url" content="https://freetoolhub.in/tools/excel-to-json.html">
+    <meta property="og:type" content="website">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- SheetJS library for reading Excel files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Header Container -->
+    <div id="app-header"></div>
+    
+    <!-- Main Content -->
+    <main class="min-h-screen pb-16" style="padding-top: 6rem;">
+        <style>
+            @media (min-width: 1024px) {
+                main {
+                    padding-top: 8.5rem !important;
+                }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Page Header with Share -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">📊 Excel to JSON Converter</h1>
+                    <p class="text-gray-600 text-lg">Convert Excel files (.xlsx, .xls) to JSON format with sheet selection, data preview, and format validation</p>
+                </div>
+                <button onclick="shareTool()" class="mt-4 md:mt-0 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 flex items-center gap-2 shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.885 12.938 9 12.482 9 12c0-.482-.115-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                    Share Tool
+                </button>
+            </div>
+            
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm">
+                <a href="/" class="text-blue-600 hover:text-blue-800">Home</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <a href="/#tools" class="text-blue-600 hover:text-blue-800">Tools</a>
+                <span class="mx-2 text-gray-400">/</span>
+                <span class="text-gray-600">Excel to JSON Converter</span>
+            </nav>
+            
+            <!-- Tool Interface -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <!-- Privacy Notice -->
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">🔒</span>
+                        <div>
+                            <p class="font-semibold text-green-800 mb-1">100% Private & Secure</p>
+                            <p class="text-sm text-green-700">All processing happens locally in your browser. Your Excel files never leave your device!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Upload Section -->
+                <div class="mb-6">
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">
+                        <span class="text-green-600">Step 1:</span> Upload Excel File
+                    </label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-green-500 transition-colors">
+                        <input type="file" id="excel-file-input" accept=".xlsx,.xls" class="hidden" onchange="handleFileUpload(event)">
+                        <label for="excel-file-input" class="cursor-pointer">
+                            <div class="flex flex-col items-center">
+                                <svg class="w-16 h-16 text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                <p class="text-xl font-semibold text-gray-700 mb-2">Click to upload or drag and drop</p>
+                                <p class="text-sm text-gray-500">Excel files (.xlsx, .xls) up to 10MB</p>
+                            </div>
+                        </label>
+                    </div>
+                    <div id="file-info" class="hidden mt-4 p-4 bg-gray-50 rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">📄</span>
+                                <div>
+                                    <p class="font-semibold text-gray-800" id="file-name"></p>
+                                    <p class="text-sm text-gray-600" id="file-size"></p>
+                                </div>
+                            </div>
+                            <button onclick="clearFile()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+                                🗑️ Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sheet Selection Section -->
+                <div id="sheet-selection-section" class="hidden mb-6">
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">
+                        <span class="text-green-600">Step 2:</span> Select Sheet
+                    </label>
+                    <select id="sheet-select" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg" onchange="onSheetChange()">
+                        <option value="">Select a sheet...</option>
+                    </select>
+                    <p class="text-sm text-gray-500 mt-2">Choose which sheet from the Excel file to convert</p>
+                </div>
+
+                <!-- Settings Section -->
+                <div id="settings-section" class="hidden mb-6">
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">
+                        <span class="text-green-600">Step 3:</span> Conversion Settings
+                    </label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                <input type="checkbox" id="first-row-header" checked class="mr-2 w-5 h-5">
+                                First row is header
+                            </label>
+                            <p class="text-xs text-gray-500">Use first row as JSON keys</p>
+                        </div>
+                        <div>
+                            <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                <input type="checkbox" id="pretty-print" checked class="mr-2 w-5 h-5">
+                                Pretty print JSON
+                            </label>
+                            <p class="text-xs text-gray-500">Format JSON with indentation</p>
+                        </div>
+                        <div>
+                            <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                <input type="checkbox" id="convert-numbers" checked class="mr-2 w-5 h-5">
+                                Auto-convert numbers
+                            </label>
+                            <p class="text-xs text-gray-500">Convert numeric strings to numbers</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Convert Button -->
+                <div class="mb-6">
+                    <button id="convert-btn" onclick="convertExcelToJson()" disabled class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 px-6 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                        🔄 Convert to JSON
+                    </button>
+                </div>
+
+                <!-- Output Section -->
+                <div id="output-section" class="hidden mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="block text-lg font-semibold text-gray-700">
+                            <span class="text-green-600">Step 4:</span> Output JSON
+                        </label>
+                        <div class="flex gap-2">
+                            <button onclick="copyToClipboard()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+                                📋 Copy to Clipboard
+                            </button>
+                            <button onclick="downloadJson()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+                                📥 Download JSON
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="json-output" rows="15" readonly class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-gray-50 font-mono text-sm"></textarea>
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-xs text-gray-500">
+                            <span id="output-chars">0</span> characters • 
+                            <span id="output-lines">0</span> lines • 
+                            <span id="output-rows">0</span> rows
+                        </p>
+                        <p class="text-xs text-green-600 font-semibold" id="success-msg"></p>
+                    </div>
+                </div>
+
+                <!-- Preview Table Section -->
+                <div id="preview-section" class="hidden mb-6">
+                    <label class="block text-lg font-semibold text-gray-700 mb-3">Data Preview</label>
+                    <div class="overflow-x-auto max-h-96 border border-gray-300 rounded-lg">
+                        <table id="preview-table" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50 sticky top-0">
+                                <tr id="preview-header"></tr>
+                            </thead>
+                            <tbody id="preview-body" class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2 text-center" id="preview-info">
+                        Showing first 20 rows
+                    </p>
+                </div>
+
+                <!-- Error Message -->
+                <div id="error-section" class="hidden mb-6">
+                    <div class="bg-red-50 border-2 border-red-500 rounded-xl p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-3xl">⚠️</span>
+                            <div>
+                                <h4 class="text-lg font-bold text-red-800 mb-1">Error</h4>
+                                <p id="error-message" class="text-red-700"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Detailed Description Section -->
+            <div class="mt-12 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Understanding Excel to JSON Conversion</h2>
+                <div class="prose max-w-none text-gray-700 leading-relaxed">
+                    <p class="mb-4">
+                        Excel to JSON conversion transforms spreadsheet data from Excel files (.xlsx, .xls) into JSON (JavaScript Object Notation) format, enabling Excel data to be used in web applications, APIs, and modern data processing systems. Our Excel to JSON converter automatically detects headers, converts rows into JSON objects, and handles various Excel formats, making it essential for integrating spreadsheet data into web projects, APIs, databases, or JavaScript applications. Whether you're importing data into web applications, migrating data between systems, or working with Excel data in modern development environments, this tool provides seamless conversion while preserving data structure and relationships.
+                    </p>
+                    <p class="mb-4">
+                        JSON is the preferred format for web applications and APIs because it's lightweight, human-readable, and easily parsed by JavaScript and most programming languages. Converting Excel data to JSON allows you to work with spreadsheet data in web development projects, send data through APIs, store data in databases, or process data using modern tools and frameworks. The converter intelligently handles Excel headers, multiple sheets, data types, and formatting to create well-structured JSON output.
+                    </p>
+                    <p class="mb-4">
+                        All conversion happens locally in your browser, ensuring complete privacy and security. Your Excel files never leave your device, and no data is uploaded to any server. This client-side processing means even sensitive spreadsheet data can be converted safely. The converter provides instant conversion results and supports various JSON output formats including arrays of objects, nested structures, and custom formatting options based on your Excel file structure.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- How to Use Section -->
+            <div class="mt-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">📖 How to Use the Excel to JSON Converter</h2>
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">1️⃣</span> Upload Excel File
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Upload your Excel file (.xlsx or .xls format) by clicking the upload area or dragging and dropping the file. The converter automatically detects the file structure, including headers, data rows, and multiple sheets. Supported formats include standard Excel files with one or more worksheets.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">2️⃣</span> Select Options (Optional)
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">
+                            Configure conversion options if needed:
+                        </p>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                            <li><strong>Sheet Selection:</strong> Choose which worksheet to convert (if multiple sheets exist)</li>
+                            <li><strong>Header Row:</strong> Specify if first row contains headers (usually yes)</li>
+                            <li><strong>Output Format:</strong> Choose array of objects or nested structure</li>
+                            <li><strong>Data Formatting:</strong> Preserve or simplify data types</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">3️⃣</span> Convert and Use JSON
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Click "Convert to JSON" to process your Excel file. The converter transforms all rows into JSON format, using headers as object keys. Copy the resulting JSON to use in your applications, APIs, or download as a JSON file. The JSON maintains data structure and relationships from your Excel file.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Examples & Use Cases -->
+            <div class="mt-8 bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">💡 Examples & Use Cases</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border-l-4 border-blue-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Data Migration</h3>
+                        <p class="text-gray-700 mb-2">Convert Excel exports from legacy systems to JSON for modern applications. Migrate spreadsheet data to databases, web applications, or cloud services that use JSON format.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-green-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">API Integration</h3>
+                        <p class="text-gray-700 mb-2">Transform Excel data for API consumption. Convert spreadsheet data to JSON format for sending to REST APIs or integrating Excel data into web services and applications.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-purple-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Web Development</h3>
+                        <p class="text-gray-700 mb-2">Import Excel data into web applications. Convert spreadsheet exports to JSON for use in React, Vue, Angular, or vanilla JavaScript applications without server-side processing.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-orange-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Data Processing</h3>
+                        <p class="text-gray-700 mb-2">Process Excel data with JavaScript tools. Convert spreadsheets to JSON for data analysis, transformation, or manipulation using JavaScript libraries and tools.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-teal-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Configuration Data</h3>
+                        <p class="text-gray-700 mb-2">Convert Excel configuration files to JSON. Transform spreadsheet-based settings, parameters, or lookup tables into JSON format for application configuration files.</p>
+                    </div>
+                    
+                    <div class="border-l-4 border-pink-500 pl-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Database Import</h3>
+                        <p class="text-gray-700 mb-2">Prepare Excel data for database import. Convert spreadsheets to JSON for importing into MongoDB, databases that accept JSON, or NoSQL databases that work with JSON documents.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FAQ Section -->
+            <div class="mt-8 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">❓ Frequently Asked Questions</h2>
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Does the converter handle multiple Excel sheets?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Yes, the converter can handle Excel files with multiple worksheets. You can typically select which sheet to convert, or convert sheets individually. Some converters allow converting all sheets into separate JSON objects or arrays. Check the converter options to see how multiple sheets are handled - you may need to convert each sheet separately or select one sheet at a time.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">What if my Excel file has formulas?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            The converter exports the calculated values from formulas, not the formulas themselves. When Excel calculates formulas, the displayed values are converted to JSON. If you need to preserve formulas, you'd need specialized tools. For most use cases, the calculated values are what you want in JSON format for data processing or API integration.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Can I convert large Excel files?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            File size limits depend on your device's memory since all processing happens locally. You can typically convert Excel files with thousands of rows without issues. Very large files (tens of thousands of rows or very wide spreadsheets) may require more memory. If you encounter problems, try converting smaller ranges, splitting large files, or processing in batches.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">How are Excel data types handled?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            The converter attempts to preserve data types appropriately. Numbers stay as numbers, text as strings, dates may be converted to ISO date strings or kept as strings depending on the converter. JSON format handles numbers, strings, booleans, and null values natively. Complex Excel formatting may be simplified - the converter focuses on data values rather than Excel-specific formatting or features.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Is my Excel data secure?</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Absolutely! All conversion happens entirely in your browser. Your Excel files never leave your device, are not uploaded to any server, and are not stored anywhere. Your privacy and security are completely protected, even when converting sensitive spreadsheet data. The conversion happens locally using JavaScript libraries.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Container -->
+    <div id="app-footer"></div>
+
+    <!-- Load Header and Footer -->
+    <script src="/js/components/HeaderLoader.js"></script>
+    <script src="/js/components/FooterLoader.js"></script>
+    <script src="/js/components/ShareButton.js"></script>
+    
+    <script>
+        let workbook = null;
+        let currentSheetData = null;
+        let currentSheetName = null;
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+                               'application/vnd.ms-excel'];
+            const validExtensions = ['.xlsx', '.xls'];
+            const fileName = file.name.toLowerCase();
+            const isValidType = validTypes.includes(file.type) || 
+                              validExtensions.some(ext => fileName.endsWith(ext));
+
+            if (!isValidType) {
+                showError('Please upload a valid Excel file (.xlsx or .xls)');
+                event.target.value = '';
+                return;
+            }
+
+            // Validate file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+                showError('File size exceeds 10MB limit. Please upload a smaller file.');
+                event.target.value = '';
+                return;
+            }
+
+            // Show file info
+            document.getElementById('file-name').textContent = file.name;
+            document.getElementById('file-size').textContent = formatFileSize(file.size);
+            document.getElementById('file-info').classList.remove('hidden');
+
+            // Hide previous results
+            hideResults();
+            hideError();
+
+            // Read the file
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    workbook = XLSX.read(data, { type: 'array' });
+
+                    if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+                        showError('The Excel file appears to be empty or invalid.');
+                        return;
+                    }
+
+                    // Populate sheet selector
+                    const sheetSelect = document.getElementById('sheet-select');
+                    sheetSelect.innerHTML = '<option value="">Select a sheet...</option>';
+                    workbook.SheetNames.forEach((sheetName, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = sheetName;
+                        if (index === 0) {
+                            option.selected = true;
+                        }
+                        sheetSelect.appendChild(option);
+                    });
+
+                    document.getElementById('sheet-selection-section').classList.remove('hidden');
+                    document.getElementById('settings-section').classList.remove('hidden');
+                    
+                    // Auto-select first sheet
+                    if (workbook.SheetNames.length > 0) {
+                        loadSheet(0);
+                    }
+
+                } catch (error) {
+                    console.error('Error reading Excel file:', error);
+                    showError('Failed to read Excel file: ' + error.message);
+                }
+            };
+
+            reader.onerror = function() {
+                showError('Error reading file. Please try again.');
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function loadSheet(sheetIndex) {
+            if (!workbook || sheetIndex < 0 || sheetIndex >= workbook.SheetNames.length) {
+                return;
+            }
+
+            currentSheetName = workbook.SheetNames[sheetIndex];
+            const worksheet = workbook.Sheets[currentSheetName];
+
+            // Convert sheet to JSON
+            const firstRowHeader = document.getElementById('first-row-header').checked;
+            const convertNumbers = document.getElementById('convert-numbers').checked;
+            
+            const jsonOptions = {
+                header: firstRowHeader ? 1 : undefined,
+                defval: '',
+                raw: !convertNumbers
+            };
+
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, jsonOptions);
+            currentSheetData = jsonData;
+
+            // Enable convert button
+            document.getElementById('convert-btn').disabled = false;
+
+            // Show preview
+            showPreview(jsonData);
+        }
+
+        function onSheetChange() {
+            const sheetIndex = parseInt(document.getElementById('sheet-select').value);
+            if (!isNaN(sheetIndex)) {
+                loadSheet(sheetIndex);
+                hideResults();
+            }
+        }
+
+        function convertExcelToJson() {
+            if (!currentSheetData || currentSheetData.length === 0) {
+                showError('No data to convert. Please select a valid sheet.');
+                return;
+            }
+
+            try {
+                const prettyPrint = document.getElementById('pretty-print').checked;
+                const jsonOutput = prettyPrint 
+                    ? JSON.stringify(currentSheetData, null, 2)
+                    : JSON.stringify(currentSheetData);
+
+                // Display output
+                document.getElementById('json-output').value = jsonOutput;
+                document.getElementById('output-chars').textContent = jsonOutput.length.toLocaleString();
+                document.getElementById('output-lines').textContent = jsonOutput.split('\n').length.toLocaleString();
+                document.getElementById('output-rows').textContent = currentSheetData.length.toLocaleString();
+                document.getElementById('success-msg').textContent = `✓ Converted ${currentSheetData.length} rows to JSON`;
+                
+                document.getElementById('output-section').classList.remove('hidden');
+                hideError();
+
+                // Scroll to output
+                document.getElementById('output-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            } catch (error) {
+                console.error('Conversion error:', error);
+                showError('Conversion failed: ' + error.message);
+            }
+        }
+
+        function showPreview(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('preview-section').classList.add('hidden');
+                return;
+            }
+
+            const previewHeader = document.getElementById('preview-header');
+            const previewBody = document.getElementById('preview-body');
+            const firstRowHeader = document.getElementById('first-row-header').checked;
+
+            // Clear previous content
+            previewHeader.innerHTML = '';
+            previewBody.innerHTML = '';
+
+            // Get headers and column keys
+            let headers = [];
+            let columnKeys = [];
+            
+            if (firstRowHeader && data.length > 0) {
+                // Use object keys as headers
+                headers = Object.keys(data[0]);
+                columnKeys = headers;
+            } else {
+                // When no header, keys are column letters (A, B, C, etc.)
+                // Get all unique keys from all rows to determine columns
+                const allKeys = new Set();
+                data.forEach(row => {
+                    Object.keys(row).forEach(key => allKeys.add(key));
+                });
+                // Sort column keys (A, B, C...)
+                columnKeys = Array.from(allKeys).sort();
+                // Convert column letters to friendly names
+                headers = columnKeys.map((_, i) => `Column ${i + 1}`);
+            }
+
+            // Create header row
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.className = 'px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider';
+                th.textContent = header;
+                previewHeader.appendChild(th);
+            });
+
+            // Create data rows (max 20)
+            const maxRows = Math.min(data.length, 20);
+            for (let i = 0; i < maxRows; i++) {
+                const tr = document.createElement('tr');
+                columnKeys.forEach(key => {
+                    const td = document.createElement('td');
+                    td.className = 'px-4 py-3 text-sm text-gray-900 whitespace-nowrap';
+                    const value = data[i][key];
+                    td.textContent = value !== undefined && value !== null ? String(value) : '';
+                    tr.appendChild(td);
+                });
+                previewBody.appendChild(tr);
+            }
+
+            // Update preview info
+            document.getElementById('preview-info').textContent = 
+                `Showing first ${maxRows} rows of ${data.length} total rows`;
+
+            document.getElementById('preview-section').classList.remove('hidden');
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('json-output').value;
+            if (!output) {
+                showError('No output to copy.');
+                return;
+            }
+
+            navigator.clipboard.writeText(output).then(() => {
+                const successMsg = document.getElementById('success-msg');
+                const originalText = successMsg.textContent;
+                successMsg.textContent = '✓ Copied to clipboard!';
+                setTimeout(() => {
+                    successMsg.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                showError('Failed to copy to clipboard: ' + err.message);
+            });
+        }
+
+        function downloadJson() {
+            const output = document.getElementById('json-output').value;
+            if (!output) {
+                showError('No output to download.');
+                return;
+            }
+
+            try {
+                const blob = new Blob([output], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const fileName = currentSheetName 
+                    ? `excel-to-json-${currentSheetName}-${new Date().toISOString().split('T')[0]}.json`
+                    : `excel-to-json-${new Date().toISOString().split('T')[0]}.json`;
+                a.download = fileName.replace(/[^a-z0-9.-]/gi, '_');
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                const successMsg = document.getElementById('success-msg');
+                const originalText = successMsg.textContent;
+                successMsg.textContent = '✓ Downloaded successfully!';
+                setTimeout(() => {
+                    successMsg.textContent = originalText;
+                }, 2000);
+            } catch (error) {
+                showError('Failed to download file: ' + error.message);
+            }
+        }
+
+        function clearFile() {
+            document.getElementById('excel-file-input').value = '';
+            document.getElementById('file-info').classList.add('hidden');
+            document.getElementById('sheet-selection-section').classList.add('hidden');
+            document.getElementById('settings-section').classList.add('hidden');
+            document.getElementById('convert-btn').disabled = true;
+            workbook = null;
+            currentSheetData = null;
+            currentSheetName = null;
+            hideResults();
+            hideError();
+        }
+
+        function hideResults() {
+            document.getElementById('output-section').classList.add('hidden');
+            document.getElementById('preview-section').classList.add('hidden');
+        }
+
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-section').classList.remove('hidden');
+            document.getElementById('output-section').classList.add('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('error-section').classList.add('hidden');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Drag and drop functionality
+        const dropZone = document.querySelector('.border-dashed');
+        if (dropZone) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.add('border-green-500', 'bg-green-50');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.remove('border-green-500', 'bg-green-50');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    const fileInput = document.getElementById('excel-file-input');
+                    fileInput.files = files;
+                    handleFileUpload({ target: fileInput });
+                }
+            }, false);
+        }
+
+        // Update preview when settings change
+        document.getElementById('first-row-header').addEventListener('change', () => {
+            if (currentSheetData) {
+                const sheetIndex = parseInt(document.getElementById('sheet-select').value);
+                if (!isNaN(sheetIndex)) {
+                    loadSheet(sheetIndex);
+                }
+            }
+        });
+
+        document.getElementById('convert-numbers').addEventListener('change', () => {
+            if (currentSheetData) {
+                const sheetIndex = parseInt(document.getElementById('sheet-select').value);
+                if (!isNaN(sheetIndex)) {
+                    loadSheet(sheetIndex);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
